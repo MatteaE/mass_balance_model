@@ -1,5 +1,19 @@
+# R runtime files #
 *.RData
 *.Rhistory
 
+# Parameter files for Barkrak, Zulmart and Yakarcha #
 set_params_*.R
+
+# Other files #
+innovations
 zNOTE*
+
+# Input files for other Central Asian glaciers #
+input/barkrak/
+input/barkrak2/*.qgs*
+input/yakarcha/
+input/zulmart/
+        
+# Output files #
+output/
