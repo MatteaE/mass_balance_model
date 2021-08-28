@@ -17,3 +17,6 @@ input/zulmart/
         
 # Output files #
 output/
+
+# Data used to develop the input preparation app #
+utils/data/
