@@ -13,6 +13,7 @@ suppressPackageStartupMessages(library(shinyFiles))
 suppressPackageStartupMessages(library(shinyjs))
 suppressPackageStartupMessages(library(raster))
 suppressPackageStartupMessages(library(sf))
+suppressPackageStartupMessages(library(tools))
 rasterOptions(todisk = TRUE) # Saves a lot of memory usage when processing large rasters.
 
 #### Functions called by the app ####
