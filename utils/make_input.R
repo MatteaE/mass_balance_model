@@ -172,14 +172,7 @@ func_do_processing <- function(dem_filepath,
   reproj_outline     <- FALSE
   
   cat("\nCoordinate system is checked...\n")
-  if (has_reference) {
-    reference_crs <- crs(reference_l1)
-    target_crs    <- reference_crs
-    if (dem_crs@projargs     != reference_crs@projargs) reproj_dem     <- TRUE
-    if (outline_crs@projargs != reference_crs@projargs) reproj_outline <- TRUE
-    
-  } else {
-    
+  
     # Find which UTM zone we should be using here in principle.
     # Also works if the outline is in some weird CRS.
     if (outline_crs@projargs == wgs84_crs@projargs) {
@@ -190,6 +183,26 @@ func_do_processing <- function(dem_filepath,
     }
     utm_crs_number       <- func_long2utmzonenumber(outline_centroid[1])
     utm_crs              <- crs(paste0("EPSG:", 32600 + utm_crs_number))
+    
+    if (has_reference) {
+      reference_crs <- crs(reference_l1)
+      
+      # If the reference is a .grid file
+      # (e.g. which we have just produced),
+      # it has no CRS! So in that case we
+      # assume that the grid uses the UTM CRS
+      # of our choice.
+      if (is.na(reference_crs@projargs)) {
+        crs(reference_l1) <- utm_crs
+      }
+      
+      target_crs    <- reference_crs
+      
+      if (dem_crs@projargs     != reference_crs@projargs) reproj_dem     <- TRUE
+      if (outline_crs@projargs != reference_crs@projargs) reproj_outline <- TRUE
+      
+    # If there is no reference grid supplied for alignment.
+    } else {
     
     if ((dem_crs@projargs == outline_crs@projargs) && (dem_crs@projargs != wgs84_crs@projargs)) {
       
