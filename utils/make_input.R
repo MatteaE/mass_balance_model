@@ -147,9 +147,9 @@ func_do_processing <- function(dem_filepath,
   
   #### Load input ####
   dem_l1     <- raster(dem_filepath)
-  outline_l1 <- st_read(outline_filepath, quiet = TRUE)
-  if (has_firn)      firn_l1      <- st_read(firn_filepath, quiet = TRUE)
-  if (has_debris)    debris_l1    <- st_read(debris_filepath, quiet = TRUE)
+  outline_l1 <- st_zm(st_read(outline_filepath, quiet = TRUE))
+  if (has_firn)      firn_l1      <- st_zm(st_read(firn_filepath, quiet = TRUE))
+  if (has_debris)    debris_l1    <- st_zm(st_read(debris_filepath, quiet = TRUE))
   if (has_reference) reference_l1 <- raster(reference_filepath)
   gc()
   
