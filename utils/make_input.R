@@ -8,6 +8,7 @@
 # Latest change: 2021/8/28                                                                        #
 ###################################################################################################
 
+suppressPackageStartupMessages(library(insol))
 suppressPackageStartupMessages(library(shinyFiles))
 suppressPackageStartupMessages(library(shinyjs))
 suppressPackageStartupMessages(library(raster))
