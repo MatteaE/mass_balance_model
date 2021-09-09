@@ -69,7 +69,31 @@ func_load_elevation_grids <- function(run_params) {
       # In this case, grids_out$grid_year_id is in general not sorted
       # (the interpolation generates new grids which are appended to
       # the list *after* the original grids).
+      # Also, to interpolate we need aligned DHMs.
+      # So we resample them to be aligned to the largest
+      # extent and most common resolution.
     } else {
+      
+      # Find largest extent and most common resolution.
+      xmin_all   <- min(sapply(grids_out$elevation, "xmin"))
+      xmax_all   <- max(sapply(grids_out$elevation, "xmax"))
+      ymin_all   <- min(sapply(grids_out$elevation, "ymin"))
+      ymax_all   <- max(sapply(grids_out$elevation, "ymax"))
+      extent_all <- extent(xmin_all, xmax_all, ymin_all, ymax_all)
+      res_all    <- func_get_mode(sapply(grids_out$elevation, "xres"))
+      raster_blueprint <- raster(ext = extent_all, resolution = res_all) # Used as reference for extent and resolution.
+      # Resample if needed, removing NAs.
+      for (grid_id in 1:length(grids_out$elevation)) {
+        if (!compareRaster(grids_out$elevation[[grid_id]], raster_blueprint, stopiffalse = FALSE)) {
+          
+          message("WARNING: func_load_elevation_grids.R: I am resampling DHM grid ", grid_id, " to enable DHM interpolation!")
+          grids_out$elevation[[grid_id]] <- resample(grids_out$elevation[[grid_id]], raster_blueprint, method = "bilinear")
+          crs(grids_out$elevation[[grid_id]]) <- run_params$grids_crs
+          
+          # Any NA in elevation is set to the mean value of the grid.
+          grids_out$elevation[[grid_id]][is.na(grids_out$elevation[[grid_id]][])] <- cellStats(grids_out$elevation[[grid_id]], stat = "mean", na.rm = TRUE)
+        }
+      }
       
       # For each modeled year look for a grid exactly from that year,
       # if found use it,
@@ -102,10 +126,15 @@ func_load_elevation_grids <- function(run_params) {
             
             # Here interpolate between the two grids of grid_year_earlier_id and grid_year_later_id.
             # This generates a new grid, which we put at the end of the grids_out$elevation list.
-            grid_earlier <- raster(grid_paths[grid_year_earlier_id])
-            grid_later <- raster(grid_paths[grid_year_later_id])
+            # grid_earlier <- raster(grid_paths[grid_year_earlier_id])
+            # grid_later <- raster(grid_paths[grid_year_later_id])
+            grid_earlier <- grids_out$elevation[[grid_year_earlier_id]]
+            grid_later <- grids_out$elevation[[grid_year_later_id]]
+            # TODO: FIX THE TWO LINES ABOVE!! DON'T REOPEN RASTER, USE THE ONES WE HAVE (BECAUSE WE MAY HAVE FIXED THEIR ALIGNMENT!)
+            
+            
             grid_interpolated <- grid_earlier + (grid_later - grid_earlier) * (year_cur - grid_year_earlier) / (grid_year_later - grid_year_earlier)
-            crs(grids_interpolated) <- run_params$grids_crs
+            crs(grid_interpolated) <- run_params$grids_crs
             grids_out$elevation[[length(grids_out$elevation) + 1]] <- grid_interpolated
             grids_out$grid_year_id[year_cur_id] <- length(grids_out$elevation)
             

@@ -19,6 +19,8 @@
 # dates, depending on the dates of the annual and winter stakes.
 # Case (2) is obviously not applicable to the first year of modeling
 # (there is no previous result for it).
+cat("Computing initial snow cover...\n")
+
 if (run_params$initial_snow_dist_from_model && swe_prev_available) {
   
   # NOTE: here weather_series_annual_cur and mod_output_annual_cur are

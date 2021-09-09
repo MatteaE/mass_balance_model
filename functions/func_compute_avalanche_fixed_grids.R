@@ -9,6 +9,8 @@
 
 func_compute_avalanche_fixed_grids <- function(run_params, data_dhms) {
   
+  cat("Computing avalanche fixed grids...\n")
+  
   conv_deg2rad <- pi / 180
 
   #### Prepare data structures ####
@@ -47,6 +49,7 @@ func_compute_avalanche_fixed_grids <- function(run_params, data_dhms) {
 
     # Process the elevation grid to make it hydrologically correct
     # (no flat patches, no sinks).
+    cat("  Pre-processing elevation grid", paste0(grid_id, "...\n"))
     avalanche$elevation_proc[[grid_id]]       <- func_elevation_preprocess(run_params, data_dhms$elevation[[grid_id]])
     
     # Compute slope and aspect.
@@ -114,7 +117,7 @@ func_compute_avalanche_fixed_grids <- function(run_params, data_dhms) {
     # for which flow width is least negative).
     avalanche$residual_sink_cell_ids[[grid_id]] <- which(getValues(avalanche$draining_coeff_sum[[grid_id]]) == 0)
     residual_sinks_n <- length(avalanche$residual_sink_cell_ids[[grid_id]])
-    cat("Residual sinks detected:", residual_sinks_n, "\n")
+    # cat("Residual sinks detected:", residual_sinks_n, "\n")
     
     if (residual_sinks_n) {
       for (residual_sink_id in 1:residual_sinks_n) {
@@ -144,7 +147,7 @@ func_compute_avalanche_fixed_grids <- function(run_params, data_dhms) {
       }
     }
     
-    cat("Residual sinks fixed.\n")
+    cat("    Residual sinks fixed.\n")
     
     # Compute normalized draining fractions for the 4 directions (Eq. 9 in Gruber, 2007).
     for (dir_id in 1:4) {
@@ -165,6 +168,7 @@ func_compute_avalanche_fixed_grids <- function(run_params, data_dhms) {
     
   }
 
+  cat("  Finished computation of avalanche fixed grids.\n")
 
   return(avalanche)
 

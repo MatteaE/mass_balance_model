@@ -7,6 +7,8 @@
 #                 This loading routine can handle both the original parameter file formatting     #
 #                 (used by the IDL model) and the new version (which follows a more rigorous      #
 #                 delimiter-based formatting).                                                    #
+#                 If the parameter file is missing, the parameter values are taken from the       #
+#                 defaults (under run_params).                                                    #
 ###################################################################################################
 
 func_load_year_params <- function(run_params, year_cur) {

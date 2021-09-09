@@ -12,8 +12,6 @@
 
 func_elevation_preprocess <- function(run_params, elevation) {
   
-  cat("Pre-processing elevation...\n")
-  
   #### REMOVE FLAT PATCHES ####
   # Find flat patches and replace them with smoothed DEM.
   # We iterate while we enlargen the smoothing window and amount,
@@ -33,7 +31,7 @@ func_elevation_preprocess <- function(run_params, elevation) {
     
   }
   
-  cat("All flat patches gone after", n_flat_iter-1, "iteration(s).\n")
+  cat("    All flat patches gone after", n_flat_iter-1, "iteration(s).\n")
   
   # writeRaster(elevation_unpatched, "1-elevation-unpatched.tif", overwrite = T)
   
@@ -57,7 +55,7 @@ func_elevation_preprocess <- function(run_params, elevation) {
   
   while (length(ids_sink_4neighbors) > 0) {
     
-    cat("Iteration", sinkfill_iter_count, "to fill all sinks...\n")
+    # cat("    Iteration", sinkfill_iter_count, "to fill all sinks...\n")
     
     # Raise isolated 4-connectivity sinks to the mean of the 4-neighbors.
     elevation_filled_mean_nofocal <- focal(elevation_filled, w = rbind(c(0,1/4,0),c(1/4,0,1/4),c(0,1/4,0)))
@@ -71,12 +69,12 @@ func_elevation_preprocess <- function(run_params, elevation) {
     
   }
   
-  cat("All sinks gone after", sinkfill_iter_count-1, "iteration(s).\n")
+  cat("    All sinks gone after", sinkfill_iter_count-1, "iteration(s).\n")
   
   dem_diff <- getValues(elevation_filled - elevation)
   
-  cat("Altered cells: ", length(which(abs(dem_diff) > 1e-9)), "\n")
-  cat("New DEM bias compared to the original: within [", as.numeric(min(dem_diff)), ",", as.numeric(max(dem_diff)), "] m\n")
+  cat("    Altered cells:", length(which(abs(dem_diff) > 1e-9)), "\n")
+  cat("    New DEM bias compared to the original: within [", as.numeric(min(dem_diff)), ",", as.numeric(max(dem_diff)), "] m\n")
 
   # [LEGACY] (Optionally) add tiny jitter (noise) to the DEM to avoid problematic
   # cases where cell patches have a constant (flat) value, which disturbes drainage.

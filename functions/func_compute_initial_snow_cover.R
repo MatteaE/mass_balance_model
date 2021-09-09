@@ -26,7 +26,7 @@ func_compute_initial_snow_cover <- function(run_params,
                                             data_massbal_winter) {
   
   # We start with the elevation/curvature effect.
-  dist_cur <- grids_snowdist_topographic[[dhm_grid_id]]
+  dist_cur <- grids_snowdist_topographic[[dem_grid_id]]
   
   # writeRaster(dist_cur, "1-dist-topo.tif", overwrite = T)
   

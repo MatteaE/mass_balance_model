@@ -9,6 +9,9 @@
 func_compute_variable_ice_albedo <- function(run_params,
                                              data_dhms) {
   
+  cat("Computing variable ice albedo...\n")
+  
+  # List with 1 to 1 correspondence with the DHMs.
   ice_albedo_fact <- list()
   
   for (grid_id in 1:data_dhms$n_grids) {
@@ -19,6 +22,8 @@ func_compute_variable_ice_albedo <- function(run_params,
     
   }
 
+  cat("  Finished computation of variable ice albedo.\n")
+  
   return(ice_albedo_fact)
 
 }

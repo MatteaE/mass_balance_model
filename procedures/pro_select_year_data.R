@@ -26,7 +26,7 @@ outline_id        <- data_outlines$outline_year_id[year_id]
 grids_avalanche_cur <- sapply(grids_avalanche, `[[`, dhm_grid_id)
 
 # Compute reduced-intensity base topographic distribution of solid precipitation.
-dist_topographic_values      <- getValues(grids_snowdist_topographic[[dhm_grid_id]])
+dist_topographic_values      <- getValues(grids_snowdist_topographic[[dem_grid_id]])
 dist_topographic_values_mean <- mean(dist_topographic_values)
 dist_topographic_values_red  <- dist_topographic_values_mean + run_params$accum_snow_dist_red_fac * (dist_topographic_values - dist_topographic_values_mean)
 

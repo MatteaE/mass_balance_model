@@ -12,8 +12,8 @@ Sys.setlocale(category = "LC_TIME", locale = "en_US.UTF-8")
 
 #### Load from input data files or reboot file ####
 boot_file_write   <- FALSE                # Save .RData file with the input data, for faster reload.
-boot_file_read    <- TRUE                 # Load .RData file with the input data, instead of loading input files.
-boot_file_name    <- "boot_file_barkrak2.RData"    # Name of the .RData input data file.
+boot_file_read    <- FALSE                 # Load .RData file with the input data, instead of loading input files.
+boot_file_name    <- "boot_file_barkrak.RData"    # Name of the .RData input data file.
 
 
 #### Load function definitions and R modules, set params ####
@@ -22,7 +22,7 @@ invisible(sapply(file.path("functions", list.files("functions", pattern = "\\.R$
 
 
 #### Setup simulation ####
-source(file.path("procedures", "pro_load_data_parameters.R"))    # Load input data.
+source(file.path("procedures", "pro_load_data_all.R"))    # Load input data.
 # Below: remove cacheDir option to force recompilation of the C++ code (useful after changing computer or editing the source file).
 if (run_params$avalanche_routine_cpp == TRUE) {sourceCpp(file.path("functions", "func_avalanche_gruber.cpp"), cacheDir = "functions")}
 source(file.path("procedures", "pro_compute_grid_parameters.R")) # Set grid-dependent parameters.

@@ -13,10 +13,16 @@
 
 func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) {
   
+  cat("Computing topographic snow distribution...\n")
+  
+  # This list has the same indices as the data_dems.
   snowdist_topographic <- list()
   
-  for (grid_id in 1:data_dhms$n_grids) {
-  
+  for (dem_grid_id in 1:data_dems$n_grids) {
+    
+    cat("  Grid number", paste0(dem_grid_id, "...\n"))
+    
+
     #### Curvature factor (lower accumulation on convex surfaces, higher on concave) ####
     # In the original IDL implementation, the curvature multiplication factor
     # is (1 - x), with x linearly dependent on the terrain curvature up to a cutoff:
@@ -28,15 +34,16 @@ func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) 
     # from the focal cell. This is a bit arbitrary (taken from some old ArcGIS documentation)
     # and produces a smoothed-out curvature.
     
-    # We use a smoothed DEM to compute curvature because it is very sensitive to DEM noise.
+    # We use a smoothed DHM to compute curvature because it is very sensitive to DHM noise.
     # The window size used for the smoothing is automatically computed from the smoothing amount.
-    dhm_smooth <- raster.gaussian.smooth(data_dhms$elevation[[grid_id]],
+    # We have to use data_dems$dhm_id[dem_grid_id] to select the DHM (see func_dhm_to_dem.R).
+    dhm_smooth <- raster.gaussian.smooth(data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]],
                                          run_params$curvature_dhm_smooth,
                                          run_params$dhm_smooth_windowsize,
                                          type = "sum")
     dhm_na_border <- which(is.na(getValues(dhm_smooth)))
     dhm_valid     <- setdiff(1:run_params$grid_ncells, dhm_na_border)
-    dhm_smooth <- cover(dhm_smooth, data_dhms$elevation[[grid_id]]) # Fill NA edges of smoothed raster with original values.
+    dhm_smooth <- cover(dhm_smooth, data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]]) # Fill NA edges of smoothed raster with original values.
     dhm_curvature <- curvature(dhm_smooth, "total")
     dhm_curvature[is.na(getValues(dhm_curvature))] <- 0.0 # NAs can appear in curvature over flat regions.
     # Rescale curvature along the raster edges,
@@ -57,11 +64,11 @@ func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) 
     
     
     #### Elevation factor (lower accumulation at very high elevations) ####
-    snowdist_ele_mult <- setValues(data_dhms$elevation[[grid_id]], 1)
-    ele_scaling_fac <- (max(getValues(data_dhms$elevation[[grid_id]]), na.rm=T) - run_params$elevation_effect_threshold) / run_params$elevation_effect_fact
-    dhm_ids_high <- which(getValues(data_dhms$elevation[[grid_id]]) > run_params$elevation_effect_threshold)
+    snowdist_ele_mult <- setValues(data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]], 1)
+    ele_scaling_fac <- (max(getValues(data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]]), na.rm=T) - run_params$elevation_effect_threshold) / run_params$elevation_effect_fact
+    dhm_ids_high <- which(getValues(data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]]) > run_params$elevation_effect_threshold)
     
-    snowdist_ele_mult[dhm_ids_high] <- 2 - 2^( (data_dhms$elevation[[grid_id]][dhm_ids_high] - run_params$elevation_effect_threshold) / ele_scaling_fac )
+    snowdist_ele_mult[dhm_ids_high] <- 2 - 2^( (data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]][dhm_ids_high] - run_params$elevation_effect_threshold) / ele_scaling_fac )
     
     
     #### Final distribution ####
@@ -79,9 +86,11 @@ func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) 
     # that curvature and elevation redistribution
     # have no net effect on the total snow amount
     # over the glacier.
-    snowdist_topographic[[grid_id]] <- snowdist_topographic_cur_raw / mean(snowdist_topographic_cur_raw[data_dems$glacier_cell_ids[[grid_id]]])
+    snowdist_topographic[[dem_grid_id]] <- snowdist_topographic_cur_raw / mean(snowdist_topographic_cur_raw[data_dems$glacier_cell_ids[[dem_grid_id]]])
   
   }
+  
+  cat("  Finished computation of topographic snow distribution.\n")
   
   return(snowdist_topographic)
   

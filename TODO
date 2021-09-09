@@ -1,1 +1,16 @@
-- Update handbook to mention new input preparation app and explain how to use it, and new package requirements (shiny, insol, tools, and so on).
+- Add support for years with no measured mass balance at all: they should just skip the optimization and use the starting mass balance value. Then of course the output plots have NO RMS, no comparison with the stakes. Like this the model can be run on any period, with no need for complete mass balance input.
+
+- Output overview plots: different symbol in case the year has/hasn't measurements.
+
+- Add support for ill-formed surface type file: if the ice does not match what the shp glacier outline says, give priority to the outline (fix surface type on the fly, adding ice / trimming the glacier).
+
+- Add shiny app as interface for the mass balance model: use folder selector for each type of input (dhm, surface type, outlines, radiation, weather, mass balance, annual parameters). Within each folder, list (recursively), and take all files which match the naming pattern (which will be dhm_<glaciername>_year.*, surface_type_<glaciername>_year.*, and so on; as *, for rasters first look for .tif, then for .grid, then for .asc; for vector look for shp then xyzn). Also all parameters of set_params.R (use shiny tabs!).
+    - To keep compatibility with set_params.R workflow, faster for glacier switching: optional input in shiny is a set_params.R file, if supplied then everything else is ignored and params are taken from that file.
+
+- Change annual parameters: no longer back-compatible, make as simple as possible: remove ignored parameters, add initial snowline elevation as possible parameter. Make params file optional: use defaults in case it is missing. Add in the global parameters the default/initial values for the annual parameters, they are used in case no mass balance measurements exist; thus the multi-year workflow becomes:
+    (1) run model on all years of interest (or only on years with data)
+    (2) get (mean) parameter values from years with data
+    (3) run model again on all years, using as defaults the mean parameter values.
+We could automate this (if a checkbox input is true): run model, then compute means, then re-run.
+
+- Update handbook to mention new input preparation app and explain how to use it, and new package requirements (shiny, insol, tools, and so on), and new interface. And new grid treatment (resampled to align, either when DHM interpolation is true or later).

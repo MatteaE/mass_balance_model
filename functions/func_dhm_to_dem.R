@@ -39,6 +39,7 @@ func_dhm_to_dem <- function(run_params,
   dhm_outline_combinations <- paste(data_dhms$grid_year_id, data_outlines$outline_year_id)
   dhm_outline_combinations_unique <- unique(dhm_outline_combinations)
   data_dems$n_grids <- length(dhm_outline_combinations_unique)
+  data_dems$dhm_id <- rep(NA, data_dems$n_grids)
   
   for (dem_id in 1:data_dems$n_grids) {
     
@@ -49,6 +50,11 @@ func_dhm_to_dem <- function(run_params,
     dem_cur_values <- getValues(dem_cur)
     cur_combination_year_ids <- which(dhm_outline_combinations == dhm_outline_combinations_unique[dem_id])
     data_dems$grid_year_id[cur_combination_year_ids] <- dem_id
+    
+    # Each DEM grid can have only a single corresponding DHM
+    # (but not vice-versa, because of possibly different outline polygons).
+    # So we find the DHM associated to each DEM.
+    data_dems$dhm_id[dem_id] <- dhm_id
     
     # We also pre-compute the glaciated/non-glaciated cells,
     # and also a re-classified raster with elevation
