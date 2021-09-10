@@ -22,12 +22,14 @@ boot_file_read    <- FALSE                 # Load .RData file with the input dat
 boot_file_name    <- "boot_file_barkrak.RData"    # Name of the .RData input data file.
 
 
-#### Load function definitions and R modules, set params ####
+#### Set parameters, load function definitions and R modules ####
+source("set_params.R")
 source(file.path("procedures", "pro_load_libraries.R"))
 invisible(sapply(file.path("functions", list.files("functions", pattern = "\\.R$")), source))
 
 
 #### Setup simulation ####
+run_params <- func_process_run_params(run_params) # Process fixed run parameters, computing derived ones.
 source(file.path("procedures", "pro_load_data_all.R"))    # Load input data.
 # Below: remove cacheDir option to force recompilation of the C++ code (useful after changing computer or editing the source file).
 if (run_params$avalanche_routine_cpp == TRUE) {sourceCpp(file.path("functions", "func_avalanche_gruber.cpp"), cacheDir = "functions")}

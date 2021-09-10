@@ -26,7 +26,7 @@ run_params <- list(
   filename_weather             =   "barkrak_barkrak_d.dat",      # File name of the weather series
   file_weather_nskip           =   4,                            # [-]: number of lines to skip in the weather file
   
-  grids_crs                    =   CRS("EPSG:32642"),            # Reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
+  grids_crs                    =   32642,            # Reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
   
   filename_dhm_prefix          =   "dhm_barkrak_",
   filename_dhm_suffix          =   ".tif",                       # DHM name is <prefix><year><suffix>
@@ -131,26 +131,3 @@ run_params <- list(
   last_year                    =   2020                          # Last modeled year (same as previous comment)
   
 )
-
-
-#### DERIVED parameters, automatically computed: DON'T CHANGE anything below this line ####
-run_params$years                       <- run_params$first_year:run_params$last_year
-run_params$n_years                     <- length(run_params$years)
-
-run_params$curvature_dhm_smooth        <- max(1e-9,run_params$curvature_dhm_smooth) # The gaussian smoothing fails if sigma   = 0 (but 1e-9 still corresponds to no smoothing!)
-run_params$dhm_smooth_windowsize       <- max(5, 2 * run_params$curvature_dhm_smooth + 1)
-
-run_params$elevation_equal_threshold   <-   1e-3 # [m]: threshold for considering two elevation values equal when we look for problematic flat patches
-
-run_params$model_avalanche_dates       <- format(as.Date(run_params$model_avalanche_dates, format = "%m/%d"), format = "%m/%d") # Add leading zeroes to single-digit values if needed.
-
-run_params$stakes_unknown_latest_start <- format(as.Date(run_params$stakes_unknown_latest_start, format = "%m/%d"), format = "%m/%d") # Same.
-
-run_params$massbal_fixed_annual_start <- format(as.Date(run_params$massbal_fixed_annual_start, format = "%m/%d"), format = "%m/%d")
-run_params$massbal_fixed_annual_end <- format(as.Date(run_params$massbal_fixed_annual_end, format = "%m/%d"), format = "%m/%d")
-run_params$massbal_fixed_winter_start <- format(as.Date(run_params$massbal_fixed_winter_start, format = "%m/%d"), format = "%m/%d")
-run_params$massbal_fixed_winter_end <- format(as.Date(run_params$massbal_fixed_winter_end, format = "%m/%d"), format = "%m/%d")
-
-run_params$output_dirname <- file.path("output", run_params$name_glacier)
-
-run_params$size_mult <- 1.183267/3 # To get A4 PDF pages.

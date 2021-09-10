@@ -31,8 +31,6 @@ library(reshape2)     # melt() data frame.
 library(stringr)      # str_split() of the outline filename suffix, to get the extension.
 library(RStoolbox)    # For the surface type basemap under the daily SWE plots (currently disabled).
 
-#### Set fixed run parameters ####
-source("set_params.R")
 
 # Load C++ avalanche routine, only if asked to do so.
 if (run_params$avalanche_routine_cpp == TRUE) {library(Rcpp)}         # avalanche function implemented in C++ for performance
