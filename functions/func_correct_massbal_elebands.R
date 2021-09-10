@@ -12,12 +12,14 @@
 #                 the given bias.                                                                 #
 ################################################################################################### 
 
-func_correct_massbal_elebands <- function(year_cur_params, data_dems, massbal_annual_meas_cur, mod_output_annual_cur, massbal_maps, dem_grid_id) {
+func_correct_massbal_elebands <- function(year_data,
+                                          year_cur_params,
+                                          data_dems) {
 
   
   # First find the DEM elevation of each stake (we base the correction on this
   # instead of the reported stake elevation, for consistency in the processing).
-  annual_stake_dem_elevations <- extract(data_dems$elevation[[dem_grid_id]], as.matrix(massbal_annual_meas_cur[,4:5]), method = "bilinear")
+  annual_stake_dem_elevations <- extract(data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), method = "bilinear")
   
   # Compute model bias within each band.
   # We create two virtual bands with midpoints at the
@@ -34,7 +36,7 @@ func_correct_massbal_elebands <- function(year_cur_params, data_dems, massbal_an
   
   for (band_id in 1:nbands) {
     band_stake_ids          <- which((annual_stake_dem_elevations > band_lower[band_id]) & (annual_stake_dem_elevations <= band_upper[band_id]))
-    band_biases[band_id]    <- mean(mod_output_annual_cur$stakes_bias[band_stake_ids])
+    band_biases[band_id]    <- mean(year_data$mod_output_annual_cur$stakes_bias[band_stake_ids])
   }
   band_biases <- as.numeric(interpNA(timeSeries(band_biases), method = "linear")) # If a correction bands contains no stakes, we linearly interpolate its bias from the two surrounding bands.
   band_biases <- c(0, band_biases, 0) # The two virtual bands have 0 bias. 
@@ -43,8 +45,8 @@ func_correct_massbal_elebands <- function(year_cur_params, data_dems, massbal_an
   # band midpoints surrounding each glaciated grid point.
   # We select the cells between two band midpoints
   # (not equal to all cells within a single band!).
-  meas_period_corr <- massbal_maps$meas_period
-  dem_values_cur    <- getValues(data_dems$elevation[[dem_grid_id]])
+  meas_period_corr <- year_data$massbal_annual_maps$meas_period
+  dem_values_cur    <- getValues(data_dems$elevation[[year_data$dem_grid_id]])
   for (band_id in 2:(nbands+2)) { # This index is relative to all bands including the two virtual ones!
     gl_cells_cur <- which((dem_values_cur <= band_midpoints[band_id]) & (dem_values_cur > band_midpoints[band_id - 1]))
     meas_period_corr[gl_cells_cur] <- meas_period_corr[gl_cells_cur] - band_biases[band_id - 1] - (band_biases[band_id] - band_biases[band_id - 1]) * ((dem_values_cur[gl_cells_cur] - band_midpoints[band_id - 1]) / (band_midpoints[band_id] - band_midpoints[band_id - 1]))

@@ -18,23 +18,26 @@
 # This is important for the bilinear filtering since we use fourCellsFromXY(..., duplicates = FALSE),
 # else the filtering would fail (duplicates = FALSE returns (if needed) additional cells which have higher index,
 # i.e. which are lower in the raster matrix, i.e. which would be the lower row of the 4 neighbors).
-func_find_stake_dxdy <- function(massbal_annual_meas_cur,
+func_find_stake_dxdy <- function(year_data,
                                  data_dhms,
-                                 dhm_grid_id,
                                  run_params) {
   
-  dx1_annual <- (massbal_annual_meas_cur$x - (extent(data_dhms$elevation[[dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
+  
+  dx1_annual <- (year_data$massbal_annual_meas_cur$x - (extent(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
   dx2_annual <- run_params$grid_cell_size - dx1_annual
-  dy2_annual <- ((extent(data_dhms$elevation[[dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - massbal_annual_meas_cur$y) %% run_params$grid_cell_size
+  dy2_annual <- ((extent(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$massbal_annual_meas_cur$y) %% run_params$grid_cell_size
   dy1_annual <- run_params$grid_cell_size - dy2_annual
   
-  dx1_winter <- (massbal_winter_meas_cur$x - (extent(data_dhms$elevation[[dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
+  dx1_winter <- (year_data$massbal_winter_meas_cur$x - (extent(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
   dx2_winter <- run_params$grid_cell_size - dx1_winter
-  dy2_winter <- ((extent(data_dhms$elevation[[dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - massbal_winter_meas_cur$y) %% run_params$grid_cell_size
+  dy2_winter <- ((extent(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$massbal_winter_meas_cur$y) %% run_params$grid_cell_size
   dy1_winter <- run_params$grid_cell_size - dy2_winter
 
-  return(list(annual = list(dx1_annual, dx2_annual, dy1_annual, dy2_annual),
-              winter = list(dx1_winter, dx2_winter, dy1_winter, dy2_winter)))
+  
+  year_data$stake_dxdy <- list(annual = list(dx1_annual, dx2_annual, dy1_annual, dy2_annual),
+                               winter = list(dx1_winter, dx2_winter, dy1_winter, dy2_winter))
+  
+  return(year_data)
     
 }
 

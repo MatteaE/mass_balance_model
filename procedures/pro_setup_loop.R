@@ -35,9 +35,11 @@ df_overview <- data.frame(year                 = run_params$years,
                           prec_corr            = NA,
                           mb_cumul             = NA)
 
-# This will be set to TRUE after the first modeled year,
-# to enable re-using of the modeled SWE as starting condition.
-swe_prev_available <- FALSE
+# This annual vector is used to optionally enable re-using of the
+# modeled SWE as starting condition for a modeled year.
+# If swe_prev_available[year_id] is TRUE, then year_id
+# can use as starting condition the model output of (year_id-1).
+swe_prev_available <- rep(FALSE, run_params$n_years)
 
 # Prepare some variables to store annual values.
 # These are filled within pro_write_year_output.R
@@ -48,7 +50,11 @@ mb_series_all_measperiod_dates <- list()
 
 # Here we will put just the final mass balance for each
 # year, to produce the overview_areaplot multi-page PDF file.
-overview_areaplots <- list()
+overview_areaplots  <- list()
+
+# Here we will put daily data for the overview plot
+# of cumulative daily glacierwide mass balance.
+overview_daily_data <- list()
 
 # Create output directory.
 dir.create(file.path(run_params$output_dirname, "annual_results"), recursive = TRUE)

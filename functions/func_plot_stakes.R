@@ -7,29 +7,25 @@
 #                 balance of each stake.                                                          #
 ################################################################################################### 
 
-func_plot_stakes <- function(model_annual_days_n,
-                             model_annual_bounds,
-                             nstakes_annual,
-                             mod_output_annual_cur,
-                             massbal_annual_meas_cur) {
+func_plot_stakes <- function(year_data) {
   
   plots_stakes <- list()
   
-  day_id_offset <- (model_annual_days_n + 1 - as.integer(format(model_annual_bounds[2], "%j"))) + 1
-  day_ids <- 1:(model_annual_days_n+1) - day_id_offset # So that day_id = 1 is Jan 1.
+  day_id_offset <- (year_data$model_annual_days_n + 1 - as.integer(format(year_data$model_time_bounds[2], "%j"))) + 1
+  day_ids <- 1:(year_data$model_annual_days_n+1) - day_id_offset # So that day_id = 1 is Jan 1.
   
-  month_starts <- seq.Date(from = as.Date(paste0(format(model_annual_bounds[1], "%Y/%m"), "/01")),
-                           to   = as.Date(paste0(format(model_annual_bounds[2], "%Y/%m"), "/01")),
+  month_starts <- seq.Date(from = as.Date(paste0(format(year_data$model_time_bounds[1], "%Y/%m"), "/01")),
+                           to   = as.Date(paste0(format(year_data$model_time_bounds[2], "%Y/%m"), "/01")),
                            by   = "1 month")
-  month_start_ids <- as.integer(month_starts[2:length(month_starts)] - model_annual_bounds[1]) + 1 - day_id_offset
+  month_start_ids <- as.integer(month_starts[2:length(month_starts)] - year_data$model_time_bounds[1]) + 1 - day_id_offset
   
   # Compute vertical offset of each series.
   # We need this to make all plotting regions
   # equal, since we need the largest extent
   # of all stake series.
-  stake_offset <- numeric(nstakes_annual)
-  for (annual_stake_id in 1:nstakes_annual) {
-    stake_offset[annual_stake_id] <- mod_output_annual_cur$stakes_series_mod_all[mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id],annual_stake_id]
+  stake_offset <- numeric(year_data$nstakes_annual)
+  for (annual_stake_id in 1:year_data$nstakes_annual) {
+    stake_offset[annual_stake_id] <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id],annual_stake_id]
   }
   
   # Compute plot ranges. Same for all plots.
@@ -38,11 +34,11 @@ func_plot_stakes <- function(model_annual_days_n,
   # accounting for the stake_offset which is used
   # to set the modeled stake series to 0 at the date
   # of stake measurement.
-  stakes_mb_lims <- (range(c(mod_output_annual_cur$stakes_mb_meas, range(mod_output_annual_cur$stakes_series_mod_all) + c(min(0,-max(stake_offset)), max(0,-min(stake_offset)))))) / 1e3
+  stakes_mb_lims <- (range(c(year_data$mod_output_annual_cur$stakes_mb_meas, range(year_data$mod_output_annual_cur$stakes_series_mod_all) + c(min(0,-max(stake_offset)), max(0,-min(stake_offset)))))) / 1e3
   
   
   # Setup month labels.
-  days <- seq.Date(model_annual_bounds[1]-1, model_annual_bounds[2], by = "1 day")
+  days <- seq.Date(year_data$model_time_bounds[1]-1, year_data$model_time_bounds[2], by = "1 day")
   months_labels_all <- format(days, "%b")
   months_doy <- c(15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349)
   
@@ -61,15 +57,15 @@ func_plot_stakes <- function(model_annual_days_n,
   
   
   # Loop to plot all stakes.
-  for (annual_stake_id in 1:nstakes_annual) {
+  for (annual_stake_id in 1:year_data$nstakes_annual) {
     
-    stake_mod_series <- mod_output_annual_cur$stakes_series_mod_all[,annual_stake_id]
-    stake_start_id <- mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id]
-    stake_end_id <- mod_output_annual_cur$stakes_end_ids[annual_stake_id]
+    stake_mod_series <- year_data$mod_output_annual_cur$stakes_series_mod_all[,annual_stake_id]
+    stake_start_id <- year_data$mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id]
+    stake_end_id <- year_data$mod_output_annual_cur$stakes_end_ids[annual_stake_id]
     stake_mod_series_offset <- stake_mod_series - stake_mod_series[stake_start_id]
     stake_mod_df <- data.frame(day_id = day_ids, mb = stake_mod_series_offset)
     stake_meas_df <- data.frame(day_id = stake_end_id - day_id_offset,
-                                mb = mod_output_annual_cur$stakes_mb_meas[annual_stake_id])
+                                mb = year_data$mod_output_annual_cur$stakes_mb_meas[annual_stake_id])
     base_size <- 12 # For the plots
     theme_stakes_plots <- theme_bw(base_size = base_size) +
       theme(axis.title.x = element_blank(),
@@ -89,7 +85,7 @@ func_plot_stakes <- function(model_annual_days_n,
       annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = base_size * 0.2) +
       geom_line(aes(x = day_id, y = mb/1e3)) +
       geom_point(data = stake_meas_df, aes(x = day_id, y = mb/1e3), shape = 5, stroke = 1.2, size = 1) +
-      annotation_custom(grobTree(textGrob(paste0(massbal_annual_meas_cur$id[annual_stake_id], ": ", sprintf("%+.2f", -mod_output_annual_cur$stakes_bias[annual_stake_id]/1e3), " m w.e."), x=0.05, y = 0.3, hjust = 0,
+      annotation_custom(grobTree(textGrob(paste0(year_data$massbal_annual_meas_cur$id[annual_stake_id], ": ", sprintf("%+.2f", -year_data$mod_output_annual_cur$stakes_bias[annual_stake_id]/1e3), " m w.e."), x=0.05, y = 0.3, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       scale_x_continuous(expand = expansion(0,0)) +
       scale_y_continuous(limits = stakes_mb_lims, breaks = pretty(stakes_mb_lims, n = 3), expand = expansion(mult = c(0.12,0.07))) +
@@ -101,7 +97,7 @@ func_plot_stakes <- function(model_annual_days_n,
   # 10 aligned plots (i.e. one full page
   # of the output PDF).
   plots_stakes_out <- list()
-  n_pages_out <- ceiling(nstakes_annual / 10)
+  n_pages_out <- ceiling(year_data$nstakes_annual / 10)
   for (page_id in 1:n_pages_out) {
     plots_stakes_out[[page_id]] <- plot_grid(plotlist = plots_stakes[((page_id-1)*10+1):(page_id*10)], align = "hv", ncol = 2)
   }

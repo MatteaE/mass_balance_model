@@ -6,7 +6,9 @@
 #                 This file contains the generation of the final overview plots.                  #
 ###################################################################################################  
 
-func_plot_overview <- function(df_overview) {
+func_plot_overview <- function(df_overview,
+                               run_params,
+                               overview_daily_data) {
   
   base_size <- 16 # For the plots
   
@@ -211,23 +213,23 @@ func_plot_overview <- function(df_overview) {
   # Vertical blue lines: hydrological year boundaries.
   # Vertical dashed purple lines: measurement period start.
   # Vertical dotted purple lines: measurement period end.
-  first_year_hydro_start_id <- pmatch(as.Date(paste0(run_params$first_year-1, "/10/1")), table = mb_series_all_dates[[1]])
-  mb_first_year_hydro_start <- mb_series_all_raw[[1]][first_year_hydro_start_id]
-  mb_series_all <- mb_series_all_raw
+  first_year_hydro_start_id <- pmatch(as.Date(paste0(run_params$first_year-1, "/10/1")), table = overview_daily_data$mb_series_all_dates[[1]])
+  mb_first_year_hydro_start <- overview_daily_data$mb_series_all_raw[[1]][first_year_hydro_start_id]
+  mb_series_all <- overview_daily_data$mb_series_all_raw
   mb_series_all[[1]] <- mb_series_all[[1]] - mb_first_year_hydro_start
   if (run_params$n_years > 1) {
     for (year_id in 2:run_params$n_years) {
       # Note: the two ids below are used to align the two
       # hydrological year values (YYYY-1 end with YYYY start).
-      year_prev_hydro_end_id <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/10/1")), table = mb_series_all_dates[[year_id-1]])
-      year_cur_hydro_start_id <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/10/1")), table = mb_series_all_dates[[year_id]])
+      year_prev_hydro_end_id <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/10/1")), table = overview_daily_data$mb_series_all_dates[[year_id-1]])
+      year_cur_hydro_start_id <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/10/1")), table = overview_daily_data$mb_series_all_dates[[year_id]])
       year_prev_mb <- mb_series_all[[year_id-1]][year_prev_hydro_end_id]
       year_cur_mb <- mb_series_all[[year_id]][year_cur_hydro_start_id]
       mb_series_all[[year_id]] <- mb_series_all[[year_id]] + year_prev_mb - year_cur_mb
     }
   }  
   mb_all_lengths <- sapply(mb_series_all, FUN = length) # Length of each annual simulation [days].
-  mb_all_df <- data.frame(day = as.Date(unlist(mb_series_all_dates), origin = as.Date("1970/1/1")),
+  mb_all_df <- data.frame(day = as.Date(unlist(overview_daily_data$mb_series_all_dates), origin = as.Date("1970/1/1")),
                           mb = unlist(mb_series_all)/1e3,
                           year_id = as.factor(rep(1:length(mb_series_all), mb_all_lengths)))
   
@@ -248,13 +250,8 @@ func_plot_overview <- function(df_overview) {
     theme_overview_plots
   
   
+  overview_plots <- suppressWarnings(ggarrange(plotlist = plots, ncol = 1, nrow = 3, align = "hv"))
   
-  
-  overview <- ggarrange(plotlist = plots, ncol = 1, nrow = 3, align = "hv")
-
-  suppressMessages(ggexport(overview,
-                            filename = file.path(run_params$output_dirname, "overview.pdf"),
-                            width = 21 * run_params$size_mult,
-                            height = 29.7 * run_params$size_mult))
+  return(overview_plots)
   
 }

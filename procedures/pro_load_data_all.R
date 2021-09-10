@@ -63,7 +63,11 @@ if (boot_file_read) {
   }
   
   data_dems                  <-   func_dhm_to_dem(run_params, data_dhms, data_outlines)
-  data_radiation             <-   func_load_radiation_grids(run_params, raster_blueprint)
+  
+  #### TEMPORARY WIP DEVELOPMENT ####
+  load("radiation.RData")
+  # data_radiation             <-   func_load_radiation_grids(run_params, raster_blueprint)
+  #### END TEMPORARY WIP DEVELOPMENT ####
   data_massbalance_annual    <-   func_load_massbalance_measurements(run_params, "annual")
   data_massbalance_winter    <-   func_load_massbalance_measurements(run_params, "winter")
 }

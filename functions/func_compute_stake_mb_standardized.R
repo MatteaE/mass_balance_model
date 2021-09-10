@@ -22,22 +22,20 @@
 # If all the stakes starts are the same, and all the stake ends are the same, the standardized stake measurement
 # is the same as the original stake measurement.
 
-func_compute_stake_mb_standardized <- function(mod_output_annual_cur,
-                                               massbal_annual_meas_cur,
-                                               nstakes_annual) {
+func_compute_stake_mb_standardized <- function(year_data) {
   
-  id_measperiod_start <- min(mod_output_annual_cur$stakes_start_ids_corr)
-  id_measperiod_end   <- max(mod_output_annual_cur$stakes_end_ids)
+  # year_data$massbal_annual_meas_period_ids[1] <- min(year_data$mod_output_annual_cur$stakes_start_ids_corr)
+  # year_data$massbal_annual_meas_period_ids[2]   <- max(year_data$mod_output_annual_cur$stakes_end_ids)
   
-  massbal_standardized <- rep(NA, nstakes_annual)
-  for (stake_id in 1:nstakes_annual) {
-    stake_mod_mb_measperiod_start <- mod_output_annual_cur$stakes_series_mod_all[id_measperiod_start,stake_id]
-    stake_mod_mb_stake_start <- mod_output_annual_cur$stakes_series_mod_all[mod_output_annual_cur$stakes_start_ids_corr[stake_id],stake_id]
-    stake_mod_mb_stake_end <- mod_output_annual_cur$stakes_series_mod_all[mod_output_annual_cur$stakes_end_ids[stake_id],stake_id]
-    stake_mod_mb_measperiod_end <- mod_output_annual_cur$stakes_series_mod_all[id_measperiod_end,stake_id]
+  massbal_standardized <- rep(NA, year_data$nstakes_annual)
+  for (stake_id in 1:year_data$nstakes_annual) {
+    stake_mod_mb_measperiod_start <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[1],stake_id]
+    stake_mod_mb_stake_start <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$mod_output_annual_cur$stakes_start_ids_corr[stake_id],stake_id]
+    stake_mod_mb_stake_end <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$mod_output_annual_cur$stakes_end_ids[stake_id],stake_id]
+    stake_mod_mb_measperiod_end <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[2],stake_id]
     
     stake_standard_corr <- (stake_mod_mb_stake_start - stake_mod_mb_measperiod_start) + (stake_mod_mb_measperiod_end - stake_mod_mb_stake_end)
-    massbal_standardized[stake_id] <- massbal_annual_meas_cur$massbal[stake_id] + stake_standard_corr
+    massbal_standardized[stake_id] <- year_data$massbal_annual_meas_cur$massbal[stake_id] + stake_standard_corr
   }
   
   return(massbal_standardized)

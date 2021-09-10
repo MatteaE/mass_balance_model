@@ -7,14 +7,15 @@
 #                 versus elevation, both in elevation bands and as a scatterplot for all cells.   #
 ################################################################################################### 
 
-func_plot_massbal_vs_elevation <- function(run_params,
-                                           data_dems,
-                                           massbal_annual_maps,
-                                           massbal_winter_maps,
-                                           dem_grid_id,
-                                           massbal_annual_meas_cur) {
+# The function returns a 2-element list:
+# the plotting df and the resulting plots.
+# The plotting df is used later to save some
+# overview values.
+func_plot_massbal_vs_elevation <- function(year_data,
+                                           run_params,
+                                           data_dems) {
   
-  mb_meas_period_corr_values <- getValues(massbal_annual_maps$meas_period_corr)
+  mb_meas_period_corr_values <- getValues(year_data$massbal_annual_maps$meas_period_corr)
   
   plots_mb_vs_ele <- list()
   
@@ -22,27 +23,27 @@ func_plot_massbal_vs_elevation <- function(run_params,
   # Also the number of cells in each elevation band.
   # We put the ele_bands_plot_df in the global environment (<<-)
   # so that we can later write its values to a .csv file.
-  ele_bands_plot_values <- getValues(data_dems$elevation_bands_plot[[dem_grid_id]])
-  ele_bands_plot_min <- min(ele_bands_plot_values, na.rm = T)
-  ele_bands_plot_max <- max(ele_bands_plot_values, na.rm = T)
-  ele_bands_plot_df <<- data.frame(ele                 = seq(ele_bands_plot_min, ele_bands_plot_max, run_params$ele_bands_plot_size),
-                                  ncells              = NA,
-                                  mb_annual_meas_corr = NA,
-                                  mb_annual_meas      = NA,
-                                  mb_annual_hydro     = NA,
-                                  mb_annual_fixed     = NA,
-                                  mb_winter_fixed     = NA,
-                                  mb_winter_meas      = NA)
+  ele_bands_plot_values <- getValues(data_dems$elevation_bands_plot[[year_data$dem_grid_id]])
+  ele_bands_plot_min    <- min(ele_bands_plot_values, na.rm = T)
+  ele_bands_plot_max    <- max(ele_bands_plot_values, na.rm = T)
+  ele_bands_plot_df     <- data.frame(ele                 = seq(ele_bands_plot_min, ele_bands_plot_max, run_params$ele_bands_plot_size),
+                                      ncells              = NA,
+                                      mb_annual_meas_corr = NA,
+                                      mb_annual_meas      = NA,
+                                      mb_annual_hydro     = NA,
+                                      mb_annual_fixed     = NA,
+                                      mb_winter_fixed     = NA,
+                                      mb_winter_meas      = NA)
   for (band_id in 1:length(ele_bands_plot_df[,1])) {
-    band_cell_ids <- which(ele_bands_plot_values == ele_bands_plot_df$ele[band_id])
-    ele_bands_plot_df$ncells[band_id] <<- length(band_cell_ids)
-    ele_bands_plot_df$mb_annual_meas_corr[band_id] <<- mean(mb_meas_period_corr_values[band_cell_ids])
-    ele_bands_plot_df$mb_annual_meas[band_id]      <<- mean(getValues(massbal_annual_maps$meas_period)[band_cell_ids])
-    ele_bands_plot_df$mb_annual_hydro[band_id]     <<- mean(getValues(massbal_annual_maps$hydro)[band_cell_ids])
-    ele_bands_plot_df$mb_annual_fixed[band_id]     <<- mean(getValues(massbal_annual_maps$fixed)[band_cell_ids])
-    ele_bands_plot_df$mb_winter_fixed[band_id]     <<- mean(getValues(massbal_winter_maps$fixed)[band_cell_ids])
-    if (process_winter) {
-      ele_bands_plot_df$mb_winter_meas[band_id]    <<- mean(getValues(massbal_winter_maps$meas_period)[band_cell_ids])
+    band_cell_ids                                  <- which(ele_bands_plot_values == ele_bands_plot_df$ele[band_id])
+    ele_bands_plot_df$ncells[band_id]              <- length(band_cell_ids)
+    ele_bands_plot_df$mb_annual_meas_corr[band_id] <- mean(mb_meas_period_corr_values[band_cell_ids])
+    ele_bands_plot_df$mb_annual_meas[band_id]      <- mean(getValues(year_data$massbal_annual_maps$meas_period)[band_cell_ids])
+    ele_bands_plot_df$mb_annual_hydro[band_id]     <- mean(getValues(year_data$massbal_annual_maps$hydro)[band_cell_ids])
+    ele_bands_plot_df$mb_annual_fixed[band_id]     <- mean(getValues(year_data$massbal_annual_maps$fixed)[band_cell_ids])
+    ele_bands_plot_df$mb_winter_fixed[band_id]     <- mean(getValues(year_data$massbal_winter_maps$fixed)[band_cell_ids])
+    if (year_data$process_winter) {
+      ele_bands_plot_df$mb_winter_meas[band_id]    <- mean(getValues(year_data$massbal_winter_maps$meas_period)[band_cell_ids])
     }
   }
   
@@ -102,23 +103,20 @@ func_plot_massbal_vs_elevation <- function(run_params,
   # measurement period. BIAS and RMS are the same as over each individual stake
   # period, since stake standardization uses the model output which by definition
   # cannot add BIAS or RMS w.r.t. the model output itself.
-  df_bias_rms <- data.frame(meas = massbal_annual_meas_cur$massbal_standardized/1e3,
-                            mod = extract(massbal_annual_maps$meas_period, cbind(massbal_annual_meas_cur$x, massbal_annual_meas_cur$y), method = "bilinear") / 1e3)
+  df_bias_rms <- data.frame(meas = year_data$massbal_annual_meas_cur$massbal_standardized/1e3,
+                            mod = extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear") / 1e3)
   stakes_bias <- mean(df_bias_rms$mod - df_bias_rms$meas)
   stakes_rms <- sqrt(mean((df_bias_rms$mod - df_bias_rms$meas)^2))
   
-  id_measperiod_start <- min(mod_output_annual_cur$stakes_start_ids_corr)
-  id_measperiod_end   <- max(mod_output_annual_cur$stakes_end_ids)
-  
-  stakes_mod_massbal_meas_period <- mod_output_annual_cur$stakes_series_mod_all[id_measperiod_end,] - mod_output_annual_cur$stakes_series_mod_all[id_measperiod_start,]
+  stakes_mod_massbal_meas_period <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[2],] - year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[1],]
   
   # This data.frame contains only the mass balance values on glaciated cells.
-  df_scatterplot <- data.frame(ele = data_dems$elevation[[dem_grid_id]][data_dems$glacier_cell_ids[[dem_grid_id]]],
-                               mb = getValues(massbal_annual_maps$meas_period)[data_dems$glacier_cell_ids[[dem_grid_id]]])
+  df_scatterplot <- data.frame(ele = data_dems$elevation[[year_data$dem_grid_id]][data_dems$glacier_cell_ids[[year_data$dem_grid_id]]],
+                               mb = getValues(year_data$massbal_annual_maps$meas_period)[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]])
 
-  df_stakes <- data.frame(z = massbal_annual_meas_cur$z,
-                          meas = massbal_annual_meas_cur$massbal_standardized,
-                          mod = stakes_mod_massbal_meas_period)
+  df_stakes <- data.frame(z    = year_data$massbal_annual_meas_cur$z,
+                          meas = year_data$massbal_annual_meas_cur$massbal_standardized,
+                          mod  = stakes_mod_massbal_meas_period)
   
   theme_scatterplot_ele <- theme_bw(base_size = base_size) +
                            theme(text = element_text(face = "bold"),
@@ -142,6 +140,7 @@ func_plot_massbal_vs_elevation <- function(run_params,
   
   plots_mb_vs_ele_out <- plot_grid(plotlist = plots_mb_vs_ele, align = "hv", ncol = 1, nrow = 2)
   
-  return(plots_mb_vs_ele_out)
+  return(list(ele_bands_plot_df   = ele_bands_plot_df,
+              plots_mb_vs_ele_out = plots_mb_vs_ele_out))
   
 }

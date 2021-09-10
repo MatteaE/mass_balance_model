@@ -20,7 +20,7 @@
 # WINTER modeling period starts at the beginning of the observation period with the earliest start
 # (among the winter ones) and ends at the end of the period with the latest end (among the winter ones).
 # It is extended to include te dates of fixed mass balance evaluation set by the user.
-func_compute_modeling_periods <- function(run_params, massbal_annual, massbal_winter, year_cur, year_cur_params) {
+func_compute_modeling_periods <- function(year_data, run_params, year_cur_params) {
   
   # na.rm because we also support NA as start date, meaning
   # "end of previous ablation season" i.e. mass balance minimum.
@@ -31,16 +31,17 @@ func_compute_modeling_periods <- function(run_params, massbal_annual, massbal_wi
   # set at Sep 30.
   # We use year_cur_params$hydro_end-1 since hydro_end is Oct 1 (00:00, i.e. as.Date(Oct 1)),
   # which means we can stop modeling after the (weather series) time step of Sep 30.
-  annual_start <- min(c(year_cur_params$hydro_start, massbal_annual$start_date, year_cur_params$fixed_annual_start), na.rm = T)
-  annual_end   <- max(c(year_cur_params$hydro_end-1, massbal_annual$end_date, year_cur_params$fixed_annual_end))
+  annual_start <- min(c(year_cur_params$hydro_start, year_data$massbal_annual_meas_cur$start_date, year_cur_params$fixed_annual_start), na.rm = T)
+  annual_end   <- max(c(year_cur_params$hydro_end-1, year_data$massbal_annual_meas_cur$end_date, year_cur_params$fixed_annual_end))
   
   winter_start <- NA
   winter_end   <- NA
-  if (nrow(massbal_winter)) {
-    winter_start <- min(massbal_winter$start_date)
-    winter_end   <- max(massbal_winter$end_date)
+  if (year_data$process_winter) {
+    winter_start <- min(year_data$massbal_winter_meas_cur$start_date)
+    winter_end   <- max(year_data$massbal_winter_meas_cur$end_date)
   }
   
-  return(c(annual_start, annual_end, winter_start, winter_end))
+  year_data$model_time_bounds <- c(annual_start, annual_end, winter_start, winter_end)
+  return(year_data)
   
 }
