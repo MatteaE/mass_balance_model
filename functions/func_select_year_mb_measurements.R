@@ -9,7 +9,7 @@
 #                 31 Dec of the year.                                                             #
 ################################################################################################### 
 
-func_select_year_measurements <- function(data_massbal, year) {
+func_select_year_mb_measurements <- function(data_massbal, year) {
   
   ids_year <- which(as.integer(format(data_massbal$end_date, "%Y")) == year)
 

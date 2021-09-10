@@ -34,9 +34,9 @@ dist_topographic_values_red  <- dist_topographic_values_mean + run_params$accum_
 grid_ice_albedo_fact_cur_values <- getValues(grids_ice_albedo_fact[[dhm_grid_id]])
 
 # Select mass balance measurements of the current year.
-massbal_annual_ids <- func_select_year_measurements(data_massbalance_annual, year_cur)
+massbal_annual_ids <- func_select_year_mb_measurements(data_massbalance_annual, year_cur)
 nstakes_annual <- length(massbal_annual_ids)
-massbal_winter_ids <- func_select_year_measurements(data_massbalance_winter, year_cur)
+massbal_winter_ids <- func_select_year_mb_measurements(data_massbalance_winter, year_cur)
 nstakes_winter <- length(massbal_winter_ids)
 massbal_annual_meas_cur <- data_massbalance_annual[massbal_annual_ids,]
 massbal_winter_meas_cur <- data_massbalance_winter[massbal_winter_ids,] # Empty if we have no winter stakes for the year.

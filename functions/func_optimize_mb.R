@@ -56,7 +56,7 @@ func_optim_worker <- function(optimization_period, corr_fact_cur, corr_fact_wint
     corrections_cur <- list(melt_factor  = corr_fact_cur    * year_cur_params$melt_factor,
                             rad_fact_ice = corr_fact_cur    * year_cur_params$rad_fact_ice,
                             prec_corr    = corr_fact_winter * year_cur_params$prec_corr)
-  
+    
   } else if (optimization_period == "winter") {
     
     corrections_cur <- list(prec_corr  = corr_fact_cur * year_cur_params$prec_corr)
@@ -104,7 +104,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                              data_dhms, data_dems, data_surftype,
                              snowdist_init, data_radiation, weather_series_cur, dist_topographic_values_red,
                              dist_probes_norm_values_red, grids_avalanche_cur,
-                             grid_ice_albedo_fact_cur_values, dx1, dx2, dy1, dy2,
+                             grid_ice_albedo_fact_cur_values, dxdy,
                              nstakes, model_days_n, massbal_meas_cur, stakes_cells) {
   
   cat("\n**", year_cur, optimization_period, "mass balance optimization **\n")
@@ -117,7 +117,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                  snowdist_init, data_radiation, weather_series_cur, dist_topographic_values_red,
                                  dist_probes_norm_values_red, grids_avalanche_cur,
                                  grid_ice_albedo_fact_cur_values,
-                                 dx1, dx2, dy1, dy2,
+                                 dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
                                  nstakes, model_days_n, massbal_meas_cur, stakes_cells)
   
   cat("\n* Optimization run # 2\n")
@@ -135,7 +135,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                 snowdist_init, data_radiation, weather_series_cur, dist_topographic_values_red,
                                 dist_probes_norm_values_red, grids_avalanche_cur,
                                 grid_ice_albedo_fact_cur_values,
-                                dx1, dx2, dy1, dy2,
+                                dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
                                 nstakes, model_days_n, massbal_meas_cur, stakes_cells)
   
   niter <- 2
@@ -153,7 +153,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                   snowdist_init, data_radiation, weather_series_cur, dist_topographic_values_red,
                                   dist_probes_norm_values_red, grids_avalanche_cur,
                                   grid_ice_albedo_fact_cur_values,
-                                  dx1, dx2, dy1, dy2,
+                                  dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
                                   nstakes, model_days_n, massbal_meas_cur, stakes_cells)
   }
   
