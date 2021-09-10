@@ -90,8 +90,6 @@ run_params <- list(
   albedo_ice_decrease_elev     =   0.,                           # [m]: below this altitude, the ice albedo decreases linearly with altitude (darker ice).
   albedo_ice_decrease_fact     =   0.014,                        # [fraction m-1]: rate of increase above 1 (with decreasing altitude) of the ice albedo factor (multiplying ice melt).
   
-  #### ACCUMULATION and MELT MODEL default year parameters ####
-  
   
   #### STAKES parameters ####
   stakes_unknown_latest_start  =   "2/28",                       # [month/day]: in the automatic search of the start date for snow pits and depth probings without a measured start date, we search no later than this day of year. The starting date will be set to the day of the minimum cumulative mass balance between the start of the simulation and the date set here. Something like end of February should be safe for all stakes. 

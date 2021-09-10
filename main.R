@@ -42,7 +42,12 @@ for (year_id in 1:run_params$n_years) {
   
   source(file.path("procedures", "pro_select_year_data.R")) # Select data for the current year.
   
-  source(file.path("procedures", "pro_find_stake_dxdy.R")) # Find stake offsets on the grid.
+  # Find stake offsets on the grid.
+  stake_dxdy <- func_find_stake_dxdy(massbal_annual_meas_cur,
+                                     data_dhms,
+                                     dhm_grid_id,
+                                     run_params)
+  # source(file.path("procedures", "pro_find_stake_dxdy.R")) # Find stake offsets on the grid.
   
   source(file.path("procedures", "pro_setup_winter_probes_dist.R")) # Setup grids from winter snow probes, if available. Also set flag process_winter to TRUE/FALSE.
 
