@@ -43,7 +43,7 @@ if (process_winter)  {
                                         weather_series_winter_cur, dist_topographic_values_red,
                                         dist_probes_norm_values_red, grids_avalanche_cur,
                                         grid_ice_albedo_fact_cur_values,
-                                        dx1_winter, dx2_winter, dy1_winter, dy2_winter,
+                                        stake_dxdy[["winter"]],
                                         nstakes_winter, model_winter_days_n, massbal_winter_meas_cur,
                                         winter_stakes_cells)
   
@@ -55,4 +55,3 @@ if (process_winter)  {
   # Free some memory after processing.
   invisible(gc())
 }
-

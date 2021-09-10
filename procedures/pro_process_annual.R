@@ -34,7 +34,7 @@ optim_corr_annual <- func_optimize_mb("annual", corr_fact_winter,
                                       weather_series_annual_cur, dist_topographic_values_red,
                                       dist_probes_norm_values_red, grids_avalanche_cur,
                                       grid_ice_albedo_fact_cur_values,
-                                      dx1_annual, dx2_annual, dy1_annual, dy2_annual,
+                                      stake_dxdy[["annual"]],
                                       nstakes_annual, model_annual_days_n, massbal_annual_meas_cur,
                                       annual_stakes_cells)
 # Free some memory after processing.
@@ -43,4 +43,4 @@ invisible(gc())
 # After an annual model run we have SWE information
 # suitable for use as starting condition of the next
 # year, if the user decides to use it.
-swe_prev_available <- TRUE 
+swe_prev_available <- TRUE
