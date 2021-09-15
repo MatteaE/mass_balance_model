@@ -97,7 +97,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                              data_dhms, data_dems, data_surftype, data_radiation,
                              nstakes, model_days_n, massbal_meas_cur, stakes_cells) {
   
-  cat("\n**", year_cur, optimization_period, "mass balance optimization **\n")
+  cat("\n**", year_data$year_cur, optimization_period, "mass balance optimization **\n")
   cat("\n* Optimization run # 1\n")
   corr_fact_prev <- 0
   

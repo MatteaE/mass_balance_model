@@ -24,9 +24,14 @@ func_setup_initial_snow_cover <- function(year_data,
                                           swe_prev_available,
                                           run_params) {
   
-  cat("Computing initial snow cover...\n")
+  cat("Setting up the initial snow cover...\n")
   
-  if (run_params$initial_snow_dist_from_model && swe_prev_available[year_data$year_id]) {
+  # If told to do so, use the previous year's result as starting SWE map.
+  # We can do that only if the previous modeled year is also the previous
+  # year (we have to save memory by keeping only the last model output!).
+  if ((run_params$initial_snow_dist_from_model) &&
+      (swe_prev_available[year_data$year_id])  &&
+      (year_data_prev$year_cur == year_data$year_cur - 1)) {
     
     # NOTE: we retrieve the weather_series_annual_cur
     # and mod_output_annual_cur of the PREVIOUS year!

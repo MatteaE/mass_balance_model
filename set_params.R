@@ -89,11 +89,22 @@ run_params <- list(
   accum_snow_dist_red_fac      =   0.5,                          # [-]: reduction factor to decrease the importance of the topographic snow distribution variability (curvature and elevation cutoff) when distributing snowfall over the grid. 0 means uniform snow distribution, 1 means no reduction.
   albedo_ice_decrease_elev     =   0.,                           # [m]: below this altitude, the ice albedo decreases linearly with altitude (darker ice).
   albedo_ice_decrease_fact     =   0.014,                        # [fraction m-1]: rate of increase above 1 (with decreasing altitude) of the ice albedo factor (multiplying ice melt).
+
+    
+  #### ACCUMULATION and MELT MODEL default year parameters ####
+  default_prec_corr            =   200,                          # [%]: precipitation correction.
+  default_prec_summer_fact     =   0.6,                          # [-]: multiplicative reduction of precipitation correction in summer.
+  default_prec_elegrad         =   10,                           # [% / 100 m]: altitudinal gradient of precipitation.
+  default_temp_elegrad         =   -0.6,                         # [°C / 100 m]: altitudinal gradient of air temperature.
+  default_melt_factor          =   1.0,                          # [mm w.e. C-1 d-1]: melt factor for DDF model.
+  default_rad_fact_ice         =   1.0,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for ice within DDF model.
+  default_rad_fact_snow        =   0.2,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for snow within DDF model.
+  nodata_years_automatic       =   TRUE,                         # [TRUE/FALSE]: if TRUE, the prec_corr/melt_factor/rad_fact_ice/rad_fact_snow parameters for years with no mass balance will be taken as the mean of the parameters optimized over the years with measured mass balance data (only IF there is no overriding value in an annual parameter file AND there is at least one year with measured mass balances). If FALSE, the parameters are taken from the defaults under run_params (only IF there is no overriding value in an annual parameter file).
   
   
   #### STAKES parameters ####
   stakes_unknown_latest_start  =   "2/28",                       # [month/day]: in the automatic search of the start date for snow pits and depth probings without a measured start date, we search no later than this day of year. The starting date will be set to the day of the minimum cumulative mass balance between the start of the simulation and the date set here. Something like end of February should be safe for all stakes. 
-  stake_cluster_distance       =   200,                           # [m]: threshold distance for clustering stakes together. This is used to ensure a more uniform distribution of the stakes: if measurements are very dense in one place they can induce a bias in the optimization, so we average stakes in clusters. This can reduce the total number of stakes. Only stakes measured on the same days can be clustered. A value of 0 corresponds to no clustering.
+  stake_cluster_distance       =   200,                          # [m]: threshold distance for clustering stakes together. This is used to ensure a more uniform distribution of the stakes: if measurements are very dense in one place they can induce a bias in the optimization, so we average stakes in clusters. This can reduce the total number of stakes. Only stakes measured on the same days can be clustered. A value of 0 corresponds to no clustering.
   snow_probes_idw_exp          =   0.75,                         # [-]: exponent for the IDW interpolation of winter snow measurements
   
   

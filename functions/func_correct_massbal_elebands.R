@@ -17,10 +17,6 @@ func_correct_massbal_elebands <- function(year_data,
                                           data_dems) {
 
   
-  # First find the DEM elevation of each stake (we base the correction on this
-  # instead of the reported stake elevation, for consistency in the processing).
-  annual_stake_dem_elevations <- extract(data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), method = "bilinear")
-  
   # Compute model bias within each band.
   # We create two virtual bands with midpoints at the
   # lowest and highest band limits, to let the linear
@@ -35,7 +31,7 @@ func_correct_massbal_elebands <- function(year_data,
   band_biases    <- numeric(nbands)
   
   for (band_id in 1:nbands) {
-    band_stake_ids          <- which((annual_stake_dem_elevations > band_lower[band_id]) & (annual_stake_dem_elevations <= band_upper[band_id]))
+    band_stake_ids          <- which((year_data$massbal_annual_meas_cur$z_dem > band_lower[band_id]) & (year_data$massbal_annual_meas_cur$z_dem <= band_upper[band_id]))
     band_biases[band_id]    <- mean(year_data$mod_output_annual_cur$stakes_bias[band_stake_ids])
   }
   band_biases <- as.numeric(interpNA(timeSeries(band_biases), method = "linear")) # If a correction bands contains no stakes, we linearly interpolate its bias from the two surrounding bands.

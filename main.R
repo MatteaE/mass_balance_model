@@ -33,11 +33,20 @@ run_params <- func_process_run_params(run_params) # Process fixed run parameters
 source(file.path("procedures", "pro_load_data_all.R"))    # Load input data.
 # Below: remove cacheDir option to force recompilation of the C++ code (useful after changing computer or editing the source file).
 if (run_params$avalanche_routine_cpp == TRUE) {sourceCpp(file.path("functions", "func_avalanche_gruber.cpp"), cacheDir = "functions")}
-source(file.path("procedures", "pro_compute_grid_parameters.R")) # Set grid-dependent parameters.
-source(file.path("procedures", "pro_compute_all_fixed_grids.R")) # Compute static grids.
-source(file.path("procedures", "pro_save_boot_files.R"))         # Save boot files if needed.
-source(file.path("procedures", "pro_setup_loop.R"))              # Prepare variables before main loop. Also create output directory.
 
+# Compute global grid parameters (numbers of cells and cell size).
+run_params <- func_compute_grid_parameters(run_params, data_dhms)
+
+# Compute fixed grids (avalanches, topographic snow distribution, variable ice albedo).
+grids_fixed_list <- func_compute_all_fixed_grids(run_params, data_dhms, data_dems)
+
+source(file.path("procedures", "pro_save_boot_files.R"))         # Save boot files if needed.
+
+# Setup list with annual values and plots (1 per year).
+overview_annual <- func_setup_overview_annual(run_params)
+
+# Create output directory.
+dir.create(file.path(run_params$output_dirname, "annual_results"), recursive = TRUE)
 
 #### Main loop ####
 # Here year_data is a list which is gradually built and
@@ -46,130 +55,83 @@ year_data <- list()
 for (year_id in 1:run_params$n_years) {
 
   #### . Select current year, parameters, data ####
-  year_cur <- run_params$years[year_id]
-  year_cur_params <- func_load_year_params(run_params, year_cur)
-  
-  cat("\n\n\n\n============  STARTING NEW YEAR:", year_cur, " ============\n")
-  
   # Select data from the current year.
-  # NOTE: year data contains indices of the
+  # NOTE: list year_data contains the indices of the
   # data grids, not copies of the grids themselves.
-  year_data_prev <- year_data # Save a copy, we need it e.g. to model starting from the previous year's result.
+  year_data_prev <- year_data # Save a copy, we need it e.g. to model based on the previous year's result.
   year_data <- func_select_year_data(data_dhms, data_dems, data_surftype, data_outlines,
-                                     grids_avalanche, grids_snowdist_topographic, grids_ice_albedo_fact,
+                                     grids_fixed_list,
                                      data_massbalance_annual, data_massbalance_winter,
                                      year_id, run_params)
+  
+  if (year_data$nstakes_annual > 0) {
+    
+    cat("\n\n\n\n============  STARTING NEW YEAR:", year_data$year_cur, " ============\n")
+    
+    year_cur_params <- func_set_year_params(year_data, run_params)
 
-  # Find stake offsets on the grid.
-  year_data <- func_find_stake_dxdy(year_data,
-                                    data_dhms,
-                                    run_params)
-  
-  # Setup grids from winter snow probes, if available. Also set flag year_data$process_winter to TRUE/FALSE.
-  year_data <- func_setup_winter_probes_dist(year_data,
-                                             data_dhms,
-                                             data_dems,
-                                             run_params)
-
-  #### . Compute annual and winter modeling periods ####
-  year_data <- func_compute_modeling_periods(year_data,
-                                             run_params,
-                                             year_cur_params)
-  
-  #### .  Setup initial snow cover from previous year or estimation ####
-  year_data <- func_setup_initial_snow_cover(year_data,
-                                             year_data_prev,
-                                             data_dhms,
-                                             data_dems,
-                                             grids_snowdist_topographic,
-                                             swe_prev_available,
-                                             run_params)
-
-  #### .  Simulate winter mass balance (only if measurements available) ####
-  year_data <- func_process_winter(year_data,
-                                   run_params,
-                                   year_cur_params,
-                                   data_dhms,
-                                   data_dems,
-                                   data_surftype,
-                                   data_radiation,
-                                   data_weather)
-  
-  #### .  Simulate annual mass balance ####
-  year_data <- func_process_annual(year_data,
-                                   run_params,
-                                   year_cur_params,
-                                   data_dhms,
-                                   data_dems,
-                                   data_surftype,
-                                   data_radiation,
-                                   data_weather)
-  
-  # After an annual model run we have SWE information
-  # suitable for use as starting condition of the next
-  # year, if we want to use it.
-  if (year_id < run_params$n_years) {
-    swe_prev_available[year_id+1] <- TRUE
+    year_results_list <- func_process_year_with_data(year_data,
+                                                     year_data_prev,
+                                                     run_params,
+                                                     year_cur_params,
+                                                     data_dhms,
+                                                     data_dems,
+                                                     data_surftype,
+                                                     data_radiation,
+                                                     data_outlines,
+                                                     data_weather,
+                                                     grids_fixed_list$grids_snowdist_topographic,
+                                                     overview_annual)
+    year_data         <- year_results_list$year_data
+    overview_annual   <- year_results_list$overview_annual
+    
+  } else {
+    cat("\n\n============  DEFERRING simulation of year", paste0(year_data$year_cur, ", which has no mass balance measurements... ============\n"))
   }
-  
-  
-  #### . Extract mass balance results ####
-  year_data <- func_extract_year_massbalance(year_data,
-                                             run_params,
-                                             year_cur_params,
-                                             data_dhms,
-                                             data_dems)
-  
-  
-  #### . Post-process mass balance (correction in elevation bands, ELA/AAR, standardized over the measurement period) ####
-  year_data <- func_massbal_postprocess(year_data,
-                                        run_params,
-                                        year_cur_params,
-                                        data_dems)
-  
-  #### . Save to df_overview the overview values for the current year ####
-  df_overview <- func_save_overview_values(year_data,
-                                           df_overview)
-  
-  #### . Produce all plots for the year ####
-  # This creates a PDF file for the year
-  # and also adds a plot to the overview
-  # plots, which are saved to PDF at the end.
-  plot_year_result <- func_plot_year(year_data,
-                                     run_params,
-                                     data_dems,
-                                     data_outlines,
-                                     overview_areaplots)
-  
-  overview_areaplots          <- plot_year_result[["overview_areaplots"]]
-  year_data$ele_bands_plot_df <- plot_year_result[["ele_bands_plot_df"]]
-
-  #### . Write annual model output to files ####
-  overview_daily_data <- func_write_year_output(year_data,
-                                                run_params,
-                                                data_dems,
-                                                overview_daily_data)
-  
-
-  #### . Produce daily plots (only if asked to do so) ####
-  if (run_params$plot_daily_maps) {
-    func_plot_daily_maps(year_data,
-                         run_params,
-                         data_surftype,
-                         data_dems,
-                         data_outlines)
-  }
-  
-  if (max(abs((extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear") - year_data$massbal_annual_meas_cur$massbal_standardized) - (year_data$mod_output_annual_cur$stakes_mb_mod - year_data$mod_output_annual_cur$stakes_mb_meas))) > 1) {
-    stop("ERROR: the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear filtering of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.")
-  }
-  
 }
 
-cat("\n** Main loop has finished. **\n")
+message("\n** Finished simulation of all years with mass balance measurements. **")
+
+# Here: compute mean of optimized parameters, to use on nodata years.
+run_params <- func_compute_mean_optimized_params(run_params, overview_annual)
+
+
+# Check if there are any years without mass balance
+# measurements, these are still not simulated.
+year_ids_todo <- which(!overview_annual$summary_df$year_has_data)
+years_todo_n  <- length(year_ids_todo)
+if (length(year_ids_todo) > 0) {
+  
+  message("\n** Processing ", years_todo_n, " year(s) without mass balance measurements... **")
+  
+  for (year_id in year_ids_todo) {
+    
+    #### . Select current year, parameters, data ####
+    # Select data from the current year.
+    # NOTE: list year_data contains the indices of the
+    # data grids, not copies of the grids themselves.
+    year_data_prev <- year_data # Save a copy, we need it e.g. to model based on the previous year's result.
+    year_data <- func_select_year_data(data_dhms, data_dems, data_surftype, data_outlines,
+                                       grids_fixed_list,
+                                       data_massbalance_annual, data_massbalance_winter,
+                                       year_id, run_params)
+    
+    cat("\n\n\n\n============  STARTING NEW YEAR:", year_data$year_cur, " ============\n")
+    
+    year_cur_params <- func_set_year_params(year_data, run_params)
+    
+    # ==============================
+    # ============================== TODO: implement actual simulation of year without data.
+    # ============================== 
+  }
+}
+  
+
+
+message("\n** All simulation loops have finished. **")
+
 #### Plot and write overview ####
-func_plot_write_overview(df_overview,
-                         overview_daily_data,
+func_plot_write_overview(overview_annual,
                          run_params)
 
 

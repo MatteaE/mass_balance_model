@@ -7,9 +7,16 @@
 #                 avalanches, topographic snow distribution and variable ice albedo.              #
 ###################################################################################################
 
-# NOTE: this code is source()'d as part of main.R.
-# We put code here just to make it more organized.
+func_compute_all_fixed_grids <- function(run_params,
+                                         data_dhms,
+                                         data_dems) {
 
-grids_avalanche            <-   func_compute_avalanche_fixed_grids(run_params, data_dhms)
-grids_snowdist_topographic <-   func_compute_snowdist_topographic(run_params, data_dhms, data_dems)
-grids_ice_albedo_fact      <-   func_compute_variable_ice_albedo(run_params, data_dhms)
+  grids_fixed_list <- list()
+  
+  grids_fixed_list$grids_avalanche            <-   func_compute_avalanche_fixed_grids(run_params, data_dhms)
+  grids_fixed_list$grids_snowdist_topographic <-   func_compute_snowdist_topographic(run_params, data_dhms, data_dems)
+  grids_fixed_list$grids_ice_albedo_fact      <-   func_compute_variable_ice_albedo(run_params, data_dhms)
+
+return(grids_fixed_list)
+
+}

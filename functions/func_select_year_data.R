@@ -9,7 +9,7 @@
 
 
 func_select_year_data <- function(data_dhms, data_dems, data_surftype, data_outlines,
-                                  grids_avalanche, grids_snowdist_topographic, grids_ice_albedo_fact,
+                                  grids_fixed_list,
                                   data_massbalance_annual, data_massbalance_winter,
                                   year_id, run_params) {
                                   
@@ -33,15 +33,15 @@ func_select_year_data <- function(data_dhms, data_dems, data_surftype, data_outl
   
   # Extract avalanche grids for this year
   # (pre-computed before the start of the loop).
-  year_data$grids_avalanche_cur             <- sapply(grids_avalanche, `[[`, year_data$dhm_grid_id)
+  year_data$grids_avalanche_cur             <- sapply(grids_fixed_list$grids_avalanche, `[[`, year_data$dhm_grid_id)
   
   # Compute reduced-intensity base topographic distribution of solid precipitation.
-  dist_topographic_values                   <- getValues(grids_snowdist_topographic[[year_data$dem_grid_id]])
+  dist_topographic_values                   <- getValues(grids_fixed_list$grids_snowdist_topographic[[year_data$dem_grid_id]])
   dist_topographic_values_mean              <- mean(dist_topographic_values)
   year_data$dist_topographic_values_red     <- dist_topographic_values_mean + run_params$accum_snow_dist_red_fac * (dist_topographic_values - dist_topographic_values_mean)
   
   # Extract ice albedo factor grid for this year.
-  year_data$grid_ice_albedo_fact_cur_values <- getValues(grids_ice_albedo_fact[[year_data$dhm_grid_id]])
+  year_data$grid_ice_albedo_fact_cur_values <- getValues(grids_fixed_list$grids_ice_albedo_fact[[year_data$dhm_grid_id]])
   
   # Select mass balance measurements of the current year.
   massbal_annual_ids                        <- func_select_year_mb_measurements(data_massbalance_annual, year_data$year_cur)
@@ -50,6 +50,11 @@ func_select_year_data <- function(data_dhms, data_dems, data_surftype, data_outl
   year_data$nstakes_winter                  <- length(massbal_winter_ids)
   year_data$massbal_annual_meas_cur         <- data_massbalance_annual[massbal_annual_ids,] # Empty if we have no annual stakes for the year.
   year_data$massbal_winter_meas_cur         <- data_massbalance_winter[massbal_winter_ids,] # Empty if we have no winter stakes for the year.
+  
+  # Add DEM elevation of the stakes, we use it
+  # instead of reported stake elevation.
+  year_data$massbal_annual_meas_cur$z_dem   <- extract(data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), method = "bilinear")
+  
   
   return(year_data)
 }

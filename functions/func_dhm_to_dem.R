@@ -18,11 +18,11 @@ func_dhm_to_dem <- function(run_params,
                             data_dhms,
                             data_outlines) {
   
-  data_dems <- list(elevation = list(),
-                    grid_year_id = rep(NA, run_params$n_years),
-                    glacier_cell_ids = list(),
-                    no_glacier_cell_ids = list(),
-                    elevation_bands_ela = list(),
+  data_dems <- list(elevation            = list(),
+                    grid_year_id         = rep(NA, run_params$n_years),
+                    glacier_cell_ids     = list(),
+                    no_glacier_cell_ids  = list(),
+                    elevation_bands_ela  = list(),
                     elevation_bands_plot = list())
 
   # Algorithm:
@@ -36,10 +36,12 @@ func_dhm_to_dem <- function(run_params,
   #     pre-compute valid glaciated cells and elevation bands.
   # NOTE: this case is general (i.e. it also accounts for the previous ones)
   # so we can implement just this one.
-  dhm_outline_combinations <- paste(data_dhms$grid_year_id, data_outlines$outline_year_id)
+  dhm_outline_combinations        <- paste(data_dhms$grid_year_id, data_outlines$outline_year_id)
   dhm_outline_combinations_unique <- unique(dhm_outline_combinations)
-  data_dems$n_grids <- length(dhm_outline_combinations_unique)
-  data_dems$dhm_id <- rep(NA, data_dems$n_grids)
+  data_dems$n_grids               <- length(dhm_outline_combinations_unique)
+  data_dems$dhm_id                <- rep(NA, data_dems$n_grids)
+  # data_dems$gl_ele_max            <- rep(NA_real_, data_dems$n_grids)
+  # data_dems$gl_ele_min            <- rep(NA_real_, data_dems$n_grids)
   
   for (dem_id in 1:data_dems$n_grids) {
     
@@ -74,6 +76,11 @@ func_dhm_to_dem <- function(run_params,
     # We center them at extent/2 so that the band limits are nice.
     data_dems$elevation_bands_plot[[dem_id]] <- round((data_dems$elevation[[dem_id]] - run_params$ele_bands_plot_size/2) / run_params$ele_bands_plot_size) * run_params$ele_bands_plot_size + run_params$ele_bands_plot_size/2
       
+    
+    # Highest and lowest glacier points, used
+    # to automatically compute correction bands.
+    # data_dems$gl_ele_max[dem_id] <- max(dem_cur_values, na.rm = TRUE)
+    # data_dems$gl_ele_min[dem_id] <- min(dem_cur_values, na.rm = TRUE)
   }
   
   return(data_dems)

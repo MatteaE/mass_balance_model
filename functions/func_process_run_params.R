@@ -23,6 +23,8 @@ func_process_run_params <- function(run_params) {
   
   run_params$elevation_equal_threshold   <-   1e-3 # [m]: threshold for considering two elevation values equal when we look for problematic flat patches
   
+  run_params$ele_bands_auto_min_extent <- 50 # When automatically computing elevation bands for contour line correction, merge bands which are smaller than this vertical extent in meters.
+  
   run_params$model_avalanche_dates       <- format(as.Date(run_params$model_avalanche_dates, format = "%m/%d"), format = "%m/%d") # Add leading zeroes to single-digit values if needed.
   
   run_params$stakes_unknown_latest_start <- format(as.Date(run_params$stakes_unknown_latest_start, format = "%m/%d"), format = "%m/%d") # Same.

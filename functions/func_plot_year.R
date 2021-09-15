@@ -12,7 +12,7 @@ func_plot_year <- function(year_data,
                            run_params,
                            data_dems,
                            data_outlines,
-                           overview_areaplots) {
+                           areaplots_list) {
   
   cat("\n** Producing year plots... **\n")
   
@@ -66,8 +66,8 @@ func_plot_year <- function(year_data,
   
   # Save the plot of the final mass balance of the year (without single stake values).
   # We will put it in a PDF file with 1 plot per year (overview_areaplot.pdf).
-  overview_areaplots[[year_id]] <- plots_year[[4]]
+  areaplots_list[[year_id]] <- plots_year[[4]]
   
-  return(list(overview_areaplots = overview_areaplots,
+  return(list(areaplots_list     = areaplots_list,
               ele_bands_plot_df  = ele_bands_plot_df))
 }

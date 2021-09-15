@@ -71,3 +71,6 @@ if (boot_file_read) {
   data_massbalance_annual    <-   func_load_massbalance_measurements(run_params, "annual")
   data_massbalance_winter    <-   func_load_massbalance_measurements(run_params, "winter")
 }
+
+# Memory cleanup.
+invisible(gc())
