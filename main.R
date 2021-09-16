@@ -70,18 +70,18 @@ for (year_id in 1:run_params$n_years) {
     
     year_cur_params <- func_set_year_params(year_data, run_params)
 
-    year_results_list <- func_process_year_with_data(year_data,
-                                                     year_data_prev,
-                                                     run_params,
-                                                     year_cur_params,
-                                                     data_dhms,
-                                                     data_dems,
-                                                     data_surftype,
-                                                     data_radiation,
-                                                     data_outlines,
-                                                     data_weather,
-                                                     grids_fixed_list$grids_snowdist_topographic,
-                                                     overview_annual)
+    year_results_list <- func_process_year(year_data,
+                                           year_data_prev,
+                                           run_params,
+                                           year_cur_params,
+                                           data_dhms,
+                                           data_dems,
+                                           data_surftype,
+                                           data_radiation,
+                                           data_outlines,
+                                           data_weather,
+                                           grids_fixed_list$grids_snowdist_topographic,
+                                           overview_annual)
     year_data         <- year_results_list$year_data
     overview_annual   <- year_results_list$overview_annual
     

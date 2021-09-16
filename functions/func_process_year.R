@@ -4,21 +4,21 @@
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
 #                 This file contains the function (called within the main loop) to entirely       #
-#                 process one year which has mass balance measurements.                           #
+#                 process one year (either having or missing the mass balabnce measurements).     #
 ###################################################################################################  
 
-func_process_year_with_data <- function(year_data,
-                                        year_data_prev,
-                                        run_params,
-                                        year_cur_params,
-                                        data_dhms,
-                                        data_dems,
-                                        data_surftype,
-                                        data_radiation,
-                                        data_outlines,
-                                        data_weather,
-                                        grids_snowdist_topographic,
-                                        overview_annual) {
+func_process_year <- function(year_data,
+                              year_data_prev,
+                              run_params,
+                              year_cur_params,
+                              data_dhms,
+                              data_dems,
+                              data_surftype,
+                              data_radiation,
+                              data_outlines,
+                              data_weather,
+                              grids_snowdist_topographic,
+                              overview_annual) {
   
   # Find stake offsets on the grid.
   year_data <- func_find_stake_dxdy(year_data,
