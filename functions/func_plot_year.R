@@ -50,10 +50,12 @@ func_plot_year <- function(year_data,
   
   
   #### . PLOT MODELED SERIES OF EACH STAKE ####
-  cat("  Mass balance at the stakes...\n")
-  plots_stakes <- func_plot_stakes(year_data)
-  for (stakes_page_id in 1:length(plots_stakes)) {
-    plots_year <- append(plots_year, list(plots_stakes[[stakes_page_id]]))
+  if (year_data$nstakes_annual > 0) {
+    cat("  Mass balance at the stakes...\n")
+    plots_stakes <- func_plot_stakes(year_data)
+    for (stakes_page_id in 1:length(plots_stakes)) {
+      plots_year <- append(plots_year, list(plots_stakes[[stakes_page_id]]))
+    }
   }
   
   # Write multi-page PDF for the current year.
@@ -64,9 +66,9 @@ func_plot_year <- function(year_data,
                             width = 21 * run_params$size_mult,
                             height = 29.7 * run_params$size_mult))
   
-  # Save the plot of the final mass balance of the year (without single stake values).
+  # Save the plot of the hydrological mass balance of the year (without single stake values).
   # We will put it in a PDF file with 1 plot per year (overview_areaplot.pdf).
-  areaplots_list[[year_id]] <- plots_year[[4]]
+  areaplots_list[[year_id]] <- plots_year[[1]]
   
   return(list(areaplots_list     = areaplots_list,
               ele_bands_plot_df  = ele_bands_plot_df))

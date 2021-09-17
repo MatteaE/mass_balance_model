@@ -21,9 +21,11 @@ func_process_year <- function(year_data,
                               overview_annual) {
   
   # Find stake offsets on the grid.
-  year_data <- func_find_stake_dxdy(year_data,
-                                    data_dhms,
-                                    run_params)
+  if (year_data$nstakes_annual > 0) {
+    year_data <- func_find_stake_dxdy(year_data,
+                                      data_dhms,
+                                      run_params)
+  }
   
   # Setup grids from winter snow probes, if available. Also set flag year_data$process_winter to TRUE/FALSE.
   year_data <- func_setup_winter_probes_dist(year_data,
@@ -55,7 +57,11 @@ func_process_year <- function(year_data,
                                    data_radiation,
                                    data_weather)
   
+  
+  
   #### .  Simulate annual mass balance ####
+  # If we have mass balance data, this runs the optimization.
+  # Else just a single simulation.
   year_data <- func_process_annual(year_data,
                                    run_params,
                                    year_cur_params,
@@ -79,7 +85,6 @@ func_process_year <- function(year_data,
                                              year_cur_params,
                                              data_dhms,
                                              data_dems)
-  
   
   #### . Post-process mass balance (correction in elevation bands, ELA/AAR, standardized over the measurement period) ####
   year_data <- func_massbal_postprocess(year_data,
@@ -111,7 +116,6 @@ func_process_year <- function(year_data,
                                                             data_dems,
                                                             overview_annual$daily_data_list)
   
-  
   #### . Produce daily plots (only if asked to do so) ####
   if (run_params$plot_daily_maps) {
     func_plot_daily_maps(year_data,
@@ -121,10 +125,9 @@ func_process_year <- function(year_data,
                          data_outlines)
   }
   
-  if (max(abs((extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear") - year_data$massbal_annual_meas_cur$massbal_standardized) - (year_data$mod_output_annual_cur$stakes_mb_mod - year_data$mod_output_annual_cur$stakes_mb_meas))) > 1) {
+  if ((year_data$nstakes_annual > 0) && (max(abs((extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear") - year_data$massbal_annual_meas_cur$massbal_standardized) - (year_data$mod_output_annual_cur$stakes_mb_mod - year_data$mod_output_annual_cur$stakes_mb_meas))) > 1)) {
     stop("ERROR: the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear filtering of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.")
   }
-  
   
   return(list(year_data = year_data,
               overview_annual = overview_annual))

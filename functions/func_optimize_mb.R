@@ -67,10 +67,7 @@ func_optim_worker <- function(optimization_period, corr_fact_cur, corr_fact_wint
     
   }
   
-  # We already set this in the global environment
-  # so that we don't have to re-run the model with
-  # the optimized parameters to get the actual
-  # model output.
+  # The model is run here.
   mod_output_cur <- func_run_simulation_single(corrections_cur,
                                                run_params, year_cur_params,
                                                dhm_grid_id, dem_grid_id, surftype_grid_id,
@@ -92,10 +89,8 @@ func_optim_worker <- function(optimization_period, corr_fact_cur, corr_fact_wint
 # corr_fact_winter is considered only during the annual optimization,
 # to use the correction previously determined for winter precipitation.
 func_optimize_mb <- function(optimization_period, corr_fact_winter,
-                             run_params, year_cur_params,
-                             year_data,
-                             data_dhms, data_dems, data_surftype, data_radiation,
-                             nstakes, model_days_n, massbal_meas_cur, stakes_cells) {
+                             run_params, year_cur_params, year_data,
+                             data_dhms, data_dems, data_surftype, data_radiation) {
   
   cat("\n**", year_data$year_cur, optimization_period, "mass balance optimization **\n")
   cat("\n* Optimization run # 1\n")

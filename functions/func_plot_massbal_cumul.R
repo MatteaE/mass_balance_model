@@ -45,8 +45,11 @@ func_plot_massbal_cumul <- function(year_data,
   
   day_id_hydro1 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == paste0(format(massbal_cumul_df$date[1], "%Y"), "-10-01"))] # day_id of the hydrological year start.
   day_id_hydro2 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == paste0(as.integer(format(massbal_cumul_df$date[1], "%Y")) + 1, "-09-30"))] # day_id of the hydrological year start.
-  day_id_meas1 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == min(year_data$massbal_annual_meas_cur$start_date, na.rm = T))] # day_id of the first annual stake start.
-  day_id_meas2 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == max(year_data$massbal_annual_meas_cur$end_date, na.rm = T))] # day_id of the last annual stake end.
+  
+  if (year_data$nstakes_annual > 0) {
+    day_id_meas1 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == min(year_data$massbal_annual_meas_cur$start_date, na.rm = T))] # day_id of the first annual stake start.
+    day_id_meas2 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == max(year_data$massbal_annual_meas_cur$end_date, na.rm = T))] # day_id of the last annual stake end.
+  }
   
   if (year_data$process_winter) {
     day_id_meas1_winter <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == min(year_data$massbal_winter_meas_cur$start_date, na.rm = T))] # day_id of the first winter stake start.
@@ -66,7 +69,7 @@ func_plot_massbal_cumul <- function(year_data,
     geom_hline(yintercept = 0, linetype = "dashed", size = 0.5) +
     geom_vline(xintercept = 0, linetype = "longdash", size = 0.5) +
     geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", size = 0.5, color = "#0000FF") +
-    geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF") +
+    {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF")} +
     {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", size = 0.5, color = "#FF00FF")} +
     geom_line(aes(x = day_id, y = mb / 1e3), size = 0.7) +
     # geom_vline(xintercept = c(massbal_cumul_df$day_id[months_labels_ids] - 14, massbal_cumul_df$day_id[months_labels_ids[length(months_labels_ids)]] + 16)) +
@@ -82,7 +85,7 @@ func_plot_massbal_cumul <- function(year_data,
     geom_hline(yintercept = 0, linetype = "dashed", size = 0.5) +
     geom_vline(xintercept = 0, linetype = "longdash", size = 0.5) +
     geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", size = 0.5, color = "#0000FF") +
-    geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF") +
+    {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF")} +
     {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", size = 0.5, color = "#FF00FF")} +
     geom_line(aes(x = day_id, y = mb / 1e3), size = 0.7) +
     geom_line(aes(x = day_id, y = -melt / 1e3), color = "#FF0000", size = 0.7) +

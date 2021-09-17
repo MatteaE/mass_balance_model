@@ -15,7 +15,9 @@ func_setup_winter_probes_dist <- function(year_data,
   
   # Should we make a winter run to optimize the precipitation correction?
   # Only if we have some measurements of winter snow cover, else we can't.
-  year_data$process_winter <- (year_data$nstakes_winter > 0)
+  # We also disable this when we don't have annual stakes, we don't support
+  # having winter measurements only.
+  year_data$process_winter <- (year_data$nstakes_winter > 0) && ((year_data$nstakes_annual > 0))
   
   if (year_data$process_winter) {
     dist_probes_idw                 <- func_snow_probes_idw(run_params, year_data$massbal_winter_meas_cur, data_dhms)

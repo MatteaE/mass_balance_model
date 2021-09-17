@@ -37,12 +37,14 @@ func_extract_massbal_maps_annual <- function(year_data,
   # measperiod refers to the period
   # between the earliest annual stake
   # start and the latest annual stake end.
-  id_measperiod_start <- min(year_data$mod_output_annual_cur$stakes_start_ids_corr)
-  id_measperiod_end   <- max(year_data$mod_output_annual_cur$stakes_end_ids)
-  massbal_measperiod_start_values <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_measperiod_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
-  massbal_measperiod_end_values   <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_measperiod_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
-  massbal_measperiod_map <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_measperiod_end_values - massbal_measperiod_start_values)
-  massbal_measperiod_map_masked <- mask(massbal_measperiod_map, data_dems$elevation[[year_data$dem_grid_id]])
+  if (year_data$nstakes_annual > 0) {
+    id_measperiod_start <- min(year_data$mod_output_annual_cur$stakes_start_ids_corr)
+    id_measperiod_end   <- max(year_data$mod_output_annual_cur$stakes_end_ids)
+    massbal_measperiod_start_values <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_measperiod_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
+    massbal_measperiod_end_values   <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_measperiod_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
+    massbal_measperiod_map <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_measperiod_end_values - massbal_measperiod_start_values)
+    massbal_measperiod_map_masked <- mask(massbal_measperiod_map, data_dems$elevation[[year_data$dem_grid_id]])
+  }
   
   id_fixed_start <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$fixed_annual_start)
   id_fixed_end <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$fixed_annual_end)
@@ -51,14 +53,23 @@ func_extract_massbal_maps_annual <- function(year_data,
   massbal_fixed_map <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_fixed_end_values - massbal_fixed_start_values)
   massbal_fixed_map_masked <- mask(massbal_fixed_map, data_dems$elevation[[year_data$dem_grid_id]])
   
+
+  # We can't use ifelse() with rasters!
   massbal_maps <- list(hydro       = massbal_hydro_map_masked,
-                       meas_period = massbal_measperiod_map_masked,
+                       # meas_period = NA,
                        fixed       = massbal_fixed_map_masked)
-  
-  massbal_maps_out <- list(massbal_maps    = massbal_maps,
-                           meas_period     = year_data$weather_series_annual_cur$timestamp[c(id_measperiod_start, id_measperiod_end)],
-                           meas_period_ids = c(id_measperiod_start, id_measperiod_end))
-  
+  if (year_data$nstakes_annual > 0) {
+    massbal_maps$meas_period <- massbal_measperiod_map_masked
+  }
+
+  massbal_maps_out <- list(massbal_maps    = massbal_maps)
+                           # meas_period     = NA,
+                           # meas_period_ids = NA)
+  if (year_data$nstakes_annual > 0) {
+    massbal_maps_out$meas_period <- year_data$weather_series_annual_cur$timestamp[c(id_measperiod_start, id_measperiod_end)]
+    massbal_maps_out$meas_period_ids <- c(id_measperiod_start, id_measperiod_end)
+  }
+
   return(massbal_maps_out)
   
 }

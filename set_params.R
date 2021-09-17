@@ -139,6 +139,6 @@ run_params <- list(
   
   #### MODELED YEARS choice ####
   first_year                   =   2017,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   2020                          # Last modeled year (same as previous comment)
+  last_year                    =   2018                          # Last modeled year (same as previous comment)
   
 )

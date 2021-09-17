@@ -15,7 +15,9 @@ func_plot_massbal_vs_elevation <- function(year_data,
                                            run_params,
                                            data_dems) {
   
-  mb_meas_period_corr_values <- getValues(year_data$massbal_annual_maps$meas_period_corr)
+  if (year_data$nstakes_annual > 0) {
+    mb_meas_period_corr_values <- getValues(year_data$massbal_annual_maps$meas_period_corr)
+  }
   
   plots_mb_vs_ele <- list()
   
@@ -37,8 +39,10 @@ func_plot_massbal_vs_elevation <- function(year_data,
   for (band_id in 1:length(ele_bands_plot_df[,1])) {
     band_cell_ids                                  <- which(ele_bands_plot_values == ele_bands_plot_df$ele[band_id])
     ele_bands_plot_df$ncells[band_id]              <- length(band_cell_ids)
-    ele_bands_plot_df$mb_annual_meas_corr[band_id] <- mean(mb_meas_period_corr_values[band_cell_ids])
-    ele_bands_plot_df$mb_annual_meas[band_id]      <- mean(getValues(year_data$massbal_annual_maps$meas_period)[band_cell_ids])
+    if (year_data$nstakes_annual > 0) {
+      ele_bands_plot_df$mb_annual_meas_corr[band_id] <- mean(mb_meas_period_corr_values[band_cell_ids])
+      ele_bands_plot_df$mb_annual_meas[band_id]      <- mean(getValues(year_data$massbal_annual_maps$meas_period)[band_cell_ids])
+    }
     ele_bands_plot_df$mb_annual_hydro[band_id]     <- mean(getValues(year_data$massbal_annual_maps$hydro)[band_cell_ids])
     ele_bands_plot_df$mb_annual_fixed[band_id]     <- mean(getValues(year_data$massbal_annual_maps$fixed)[band_cell_ids])
     ele_bands_plot_df$mb_winter_fixed[band_id]     <- mean(getValues(year_data$massbal_winter_maps$fixed)[band_cell_ids])
@@ -97,45 +101,48 @@ func_plot_massbal_vs_elevation <- function(year_data,
   
   
   #### Plot #2: scatterplot of (uncorrected) mass balance over the measurement period, vs elevation ####
-  # Also the stake measurements, **standardized over the measurement period**.
-  # The reported BIAS and RMS are computed over the whole measurement period,
-  # comparing the stake standardized mass balance to the model result over the
-  # measurement period. BIAS and RMS are the same as over each individual stake
-  # period, since stake standardization uses the model output which by definition
-  # cannot add BIAS or RMS w.r.t. the model output itself.
-  df_bias_rms <- data.frame(meas = year_data$massbal_annual_meas_cur$massbal_standardized/1e3,
-                            mod = extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear") / 1e3)
-  stakes_bias <- mean(df_bias_rms$mod - df_bias_rms$meas)
-  stakes_rms <- sqrt(mean((df_bias_rms$mod - df_bias_rms$meas)^2))
-  
-  stakes_mod_massbal_meas_period <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[2],] - year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[1],]
-  
-  # This data.frame contains only the mass balance values on glaciated cells.
-  df_scatterplot <- data.frame(ele = data_dems$elevation[[year_data$dem_grid_id]][data_dems$glacier_cell_ids[[year_data$dem_grid_id]]],
-                               mb = getValues(year_data$massbal_annual_maps$meas_period)[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]])
-
-  df_stakes <- data.frame(z    = year_data$massbal_annual_meas_cur$z,
-                          meas = year_data$massbal_annual_meas_cur$massbal_standardized,
-                          mod  = stakes_mod_massbal_meas_period)
-  
-  theme_scatterplot_ele <- theme_bw(base_size = base_size) +
-                           theme(text = element_text(face = "bold"),
-                                 panel.grid = element_blank())
-
-  plots_mb_vs_ele[[2]] <- ggplot(df_scatterplot) +
-    annotation_custom(grobTree(textGrob(paste0("Bias: ", sprintf("%+.3f", stakes_bias), " m w.e."), x=0.02, y = 0.95, hjust = 0,
-                                        gp=gpar(fontsize = base_size, fontface="bold")))) +
-    annotation_custom(grobTree(textGrob(paste0("RMS: ", sprintf("%.3f", stakes_rms), " m w.e."), x=0.02, y = 0.87, hjust = 0,
-                                        gp=gpar(fontsize = base_size, fontface="bold")))) +
-    geom_point(aes(x = ele, y = mb/1e3), color = "#FF0000", size = 0.5, stroke = 0) +
-    geom_point(data = df_stakes, aes(x = z, y = meas/1e3), shape = 3, stroke = 1.5, size = 0) +
-    geom_segment(data = df_stakes, aes(x = z, xend = z, y = meas/1e3, yend = mod/1e3)) +
-    coord_flip() +
-    scale_x_continuous(breaks = pretty(df_scatterplot$ele), expand = expansion(mult = 0.05)) +
-    scale_y_continuous(expand = expansion(mult = 0.05)) +
-    xlab("Elevation [m a.s.l.]") +
-    ylab("Mass balance [m w.e.]") +
-    theme_scatterplot_ele
+  # Do this only if we have stake measurements, else it's useless.
+  if (year_data$nstakes_annual > 0) {
+    # Also the stake measurements, **standardized over the measurement period**.
+    # The reported BIAS and RMS are computed over the whole measurement period,
+    # comparing the stake standardized mass balance to the model result over the
+    # measurement period. BIAS and RMS are the same as over each individual stake
+    # period, since stake standardization uses the model output which by definition
+    # cannot add BIAS or RMS w.r.t. the model output itself.
+    df_bias_rms <- data.frame(meas = year_data$massbal_annual_meas_cur$massbal_standardized/1e3,
+                              mod = extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear") / 1e3)
+    stakes_bias <- mean(df_bias_rms$mod - df_bias_rms$meas)
+    stakes_rms <- sqrt(mean((df_bias_rms$mod - df_bias_rms$meas)^2))
+    
+    stakes_mod_massbal_meas_period <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[2],] - year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[1],]
+    
+    # This data.frame contains only the mass balance values on glaciated cells.
+    df_scatterplot <- data.frame(ele = data_dems$elevation[[year_data$dem_grid_id]][data_dems$glacier_cell_ids[[year_data$dem_grid_id]]],
+                                 mb = getValues(year_data$massbal_annual_maps$meas_period)[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]])
+    
+    df_stakes <- data.frame(z    = year_data$massbal_annual_meas_cur$z,
+                            meas = year_data$massbal_annual_meas_cur$massbal_standardized,
+                            mod  = stakes_mod_massbal_meas_period)
+    
+    theme_scatterplot_ele <- theme_bw(base_size = base_size) +
+      theme(text = element_text(face = "bold"),
+            panel.grid = element_blank())
+    
+    plots_mb_vs_ele[[2]] <- ggplot(df_scatterplot) +
+      annotation_custom(grobTree(textGrob(paste0("Bias: ", sprintf("%+.3f", stakes_bias), " m w.e."), x=0.02, y = 0.95, hjust = 0,
+                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
+      annotation_custom(grobTree(textGrob(paste0("RMS: ", sprintf("%.3f", stakes_rms), " m w.e."), x=0.02, y = 0.87, hjust = 0,
+                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
+      geom_point(aes(x = ele, y = mb/1e3), color = "#FF0000", size = 0.5, stroke = 0) +
+      geom_point(data = df_stakes, aes(x = z, y = meas/1e3), shape = 3, stroke = 1.5, size = 0) +
+      geom_segment(data = df_stakes, aes(x = z, xend = z, y = meas/1e3, yend = mod/1e3)) +
+      coord_flip() +
+      scale_x_continuous(breaks = pretty(df_scatterplot$ele), expand = expansion(mult = 0.05)) +
+      scale_y_continuous(expand = expansion(mult = 0.05)) +
+      xlab("Elevation [m a.s.l.]") +
+      ylab("Mass balance [m w.e.]") +
+      theme_scatterplot_ele
+  }
   
   
   plots_mb_vs_ele_out <- plot_grid(plotlist = plots_mb_vs_ele, align = "hv", ncol = 1, nrow = 2)

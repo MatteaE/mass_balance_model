@@ -122,7 +122,19 @@ if (length(year_ids_todo) > 0) {
     
     # ==============================
     # ============================== TODO: implement actual simulation of year without data.
-    # ============================== 
+    # ==============================
+    year_results_list <- func_process_year(year_data,
+                                           year_data_prev,
+                                           run_params,
+                                           year_cur_params,
+                                           data_dhms,
+                                           data_dems,
+                                           data_surftype,
+                                           data_radiation,
+                                           data_outlines,
+                                           data_weather,
+                                           grids_fixed_list$grids_snowdist_topographic,
+                                           overview_annual)
   }
 }
   

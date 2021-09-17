@@ -18,26 +18,27 @@ func_massbal_postprocess <- function(year_data,
                                      data_dems) {
   
   #### Correct mass balance bias according to user-defined elevation bands ####
-  year_data$massbal_annual_maps$meas_period_corr <- func_correct_massbal_elebands(year_data,
-                                                                                  year_cur_params,
-                                                                                  data_dems)
+  if (year_data$nstakes_annual > 0) {
+    year_data$massbal_annual_maps$meas_period_corr <- func_correct_massbal_elebands(year_data,
+                                                                                    year_cur_params,
+                                                                                    data_dems)
+  }
   
   # Compute time series of glacier-wide mean values.
   year_data$massbal_annual_values <- sapply(year_data$massbal_annual_maps, cellStats, stat = "mean", na.rm = TRUE)
   year_data$massbal_winter_values <- sapply(year_data$massbal_winter_maps, cellStats, stat = "mean", na.rm = TRUE)
   
-  # Extract the grid values of the "final" mass balance, since we will use them several times below.
-  year_data$mb_meas_period_corr_values <- getValues(year_data$massbal_annual_maps$meas_period_corr)
-  
-  # Compute time series of glacier-wide mass balance,
-  # including the bias correction in elevation bands.
-  # We assign the correction to the melt component,
-  # accumulation stays the same.
-  mb_band_bias <- year_data$massbal_annual_values[["meas_period"]] - year_data$massbal_annual_values[["meas_period_corr"]]
-  mb_band_corr_fact <- (year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[2]] - year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[1]] + mb_band_bias) / (year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[2]] - year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[1]])
-  year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr <- year_data$mod_output_annual_cur$gl_melt_cumul * mb_band_corr_fact
-  year_data$mod_output_annual_cur$gl_massbal_cumul_bandcorr <- year_data$mod_output_annual_cur$gl_accum_cumul - year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr
-  
+  if (year_data$nstakes_annual > 0) {
+    
+    # Compute time series of glacier-wide mass balance,
+    # including the bias correction in elevation bands.
+    # We assign the correction to the melt component,
+    # accumulation stays the same.
+    mb_band_bias <- year_data$massbal_annual_values[["meas_period"]] - year_data$massbal_annual_values[["meas_period_corr"]]
+    mb_band_corr_fact <- (year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[2]] - year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[1]] + mb_band_bias) / (year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[2]] - year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[1]])
+    year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr <- year_data$mod_output_annual_cur$gl_melt_cumul * mb_band_corr_fact
+    year_data$mod_output_annual_cur$gl_massbal_cumul_bandcorr <- year_data$mod_output_annual_cur$gl_accum_cumul - year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr
+  }
   
   # COMMENTED OUT: WE NO LONGER CORRECT GLACIER-WIDE MASS BALANCE WITH THE LOCAL BAND CORRECTION
   # AS THIS RE-INTRODUCES SOME GLOBAL BIAS. WE KEEP THE LOCAL BAND CORRECTION ONLY FOR DISTRIBUTED
@@ -59,7 +60,9 @@ func_massbal_postprocess <- function(year_data,
   
   
   #### Compute standardized stake measurements ####
-  year_data$massbal_annual_meas_cur$massbal_standardized <- func_compute_stake_mb_standardized(year_data)
+  if (year_data$nstakes_annual > 0) {
+    year_data$massbal_annual_meas_cur$massbal_standardized <- func_compute_stake_mb_standardized(year_data)
+  }
   
   return(year_data)
   
