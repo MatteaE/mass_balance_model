@@ -8,6 +8,8 @@
 
 func_load_weather <- function(run_params) {
   
+  cat("  Loading weather...\n")
+  
   filepath_weather <- file.path(run_params$dir_data_weather, run_params$filename_weather)
   
   data_raw <- read.table(filepath_weather, header = FALSE, skip = run_params$file_weather_nskip)

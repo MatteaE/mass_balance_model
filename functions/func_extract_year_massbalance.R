@@ -42,8 +42,8 @@ func_extract_year_massbalance <- function(year_data,
     year_data$massbal_winter_meas_period     <- massbal_winter_maps_data$meas_period
     year_data$massbal_winter_meas_period_ids <- massbal_winter_maps_data$meas_period_ids
   } else {
-    year_data$massbal_winter_meas_period     <- NA
-    year_data$massbal_winter_meas_period_ids <- NA
+    year_data$massbal_winter_meas_period     <- c(NA, NA)
+    year_data$massbal_winter_meas_period_ids <- c(NA, NA)
   }
   
   return(year_data)

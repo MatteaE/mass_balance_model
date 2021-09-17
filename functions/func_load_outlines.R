@@ -12,6 +12,8 @@
 
 func_load_outlines <- function(run_params) {
   
+  cat("  Loading glacier outlines...\n")
+  
   ext_str_raw <- str_split(run_params$filename_outline_suffix, fixed("."))[[1]]
   ext_str <- ext_str_raw[length(ext_str_raw)]
   if (ext_str == "xyzn") {

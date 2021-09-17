@@ -66,8 +66,11 @@ func_extract_massbal_maps_annual <- function(year_data,
                            # meas_period     = NA,
                            # meas_period_ids = NA)
   if (year_data$nstakes_annual > 0) {
-    massbal_maps_out$meas_period <- year_data$weather_series_annual_cur$timestamp[c(id_measperiod_start, id_measperiod_end)]
+    massbal_maps_out$meas_period     <- year_data$weather_series_annual_cur$timestamp[c(id_measperiod_start, id_measperiod_end)]
     massbal_maps_out$meas_period_ids <- c(id_measperiod_start, id_measperiod_end)
+  } else {
+    massbal_maps_out$meas_period     <- c(NA, NA)
+    massbal_maps_out$meas_period_ids <- c(NA, NA)
   }
 
   return(massbal_maps_out)

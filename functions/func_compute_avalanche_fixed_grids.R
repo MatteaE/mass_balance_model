@@ -88,9 +88,9 @@ func_compute_avalanche_fixed_grids <- function(run_params, data_dhms) {
     # Compute elevation difference to 4-neighbors.
     # Same indexing as above.
     avalanche$dz[[grid_id]][[1]] <- setValues(avalanche$elevation_proc[[grid_id]], c(rep(NA, run_params$grid_ncol), avalanche$elevation_proc[[grid_id]][2:run_params$grid_nrow,] - avalanche$elevation_proc[[grid_id]][1:(run_params$grid_nrow - 1),]))
-    avalanche$dz[[grid_id]][[2]] <- avalanche$dz[[1]][[grid_id]]
+    avalanche$dz[[grid_id]][[2]] <- avalanche$dz[[grid_id]][[1]]
     avalanche$dz[[grid_id]][[2]][,1:run_params$grid_ncol] <- c(rep(NA, run_params$grid_nrow), avalanche$elevation_proc[[grid_id]][,2:run_params$grid_ncol] - avalanche$elevation_proc[[grid_id]][,1:(run_params$grid_ncol - 1)]) # We cannot use setValues() here because we compute by column and setValues sets by row.
-    avalanche$dz[[grid_id]][[3]] <- avalanche$dz[[1]][[grid_id]]
+    avalanche$dz[[grid_id]][[3]] <- avalanche$dz[[grid_id]][[1]]
     avalanche$dz[[grid_id]][[3]][,1:run_params$grid_ncol] <- c(avalanche$elevation_proc[[grid_id]][,1:(run_params$grid_ncol - 1)] - avalanche$elevation_proc[[grid_id]][,2:run_params$grid_ncol], rep(NA, run_params$grid_nrow)) # We cannot use setValues() here because we compute by column and setValues sets by row.
     avalanche$dz[[grid_id]][[4]] <- setValues(avalanche$elevation_proc[[grid_id]], c(avalanche$elevation_proc[[grid_id]][1:(run_params$grid_nrow - 1),] - avalanche$elevation_proc[[grid_id]][2:run_params$grid_nrow,], rep(NA, run_params$grid_ncol)))
     

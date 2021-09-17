@@ -23,6 +23,8 @@
 
 func_load_elevation_grids <- function(run_params) {
   
+  cat("  Loading DHMs...\n")
+  
   # Here we will put the output.
   grids_out <- list(elevation = list(),
                     grid_year_id = rep(NA, run_params$n_years))
@@ -126,12 +128,8 @@ func_load_elevation_grids <- function(run_params) {
             
             # Here interpolate between the two grids of grid_year_earlier_id and grid_year_later_id.
             # This generates a new grid, which we put at the end of the grids_out$elevation list.
-            # grid_earlier <- raster(grid_paths[grid_year_earlier_id])
-            # grid_later <- raster(grid_paths[grid_year_later_id])
             grid_earlier <- grids_out$elevation[[grid_year_earlier_id]]
-            grid_later <- grids_out$elevation[[grid_year_later_id]]
-            # TODO: FIX THE TWO LINES ABOVE!! DON'T REOPEN RASTER, USE THE ONES WE HAVE (BECAUSE WE MAY HAVE FIXED THEIR ALIGNMENT!)
-            
+            grid_later   <- grids_out$elevation[[grid_year_later_id]]
             
             grid_interpolated <- grid_earlier + (grid_later - grid_earlier) * (year_cur - grid_year_earlier) / (grid_year_later - grid_year_earlier)
             crs(grid_interpolated) <- run_params$grids_crs

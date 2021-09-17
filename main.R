@@ -46,7 +46,7 @@ source(file.path("procedures", "pro_save_boot_files.R"))         # Save boot fil
 overview_annual <- func_setup_overview_annual(run_params)
 
 # Create output directory.
-dir.create(file.path(run_params$output_dirname, "annual_results"), recursive = TRUE)
+dir.create(file.path(run_params$output_dirname, "annual_results"), recursive = TRUE, showWarnings = FALSE)
 
 #### Main loop ####
 # Here year_data is a list which is gradually built and
@@ -95,7 +95,6 @@ message("\n** Finished simulation of all years with mass balance measurements. *
 # Here: compute mean of optimized parameters, to use on nodata years.
 run_params <- func_compute_mean_optimized_params(run_params, overview_annual)
 
-
 # Check if there are any years without mass balance
 # measurements, these are still not simulated.
 year_ids_todo <- which(!overview_annual$summary_df$year_has_data)
@@ -120,9 +119,6 @@ if (length(year_ids_todo) > 0) {
     
     year_cur_params <- func_set_year_params(year_data, run_params)
     
-    # ==============================
-    # ============================== TODO: implement actual simulation of year without data.
-    # ==============================
     year_results_list <- func_process_year(year_data,
                                            year_data_prev,
                                            run_params,
@@ -135,16 +131,15 @@ if (length(year_ids_todo) > 0) {
                                            data_weather,
                                            grids_fixed_list$grids_snowdist_topographic,
                                            overview_annual)
+    year_data         <- year_results_list$year_data
+    overview_annual   <- year_results_list$overview_annual
   }
 }
-  
-
 
 message("\n** All simulation loops have finished. **")
 
 #### Plot and write overview ####
 func_plot_write_overview(overview_annual,
                          run_params)
-
 
 message("\n============  All done! Model has finished succesfully.  ============\n")

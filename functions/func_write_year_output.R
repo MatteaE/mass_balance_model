@@ -75,7 +75,11 @@ func_write_year_output <- function(year_data,
   
   # Save some values which we will use for the overview plots.
   overview_daily_data$mb_series_all_dates[[year_id]]            <- model_annual_dates
-  overview_daily_data$mb_series_all_measperiod_dates[[year_id]] <- ifelse(year_data$nstakes_annual > 0, year_data$massbal_annual_meas_period, NA)
+  if(year_data$nstakes_annual > 0) {
+    overview_daily_data$mb_series_all_measperiod_dates[[year_id]] <- year_data$massbal_annual_meas_period
+  } else {
+    overview_daily_data$mb_series_all_measperiod_dates[[year_id]] <- NA
+  }
   overview_daily_data$mb_series_all_raw[[year_id]]              <- year_data$mod_output_annual_cur$gl_massbal_cumul
   
   return(overview_daily_data)

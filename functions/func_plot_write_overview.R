@@ -26,30 +26,30 @@ func_plot_write_overview <- function(overview_annual,
   # Different treatment if we have a single modeled year, else the data.frame is built wrong.
   if (nrow(overview_annual$summary_df) > 1) {
     overview_annual$summary_df_out <- data.frame(year = overview_annual$summary_df$year,
-                                  apply(overview_annual$summary_df[,2:7], 2, sprintf, fmt="%.3f"),
-                                  overview_annual$summary_df[,8],
-                                  sprintf("%.1f", overview_annual$summary_df[,9]),
-                                  apply(overview_annual$summary_df[,10:13], 2, sprintf, fmt="%.3f"),
-                                  overview_annual$summary_df[,14],
-                                  sprintf("%.2f", overview_annual$summary_df[,15]))
+                                                 apply(overview_annual$summary_df[,2:7], 2, sprintf, fmt="%.3f"),
+                                                 overview_annual$summary_df[,8],
+                                                 sprintf("%.1f", overview_annual$summary_df[,9]),
+                                                 apply(overview_annual$summary_df[,10:13], 2, sprintf, fmt="%.3f"),
+                                                 overview_annual$summary_df[,14],
+                                                 sprintf("%.2f", overview_annual$summary_df[,15]))
   } else {
     overview_annual$summary_df_out <- data.frame(year = overview_annual$summary_df$year,
-                                  sprintf(overview_annual$summary_df[1,2], fmt="%.3f"),
-                                  sprintf(overview_annual$summary_df[1,3], fmt="%.3f"),
-                                  sprintf(overview_annual$summary_df[1,4], fmt="%.3f"),
-                                  sprintf(overview_annual$summary_df[1,5], fmt="%.3f"),
-                                  sprintf(overview_annual$summary_df[1,6], fmt="%.3f"),
-                                  sprintf(overview_annual$summary_df[1,7], fmt="%.3f"),
-                                  overview_annual$summary_df[,8],
-                                  sprintf(overview_annual$summary_df[1,9], fmt="%.1f"),
-                                  sprintf(overview_annual$summary_df[1,10], fmt="%.3f"),
-                                  sprintf(overview_annual$summary_df[1,11], fmt="%.3f"),
-                                  sprintf(overview_annual$summary_df[1,12], fmt="%.3f"),
-                                  sprintf(overview_annual$summary_df[1,13], fmt="%.3f"),
-                                  overview_annual$summary_df[,14],
-                                  sprintf(overview_annual$summary_df[1,15], fmt="%.2f"))
+                                                 sprintf(overview_annual$summary_df[1,2], fmt="%.3f"),
+                                                 sprintf(overview_annual$summary_df[1,3], fmt="%.3f"),
+                                                 sprintf(overview_annual$summary_df[1,4], fmt="%.3f"),
+                                                 sprintf(overview_annual$summary_df[1,5], fmt="%.3f"),
+                                                 sprintf(overview_annual$summary_df[1,6], fmt="%.3f"),
+                                                 sprintf(overview_annual$summary_df[1,7], fmt="%.3f"),
+                                                 overview_annual$summary_df[,8],
+                                                 sprintf(overview_annual$summary_df[1,9], fmt="%.1f"),
+                                                 sprintf(overview_annual$summary_df[1,10], fmt="%.3f"),
+                                                 sprintf(overview_annual$summary_df[1,11], fmt="%.3f"),
+                                                 sprintf(overview_annual$summary_df[1,12], fmt="%.3f"),
+                                                 sprintf(overview_annual$summary_df[1,13], fmt="%.3f"),
+                                                 overview_annual$summary_df[,14],
+                                                 sprintf(overview_annual$summary_df[1,15], fmt="%.2f"))
   }
-  names(overview_annual$summary_df_out) <- names(overview_annual$summary_df)[1:(nrow(overview_annual$summary_df)-2)]
+  names(overview_annual$summary_df_out) <- names(overview_annual$summary_df)[1:(ncol(overview_annual$summary_df)-2)]
   write.csv(overview_annual$summary_df_out,
             file.path(run_params$output_dirname, "overview.csv"),
             quote = FALSE,

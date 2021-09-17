@@ -6,45 +6,45 @@
 #                 This file contains the fixed parameter definitions for the model run.           #
 ###################################################################################################
 
-dir_data_base                <-   file.path("input", "barkrak")        # The base directory for all the data
+dir_data_base                <-   file.path("input", "pers")        # The base directory for all the data
 
 run_params <- list(
   
-  name_glacier                =    "barkrak",                    # Glacier name, used for output directory naming.
+  name_glacier                =    "pers",                    # Glacier name, used for output directory naming.
   
   #### INPUT-related parameters ####
   # Set input data paths.
   dir_data_weather             =   file.path(dir_data_base, "weather"),      # The weather series goes here
   dir_data_dhm                 =   file.path(dir_data_base, "dhm"),          # Path to the DHM(s) = elevation grids(s) (rectangular, to compute slopes and curvatures)
-  dir_data_surftype            =   file.path(dir_data_base, "surftype"),     # Path to the grids of surface type (snow/ice/firn/rock/debris) go here
+  dir_data_surftype            =   file.path(dir_data_base, "surface_type"),     # Path to the grids of surface type (snow/ice/firn/rock/debris) go here
   dir_data_outline             =   file.path(dir_data_base, "outline"),      # Path to the outlines
   dir_data_radiation           =   file.path(dir_data_base, "radiation"),    # Path to the grids of potential direct radiation (daily sums)
   dir_data_massbalance         =   file.path(dir_data_base, "massbalance"),  # The mass balance observations go here
-  dir_annual_params            =   file.path("input", "barkrak", "params"),     # The annual model parameter files go here
+  dir_annual_params            =   file.path("input", "pers", "params"),     # The annual model parameter files go here
   
   # Set filenames and input file properties.
-  filename_weather             =   "barkrak_barkrak_d.dat",      # File name of the weather series
-  file_weather_nskip           =   4,                            # [-]: number of lines to skip in the weather file
+  filename_weather             =   "pers_sils_d_proc.dat",      # File name of the weather series
+  file_weather_nskip           =   2,                            # [-]: number of lines to skip in the weather file
   
-  grids_crs                    =   32642,            # Reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
+  grids_crs                    =   21781,            # Reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
   
-  filename_dhm_prefix          =   "dhm_barkrak_",
-  filename_dhm_suffix          =   ".tif",                       # DHM name is <prefix><year><suffix>
-  dhm_years                    =   c(2015),                      # Years for which a DHM is available. These should be sorted in ascending order.
+  filename_dhm_prefix          =   "dhm_pers",
+  filename_dhm_suffix          =   ".grid",                       # DHM name is <prefix><year><suffix>
+  dhm_years                    =   c(2008,2015,2019),                      # Years for which a DHM is available. These should be sorted in ascending order.
   dhm_interpolate              =   TRUE,                        # [TRUE/FALSE]: should we use linear interpolation to compute each year's DHM?
   
-  filename_surftype_prefix     =   "surf_type_barkrak",
+  filename_surftype_prefix     =   "firn_pers",
   filename_surftype_suffix     =   ".grid",                      # Surface type filename is <prefix><year><suffix>
-  surftype_years               =   c(2015),                      # Years for which a surface type file is available. These whould be sorted in ascending order.
+  surftype_years               =   c(2008,2015,2019),                      # Years for which a surface type file is available. These whould be sorted in ascending order.
   
-  filename_outline_prefix      =   "barkrak",
+  filename_outline_prefix      =   "pers",
   filename_outline_suffix      =   "_gltot.xyzn",                # Outline name is <prefix><year><suffix>
-  outline_years                =   c(2015),                      # Years for which an outline is available.
+  outline_years                =   c(2008,2015,2019),                      # Years for which an outline is available.
   
   filename_radiation_prefix    =   "dir",
   filename_radiation_suffix    =   "24.grid",                    # Radiation files are called <prefix><doy><suffix> where <doy> is the day of year, zero-padded to length 3 (e.g. 001).
   
-  filename_massbalance_annual  =   "peg_barkrak_orig.dat",       # File name of the annual mass balance observations
+  filename_massbalance_annual  =   "peg_pers.dat",       # File name of the annual mass balance observations
   filename_massbalance_winter  =   "",                           # File name of the winter mass balance observations
   
   filename_params_prefix       =   "param_",
@@ -52,9 +52,9 @@ run_params <- list(
   
   
   #### WEATHER INPUT parameters ####
-  weather_aws_elevation        =   3463,                         # [m a.s.l.]: AWS elevation
+  weather_aws_elevation        =   1798,                         # [m a.s.l.]: AWS elevation
   weather_snowfall_temp        =   1.5,                          # [°C]: at this temperature precipitation is half rain, half snow. One degree above it is all rain, one degree below it is all snow (snow fraction is linearly interpolated).
-  weather_max_precip_ele       =   4000,                         # [m a.s.l.]: above this altitude, precipitation does not increase any more but becomes constant (cutoff).
+  weather_max_precip_ele       =   3800,                         # [m a.s.l.]: above this altitude, precipitation does not increase any more but becomes constant (cutoff).
   
   
   #### TOPOGRAPHICAL SNOW DISTRIBUTION-related parameters ####
@@ -62,7 +62,7 @@ run_params <- list(
   curvature_cutoff_fact        =   1.2,                          # [-]: multiplier for the curvature cutoff threshold at which the snow distribution is not further changed. The threshold is given by the smaller of the two curvature extremes (positive and negative) divided by this factor. Only values >  = 1 make sense.
   curvature_effect_limit       =   0.5,                          # [-]: maximum effect of curvature, i.e. the curvature multiplier will be within [1 ± curvature_effect_limit]. Only values between 0 and 1 make sense.
   
-  elevation_effect_threshold   =   3950,                         # [m]: elevation above which snow accumulation decreases (wind effect)
+  elevation_effect_threshold   =   3850,                         # [m]: elevation above which snow accumulation decreases (wind effect)
   elevation_effect_fact        =   1.0,                          # [-]: strength of snow accumulation decrease at very high altitude. Only values between 0 and 1 make sense. At 0 accumulation does not decrease, at 1 accumulation decreases to 0 at the highest point in the DHM.
   
   
@@ -77,7 +77,7 @@ run_params <- list(
   
   
   #### INITIAL SNOW COVER parameters ####
-  initial_snowline_elevation   =   3750,                         # [m]: initial snow line elevation, at the beginning of each simulated year.
+  initial_snowline_elevation   =   3650,                         # [m]: initial snow line elevation, at the beginning of each simulated year.
   initial_snow_gradient        =   200,                           # [mm w.e. (100 m)-1]: increase of the initial snow amount for every 100 m elevation above the snow line.
   initial_snow_dist_red_fac    =   0.5,                          # [-]: reduction factor to decrease the importance of the snow distribution variability (all components except winter snow probes), for the computed initial snow cover (of each year). 0 means uniform snow distribution, 1 means no reduction.
   initial_snow_dist_from_model =   FALSE,                         # [TRUE/FALSE]: if TRUE, use the simulated SWE of the previous year as starting condition for the simulation. If FALSE, compute initial SWE from topography and given parameters. The first simulated year always uses a computed initial SWE since there is no previous modeled year.
@@ -104,7 +104,7 @@ run_params <- list(
   
   #### STAKES parameters ####
   stakes_unknown_latest_start  =   "2/28",                       # [month/day]: in the automatic search of the start date for snow pits and depth probings without a measured start date, we search no later than this day of year. The starting date will be set to the day of the minimum cumulative mass balance between the start of the simulation and the date set here. Something like end of February should be safe for all stakes. 
-  stake_cluster_distance       =   200,                          # [m]: threshold distance for clustering stakes together. This is used to ensure a more uniform distribution of the stakes: if measurements are very dense in one place they can induce a bias in the optimization, so we average stakes in clusters. This can reduce the total number of stakes. Only stakes measured on the same days can be clustered. A value of 0 corresponds to no clustering.
+  stake_cluster_distance       =   50,                          # [m]: threshold distance for clustering stakes together. This is used to ensure a more uniform distribution of the stakes: if measurements are very dense in one place they can induce a bias in the optimization, so we average stakes in clusters. This can reduce the total number of stakes. Only stakes measured on the same days can be clustered. A value of 0 corresponds to no clustering.
   snow_probes_idw_exp          =   0.75,                         # [-]: exponent for the IDW interpolation of winter snow measurements
   
   
@@ -115,8 +115,8 @@ run_params <- list(
 
   
   #### FIXED MASS BALANCE PERIODS choice ####
-  massbal_fixed_annual_start   =   "8/13",                       # [month/day]: start of the user-defined fixed period for annual mass balance evaluation. This is referred to (<year_cur> - 1).
-  massbal_fixed_annual_end     =   "8/12",                       # [month/day]: end of the user-defined fixed period for annual mass balance evaluation. This is referred to <year_cur>.
+  massbal_fixed_annual_start   =   "10/31",                       # [month/day]: start of the user-defined fixed period for annual mass balance evaluation. This is referred to (<year_cur> - 1).
+  massbal_fixed_annual_end     =   "8/31",                       # [month/day]: end of the user-defined fixed period for annual mass balance evaluation. This is referred to <year_cur>.
   massbal_fixed_winter_start   =   "10/1",                       # [month/day]: start of the user-defined fixed period for winter mass balance evaluation. This is referred to (<year_cur> - 1).
   massbal_fixed_winter_end     =   "4/30",                       # [month/day]: end of the user-defined fixed period for winter mass balance evaluation. This is referred to <year_cur>.
   
@@ -134,11 +134,11 @@ run_params <- list(
   #### OUTPUT parameters ####
   output_grid_ext           =      ".tif",                       # extension of the output mass balance grids. Use ?writeFormats to check what is available. Common choices are ".tif" for GeoTiff, and ".asc" for ASCII grid.
   dem_write                    =   TRUE,                        # [TRUE/FALSE]: should we write the annual used DEM to the output directory?
-  filename_dem_prefix          =   "dem_barkrak_",               # output DEM name is <prefix><year><output_grid_exts>
+  filename_dem_prefix          =   "dem_pers_",               # output DEM name is <prefix><year><output_grid_exts>
   
   
   #### MODELED YEARS choice ####
-  first_year                   =   2017,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   2018                          # Last modeled year (same as previous comment)
+  first_year                   =   2001,                         # First modeled year (usually from October of the previous year to September of this year)
+  last_year                    =   2019                          # Last modeled year (same as previous comment)
   
 )

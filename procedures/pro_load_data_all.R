@@ -18,6 +18,8 @@ if (boot_file_read) {
   
 } else {
   
+  cat("Loading all input data...\n")
+  
   data_weather               <-   func_load_weather(run_params)
   data_surftype              <-   func_load_surftype_grids(run_params)
   data_outlines              <-   func_load_outlines(run_params)
@@ -65,12 +67,14 @@ if (boot_file_read) {
   data_dems                  <-   func_dhm_to_dem(run_params, data_dhms, data_outlines)
   
   #### TEMPORARY WIP DEVELOPMENT ####
-  load("radiation.RData")
+  load("radiation_pers.RData")
   # data_radiation             <-   func_load_radiation_grids(run_params, raster_blueprint)
   #### END TEMPORARY WIP DEVELOPMENT ####
-  data_massbalance_annual    <-   func_load_massbalance_measurements(run_params, "annual")
-  data_massbalance_winter    <-   func_load_massbalance_measurements(run_params, "winter")
+  data_massbalance_annual    <-   func_load_massbalance_measurements(run_params, "annual", data_dhms)
+  data_massbalance_winter    <-   func_load_massbalance_measurements(run_params, "winter", data_dhms)
 }
 
 # Memory cleanup.
 invisible(gc())
+
+cat("Finished loading data.\n\n")

@@ -18,6 +18,8 @@ func_dhm_to_dem <- function(run_params,
                             data_dhms,
                             data_outlines) {
   
+  cat("  Generating DEMs from DHMs...\n")
+  
   data_dems <- list(elevation            = list(),
                     grid_year_id         = rep(NA, run_params$n_years),
                     glacier_cell_ids     = list(),
@@ -40,8 +42,6 @@ func_dhm_to_dem <- function(run_params,
   dhm_outline_combinations_unique <- unique(dhm_outline_combinations)
   data_dems$n_grids               <- length(dhm_outline_combinations_unique)
   data_dems$dhm_id                <- rep(NA, data_dems$n_grids)
-  # data_dems$gl_ele_max            <- rep(NA_real_, data_dems$n_grids)
-  # data_dems$gl_ele_min            <- rep(NA_real_, data_dems$n_grids)
   
   for (dem_id in 1:data_dems$n_grids) {
     

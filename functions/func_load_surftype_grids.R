@@ -14,6 +14,8 @@
 
 func_load_surftype_grids <- function(run_params) {
   
+  cat("  Loading surface type grids...\n")
+  
   # Here we will put the output.
   grids_out <- list(grids = list(),
                     grid_year_id = rep(NA, run_params$n_years))

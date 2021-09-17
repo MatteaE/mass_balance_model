@@ -11,7 +11,9 @@
 #                 for probe/snowpit measurements.                                                 #
 ################################################################################################### 
 
-func_load_massbalance_measurements <- function(run_params, load_what) {
+func_load_massbalance_measurements <- function(run_params, load_what, data_dhms) {
+  
+  cat("  Loading", load_what, "mass balance measurements...\n")
   
   if (load_what == "annual") {
     
@@ -43,17 +45,28 @@ func_load_massbalance_measurements <- function(run_params, load_what) {
   data_massbalance <- read.table(massbalance_path, header = FALSE, stringsAsFactors = FALSE)
   names(data_massbalance) <- c("id", "start_date", "end_date", "x", "y", "z", "dh_cm", "density")
   
-  # Convert timestamps to time objects.
+  # Convert timestamps to Date objects.
   data_massbalance$start_date <- as.Date(data_massbalance$start_date, format = "%d.%m.%Y")
   data_massbalance$end_date <- as.Date(data_massbalance$end_date, format = "%d.%m.%Y")
   
   # Compute mass balance.
   data_massbalance$massbal <- data_massbalance$dh_cm * data_massbalance$density * 10 # 10: cm w.e. to mm w.e.
   
+  # Remove from mass balance df any stakes with coordinates outside the DHM.
+  ext_limits <- extent(data_dhms$elevation[[1]])
+  ids_df_bad <- which((data_massbalance$x < ext_limits@xmin) |
+                        (data_massbalance$x > ext_limits@xmax) |
+                        (data_massbalance$y < ext_limits@ymin) |
+                        (data_massbalance$y > ext_limits@ymax))
+  if (length(ids_df_bad) > 0) {
+    data_massbalance <- data_massbalance[-ids_df_bad,]
+  }
+  
+  
   # Cluster measurements according to a user-defined distance.
   # We skip this step in case we have only one measurement
   # (can be the case if we have a dummy file for winter stakes).
-  if (length(data_massbalance[,1]) > 1) {
+  if (nrow(data_massbalance) > 1) {
     
     # We only cluster together stakes which are within the distance
     # AND have were measured on the same date (both at the start
@@ -94,7 +107,6 @@ func_load_massbalance_measurements <- function(run_params, load_what) {
     # Add them to the output data frame.
     clusters_n <- max(stakes_clusters_cut)
     for (cluster_id in 1:clusters_n) {
-      # cat(cluster_id)
       cluster_stakes_id <- as.integer(which(stakes_clusters_cut == cluster_id))
       cluster_name <- ifelse(length(cluster_stakes_id) > 1, paste0("CL", sprintf("%03d", cluster_id)), data_massbalance$id[cluster_stakes_id])
       cluster_start_date <- data_massbalance$start_date[cluster_stakes_id[1]]
@@ -112,10 +124,6 @@ func_load_massbalance_measurements <- function(run_params, load_what) {
                                                                                massbal = cluster_massbal,
                                                                                stringsAsFactors = FALSE))
     }
-    
-    # Convert back to Date object the start and end dates.
-    # data_massbalance_filtered$start_date <- as.Date(data_massbalance_filtered$start_date)
-    # data_massbalance_filtered$end_date <- as.Date(data_massbalance_filtered$end_date)
     
   } else {
     data_massbalance_filtered <- data_massbalance[,c(1:6,9)]
