@@ -40,6 +40,10 @@ func_load_outlines <- function(run_params) {
     } else if (outline_filetype == "shapefile") {
       invisible(capture.output(outlines_out$outlines[[outline_id]] <- as(as_Spatial(st_read(outline_paths[outline_id])), "SpatialPolygons")))
     }
+    # Aspect ratio: > 1 if tall glacier, < 1 if wide glacier. Used to add margins to the area plots,
+    # in order to keep the plot titles within the page margins.
+    outline_ext <- extent(outlines_out$outlines[[outline_id]])
+    outlines_out$aspect_ratio[[outline_id]] <- (outline_ext[4] - outline_ext[3]) / (outline_ext[2] - outline_ext[1])
   }
   
   # For each modeled year find the closest grid year and use its grid.

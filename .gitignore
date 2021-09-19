@@ -9,11 +9,12 @@ set_params_*.R
 innovations
 zNOTE*
 
-# Input files for other Central Asian glaciers #
+# Input files for other glaciers #
 input/barkrak/
 input/barkrak2/*.qgs*
 input/yakarcha/
 input/zulmart/
+input/pers/
         
 # Output files #
 output/

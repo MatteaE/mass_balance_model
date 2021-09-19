@@ -23,6 +23,9 @@ func_plot_year_mb_maps <- function(year_data,
                                    data_outlines) {
   
   base_size <- 16 # For the plots.
+  # Empirical top margin to keep plots inside page borders
+  # when the glacier is tall (aspect ratio > 1.07).
+  margin_top <- max(0, (data_outlines$aspect_ratio[[year_data$outline_id]] - 1.07) * 1500)
   theme_map_massbal <- theme_void(base_size = base_size) +
                        theme(legend.position = "bottom",
                              legend.key.width = unit(3, "cm"),
@@ -30,7 +33,7 @@ func_plot_year_mb_maps <- function(year_data,
                              legend.box.margin = margin(0,0,5,0),
                              legend.title = element_text(vjust = 1, face = "bold", size = 16),
                              legend.text = element_text(face = "bold", size = 12),
-                             plot.margin = margin(0,0,0,0))
+                             plot.margin = margin(margin_top,0,0,0, unit = "pt"))
   
   contour_label_textsize <- 4
   contour_linesize <- 0.4

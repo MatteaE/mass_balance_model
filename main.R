@@ -16,31 +16,31 @@ message("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n\n")
 Sys.setlocale(category = "LC_TIME", locale = "en_US.UTF-8")
 
 
-#### Load from input data files or reboot file ####
-boot_file_write   <- FALSE                # Save .RData file with the input data, for faster reload.
-boot_file_read    <- FALSE                 # Load .RData file with the input data, instead of loading input files.
-boot_file_name    <- "boot_file_barkrak.RData"    # Name of the .RData input data file.
-
-
-#### Set parameters, load function definitions and R modules ####
+#### Set parameters, load function definitions and R packages ####
 source("set_params.R")
-source(file.path("procedures", "pro_load_libraries.R"))
+
 invisible(sapply(file.path("functions", list.files("functions", pattern = "\\.R$")), source))
 
+packages_loaded <- func_load_packages(run_params)
+if (packages_loaded == FALSE) {
+  stop("Please install required packages before proceeding!")
+}
 
 #### Setup simulation ####
 run_params <- func_process_run_params(run_params) # Process fixed run parameters, computing derived ones.
-source(file.path("procedures", "pro_load_data_all.R"))    # Load input data.
+
+data_all   <- func_load_data_all(run_params)
+
 # Below: remove cacheDir option to force recompilation of the C++ code (useful after changing computer or editing the source file).
-if (run_params$avalanche_routine_cpp == TRUE) {sourceCpp(file.path("functions", "func_avalanche_gruber.cpp"), cacheDir = "functions")}
+if (run_params$avalanche_routine_cpp == TRUE) {
+  sourceCpp(file.path("functions", "func_avalanche_gruber.cpp"), cacheDir = "functions")
+}
 
 # Compute global grid parameters (numbers of cells and cell size).
-run_params <- func_compute_grid_parameters(run_params, data_dhms)
+run_params <- func_compute_grid_parameters(run_params, data_all$data_dhms)
 
 # Compute fixed grids (avalanches, topographic snow distribution, variable ice albedo).
-grids_fixed_list <- func_compute_all_fixed_grids(run_params, data_dhms, data_dems)
-
-source(file.path("procedures", "pro_save_boot_files.R"))         # Save boot files if needed.
+grids_fixed_list <- func_compute_all_fixed_grids(run_params, data_all$data_dhms, data_all$data_dems)
 
 # Setup list with annual values and plots (1 per year).
 overview_annual <- func_setup_overview_annual(run_params)

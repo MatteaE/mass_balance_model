@@ -31,7 +31,7 @@ run_params <- list(
   filename_dhm_prefix          =   "dhm_pers",
   filename_dhm_suffix          =   ".grid",                       # DHM name is <prefix><year><suffix>
   dhm_years                    =   c(2008,2015,2019),                      # Years for which a DHM is available. These should be sorted in ascending order.
-  dhm_interpolate              =   TRUE,                        # [TRUE/FALSE]: should we use linear interpolation to compute each year's DHM?
+  dhm_interpolate              =   FALSE,                        # [TRUE/FALSE]: should we use linear interpolation to compute each year's DHM?
   
   filename_surftype_prefix     =   "firn_pers",
   filename_surftype_suffix     =   ".grid",                      # Surface type filename is <prefix><year><suffix>
@@ -69,7 +69,7 @@ run_params <- list(
   #### AVALANCHE model parameters ####
   avalanche_routine_cpp        =   TRUE,                         # [TRUE/FALSE]: should we use the C++ (TRUE) or R (FALSE) version of the avalanche routine? C++ is much faster but it requires a code compiler.
   deposition_slope_lim         =   40,                           # [°]: at or above this slope value snow will not be deposited during an avalanche. A lower value makes avalanches travel farther. Called beta_lim in Gruber (2007).
-  deposition_mass_lim          =   1800,                         # [kg m-2]: maximum deposition during an avalanche. A lower value makes avalanches travel farther. Called D_lim in Gruber (2007).
+  deposition_mass_lim          =   8000,                         # [kg m-2]: maximum deposition during an avalanche. A lower value makes avalanches travel farther. Called D_lim in Gruber (2007).
   movable_slope_lim_lower      =   30,                           # [°]: above this slope value, there is a linearly increasing movable fraction in the initial mass distribution, for avalanches. A lower value makes avalanches start also on more gentle slopes.
   movable_slope_lim_upper      =   70,                           # [°]: above this slope value, all input snow is movable in the avalanche routine.
   deposition_max_ratio_init    =   12,                           # [-]: ONLY for the initial snow distribution grid, how much accumulation can locally result from an avalanche relative to the mean snow distribution before the avalanche? This controls how far avalanches travel, it should be set to a value low enough that avalanches don't bring snow below the marked snow line elevation, and high enough that avalanche deposits look plausible. An exploratory value of 10 can make sense.
@@ -97,8 +97,8 @@ run_params <- list(
   default_prec_elegrad         =   10,                           # [% / 100 m]: altitudinal gradient of precipitation.
   default_temp_elegrad         =   -0.6,                         # [°C / 100 m]: altitudinal gradient of air temperature.
   default_melt_factor          =   1.0,                          # [mm w.e. C-1 d-1]: melt factor for DDF model.
-  default_rad_fact_ice         =   1.0,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for ice within DDF model.
-  default_rad_fact_snow        =   0.2,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for snow within DDF model.
+  default_rad_fact_ice         =   0.2,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for ice within DDF model.
+  default_rad_fact_snow        =   0.13,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for snow within DDF model.
   nodata_years_automatic       =   TRUE,                         # [TRUE/FALSE]: if TRUE, the prec_corr/melt_factor/rad_fact_ice/rad_fact_snow parameters for years with no mass balance will be taken as the mean of the parameters optimized over the years with measured mass balance data (only IF there is no overriding value in an annual parameter file AND there is at least one year with measured mass balances). If FALSE, the parameters are taken from the defaults under run_params (only IF there is no overriding value in an annual parameter file).
   
   
@@ -138,7 +138,7 @@ run_params <- list(
   
   
   #### MODELED YEARS choice ####
-  first_year                   =   2001,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   2019                          # Last modeled year (same as previous comment)
+  first_year                   =   2011,                         # First modeled year (usually from October of the previous year to September of this year)
+  last_year                    =   2018                          # Last modeled year (same as previous comment)
   
 )
