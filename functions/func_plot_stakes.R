@@ -47,12 +47,13 @@ func_plot_stakes <- function(year_data) {
                                  label = months_labels_all[months_labels_ids])
   # Don't add label for the first month unless it is
   # represented by at least 28 days, and same for the last month.
+  # Also see func_plot_massbal_cumul for an explanation of the if() conditions.
   months_cur_rle <- rle(as.integer(format(days, "%m")))
-  if (months_cur_rle$lengths[1] < 28) { 
+  if ((months_cur_rle$lengths[1] < 28) && (as.integer(format(days[1], "%d")) < 15)) { 
     months_labels_df <- months_labels_df[-1,]
   }
-  if (months_cur_rle$lengths[length(months_cur_rle$lengths)] < 28) { # Same, for last month.
-    months_labels_df <- months_labels_df[-length(months_labels_df[,1]),]
+  if ((months_cur_rle$lengths[length(months_cur_rle$lengths)] < 28) && (as.integer(format(days[length(days)])) > 15)) { # Same, for last month.
+    months_labels_df <- months_labels_df[-nrow(months_labels_df),]
   }
   
   

@@ -20,7 +20,8 @@
 # At the end of this, if there are fewer than 4 bands give up,
 # if there are more than 10 bands merge them with the usual logic,
 # starting from the smallest one (recompute at each iteration).
-func_compute_ele_bands_from_stakes <- function(stakes_ele) {
+func_compute_ele_bands_from_stakes <- function(stakes_ele,
+                                               run_params) {
   
   stakes_ele_unique <- unique(stakes_ele)
   stakes_ele_n      <- length(stakes_ele_unique)

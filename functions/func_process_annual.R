@@ -26,7 +26,7 @@ func_process_annual <- function(year_data,
   # model_time_bounds[1] is the start of the annual run, 
   # model_time_bounds[2] is the end.
   year_data$weather_series_annual_cur <- data_weather[which(data_weather$timestamp == year_data$model_time_bounds[1]):(which(data_weather$timestamp == year_data$model_time_bounds[2])),]
-  year_data$model_annual_days_n <- nrow(year_data$weather_series_annual_cur)
+  year_data$model_annual_days_n       <- nrow(year_data$weather_series_annual_cur)
   
   
   # Different processing in case we have or not annual mass balance measurements.
@@ -53,7 +53,6 @@ func_process_annual <- function(year_data,
     year_data$optim_corr_annual <- list(melt_factor  = 0,
                                         rad_fact_ice = 0,
                                         prec_corr    = 0)
-    
   }
   
   # Free some memory after processing.

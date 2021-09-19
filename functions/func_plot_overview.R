@@ -12,9 +12,9 @@ func_plot_overview <- function(overview_annual,
   base_size <- 16 # For the plots
   
   theme_overview_plots <- theme_bw(base_size = base_size) +
-                          theme(axis.title.x = element_blank(),
-                                plot.title = element_text(hjust = 0.5),
-                                text = element_text(face = "bold"))
+    theme(axis.title.x = element_blank(),
+          plot.title = element_text(hjust = 0.5),
+          text = element_text(face = "bold"))
   
   plots <- list()
   
@@ -43,7 +43,7 @@ func_plot_overview <- function(overview_annual,
       ggtitle("Mass balance (measurement period + local correction)") +
       theme_overview_plots
   }
-
+  
   
   # Time series of other annual mass balances:
   # over the measurement period with no correction,
@@ -100,7 +100,7 @@ func_plot_overview <- function(overview_annual,
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("Winter mass balance") +
     {if(any(!is.na(overview_annual$summary_df$mb_winter_meas))) annotation_custom(grobTree(textGrob("Measurement period", x=0.05, y = 0.12, hjust = 0,
-                                        gp=gpar(col="#FF00FF", fontsize = base_size * 1., fontface="bold"))))} +
+                                                                                                    gp=gpar(col="#FF00FF", fontsize = base_size * 1., fontface="bold"))))} +
     annotation_custom(grobTree(textGrob("Fixed period", x=0.05, y = 0.05, hjust = 0,
                                         gp=gpar(col="#00FFFF", fontsize = base_size * 1., fontface="bold")))) +
     theme_overview_plots
@@ -195,7 +195,7 @@ func_plot_overview <- function(overview_annual,
     theme_overview_plots
   
   
-
+  
   # Time series of cumulative hydrological year mass balance.
   x_breaks_cumul <- seq(overview_annual$summary_df$year[1]-1, overview_annual$summary_df$year[length(overview_annual$summary_df$year)], by = max(1, floor((length(overview_annual$summary_df$year)+1) / 4)))
   df_lines <- data.frame(year_start = overview_annual$summary_df$year - 1,
@@ -215,15 +215,16 @@ func_plot_overview <- function(overview_annual,
   } else {
     theme_mbcumul_legend <- theme(legend.position = "none")
   }
-plots[[length(plots)+1]] <- ggplot(data.frame(year = overview_annual$summary_df$year,
-                                              mb_cumul = overview_annual$summary_df$mb_cumul,
+  point_size <- 3 - max(0, min(2.5, log(max(1, (run_params$nyears - 15)/8)))) # Empirical point size, smaller if many years.
+  plots[[length(plots)+1]] <- ggplot(data.frame(year = overview_annual$summary_df$year,
+                                                mb_cumul = overview_annual$summary_df$mb_cumul,
                                                 has_data = as.character(overview_annual$summary_df$year_has_data))) +
     geom_hline(yintercept = 0, linetype = "dashed", size = 1) +
     geom_segment(data = df_lines, aes(x = year_start, xend = year_end,
                                       y = mb_start, yend = mb_end,
                                       linetype = has_data),
                  color = "#FF0000", size = 1) +
-    geom_point(aes(x = year, y = mb_cumul, shape = has_data), color = "#FF0000", size = 3, stroke = 1.2) +
+    geom_point(aes(x = year, y = mb_cumul, shape = has_data), color = "#FF0000", size = point_size, stroke = point_size/2.5) +
     scale_y_continuous(breaks = pretty(c(0, overview_annual$summary_df$mb_cumul))) +
     scale_x_continuous(breaks = x_breaks_cumul) +
     scale_shape_manual(values = c("TRUE" = 17, "FALSE" = 2),
@@ -270,7 +271,7 @@ plots[[length(plots)+1]] <- ggplot(data.frame(year = overview_annual$summary_df$
     geom_line(data = mb_all_df, aes(x = day, y = mb, group = year_id)) +
     geom_hline(yintercept = 0, linetype = "dashed", size = 1) +
     geom_line(data = mb_cumul_df,  aes(x = year, y = mb_cumul), color = "#FF0000", size = 1) +
-    geom_point(data = mb_cumul_df, aes(x = year, y = mb_cumul), color = "#FF0000", shape = 2, size = 3, stroke = 1.2) +
+    geom_point(data = mb_cumul_df, aes(x = year, y = mb_cumul), color = "#FF0000", shape = 2, size = point_size, stroke = point_size/2.5) +
     scale_y_continuous(breaks = pretty(c(max(mb_all_df$mb), overview_annual$summary_df$mb_cumul))) +
     scale_x_date(date_labels = "%Y/%m") +
     ylab("Cumulative mass balance [m w.e.]") +

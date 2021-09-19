@@ -68,7 +68,7 @@ func_plot_year <- function(year_data,
   
   # Save the plot of the hydrological mass balance of the year (without single stake values).
   # We will put it in a PDF file with 1 plot per year (overview_areaplot.pdf).
-  areaplots_list[[year_id]] <- plots_year[[1]]
+  areaplots_list[[year_data$year_id]] <- plots_year[[1]]
   
   return(list(areaplots_list     = areaplots_list,
               ele_bands_plot_df  = ele_bands_plot_df))

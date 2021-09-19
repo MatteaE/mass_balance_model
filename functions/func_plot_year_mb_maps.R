@@ -25,7 +25,7 @@ func_plot_year_mb_maps <- function(year_data,
   base_size <- 16 # For the plots.
   # Empirical top margin to keep plots inside page borders
   # when the glacier is tall (aspect ratio > 1.07).
-  margin_top <- max(0, (data_outlines$aspect_ratio[[year_data$outline_id]] - 1.07) * 1500)
+  margin_top <- max(0, (data_outlines$aspect_ratio[[year_data$outline_id]] - 1.05) * 1000)
   theme_map_massbal <- theme_void(base_size = base_size) +
                        theme(legend.position = "bottom",
                              legend.key.width = unit(3, "cm"),

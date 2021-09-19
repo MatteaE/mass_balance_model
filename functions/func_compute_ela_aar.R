@@ -30,7 +30,7 @@ func_compute_ela_aar <- function(year_data,
   
   mb_hydro_map_values <- getValues(year_data$massbal_annual_maps$hydro)
   
-  for (band_id in 1:length(ele_bands_df[,1])) {
+  for (band_id in 1:nrow(ele_bands_df)) {
     ele_bands_df$mb_hydro[band_id] <- mean(mb_hydro_map_values[ele_bands_values == ele_bands_df$ele[band_id]], na.rm=T)
   }
   ela_band_id <- which.min(abs(ele_bands_df$mb_hydro))

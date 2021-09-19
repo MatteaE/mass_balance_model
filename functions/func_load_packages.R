@@ -3,7 +3,7 @@
 # Description:    this program models the distributed mass balance of a glacier at daily          #
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
-#                 This file contains the code to load all required modules.                       #
+#                 This file contains the code to load all required R packages.                    #
 ################################################################################################### 
 
 
@@ -36,7 +36,7 @@ func_load_packages <- function(run_params) {
     package_list <- c(package_list, "Rcpp")
   }
   
-  exit_status <- sapply(package_list, require, character.only = TRUE)
+  exit_status <- suppressPackageStartupMessages(sapply(package_list, require, character.only = TRUE))
   exit_status_all <- all(exit_status)
   
   if (!exit_status_all) {

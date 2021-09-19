@@ -36,7 +36,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
                                       mb_annual_fixed     = NA,
                                       mb_winter_fixed     = NA,
                                       mb_winter_meas      = NA)
-  for (band_id in 1:length(ele_bands_plot_df[,1])) {
+  for (band_id in 1:nrow(ele_bands_plot_df)) {
     band_cell_ids                                  <- which(ele_bands_plot_values == ele_bands_plot_df$ele[band_id])
     ele_bands_plot_df$ncells[band_id]              <- length(band_cell_ids)
     if (year_data$nstakes_annual > 0) {

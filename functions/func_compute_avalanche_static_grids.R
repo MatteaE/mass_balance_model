@@ -7,9 +7,9 @@
 #                 be used by the avalanche module.                                                #
 ###################################################################################################
 
-func_compute_avalanche_fixed_grids <- function(run_params, data_dhms) {
+func_compute_avalanche_static_grids <- function(run_params, data_dhms) {
   
-  cat("Computing avalanche fixed grids...\n")
+  cat("Computing avalanche static grids...\n")
   
   conv_deg2rad <- pi / 180
 
@@ -168,7 +168,7 @@ func_compute_avalanche_fixed_grids <- function(run_params, data_dhms) {
     
   }
 
-  cat("  Finished computation of avalanche fixed grids.\n")
+  cat("  Finished computation of avalanche static grids.\n")
 
   return(avalanche)
 

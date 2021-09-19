@@ -26,6 +26,10 @@ packages_cran <- c("cowplot",
                    "spatialEco",
                    "topmodel",
                    "timeSeries")
+if (Sys.info()["sysname"] == "Windows") {
+  packages_cran <- c(packages_cran, "installr")
+}
+
 install.packages(setdiff(packages_cran, rownames(installed.packages())))  
 
 packages_github_repos <- c("coolbutuseless")
@@ -35,4 +39,10 @@ packages_github_missing_ids <- which(!(packages_github_names %in% rownames(insta
 
 remotes::install_github(packages_github_full[packages_github_missing_ids])
 
+if (Sys.info()["sysname"] == "Windows") {
+  install.Rtools()
+  writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron")
+}
+
 message("\n\n====                                     ====\n==== All packages installed succesfully! ====\n====                                     ====")
+message("\nYou should now **CLOSE** and **RESTART** RStudio **BEFORE** running the model.\n")

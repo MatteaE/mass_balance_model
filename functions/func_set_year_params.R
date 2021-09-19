@@ -58,7 +58,7 @@ func_set_year_params <- function(year_data,
         if (params_names_all[param_id] != "mb_corr_ele_bands") {
           year_cur_params[[param_id]] <- run_params[[paste0("default_", params_names_all[param_id])]]
         } else {
-          year_cur_params[[param_id]] <- func_compute_ele_bands_from_stakes(year_data$massbal_annual_meas_cur$z_dem)
+          year_cur_params[[param_id]] <- func_compute_ele_bands_from_stakes(year_data$massbal_annual_meas_cur$z_dem, run_params)
         }
       }
       
@@ -70,7 +70,7 @@ func_set_year_params <- function(year_data,
           year_cur_params[[param_id]] <- run_params[[paste0("default_", params_names_all[param_id])]]
           # Correction bands, computed on the fly.
         } else if (params_names_all[param_id] == "mb_corr_ele_bands") {
-          year_cur_params[[param_id]] <- func_compute_ele_bands_from_stakes(year_data$massbal_annual_meas_cur$z_dem)
+          year_cur_params[[param_id]] <- func_compute_ele_bands_from_stakes(year_data$massbal_annual_meas_cur$z_dem, run_params)
           # Parameters subject to optimization, look at whether we want them
           # with default values or automatically optimized.
           # Also deal with the possibility that the automatically optimized

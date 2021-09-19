@@ -22,13 +22,14 @@ func_load_data_all <- function(run_params) {
   data_all$data_dhms                  <-   func_load_elevation_grids(run_params)
   
   # Check and if needed resample the elevation / surface type grids, for alignment.
-  data_all$raster_blueprint           <- func_compute_blueprint_grid(data_all$data_surftype, data_all$data_dhms)
-  data_all                            <- func_check_resample_grids(run_params, data_all)
+  data_all$raster_blueprint           <-   func_compute_blueprint_grid(data_all$data_surftype, data_all$data_dhms)
+  data_all                            <-   func_check_resample_grids(run_params, data_all)
   
+  # Compute DEMs from DHMs and outlines.
   data_all$data_dems                  <-   func_dhm_to_dem(run_params, data_all$data_dhms, data_all$data_outlines)
   
   # Fix surface type in case it is inconsistent with the DEM.
-  data_all$data_surftype              <- func_repair_surface_type(run_params, data_all$data_dems, data_all$data_surftype)
+  data_all$data_surftype              <-   func_repair_surface_type(run_params, data_all$data_dems, data_all$data_surftype)
   
   data_all$data_radiation             <-   func_load_radiation_grids(run_params, data_all$raster_blueprint)
   data_all$data_massbalance_annual    <-   func_load_massbalance_measurements(run_params, "annual", data_all$data_dhms)

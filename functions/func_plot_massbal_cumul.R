@@ -18,9 +18,9 @@ func_plot_massbal_cumul <- function(year_data,
   
   
   # Prepare the data for plotting.
-  massbal_cumul_df <- data.frame(date = seq.Date(year_data$model_time_bounds[1]-1, year_data$model_time_bounds[2], by = "1 day"),
-                                 mb = year_data$mod_output_annual_cur$gl_massbal_cumul,
-                                 melt = year_data$mod_output_annual_cur$gl_melt_cumul,
+  massbal_cumul_df <- data.frame(date  = seq.Date(year_data$model_time_bounds[1]-1, year_data$model_time_bounds[2], by = "1 day"),
+                                 mb    = year_data$mod_output_annual_cur$gl_massbal_cumul,
+                                 melt  = year_data$mod_output_annual_cur$gl_melt_cumul,
                                  accum = year_data$mod_output_annual_cur$gl_accum_cumul)
   day_id_offset <- (length(massbal_cumul_df$date) - as.integer(format(massbal_cumul_df$date[length(massbal_cumul_df$date)], "%j"))) + 1
   massbal_cumul_df$day_id <- seq_along(massbal_cumul_df$date) - day_id_offset # So that day_id = 1 is Jan 1.
@@ -30,17 +30,26 @@ func_plot_massbal_cumul <- function(year_data,
   months_labels_all <- format(massbal_cumul_df$date, "%b")
   months_doy <- c(15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349)
   
-  months_labels_ids <- which(as.integer(format(massbal_cumul_df$date, "%j")) %in% months_doy) # Select the day at the middle of each month.
+  # Select the day at the middle of each month.
+  # If the simulation starts after day 15 of the first month,
+  # the first item of months_labels_ids refers to the second
+  # month of the simulation.
+  months_labels_ids <- which(as.integer(format(massbal_cumul_df$date, "%j")) %in% months_doy)
   months_labels_df <- data.frame(day_id = massbal_cumul_df$day_id[months_labels_ids],
-                                 label = months_labels_all[months_labels_ids])
+                                 label  = months_labels_all[months_labels_ids])
   # Don't add label for first month unless it is
   # represented by at least 28 days, and same for last month.
+  # To do this, we remove the first label if the first month
+  # of the data frame has fewer than 28 days and the first day
+  # of the simulation is before the 15th of the month
+  # (else the month is already not present, since we use the
+  # middle of the month).
   months_cur_rle <- rle(as.integer(format(massbal_cumul_df$date, "%m")))
-  if (months_cur_rle$lengths[1] < 28) { 
+  if ((months_cur_rle$lengths[1] < 28) && (as.integer(format(massbal_cumul_df$date[1], "%d")) < 15)) { 
     months_labels_df <- months_labels_df[-1,]
   }
-  if (months_cur_rle$lengths[length(months_cur_rle$lengths)] < 28) { # Same, for last month.
-    months_labels_df <- months_labels_df[-length(months_labels_df[,1]),]
+  if ((months_cur_rle$lengths[length(months_cur_rle$lengths)] < 28) && (as.integer(format(massbal_cumul_df$date[nrow(massbal_cumul_df)], "%d")) > 15)) { # Same, for last month.
+    months_labels_df <- months_labels_df[-nrow(months_labels_df),]
   }
   
   day_id_hydro1 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == paste0(format(massbal_cumul_df$date[1], "%Y"), "-10-01"))] # day_id of the hydrological year start.
