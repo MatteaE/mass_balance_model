@@ -21,17 +21,23 @@ func_load_outlines <- function(run_params) {
   } else if (ext_str == "shp") {
     outline_filetype <- "shapefile"
   } else {
-    stop("Outline file is not either XYZN or shapefile (.shp). Please convert to the correct format and run the model again.")
+    stop("    FATAL: outline file specification is not either XYZN or shapefile (.shp). Please convert outlines to the correct format and run the model again.")
   }
   
   outlines_out <- list(outlines = list(),
                        outline_year_id = rep(NA, run_params$n_years)) # Here we put all the loaded outlines.
   
-  outline_paths <- file.path(run_params$dir_data_outline,
-                             paste0(run_params$filename_outline_prefix,
-                                    run_params$outline_years,
-                                    run_params$filename_outline_suffix))
-                      
+  cat("    Looking for", outline_filetype, "outline files...\n")
+  
+  run_params <- func_find_input_files_single(run_params, "outline")
+  outline_paths <- run_params$outline_paths
+  outline_n <- length(outline_paths)
+  
+  if (outline_n == 0) {
+    stop("    FATAL: no outline files found. Please check parameters dir_data_outline, filename_outline_prefix and filename_outline_suffix.")
+  } else {
+    cat("    Found", outline_n, "outline file(s). Available year(s):", run_params$outline_years, "\n")
+  }
   
   # Load outlines
   for (outline_id in 1:length(outline_paths)) {

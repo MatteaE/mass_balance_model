@@ -15,6 +15,8 @@ func_load_weather <- function(run_params) {
   data_raw <- read.table(filepath_weather, header = FALSE, skip = run_params$file_weather_nskip)
   names(data_raw) <- c("year", "doy", "hour", "t2m_mean", "precip")
   
+  # Sometimes we may have negative precipitation artifacts, remove them.
+  data_raw$precip[which(data_raw$precip < 0.0)] <- 0.0
   
   data_raw$timestamp <- as.Date(paste(data_raw$year, data_raw$doy), format = "%Y %j", tz = "UTC")
   data_raw$month <- as.integer(format(data_raw$timestamp, "%m"))

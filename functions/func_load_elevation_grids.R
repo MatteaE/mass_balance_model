@@ -29,10 +29,18 @@ func_load_elevation_grids <- function(run_params) {
   grids_out <- list(elevation = list(),
                     grid_year_id = rep(NA, run_params$n_years))
   
-  grid_paths <- file.path(run_params$dir_data_dhm,
-                          paste0(run_params$filename_dhm_prefix,
-                                 run_params$dhm_years,
-                                 run_params$filename_dhm_suffix))
+  cat("    Looking for DHM files...\n")
+  
+  run_params <- func_find_input_files_single(run_params, "dhm")
+  grid_paths <- run_params$dhm_paths
+  dhm_n <- length(grid_paths)
+  
+  if (dhm_n == 0) {
+    stop("    FATAL: no DHM files found. Please check parameters dir_data_dhm, filename_dhm_prefix and filename_dhm_suffix.")
+  } else {
+    cat("    Found", dhm_n, "DHM file(s). Available year(s):", run_params$dhm_years, "\n")
+  }
+  
   grid_interpolate <- run_params$dhm_interpolate
   grid_years <- run_params$dhm_years
   

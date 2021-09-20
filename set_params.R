@@ -21,6 +21,7 @@ run_params <- list(
   dir_data_radiation           =   file.path(dir_data_base, "radiation"),    # Path to the grids of potential direct radiation (daily sums)
   dir_data_massbalance         =   file.path(dir_data_base, "massbalance"),  # The mass balance observations go here
   dir_annual_params            =   file.path("input", "pers", "params"),     # The annual model parameter files go here
+  dir_data_recursive           =   TRUE,                                     # [TRUE/FALSE]: should we look recursively for the input files in the specified directories?
   
   # Set filenames and input file properties.
   filename_weather             =   "pers_sils_d_proc.dat",      # File name of the weather series
@@ -30,16 +31,13 @@ run_params <- list(
   
   filename_dhm_prefix          =   "dhm_pers",
   filename_dhm_suffix          =   ".grid",                       # DHM name is <prefix><year><suffix>
-  dhm_years                    =   c(2008,2015,2019),                      # Years for which a DHM is available. These should be sorted in ascending order.
   dhm_interpolate              =   FALSE,                        # [TRUE/FALSE]: should we use linear interpolation to compute each year's DHM?
   
   filename_surftype_prefix     =   "firn_pers",
   filename_surftype_suffix     =   ".grid",                      # Surface type filename is <prefix><year><suffix>
-  surftype_years               =   c(2008,2015,2019),                      # Years for which a surface type file is available. These whould be sorted in ascending order.
   
   filename_outline_prefix      =   "pers",
   filename_outline_suffix      =   "_gltot.xyzn",                # Outline name is <prefix><year><suffix>
-  outline_years                =   c(2008,2015,2019),                      # Years for which an outline is available.
   
   filename_radiation_prefix    =   "dir",
   filename_radiation_suffix    =   "24.grid",                    # Radiation files are called <prefix><doy><suffix> where <doy> is the day of year, zero-padded to length 3 (e.g. 001).
@@ -138,7 +136,7 @@ run_params <- list(
   
   
   #### MODELED YEARS choice ####
-  first_year                   =   2011,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   2018                          # Last modeled year (same as previous comment)
+  first_year                   =   2008,                         # First modeled year (usually from October of the previous year to September of this year)
+  last_year                    =   2016                          # Last modeled year (same as previous comment)
   
 )

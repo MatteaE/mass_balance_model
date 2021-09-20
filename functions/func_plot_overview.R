@@ -59,18 +59,18 @@ func_plot_overview <- function(overview_annual,
     single_year_point3 <- geom_point(aes(x = year, y = mb_annual_fixed), color = "#00FFFF")
   }
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-    geom_line(aes(x = year, y = mb_annual_meas), color = "#FF00FF", size = 1) +
+    {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_line(aes(x = year, y = mb_annual_meas), color = "#FF00FF", size = 1)} +
     geom_line(aes(x = year, y = mb_annual_hydro), color = "#0000FF", size = 1) +
     geom_line(aes(x = year, y = mb_annual_fixed), color = "#00FFFF", size = 1) +
-    single_year_point1 +
+    {if (any(overview_annual$summary_df$year_has_data) == TRUE) single_year_point1} +
     single_year_point2 +
     single_year_point3 +
     ylab("Mass balance [m w.e.]") +
     scale_y_continuous(expand = expansion(0.3, 0)) +
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("Annual mass balance (no local correction)") +
-    annotation_custom(grobTree(textGrob("Measurement period", x=0.05, y = 0.19, hjust = 0,
-                                        gp=gpar(col="#FF00FF", fontsize = base_size * 1., fontface="bold")))) +
+    {if (any(overview_annual$summary_df$year_has_data) == TRUE) annotation_custom(grobTree(textGrob("Measurement period", x=0.05, y = 0.19, hjust = 0,
+                                        gp=gpar(col="#FF00FF", fontsize = base_size * 1., fontface="bold"))))} +
     annotation_custom(grobTree(textGrob("Hydrological year", x=0.05, y = 0.12, hjust = 0,
                                         gp=gpar(col="#0000FF", fontsize = base_size * 1., fontface="bold")))) +
     annotation_custom(grobTree(textGrob("Fixed period", x=0.05, y = 0.05, hjust = 0,
@@ -136,16 +136,18 @@ func_plot_overview <- function(overview_annual,
   
   # Time series of RMSE.
   # If we model just one year, add point plot so that something is visible.
-  single_year_point <- NULL
-  if (single_year) {single_year_point <- geom_point(aes(x = year, y = rmse))}
-  plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-    geom_line(aes(x = year, y = rmse), size = 1) +
-    single_year_point +
-    ylab("RMSE [m w.e.]") +
-    scale_y_continuous(limits = c(0,NA), expand = expansion(mult = c(0, 0.2))) +
-    scale_x_continuous(breaks = x_breaks) +
-    ggtitle("Root-Mean-Square Error") +
-    theme_overview_plots
+  if (any(overview_annual$summary_df$year_has_data) == TRUE) {
+    single_year_point <- NULL
+    if (single_year) {single_year_point <- geom_point(aes(x = year, y = rmse))}
+    plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
+      geom_line(aes(x = year, y = rmse), size = 1) +
+      single_year_point +
+      ylab("RMSE [m w.e.]") +
+      scale_y_continuous(limits = c(0,NA), expand = expansion(mult = c(0, 0.2))) +
+      scale_x_continuous(breaks = x_breaks) +
+      ggtitle("Root-Mean-Square Error") +
+      theme_overview_plots
+  }
   
   
   # Time series of the melt parameters.
@@ -204,7 +206,13 @@ func_plot_overview <- function(overview_annual,
                          mb_end     = overview_annual$summary_df$mb_cumul,
                          has_data   = as.character(overview_annual$summary_df$year_has_data))
   if (!all(overview_annual$summary_df$year_has_data)) {
-    theme_mbcumul_legend <- theme(legend.position = c(0.14,0.102),
+    # Try smart positioning of the legend: top left
+    # if first point (0.0: cumulative!) is low,
+    # bottom left if it is high.
+    first_point_ypos_rel <- (0.0 - min(df_lines$mb_end)) / (max(c(0, df_lines$mb_end)) - min(c(0,df_lines$mb_end)))
+    if (is.nan(first_point_ypos_rel)) first_point_ypos_rel <- 0.6 # Rare but possible case where mass balance is 0.0 in all years.
+    legend_ypos <- ifelse(first_point_ypos_rel > 0.5, 0.102, 0.930)
+    theme_mbcumul_legend <- theme(legend.position = c(0.14, legend_ypos),
                                   legend.title = element_blank(),
                                   legend.margin = margin(0,0,0,0),
                                   legend.spacing = unit(0, "pt"),
@@ -215,7 +223,7 @@ func_plot_overview <- function(overview_annual,
   } else {
     theme_mbcumul_legend <- theme(legend.position = "none")
   }
-  point_size <- 3 - max(0, min(2.5, log(max(1, (run_params$nyears - 15)/8)))) # Empirical point size, smaller if many years.
+  point_size <- 3 - max(0, min(2.5, log(max(1, (run_params$n_years - 15)/8)))) # Empirical point size, smaller if many years.
   plots[[length(plots)+1]] <- ggplot(data.frame(year = overview_annual$summary_df$year,
                                                 mb_cumul = overview_annual$summary_df$mb_cumul,
                                                 has_data = as.character(overview_annual$summary_df$year_has_data))) +
@@ -277,7 +285,6 @@ func_plot_overview <- function(overview_annual,
     ylab("Cumulative mass balance [m w.e.]") +
     ggtitle("Cumulative mass balance (hydrological years)") +
     theme_overview_plots
-  
   
   overview_plots <- suppressWarnings(ggarrange(plotlist = plots, ncol = 1, nrow = 3, align = "hv"))
   

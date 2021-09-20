@@ -20,7 +20,7 @@ func_run_model <- function(run_params) {
   # Load required R packages.
   packages_loaded <- func_load_packages(run_params)
   if (packages_loaded == FALSE) {
-    stop("Please install required packages before proceeding!")
+    stop("FATAL: please install required packages before proceeding!")
   }
   
   #### Setup simulation ####
@@ -125,6 +125,9 @@ func_run_model <- function(run_params) {
   }
   
   message("\n** All simulation loops have finished. **")
+  
+  # WIP DEVELOPMENT!
+  save.image("model_output.RData")
   
   #### Plot and write overview ####
   func_plot_write_overview(overview_annual,

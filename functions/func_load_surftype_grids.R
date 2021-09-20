@@ -20,12 +20,17 @@ func_load_surftype_grids <- function(run_params) {
   grids_out <- list(grids = list(),
                     grid_year_id = rep(NA, run_params$n_years))
   
-  grid_paths <- file.path(run_params$dir_data_surftype,
-                          paste0(run_params$filename_surftype_prefix,
-                                 run_params$surftype_years,
-                                 run_params$filename_surftype_suffix))
+  cat("    Looking for surface type grid files...\n")
   
-  grid_years <- run_params$surftype_years
+  run_params <- func_find_input_files_single(run_params, "surftype")
+  grid_paths <- run_params$surftype_paths
+  surftype_n <- length(grid_paths)
+  
+  if (surftype_n == 0) {
+    stop("    FATAL: no surface type grid files found. Please check parameters dir_data_surftype, filename_surftype_prefix and filename_surftype_suffix.")
+  } else {
+    cat("    Found", surftype_n, "surface type grid file(s). Available year(s):", run_params$surftype_years, "\n")
+  }
   
   # Load grids.
   for (grid_id in 1:length(grid_paths)) {
@@ -36,7 +41,7 @@ func_load_surftype_grids <- function(run_params) {
   # For each modeled year find the closest grid year and use its grid.
   for (year_cur_id in 1:run_params$n_years) {
     year_cur <- run_params$years[year_cur_id]
-    grid_year_closest_id <- which.min(abs(grid_years - year_cur))
+    grid_year_closest_id <- which.min(abs(run_params$surftype_years - year_cur))
     grids_out$grid_year_id[year_cur_id] <- grid_year_closest_id
   }
   
