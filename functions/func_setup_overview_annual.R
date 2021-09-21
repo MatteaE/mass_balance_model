@@ -41,10 +41,6 @@ func_setup_overview_annual <- function(run_params) {
                                            year_has_data               = FALSE,
                                            year_starting_swe_available = FALSE) # This is used to optionally enable re-using of the modeled SWE as starting condition for a modeled year. If swe_prev_available[year_id] is TRUE, then year_id can use as starting condition the model output of (year_id-1).
   
-  # Here we will put just the final mass balance for each
-  # year, to produce the overview_areaplot multi-page PDF file.
-  overview_annual$areaplots_list <- list()
-
   # Here we will put daily data for the overview plot
   # of cumulative daily glacierwide mass balance.
   overview_annual$daily_data_list <- list()

@@ -273,10 +273,10 @@ func_plot_overview <- function(overview_annual,
   mb_cumul_df <- data.frame(year = as.Date(paste0(c(overview_annual$summary_df$year[1]-1, overview_annual$summary_df$year), "/10/1")),
                             mb_cumul = c(0, overview_annual$summary_df$mb_cumul))
   plots[[length(plots)+1]] <- ggplot() +
-    geom_vline(xintercept = as.Date(paste0(c(run_params$years[1]-1,run_params$years), "/10/1")), color = "#0000FF") +
-    geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 1), color = "#FF00FF", linetype = "dashed") +
-    geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 2), color = "#FF00FF", linetype = "dotted") +
-    geom_line(data = mb_all_df, aes(x = day, y = mb, group = year_id)) +
+    geom_vline(xintercept = as.Date(paste0(c(run_params$years[1]-1,run_params$years), "/10/1")), color = "#0000FF", size = point_size/6) +
+    geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 1), color = "#FF00FF", linetype = "dashed", size = point_size/6) +
+    geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 2), color = "#FF00FF", linetype = "dotted", size = point_size/6) +
+    geom_line(data = mb_all_df, aes(x = day, y = mb, group = year_id), size = point_size/6) +
     geom_hline(yintercept = 0, linetype = "dashed", size = 1) +
     geom_line(data = mb_cumul_df,  aes(x = year, y = mb_cumul), color = "#FF0000", size = 1) +
     geom_point(data = mb_cumul_df, aes(x = year, y = mb_cumul), color = "#FF0000", shape = 2, size = point_size, stroke = point_size/2.5) +

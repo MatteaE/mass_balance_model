@@ -39,24 +39,6 @@ func_simulate_mb_without_data <- function(run_params,
   cat("rad_fact_ice =", round(year_cur_params$rad_fact_ice, 3), "\n")
   cat("prec_corr =",    round(year_cur_params$prec_corr, 3),    "\n")
   
-  
-  # Compile output with everything we may need
-  # for either plots or optimization.
-  run_output <- list(vec_swe_all           = mb_model_output$vec_swe_all,
-                     vec_surftype_all      = mb_model_output$vec_surftype_all,
-                     vec_massbal_cumul     = mb_model_output$vec_massbal_cumul,
-                     gl_massbal_cumul      = mb_model_output$gl_massbal_cumul,
-                     gl_melt_cumul         = mb_model_output$gl_melt_cumul,
-                     gl_accum_cumul        = mb_model_output$gl_accum_cumul)
-                     # stakes_start_ids_corr = NA,
-                     # stakes_end_ids        = NA,
-                     # stakes_series_mod_all = NA,
-                     # stakes_mb_mod         = NA,
-                     # stakes_mb_meas        = NA,
-                     # stakes_bias           = NA,
-                     # global_bias           = NA,
-                     # global_rms            = NA)
-
-  return(run_output)
+  return(mb_model_output)
   
 }

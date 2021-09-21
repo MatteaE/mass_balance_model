@@ -1,7 +1,7 @@
 ###################################################################################################
 # This program installs all the R packages required to run the glacier mass balance model.        #
 # Author: Enrico Mattea (University of Fribourg)                                                  #
-# Latest change: 2021/8/27                                                                        #
+# Latest change: 2021/9/20                                                                        #
 ###################################################################################################
 
 packages_cran <- c("cowplot",
@@ -10,6 +10,7 @@ packages_cran <- c("cowplot",
                    "gstat",
                    "insol",
                    "metR",
+                   "qpdf",
                    "raster",
                    "Rcpp",
                    "remotes",

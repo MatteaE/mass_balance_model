@@ -23,8 +23,6 @@ func_plot_massbal_vs_elevation <- function(year_data,
   
   #### Plot #1: all the mass balance profiles with elevation bands ####
   # Also the number of cells in each elevation band.
-  # We put the ele_bands_plot_df in the global environment (<<-)
-  # so that we can later write its values to a .csv file.
   ele_bands_plot_values <- getValues(data_dems$elevation_bands_plot[[year_data$dem_grid_id]])
   ele_bands_plot_min    <- min(ele_bands_plot_values, na.rm = T)
   ele_bands_plot_max    <- max(ele_bands_plot_values, na.rm = T)

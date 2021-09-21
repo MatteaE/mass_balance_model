@@ -11,8 +11,7 @@
 func_plot_year <- function(year_data,
                            run_params,
                            data_dems,
-                           data_outlines,
-                           areaplots_list) {
+                           data_outlines) {
   
   cat("\n** Producing year plots... **\n")
   
@@ -27,6 +26,12 @@ func_plot_year <- function(year_data,
                                        run_params,
                                        data_dems,
                                        data_outlines)
+  
+  
+  #### . PLOT THE DAILY METEOROLOGICAL SERIES ####
+  cat("  Meteorological series...\n")
+  plot_weather_series <- func_plot_weather_series(year_data)
+  plots_year <- append(plots_year, list(plot_weather_series))
   
   
   #### . PLOT THE DAILY TIME SERIES OF GLACIER-WIDE MASS BALANCE ####
@@ -66,10 +71,6 @@ func_plot_year <- function(year_data,
                             width = 21 * run_params$size_mult,
                             height = 29.7 * run_params$size_mult))
   
-  # Save the plot of the hydrological mass balance of the year (without single stake values).
-  # We will put it in a PDF file with 1 plot per year (overview_areaplot.pdf).
-  areaplots_list[[year_data$year_id]] <- plots_year[[1]]
   
-  return(list(areaplots_list     = areaplots_list,
-              ele_bands_plot_df  = ele_bands_plot_df))
+  return(ele_bands_plot_df  = ele_bands_plot_df)
 }

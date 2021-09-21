@@ -64,6 +64,7 @@ func_massbal_model <- function(run_params,
   vec_items_n <- run_params$grid_ncol * run_params$grid_nrow * (model_days_n + 1)
   
   # The first three vectors will hold all the output of the mass balance model.
+  # NOTE BUG BUG BUG: here we have 245 MB (for Pers) which are allocated but never freed, big memory leak!!
   vec_snow_swe      <- rep(NA_real_, vec_items_n)
   vec_surf_type     <- rep(NA_real_, vec_items_n) # We use 0 for ice, 1 for firn, 2 for snow, 4 for rock, 5 for debris.
   vec_massbal_cumul <- rep(NA_real_, vec_items_n)
@@ -205,7 +206,6 @@ func_massbal_model <- function(run_params,
                           gl_massbal_cumul  = gl_massbal_cumul,
                           gl_melt_cumul     = cumsum(gl_melt_daily),
                           gl_accum_cumul    = cumsum(gl_accum_daily))
-  
   
   # t2 <- Sys.time()
   # print(t2-t1)

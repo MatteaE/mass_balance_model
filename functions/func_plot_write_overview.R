@@ -55,11 +55,15 @@ func_plot_write_overview <- function(overview_annual,
             quote = FALSE,
             row.names = FALSE)
   
-  # Save to a separate file the annual maps of final annual mass balance
-  # (same as already saved within each annual PDF).
-  overview_areaplot <- suppressWarnings(ggarrange(plotlist = overview_annual$areaplots_list, ncol = 1, nrow = 1, align = "hv"))
-  suppressMessages(ggexport(overview_areaplot,
-                            filename = file.path(run_params$output_dirname, "overview_areaplot.pdf"),
-                            width = 21 * run_params$size_mult,
-                            height = 29.7 * run_params$size_mult)) 
+  
+  # Save to a separate file the annual maps of hydrological mass balance.
+  # We extract them from the annual PDFs and merge them.
+  overview_areaplot_pdf_path <- file.path(run_params$output_dirname, "overview_areaplot.pdf")
+  for (year_id in 1:run_params$n_years) {
+    annual_pdf_path <- file.path(run_params$output_dirname, "annual_results", paste0("massbalance_", run_params$years[year_id], ".pdf"))
+    # Extract first page of the annual PDF (i.e. hydro mass balance map).
+    invisible(pdf_subset(annual_pdf_path, pages = 1, output = paste0("hydro_mb_", year_id, ".pdf")))
+  }
+  invisible(pdf_combine(paste0("hydro_mb_", 1:run_params$n_years, ".pdf"), output = overview_areaplot_pdf_path))
+  invisible(file.remove(paste0("hydro_mb_", 1:run_params$n_years, ".pdf")))
 }

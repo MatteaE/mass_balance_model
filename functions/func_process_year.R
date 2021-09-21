@@ -73,7 +73,6 @@ func_process_year <- function(year_data,
     overview_annual$summary_df$year_starting_swe_available[year_data$year_id+1] <- TRUE
   }
   
-  
   #### . Extract mass balance results ####
   year_data <- func_extract_year_massbalance(year_data,
                                              run_params,
@@ -96,14 +95,10 @@ func_process_year <- function(year_data,
   # This creates a PDF file for the year
   # and also adds a plot to the overview
   # plots, which are saved to PDF at the end.
-  plot_year_result <- func_plot_year(year_data,
-                                     run_params,
-                                     data_all$data_dems,
-                                     data_all$data_outlines,
-                                     overview_annual$areaplots_list)
-  
-  overview_annual$areaplots_list <- plot_year_result[["areaplots_list"]]
-  year_data$ele_bands_plot_df    <- plot_year_result[["ele_bands_plot_df"]]
+  year_data$ele_bands_plot_df    <- func_plot_year(year_data,
+                                                   run_params,
+                                                   data_all$data_dems,
+                                                   data_all$data_outlines)
   
   #### . Write annual model output to files ####
   overview_annual$daily_data_list <- func_write_year_output(year_data,
@@ -124,7 +119,7 @@ func_process_year <- function(year_data,
     stop("FATAL: the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear filtering of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.")
   }
   
-  return(list(year_data = year_data,
+  return(list(year_data       = year_data,
               overview_annual = overview_annual))
   
 }

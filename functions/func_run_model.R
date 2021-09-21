@@ -67,7 +67,6 @@ func_run_model <- function(run_params) {
       cat("\n\n\n\n============  STARTING NEW YEAR:", year_data$year_cur, " ============\n")
       
       year_cur_params   <- func_set_year_params(year_data, run_params)
-      
       year_results_list <- func_process_year(year_data,
                                              year_data_prev,
                                              run_params,
@@ -97,7 +96,6 @@ func_run_model <- function(run_params) {
     message("\n** Processing ", years_todo_n, " year(s) without mass balance measurements... **")
     
     for (year_id in year_ids_todo) {
-      
       #### . Select current year, parameters, data ####
       # Select data from the current year.
       # NOTE: list year_data contains the indices of the
@@ -111,7 +109,6 @@ func_run_model <- function(run_params) {
       cat("\n\n\n\n============  STARTING NEW YEAR:", year_data$year_cur, " ============\n")
       
       year_cur_params <- func_set_year_params(year_data, run_params)
-      
       year_results_list <- func_process_year(year_data,
                                              year_data_prev,
                                              run_params,
@@ -121,17 +118,21 @@ func_run_model <- function(run_params) {
                                              overview_annual)
       year_data         <- year_results_list$year_data
       overview_annual   <- year_results_list$overview_annual
+      
     }
   }
   
   message("\n** All simulation loops have finished. **")
   
-  # WIP DEVELOPMENT!
-  save.image("model_output.RData")
-  
   #### Plot and write overview ####
   func_plot_write_overview(overview_annual,
                            run_params)
+  
+  if (run_params$save_simulation_RData == TRUE) {
+    cat("\n** Saving entire simulation output to file model_output.RData... **\n")
+    save(list = ls(all.names = TRUE), file = "model_output.RData", envir = environment())
+    
+  }
   
   message("\n============  All done! Model has finished succesfully.  ============\n")
   

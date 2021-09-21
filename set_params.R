@@ -16,11 +16,11 @@ run_params <- list(
   # Set input data paths.
   dir_data_weather             =   file.path(dir_data_base, "weather"),      # The weather series goes here
   dir_data_dhm                 =   file.path(dir_data_base, "dhm"),          # Path to the DHM(s) = elevation grids(s) (rectangular, to compute slopes and curvatures)
-  dir_data_surftype            =   file.path(dir_data_base, "surface_type"),     # Path to the grids of surface type (snow/ice/firn/rock/debris) go here
+  dir_data_surftype            =   file.path(dir_data_base, "surftype"),     # Path to the grids of surface type (snow/ice/firn/rock/debris) go here
   dir_data_outline             =   file.path(dir_data_base, "outline"),      # Path to the outlines
   dir_data_radiation           =   file.path(dir_data_base, "radiation"),    # Path to the grids of potential direct radiation (daily sums)
   dir_data_massbalance         =   file.path(dir_data_base, "massbalance"),  # The mass balance observations go here
-  dir_annual_params            =   file.path("input", "pers", "params"),     # The annual model parameter files go here
+  dir_annual_params            =   file.path(dir_data_base, "params"),     # The annual model parameter files go here
   dir_data_recursive           =   TRUE,                                     # [TRUE/FALSE]: should we look recursively for the input files in the specified directories?
   
   # Set filenames and input file properties.
@@ -75,7 +75,7 @@ run_params <- list(
   
   
   #### INITIAL SNOW COVER parameters ####
-  initial_snowline_elevation   =   3650,                         # [m]: initial snow line elevation, at the beginning of each simulated year.
+  initial_snowline_elevation   =   3600,                         # [m]: initial snow line elevation, at the beginning of each simulated year.
   initial_snow_gradient        =   200,                           # [mm w.e. (100 m)-1]: increase of the initial snow amount for every 100 m elevation above the snow line.
   initial_snow_dist_red_fac    =   0.5,                          # [-]: reduction factor to decrease the importance of the snow distribution variability (all components except winter snow probes), for the computed initial snow cover (of each year). 0 means uniform snow distribution, 1 means no reduction.
   initial_snow_dist_from_model =   FALSE,                         # [TRUE/FALSE]: if TRUE, use the simulated SWE of the previous year as starting condition for the simulation. If FALSE, compute initial SWE from topography and given parameters. The first simulated year always uses a computed initial SWE since there is no previous modeled year.
@@ -90,13 +90,13 @@ run_params <- list(
 
     
   #### ACCUMULATION and MELT MODEL default year parameters ####
-  default_prec_corr            =   200,                          # [%]: precipitation correction.
+  default_prec_corr            =   150,                          # [%]: precipitation correction.
   default_prec_summer_fact     =   0.6,                          # [-]: multiplicative reduction of precipitation correction in summer.
   default_prec_elegrad         =   10,                           # [% / 100 m]: altitudinal gradient of precipitation.
   default_temp_elegrad         =   -0.6,                         # [°C / 100 m]: altitudinal gradient of air temperature.
-  default_melt_factor          =   1.0,                          # [mm w.e. C-1 d-1]: melt factor for DDF model.
-  default_rad_fact_ice         =   0.2,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for ice within DDF model.
-  default_rad_fact_snow        =   0.13,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for snow within DDF model.
+  default_melt_factor          =   4.0,                          # [mm w.e. C-1 d-1]: melt factor for DDF model.
+  default_rad_fact_ice         =   0.8,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for ice within DDF model.
+  default_rad_fact_snow        =   0.5,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for snow within DDF model.
   nodata_years_automatic       =   TRUE,                         # [TRUE/FALSE]: if TRUE, the prec_corr/melt_factor/rad_fact_ice/rad_fact_snow parameters for years with no mass balance will be taken as the mean of the parameters optimized over the years with measured mass balance data (only IF there is no overriding value in an annual parameter file AND there is at least one year with measured mass balances). If FALSE, the parameters are taken from the defaults under run_params (only IF there is no overriding value in an annual parameter file).
   
   
@@ -136,7 +136,7 @@ run_params <- list(
   
   
   #### MODELED YEARS choice ####
-  first_year                   =   2008,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   2016                          # Last modeled year (same as previous comment)
+  first_year                   =   1950,                         # First modeled year (usually from October of the previous year to September of this year)
+  last_year                    =   2019                          # Last modeled year (same as previous comment)
   
 )

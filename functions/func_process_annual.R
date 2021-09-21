@@ -55,8 +55,8 @@ func_process_annual <- function(year_data,
                                         prec_corr    = 0)
   }
   
-  # Free some memory after processing.
-  invisible(gc())
+  # Free some memory after processing? Probably useless here.
+  # invisible(gc())
   
   return(year_data)
   

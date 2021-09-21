@@ -10,6 +10,10 @@
 
 func_process_run_params <- function(run_params) {
   
+  # Should we call save.image() at the end of the model run?
+  # Useful for faster debugging.
+  run_params$save_simulation_RData <- FALSE
+  
   # Convert CRS from number to CRS class.
   run_params$grids_crs <- CRS(paste0("EPSG:", run_params$grids_crs))
   
