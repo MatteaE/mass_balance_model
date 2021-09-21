@@ -1,11 +1,11 @@
 ###################################################################################################
 # This program takes a shapefile glacier outline and up to additional 2 outlines                  #
 # (firn, debris), and produces grids which can be used in the mass balance model:                 #
-# DEM, DHM, surface type and optionally daily incoming solar radiation.                           #
+# DHM, surface type and optionally daily incoming solar radiation.                                #
 # The 2 additional shapefiles are optional: in case they are not provided, the output grid        #
 # only has ice and rock (no firn and no debris).                                                  #
 # Author: Enrico Mattea (University of Fribourg)                                                  #
-# Latest change: 2021/8/28                                                                        #
+# Latest change: 2021/9/21                                                                        #
 ###################################################################################################
 
 suppressPackageStartupMessages(library(insol))
@@ -135,7 +135,7 @@ func_do_processing <- function(dem_filepath,
                                reference_filepath,
                                dem_buffer,
                                compute_radiation_bool,
-                               dem_outpath,
+                               # dem_outpath,
                                dhm_outpath,
                                surftype_outpath) {
   
@@ -286,10 +286,10 @@ func_do_processing <- function(dem_filepath,
   
   #### Write grids to output ####
   NAvalue(dhm_out)      <- -9999
-  NAvalue(dem_out)      <- -9999
+  # NAvalue(dem_out)      <- -9999
   NAvalue(surftype_out) <- -9999
   writeRaster(dhm_out, dhm_outpath, overwrite = TRUE)
-  writeRaster(dem_out, dem_outpath, overwrite = TRUE)
+  # writeRaster(dem_out, dem_outpath, overwrite = TRUE)
   writeRaster(surftype_out, surftype_outpath, overwrite = TRUE)
   
   #### Compute radiation if asked to do so ####
@@ -323,6 +323,7 @@ ui <- fluidPage(useShinyjs(),
   
   checkboxInput("checkbox_show_help_text", "Show help text", FALSE),
 
+  # . . Help text which can be shown by ticking a checkbox.
   conditionalPanel(condition = "input.checkbox_show_help_text == 1",
     h5(style="text-align: justify; margin-top: 0px; margin-bottom: 5px;",
        em("This program generates the grids of DEM, surface type and radiation which are used in the glacier mass balance model.")),
@@ -330,6 +331,7 @@ ui <- fluidPage(useShinyjs(),
     h5(style="text-align: justify; margin-top: 0px; margin-bottom: 5px;",
        em("As"), strong(" INPUT DATA "), em("please provide:")),
     tags$div(tags$ul(
+      tags$li(em("the ", strong("glacier name "), "with no whitespaces")),
       tags$li(em("an ", strong("elevation grid "), "of the region of interest (for example .tif or .hgt, from EarthExplorer, SRTM, ASTER or any other)")),
       tags$li(em("a ", strong("glacier outline, "), "for example as shapefile (.shp)")),
       tags$li("(OPTIONAL): ", em("a shapefile with the ", strong("firn area"))),
@@ -342,17 +344,24 @@ ui <- fluidPage(useShinyjs(),
        em("As"), strong(" OUTPUT "), em("the model will create several grids:")),
     tags$div(tags$ul(
       tags$li(em("a ", strong("DHM"), " (altitude grid, as a full rectangle around the glacier)")),
-      tags$li(em("a ", strong("DEM"), " (altitude grid, only where there is ice, with no data outside the glacier)")),
+      # tags$li(em("a ", strong("DEM"), " (altitude grid, only where there is ice, with no data outside the glacier)")),
       tags$li(em("a grid of ", strong("surface type"), " (rock/ice/firn/debris, important for albedo)")),
       tags$li("(OPTIONAL): ", em("365 grids of ", strong("daily potential solar radiation."))),
       style = "margin-top: 0px; margin-bottom: 5px;")),
     h5(style="text-align: justify; margin-top: 0px; margin-bottom: 30px; text-align: justify;",
        em("The ", strong("coordinate system"), " (UTM / WGS84) is adjusted automatically."))),
   
-  # . UI layout ----
+  # . UI layout below the help text ----
   p(),
   
-  # .. Input: choose DEM, outline file, and (optionally) firn and debris shapefiles, as well as reference grid for alignment ----
+  # .. Input: choose glacier name (with inline CSS modifier to have label and field on same row),
+  # DEM, outline file, and (optionally) firn and debris shapefiles, as well as reference grid for alignment ----
+  tags$head(
+    tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 10px; } 
+                #inline .form-group { display: table-row;}")
+  ),
+  tags$div(id = "inline", textInput("choose_glacier_name", "Choose glacier name:", placeholder = "Glacier name")),
+  p(),
   shinyFilesButton("choose_dem_file", strong("Choose input DEM file"), "Choose input DEM file", FALSE, style = "width: 60%;"),
   p(),
   shinyFilesButton("choose_shp_file", strong("Choose input glacier shapefile"), "Choose input glacier shapefile", FALSE, style = "width: 60%;"),
@@ -378,6 +387,7 @@ ui <- fluidPage(useShinyjs(),
   p(),
   
   # .. Text fields: show the full path of the chosen DEM and outline file ----
+  htmlOutput("glaciername_chosen_string"),
   htmlOutput("dem_chosen_string"),
   htmlOutput("shp_chosen_string"),
   htmlOutput("firn_chosen_string"),
@@ -402,13 +412,24 @@ server <- function(input, output, session) {
   shinyFileChoose(input, "choose_debris_file", roots=volumes, session=session)
   shinyFileChoose(input, "choose_reference_file", roots=volumes, session=session)
 
+  glaciername       <- reactive(input$choose_glacier_name)
   demfilepath       <- reactive(as.character(parseFilePaths(volumes, input$choose_dem_file)$datapath))
   shpfilepath       <- reactive(as.character(parseFilePaths(volumes, input$choose_shp_file)$datapath))
   firnfilepath      <- reactive(as.character(parseFilePaths(volumes, input$choose_firn_file)$datapath))
   debrisfilepath    <- reactive(as.character(parseFilePaths(volumes, input$choose_debris_file)$datapath))
   referencefilepath <- reactive(as.character(parseFilePaths(volumes, input$choose_reference_file)$datapath))
   
-  # Show the user which files have been provided and which are still missing.
+  # Disable "RUN!" button if the required input is missing.
+  observe({
+    toggleState("startprocessing", isTruthy(glaciername()) && isTruthy(demfilepath()) && isTruthy(shpfilepath()))
+  })
+  
+  # Show the user which input has been provided and which is still missing.
+  output$glaciername_chosen_string <- renderText({
+    ifelse(isTruthy(glaciername()),
+           "<font color=\"#00C000\"><b>Glacier name selected.</b></font color>",
+           "<font color=\"#FF0000\"><b>Glacier name not yet selected.</b></font color>")
+  })
   output$dem_chosen_string <- renderText({
     ifelse(isTruthy(demfilepath()),
            "<font color=\"#00C000\"><b>Input DEM file selected.</b></font color>",
@@ -438,16 +459,17 @@ server <- function(input, output, session) {
   
   # Button to start processing.
   observeEvent(input$startprocessing, {
+    req(input$choose_glacier_name)
     req(input$choose_dem_file)
     req(input$choose_shp_file)
     firnfilepath_sel      <- ifelse(isTruthy(firnfilepath()), firnfilepath(), NA)
     debrisfilepath_sel    <- ifelse(isTruthy(debrisfilepath()), debrisfilepath(), NA)
     referencefilepath_sel <- ifelse(isTruthy(referencefilepath()), referencefilepath(), NA)
     showModal(modalDialog(h3("Processing... See RStudio console for progress."), footer=NULL))
-    func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$checkbox_compute_radiation, file.path(getwd(), "dem_glacier.asc"), file.path(getwd(), "dhm_glacier.asc"), file.path(getwd(), "surface_type_glacier.asc"))
-    file.rename(file.path(getwd(), "dem_glacier.asc"), file.path(getwd(), "dem_glacier.grid"))
-    file.rename(file.path(getwd(), "dhm_glacier.asc"), file.path(getwd(), "dhm_glacier.grid"))
-    file.rename(file.path(getwd(), "surface_type_glacier.asc"), file.path(getwd(), "surface_type_glacier.grid"))
+    func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$checkbox_compute_radiation, file.path(getwd(), "dhm_glacier.asc"), file.path(getwd(), "surface_type_glacier.asc"))
+    # file.rename(file.path(getwd(), "dem_glacier.asc"), file.path(getwd(), "dem_glacier.grid"))
+    file.rename(file.path(getwd(), "dhm_glacier.asc"), file.path(getwd(), paste0("dhm_", glaciername(), "_YEAR.grid")))
+    file.rename(file.path(getwd(), "surface_type_glacier.asc"), file.path(getwd(), paste0("surface_type_", glaciername(), "_YEAR.grid")))
     removeModal()
     showModal(modalDialog(h3("Processing finished. See RStudio console for details. You can now close the program."), footer=NULL))
   })
