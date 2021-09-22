@@ -40,7 +40,10 @@ func_plot_year_mb_maps <- function(year_data,
   outline_linesize <- 0.7
   
   palette_RdBu_ext <- c("#33000F", RColorBrewer::brewer.pal(11, "RdBu")[c(1:4,6,8:11)], "#011830")
-  max_mb <- abs(2*run_params$mb_colorscale_breaks[1] - run_params$mb_colorscale_breaks[2]) # Values exceeding +/- max_mb will be clamped.
+  # Values exceeding +/- max_mb will be clamped.
+  # We need set this so that the colors are well distributed
+  # in the scale (else they are too dark or washed out).
+  max_mb <- abs(2*run_params$mb_colorscale_breaks[1] - run_params$mb_colorscale_breaks[2])
   
   plot_df_base <- data.frame(coordinates(data_dems$elevation[[year_data$dem_grid_id]]))
   elevation_df <- data.frame(plot_df_base, z = getValues(data_dems$elevation[[year_data$dem_grid_id]]))

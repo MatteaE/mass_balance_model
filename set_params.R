@@ -6,31 +6,21 @@
 #                 This file contains the fixed parameter definitions for the model run.           #
 ###################################################################################################
 
-dir_data_base                <-   file.path("input", "pers")        # The base directory for all the data
-
 run_params <- list(
   
   name_glacier                =    "pers",                    # Glacier name, used for output directory naming.
   
   #### INPUT-related parameters ####
-  # Set input data paths.
-  dir_data_weather             =   file.path(dir_data_base, "weather"),      # The weather series goes here
-  dir_data_dhm                 =   file.path(dir_data_base, "dhm"),          # Path to the DHM(s) = elevation grids(s) (rectangular, to compute slopes and curvatures)
-  dir_data_surftype            =   file.path(dir_data_base, "surftype"),     # Path to the grids of surface type (snow/ice/firn/rock/debris) go here
-  dir_data_outline             =   file.path(dir_data_base, "outline"),      # Path to the outlines
-  dir_data_radiation           =   file.path(dir_data_base, "radiation"),    # Path to the grids of potential direct radiation (daily sums)
-  dir_data_massbalance         =   file.path(dir_data_base, "massbalance"),  # The mass balance observations go here
-  dir_annual_params            =   file.path(dir_data_base, "params"),     # The annual model parameter files go here
-  dir_data_recursive           =   TRUE,                                     # [TRUE/FALSE]: should we look recursively for the input files in the specified directories?
+  dir_data_recursive           =   TRUE,                         # [TRUE/FALSE]: should we look recursively for the input files in the specified directories?
   
-  # Set filenames and input file properties.
-  filename_weather             =   "pers_sils_d_proc.dat",      # File name of the weather series
+  # Set FILE NAMES and input file properties.
+  filename_weather             =   "pers_sils_d_proc.dat",       # File name of the weather series
   file_weather_nskip           =   2,                            # [-]: number of lines to skip in the weather file
   
-  grids_crs                    =   21781,            # Reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
+  grids_crs                    =   21781,                        # Reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
   
   filename_dhm_prefix          =   "dhm_pers",
-  filename_dhm_suffix          =   ".grid",                       # DHM name is <prefix><year><suffix>
+  filename_dhm_suffix          =   ".grid",                      # DHM name is <prefix><year><suffix>
   dhm_interpolate              =   FALSE,                        # [TRUE/FALSE]: should we use linear interpolation to compute each year's DHM?
   
   filename_surftype_prefix     =   "firn_pers",
@@ -100,28 +90,12 @@ run_params <- list(
   nodata_years_automatic       =   TRUE,                         # [TRUE/FALSE]: if TRUE, the prec_corr/melt_factor/rad_fact_ice/rad_fact_snow parameters for years with no mass balance will be taken as the mean of the parameters optimized over the years with measured mass balance data (only IF there is no overriding value in an annual parameter file AND there is at least one year with measured mass balances). If FALSE, the parameters are taken from the defaults under run_params (only IF there is no overriding value in an annual parameter file).
   
   
-  #### STAKES parameters ####
-  stakes_unknown_latest_start  =   "2/28",                       # [month/day]: in the automatic search of the start date for snow pits and depth probings without a measured start date, we search no later than this day of year. The starting date will be set to the day of the minimum cumulative mass balance between the start of the simulation and the date set here. Something like end of February should be safe for all stakes. 
-  stake_cluster_distance       =   50,                          # [m]: threshold distance for clustering stakes together. This is used to ensure a more uniform distribution of the stakes: if measurements are very dense in one place they can induce a bias in the optimization, so we average stakes in clusters. This can reduce the total number of stakes. Only stakes measured on the same days can be clustered. A value of 0 corresponds to no clustering.
-  snow_probes_idw_exp          =   0.75,                         # [-]: exponent for the IDW interpolation of winter snow measurements
-  
-  
-  #### MODEL OPTIMIZATION parameters ####
-  optim_max_corr_fact          =   1,                            # [-]: maximum allowable positive correction to the melt factor and the radiation factor during optimization, in units of the factors themselves (i.e. by how many times these can be increased). Only positive values make sense. A larger value is safer if a reasonable value for the melt factors is not known, but the optimization will be a bit slower. There is no parameter for the negative correction: it is automatically set to maximum 0.
-  optim_bias_threshold         =   1,                            # [mm w.e.]: if abs(bias) is below this threshold then we stop the optimization. This saves us a couple iterations since the optim() function will stop when the value *change* is less than a threshold, not the value itself.
-  optim_max_iter               =   20,                           # [-]: forcefully stop mass balance optimization after this number of iterations, even if bias is not within threshold. This is useful in case the optimization is not converging due to avalanches barely reaching a stake, thus a small change in the snow amounts changes a stake's simulated mass balance by a lot, thus bias keeps jumping around 0. In normal conditions, the model converges much faster than 20 iterations.
-
-  
   #### FIXED MASS BALANCE PERIODS choice ####
-  massbal_fixed_annual_start   =   "10/31",                       # [month/day]: start of the user-defined fixed period for annual mass balance evaluation. This is referred to (<year_cur> - 1).
+  massbal_fixed_annual_start   =   "10/31",                      # [month/day]: start of the user-defined fixed period for annual mass balance evaluation. This is referred to (<year_cur> - 1).
   massbal_fixed_annual_end     =   "8/31",                       # [month/day]: end of the user-defined fixed period for annual mass balance evaluation. This is referred to <year_cur>.
   massbal_fixed_winter_start   =   "10/1",                       # [month/day]: start of the user-defined fixed period for winter mass balance evaluation. This is referred to (<year_cur> - 1).
   massbal_fixed_winter_end     =   "4/30",                       # [month/day]: end of the user-defined fixed period for winter mass balance evaluation. This is referred to <year_cur>.
-  
-  
-  #### MASS BALANCE PROCESSING parameters ####
-  ele_bands_ela_size           =   10,                           # [m]: to compute the equilibrium line altitude, divide the glacier grid into elevation bands with this vertical extent.
-  
+
   
   #### PLOT parameters ####
   mb_colorscale_breaks         =   c(-2,-1.5,-1,-0.5,-0.2,0,0.2,0.5,1,1.5,2), # [m w.e.]: use these breaks in the color scale for mass balance maps. NOTE: these have to be exactly 11 at the moment.
@@ -129,14 +103,8 @@ run_params <- list(
   plot_daily_maps              =   FALSE,                         # [TRUE/FALSE]: produce daily plots of mass balance and SWE (slow!).
   
   
-  #### OUTPUT parameters ####
-  output_grid_ext           =      ".tif",                       # extension of the output mass balance grids. Use ?writeFormats to check what is available. Common choices are ".tif" for GeoTiff, and ".asc" for ASCII grid.
-  dem_write                    =   TRUE,                        # [TRUE/FALSE]: should we write the annual used DEM to the output directory?
-  filename_dem_prefix          =   "dem_pers_",               # output DEM name is <prefix><year><output_grid_exts>
-  
-  
   #### MODELED YEARS choice ####
-  first_year                   =   1950,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   2019                          # Last modeled year (same as previous comment)
+  first_year                   =   1990,                         # First modeled year (usually from October of the previous year to September of this year)
+  last_year                    =   2010                          # Last modeled year (same as previous comment)
   
 )

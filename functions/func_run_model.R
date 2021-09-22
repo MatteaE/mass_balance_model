@@ -34,6 +34,12 @@ func_run_model <- function(run_params) {
     sourceCpp(file.path("functions", "func_avalanche_gruber.cpp"), cacheDir = "functions")
   }
   
+  # Compute and apply multiplier for color scale of mass balance maps.
+  mb_colorscale_multiplier <- func_compute_massbal_colorscale_multiplier(data_all$data_massbalance_annual,
+                                                                         data_all$data_dems,
+                                                                         data_all$data_weather)
+  run_params$mb_colorscale_breaks <- run_params$mb_colorscale_breaks * mb_colorscale_multiplier
+  
   # Compute global grid parameters (numbers of cells and cell size).
   run_params        <- func_compute_grid_parameters(run_params, data_all$data_dhms)
   
