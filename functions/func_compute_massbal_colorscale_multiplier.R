@@ -21,11 +21,14 @@
 
 func_compute_massbal_colorscale_multiplier <- function(data_massbalance_annual,
                                                        data_dems,
-                                                       data_weather) {
+                                                       data_weather,
+                                                       run_params) {
   
   multipliers_possible <- c(0.5, 1, 1.5, 2, 2.5, 3:10)
   
-  if (nrow(data_massbalance_annual) > 0) {
+  data_massbalance_annual_sim <- data_massbalance_annual[as.integer(format(data_massbalance_annual$end_date, "%Y")) %in% run_params$years,]
+  
+  if (nrow(data_massbalance_annual_sim) > 0) {
     
     mb_val <- as.numeric(quantile(abs(data_massbalance_annual$massbal), 0.9)) / 1e3
     

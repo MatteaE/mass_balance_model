@@ -14,8 +14,6 @@ func_run_model <- function(run_params) {
   message("|++++++++++++++++                          ++++++++++++++++|")
   message("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n\n")
   
-  # Set English language for dates (in the plots).
-  Sys.setlocale(category = "LC_TIME", locale = "en_US.UTF-8")
   
   # Load required R packages.
   packages_loaded <- func_load_packages(run_params)
@@ -37,7 +35,9 @@ func_run_model <- function(run_params) {
   # Compute and apply multiplier for color scale of mass balance maps.
   mb_colorscale_multiplier <- func_compute_massbal_colorscale_multiplier(data_all$data_massbalance_annual,
                                                                          data_all$data_dems,
-                                                                         data_all$data_weather)
+                                                                         data_all$data_weather,
+                                                                         run_params)
+  
   run_params$mb_colorscale_breaks <- run_params$mb_colorscale_breaks * mb_colorscale_multiplier
   
   # Compute global grid parameters (numbers of cells and cell size).

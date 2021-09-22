@@ -80,13 +80,13 @@ run_params <- list(
 
     
   #### ACCUMULATION and MELT MODEL default year parameters ####
-  default_prec_corr            =   150,                          # [%]: precipitation correction.
-  default_prec_summer_fact     =   0.6,                          # [-]: multiplicative reduction of precipitation correction in summer.
-  default_prec_elegrad         =   10,                           # [% / 100 m]: altitudinal gradient of precipitation.
-  default_temp_elegrad         =   -0.6,                         # [°C / 100 m]: altitudinal gradient of air temperature.
-  default_melt_factor          =   4.0,                          # [mm w.e. C-1 d-1]: melt factor for DDF model.
-  default_rad_fact_ice         =   0.8,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for ice within DDF model.
-  default_rad_fact_snow        =   0.5,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: radiation factor for snow within DDF model.
+  default_prec_corr            =   150,                          # [%]: default precipitation correction in case no data are available.
+  default_prec_summer_fact     =   0.8,                          # [-]: default multiplicative reduction of precipitation correction in summer.
+  default_prec_elegrad         =   10,                           # [% / 100 m]: default altitudinal gradient of precipitation.
+  default_temp_elegrad         =   -0.6,                         # [°C / 100 m]: default altitudinal gradient of air temperature.
+  default_melt_factor          =   4.0,                          # [mm w.e. C-1 d-1]: default melt factor for DDF model.
+  default_rad_fact_ice         =   0.8,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: default radiation factor for ice within DDF model.
+  default_rad_fact_snow        =   0.5,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: default radiation factor for snow within DDF model.
   nodata_years_automatic       =   TRUE,                         # [TRUE/FALSE]: if TRUE, the prec_corr/melt_factor/rad_fact_ice/rad_fact_snow parameters for years with no mass balance will be taken as the mean of the parameters optimized over the years with measured mass balance data (only IF there is no overriding value in an annual parameter file AND there is at least one year with measured mass balances). If FALSE, the parameters are taken from the defaults under run_params (only IF there is no overriding value in an annual parameter file).
   
   
@@ -97,14 +97,8 @@ run_params <- list(
   massbal_fixed_winter_end     =   "4/30",                       # [month/day]: end of the user-defined fixed period for winter mass balance evaluation. This is referred to <year_cur>.
 
   
-  #### PLOT parameters ####
-  mb_colorscale_breaks         =   c(-2,-1.5,-1,-0.5,-0.2,0,0.2,0.5,1,1.5,2), # [m w.e.]: use these breaks in the color scale for mass balance maps. NOTE: these have to be exactly 11 at the moment.
-  ele_bands_plot_size          =   50,                           # [m]: plot the annual mass balance profile as function of elevation, using elevation bands with this vertical extent.
-  plot_daily_maps              =   FALSE,                         # [TRUE/FALSE]: produce daily plots of mass balance and SWE (slow!).
-  
-  
   #### MODELED YEARS choice ####
   first_year                   =   1990,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   2010                          # Last modeled year (same as previous comment)
+  last_year                    =   1992                          # Last modeled year (same as previous comment)
   
 )

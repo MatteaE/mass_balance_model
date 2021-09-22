@@ -41,7 +41,6 @@ func_process_run_params <- function(run_params) {
   run_params$dem_write                   <-   TRUE        # [TRUE/FALSE]: should we write the annual used DEM to the output directory?
   run_params$filename_dem_prefix         <-   paste0("dem_", run_params$glacier_name, "_") # output DEM name is <prefix><year><output_grid_ext>
   
-  
   #### STAKES parameters ####
   run_params$stakes_unknown_latest_start <-   "2/28"      # [month/day]: in the automatic search of the start date for snow pits and depth probings without a measured start date, we search no later than this day of year. The starting date will be set to the day of the minimum cumulative mass balance between the start of the simulation and the date set here. Something like end of February should be safe for all stakes. 
   run_params$stake_cluster_distance      <-   50          # [m]: threshold distance for clustering stakes together. This is used to ensure a more uniform distribution of the stakes: if measurements are very dense in one place they can induce a bias in the optimization, so we average stakes in clusters. This can reduce the total number of stakes. Only stakes measured on the same days can be clustered. A value of 0 corresponds to no clustering.
@@ -49,6 +48,11 @@ func_process_run_params <- function(run_params) {
   
   #### MASS BALANCE PROCESSING parameters ####
   run_params$ele_bands_ela_size          <-   10          # [m]: to compute the equilibrium line altitude, divide the glacier grid into elevation bands with this vertical extent.
+  
+  #### PLOT parameters ####
+  run_params$mb_colorscale_breaks        <-   c(-2,-1.5,-1,-0.5,-0.2,0,0.2,0.5,1,1.5,2) # [m w.e.]: use these breaks in the color scale for mass balance maps. NOTE: these have to be exactly 11 at the moment.
+  run_params$ele_bands_plot_size         <-   50          # [m]: plot the annual mass balance profile as function of elevation, using elevation bands with this vertical extent.
+  run_params$plot_daily_maps             <-   FALSE       # [TRUE/FALSE]: produce daily plots of mass balance and SWE (slow!).
   
   
   #### DERIVED parameters, automatically computed ####
