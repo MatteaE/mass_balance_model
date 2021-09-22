@@ -105,8 +105,26 @@ func_plot_massbal_cumul <- function(year_data,
     ylab("Mass balance [m w.e.]") +
     theme_mbcumul_plots
   
+  
+  # Generate plot of daily melt, could be compared to a hydrograph.
+  massbal_daily_df <- data.frame(date  = seq.Date(year_data$model_time_bounds[1], year_data$model_time_bounds[2], by = "1 day"),
+                                 melt  = diff(year_data$mod_output_annual_cur$gl_melt_cumul),
+                                 day_id = massbal_cumul_df$day_id[2:nrow(massbal_cumul_df)])
+  
+  plots_mb[[3]] <- ggplot(massbal_daily_df) +
+    annotate("text", x = months_labels_df$day_id, y = Inf, label = months_labels_df$label, vjust = 2, fontface = "bold", size = 5) +
+    geom_vline(xintercept = 0, linetype = "longdash", size = 0.5) +
+    geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", size = 0.5, color = "#0000FF") +
+    {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF")} +
+    {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", size = 0.5, color = "#FF00FF")} +
+    geom_line(aes(x = day_id, y = melt), color = "#FF0000", size = 0.7) +
+    scale_x_continuous(expand = expansion(mult = 0.02)) +
+    scale_y_continuous(breaks = pretty(massbal_daily_df$melt, n = 5), expand = expansion(mult = c(0,0.05))) +
+    ylab("Daily melt [mm w.e.]") +
+    theme_mbcumul_plots
+  
   # Align panels.
-  plots_mb_out <- plot_grid(plotlist = plots_mb, align = "hv", ncol = 1, nrow = 2)
+  plots_mb_out <- plot_grid(plotlist = plots_mb, align = "hv", ncol = 1, nrow = 3)
   
   return(plots_mb_out)
 }

@@ -44,27 +44,37 @@ func_elevation_preprocess <- function(run_params, elevation) {
   # and we remove those sinks by raising them to the mean of the 4-neighbors.
   # This might stop drainage of some other cell, so we repeat topmodel::sinkfill(),
   # and we iterate until there are no sinks of any kind left.
-  invisible(capture.output(elevation_filled <- setValues(elevation_unpatched,    # elevation_filled will be the output.
-                                                         topmodel::sinkfill(as.matrix(elevation_unpatched),
-                                                                            res = xres(elevation_unpatched),
-                                                                            degree = 0.5))))
+  invisible(capture.output(
+    elevation_filled <- setValues(elevation_unpatched,    # elevation_filled is the raster returned at the end.
+                                  topmodel::sinkfill(as.matrix(elevation_unpatched),
+                                                     res = xres(elevation_unpatched),
+                                                     degree = 0.5))
+  ))
   
   elevation_filled_focal_min <- focal(elevation_filled, w = rbind(c(Inf,1,Inf),c(1,1,1),c(Inf,1,Inf)), fun = min)
-  ids_sink_4neighbors <- which((elevation_filled < elevation_filled_focal_min + 0.01)[])
+  # Remove NAs at the border of elevation_filled_focal_min
+  elevation_filled_focal_min <- subs(elevation_filled_focal_min, data.frame(ID = NA, repl = 0), subsWithNA = FALSE)
+  ids_sink_4neighbors <- which(getValues(elevation_filled - (elevation_filled_focal_min + 0.01)) < 0)
+  
   sinkfill_iter_count <- 1
   
   while (length(ids_sink_4neighbors) > 0) {
     
-    # cat("    Iteration", sinkfill_iter_count, "to fill all sinks...\n")
+    cat("    Iteration", sinkfill_iter_count, "to fill all sinks...\n")
     
     # Raise isolated 4-connectivity sinks to the mean of the 4-neighbors.
     elevation_filled_mean_nofocal <- focal(elevation_filled, w = rbind(c(0,1/4,0),c(1/4,0,1/4),c(0,1/4,0)))
     elevation_filled[ids_sink_4neighbors] <- elevation_filled_mean_nofocal[ids_sink_4neighbors]
     # Fill again in case we have created new sinks.
-    invisible(capture.output(elevation_filled <- setValues(elevation_filled, topmodel::sinkfill(as.matrix(elevation_filled), res = xres(elevation_filled), degree = 0.5))))
+    invisible(capture.output(
+      elevation_filled <- setValues(elevation_filled, topmodel::sinkfill(as.matrix(elevation_filled), res = xres(elevation_filled), degree = 0.5))
+      ))
     # Look again for 4-connectivity sinks.
     elevation_filled_focal_min <- focal(elevation_filled, w = rbind(c(Inf,1,Inf),c(1,1,1),c(Inf,1,Inf)), fun = min)
-    ids_sink_4neighbors <- which((elevation_filled < elevation_filled_focal_min + 0.01)[])
+    # Remove NAs at the border of elevation_filled_focal_min
+    elevation_filled_focal_min <- subs(elevation_filled_focal_min, data.frame(ID = NA, repl = 0), subsWithNA = FALSE)
+    ids_sink_4neighbors <- which(getValues(elevation_filled - (elevation_filled_focal_min + 0.01)) < 0)
+    
     sinkfill_iter_count <- sinkfill_iter_count + 1
     
   }
