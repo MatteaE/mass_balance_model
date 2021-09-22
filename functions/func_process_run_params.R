@@ -33,10 +33,10 @@ func_process_run_params <- function(run_params) {
   run_params$optim_bias_threshold        <-   1           # [mm w.e.]: if abs(bias) is below this threshold then we stop the optimization. This saves us a couple iterations since the optim() function will stop when the value *change* is less than a threshold, not the value itself.
   run_params$optim_max_iter              <-   20          # [-]: force mass balance optimization to stop after this number of iterations, even if bias is not within threshold. This is useful in case the optimization is not converging due to avalanches barely reaching a stake, thus a small change in the snow amounts changes a stake's simulated mass balance by a lot, thus bias keeps jumping around 0. In normal conditions, the model converges much faster than 20 iterations.
   
-  #### OUTPUT parameters ####
+  #### OUTPUT DEM parameters ####
   run_params$output_grid_ext             <-   ".tif"      # extension of the output mass balance grids. Use ?writeFormats to check what is available. Common choices are ".tif" for GeoTiff, and ".asc" for ASCII grid.
   run_params$dem_write                   <-   TRUE        # [TRUE/FALSE]: should we write the annual used DEM to the output directory?
-  run_params$filename_dem_prefix         <-   paste0("dem_", run_params$glacier_name, "_") # output DEM name is <prefix><year><output_grid_ext>
+  run_params$filename_dem_prefix         <-   paste0("dem_", run_params$name_glacier, "_") # output DEM name is <prefix><year><output_grid_ext>
   
   #### STAKES parameters ####
   run_params$stakes_unknown_latest_start <-   "2/28"      # [month/day]: in the automatic search of the start date for snow pits and depth probings without a measured start date, we search no later than this day of year. The starting date will be set to the day of the minimum cumulative mass balance between the start of the simulation and the date set here. Something like end of February should be safe for all stakes. 
