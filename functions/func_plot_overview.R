@@ -48,33 +48,33 @@ func_plot_overview <- function(overview_annual,
   # Time series of other annual mass balances:
   # over the measurement period with no correction,
   # over the hydrological year,
-  # over a fixed (user-defined) period.
+  # [DISABLED] over a fixed (user-defined) period.
   # If we model just one year, add point plot so that something is visible.
   single_year_point1 <- NULL
   single_year_point2 <- NULL
-  single_year_point3 <- NULL
+  # single_year_point3 <- NULL
   if (single_year) {
     single_year_point1 <- geom_point(aes(x = year, y = mb_annual_meas), color = "#FF00FF")
     single_year_point2 <- geom_point(aes(x = year, y = mb_annual_hydro), color = "#0000FF")
-    single_year_point3 <- geom_point(aes(x = year, y = mb_annual_fixed), color = "#00FFFF")
+    # single_year_point3 <- geom_point(aes(x = year, y = mb_annual_fixed), color = "#00FFFF")
   }
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
     {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_line(aes(x = year, y = mb_annual_meas), color = "#FF00FF", size = 1)} +
     geom_line(aes(x = year, y = mb_annual_hydro), color = "#0000FF", size = 1) +
-    geom_line(aes(x = year, y = mb_annual_fixed), color = "#00FFFF", size = 1) +
+    # geom_line(aes(x = year, y = mb_annual_fixed), color = "#00FFFF", size = 1) +
     {if (any(overview_annual$summary_df$year_has_data) == TRUE) single_year_point1} +
     single_year_point2 +
-    single_year_point3 +
+    # single_year_point3 +
     ylab("Mass balance [m w.e.]") +
     scale_y_continuous(expand = expansion(0.3, 0)) +
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("Annual mass balance (no local correction)") +
-    {if (any(overview_annual$summary_df$year_has_data) == TRUE) annotation_custom(grobTree(textGrob("Measurement period", x=0.05, y = 0.19, hjust = 0,
+    {if (any(overview_annual$summary_df$year_has_data) == TRUE) annotation_custom(grobTree(textGrob("Measurement period", x=0.05, y = 0.12, hjust = 0,
                                         gp=gpar(col="#FF00FF", fontsize = base_size * 1., fontface="bold"))))} +
-    annotation_custom(grobTree(textGrob("Hydrological year", x=0.05, y = 0.12, hjust = 0,
+    annotation_custom(grobTree(textGrob("Hydrological year", x=0.05, y = 0.05, hjust = 0,
                                         gp=gpar(col="#0000FF", fontsize = base_size * 1., fontface="bold")))) +
-    annotation_custom(grobTree(textGrob("Fixed period", x=0.05, y = 0.05, hjust = 0,
-                                        gp=gpar(col="#00FFFF", fontsize = base_size * 1., fontface="bold")))) +
+    # annotation_custom(grobTree(textGrob("Fixed period", x=0.05, y = 0.05, hjust = 0,
+                                        # gp=gpar(col="#00FFFF", fontsize = base_size * 1., fontface="bold")))) +
     theme_overview_plots
   
   
@@ -202,9 +202,16 @@ func_plot_overview <- function(overview_annual,
   x_breaks_cumul <- seq(overview_annual$summary_df$year[1]-1, overview_annual$summary_df$year[length(overview_annual$summary_df$year)], by = max(1, floor((length(overview_annual$summary_df$year)+1) / 4)))
   df_lines <- data.frame(year_start = overview_annual$summary_df$year - 1,
                          year_end   = overview_annual$summary_df$year,
-                         mb_start   = c(0, overview_annual$summary_df$mb_cumul[1:(nrow(overview_annual$summary_df)-1)]),
                          mb_end     = overview_annual$summary_df$mb_cumul,
                          has_data   = as.character(overview_annual$summary_df$year_has_data))
+  # Handle the case in which there is a single year,
+  # else mb_start gets 2 elements due to slicing.
+  if (nrow(df_lines) > 1) {
+    df_lines$mb_start   <- c(0.0, overview_annual$summary_df$mb_cumul[1:(nrow(overview_annual$summary_df)-1)])
+  } else {
+    df_lines$mb_start <- 0.0
+  }
+  
   if (!all(overview_annual$summary_df$year_has_data)) {
     # Try smart positioning of the legend: top left
     # if first point (0.0: cumulative!) is low,
@@ -286,7 +293,7 @@ func_plot_overview <- function(overview_annual,
     ggtitle("Cumulative mass balance (hydrological years)") +
     theme_overview_plots
   
-  overview_plots <- suppressWarnings(ggarrange(plotlist = plots, ncol = 1, nrow = 3, align = "hv"))
+  overview_plots <- suppressWarnings(suppressMessages(ggarrange(plotlist = plots, ncol = 1, nrow = 3, align = "hv")))
   
   return(overview_plots)
   

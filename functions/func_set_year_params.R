@@ -89,7 +89,7 @@ func_set_year_params <- function(year_data,
 
   
   # Compute derived parameters.
-  year_cur_params <- func_compute_derived_year_params(year_data, year_cur_params)
+  year_cur_params <- func_compute_derived_year_params(year_data, year_cur_params, run_params)
   
   return(year_cur_params)
   

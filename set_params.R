@@ -88,17 +88,10 @@ run_params <- list(
   default_rad_fact_ice         =   0.8,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: default radiation factor for ice within DDF model.
   default_rad_fact_snow        =   0.5,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: default radiation factor for snow within DDF model.
   nodata_years_automatic       =   TRUE,                         # [TRUE/FALSE]: if TRUE, the prec_corr/melt_factor/rad_fact_ice/rad_fact_snow parameters for years with no mass balance will be taken as the mean of the parameters optimized over the years with measured mass balance data (only IF there is no overriding value in an annual parameter file AND there is at least one year with measured mass balances). If FALSE, the parameters are taken from the defaults under run_params (only IF there is no overriding value in an annual parameter file).
-  
-  
-  #### FIXED MASS BALANCE PERIODS choice ####
-  massbal_fixed_annual_start   =   "10/31",                      # [month/day]: start of the user-defined fixed period for annual mass balance evaluation. This is referred to (<year_cur> - 1).
-  massbal_fixed_annual_end     =   "8/31",                       # [month/day]: end of the user-defined fixed period for annual mass balance evaluation. This is referred to <year_cur>.
-  massbal_fixed_winter_start   =   "10/1",                       # [month/day]: start of the user-defined fixed period for winter mass balance evaluation. This is referred to (<year_cur> - 1).
-  massbal_fixed_winter_end     =   "4/30",                       # [month/day]: end of the user-defined fixed period for winter mass balance evaluation. This is referred to <year_cur>.
 
   
   #### MODELED YEARS choice ####
-  first_year                   =   1990,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   1992                          # Last modeled year (same as previous comment)
+  first_year                   =   1995,                         # First modeled year (usually from October of the previous year to September of this year)
+  last_year                    =   2010                          # Last modeled year (same as previous comment)
   
 )

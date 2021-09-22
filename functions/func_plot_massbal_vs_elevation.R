@@ -31,7 +31,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
                                       mb_annual_meas_corr = NA,
                                       mb_annual_meas      = NA,
                                       mb_annual_hydro     = NA,
-                                      mb_annual_fixed     = NA,
+                                      # mb_annual_fixed     = NA,
                                       mb_winter_fixed     = NA,
                                       mb_winter_meas      = NA)
   for (band_id in 1:nrow(ele_bands_plot_df)) {
@@ -42,7 +42,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
       ele_bands_plot_df$mb_annual_meas[band_id]      <- mean(getValues(year_data$massbal_annual_maps$meas_period)[band_cell_ids])
     }
     ele_bands_plot_df$mb_annual_hydro[band_id]     <- mean(getValues(year_data$massbal_annual_maps$hydro)[band_cell_ids])
-    ele_bands_plot_df$mb_annual_fixed[band_id]     <- mean(getValues(year_data$massbal_annual_maps$fixed)[band_cell_ids])
+    # ele_bands_plot_df$mb_annual_fixed[band_id]     <- mean(getValues(year_data$massbal_annual_maps$fixed)[band_cell_ids])
     ele_bands_plot_df$mb_winter_fixed[band_id]     <- mean(getValues(year_data$massbal_winter_maps$fixed)[band_cell_ids])
     if (year_data$process_winter) {
       ele_bands_plot_df$mb_winter_meas[band_id]    <- mean(getValues(year_data$massbal_winter_maps$meas_period)[band_cell_ids])
@@ -53,7 +53,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
   # The na.omit() also removes the empty mb_winter_meas values if we don't have winter measurements.
   ele_bands_plot_df_melt <- na.omit(melt(ele_bands_plot_df, id.vars = c("ele", "ncells")))
   # Re-order the data frame so that the final mass balance profile is plotted on top of the others.
-  ele_bands_plot_df_melt$variable <- factor(ele_bands_plot_df_melt$variable, levels = c("mb_annual_fixed", "mb_annual_meas", "mb_annual_hydro",
+  ele_bands_plot_df_melt$variable <- factor(ele_bands_plot_df_melt$variable, levels = c("mb_annual_meas", "mb_annual_hydro", # DEV NOTE: first one would have been "mb_annual_fixed", but we have disabled that period.
                                                                                         "mb_winter_fixed", "mb_winter_meas",
                                                                                         "mb_annual_meas_corr"))
   
@@ -83,9 +83,9 @@ func_plot_massbal_vs_elevation <- function(year_data,
                          pattern_angle = 35, pattern_size = 0.1, pattern_spacing = 0.02, pattern_density = 0.05) +
     geom_hline(yintercept = 0, size = 0.4) +
     geom_line(aes(x = ele, y = value / 1e3, color = variable), size = 1) +
-    scale_color_manual(breaks = c("mb_annual_fixed", "mb_annual_meas", "mb_annual_hydro", "mb_winter_fixed", "mb_winter_meas", "mb_annual_meas_corr"),
+    scale_color_manual(breaks = c("mb_annual_meas", "mb_annual_hydro", "mb_winter_fixed", "mb_winter_meas", "mb_annual_meas_corr"), # DEV NOTE: first one would have been "mb_annual_fixed", but we have disabled that period.
                        values = c("#8C00D4", "#FF0000", "#FF9000", "#0000FF", "#8080FF", "#000000"),
-                       labels = c("Annual, fixed dates", "Annual, measurement period", "Annual, hydrological year",
+                       labels = c("Annual, measurement period", "Annual, hydrological year", # DEV NOTE: first one would have been "Annual, fixed dates", but we have disabled that period.
                                   "Winter, fixed dates", "Winter, measurement period", "Annual, final")) +
     scale_y_continuous(breaks = pretty(ele_bands_plot_df_melt$value / 1e3), expand = expansion(0,0)) +
                        # Optional: secondary horizontal axis with the number of cells for each elevation band (not strictly necessary).

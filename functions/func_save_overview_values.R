@@ -16,7 +16,7 @@ func_save_overview_values <- function(year_data,
   # After the loop we show them in the multi-year plots.
   df_overview$mb_annual_hydro[year_data$year_id]      <- year_data$massbal_annual_values[["hydro"]] / 1e3
   # df_overview$mb_annual_hydro_corr[year_data$year_id] <- year_data$massbal_annual_values[["hydro_corr"]] / 1e3
-  df_overview$mb_annual_fixed[year_data$year_id]      <- year_data$massbal_annual_values[["fixed"]] / 1e3
+  # df_overview$mb_annual_fixed[year_data$year_id]      <- year_data$massbal_annual_values[["fixed"]] / 1e3
   df_overview$mb_winter_fixed[year_data$year_id]      <- year_data$massbal_winter_values [["fixed"]] / 1e3
   df_overview$ela[year_data$year_id]                  <- year_data$ela_aar[["ela"]]
   df_overview$aar[year_data$year_id]                  <- year_data$ela_aar[["aar"]] * 100

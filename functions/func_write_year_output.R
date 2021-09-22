@@ -22,7 +22,7 @@ func_write_year_output <- function(year_data,
     writeRaster(year_data$massbal_annual_maps$meas_period, file.path(run_params$output_dirname, "annual_results", paste0("mb_annual_measperiod_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
     writeRaster(year_data$massbal_annual_maps$meas_period_corr, file.path(run_params$output_dirname, "annual_results", paste0("mb_annual_final_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
   }
-  writeRaster(year_data$massbal_annual_maps$fixed, file.path(run_params$output_dirname, "annual_results", paste0("mb_annual_fixedperiod_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
+  # writeRaster(year_data$massbal_annual_maps$fixed, file.path(run_params$output_dirname, "annual_results", paste0("mb_annual_fixedperiod_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
   
   writeRaster(year_data$massbal_winter_maps$fixed, file.path(run_params$output_dirname, "annual_results", paste0("mb_winter_fixedperiod_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
   if (year_data$process_winter) {
@@ -64,9 +64,11 @@ func_write_year_output <- function(year_data,
   
   
   # Write mass balance in vertical bands.
+  # Note: we have disabled the fixed annual period,
+  # This has changed the indices below from 3:8 to 3:7.
   df_ele_bands_out <- data.frame(year_data$ele_bands_plot_df$ele,
                                  year_data$ele_bands_plot_df$ncells,
-                                 apply(year_data$ele_bands_plot_df[,3:8], 2, sprintf, fmt="%.1f"))
+                                 apply(year_data$ele_bands_plot_df[,3:7], 2, sprintf, fmt="%.1f"))
   names(df_ele_bands_out) <- names(year_data$ele_bands_plot_df)
   write.csv(df_ele_bands_out,
             file.path(run_params$output_dirname, "annual_results", paste0("mb_ele_bands_", year_data$year_cur, ".csv")),

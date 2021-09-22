@@ -27,7 +27,7 @@ func_setup_overview_annual <- function(run_params) {
                                            mb_annual_meas              = NA,
                                            mb_annual_hydro             = NA,
                                            # mb_annual_hydro_corr        = NA,
-                                           mb_annual_fixed             = NA,
+                                           # mb_annual_fixed             = NA,
                                            mb_winter_meas              = NA, # This stays NA unless winter measurements are available.
                                            mb_winter_fixed             = NA,
                                            ela                         = NA,

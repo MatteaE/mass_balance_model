@@ -183,29 +183,29 @@ func_plot_year_mb_maps <- function(year_data,
   } # End of if (year_data$nstakes_annual > 0)
   
   
-  #### USER-DEFINED FIXED PERIOD - ANNUAL ####
-  mb_fixed_period_annual_lab <- paste(run_params$massbal_fixed_annual_start, run_params$massbal_fixed_annual_end, sep = " - ")
-  mb_fixed_annual_lab <- sprintf("%.3f",year_data$massbal_annual_values[["fixed"]] / 1000.)
-  plot_df <- plot_df_base
-  plot_df$massbal <- getValues(year_data$massbal_annual_maps$fixed)
-  plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
-    geom_raster(aes(x = x, y = y, fill = massbal/1000)) +
-    geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", size = outline_linesize) +
-    coord_sf(clip = "off") +
-    geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", size = contour_linesize) +
-    geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1, stroke.color = "#FFFFFF", size = contour_label_textsize, min.size = 15, fontface = "bold") +
-    annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-                                        x=0.05,  y=1.15, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(paste0("Fixed period (annual): ", mb_fixed_period_annual_lab),
-                                        x=0.05,  y=1.06, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(bquote(bold(b[n]*" = "*.(mb_fixed_annual_lab)*" m w.e.")),
-                                        x = 0.05, y = 1.0, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-    labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
-         subtitle = " ") +
-    scale_fill_stepsn(name = "SMB [m w.e.]", colors = palette_RdBu_ext,
-                      limits = max_mb*c(-1,1),
-                      breaks = run_params$mb_colorscale_breaks) +
-    theme_map_massbal
+  #### [DISABLED] USER-DEFINED FIXED PERIOD - ANNUAL ####
+  # mb_fixed_period_annual_lab <- paste(run_params$massbal_fixed_annual_start, run_params$massbal_fixed_annual_end, sep = " - ")
+  # mb_fixed_annual_lab <- sprintf("%.3f",year_data$massbal_annual_values[["fixed"]] / 1000.)
+  # plot_df <- plot_df_base
+  # plot_df$massbal <- getValues(year_data$massbal_annual_maps$fixed)
+  # plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
+  #   geom_raster(aes(x = x, y = y, fill = massbal/1000)) +
+  #   geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", size = outline_linesize) +
+  #   coord_sf(clip = "off") +
+  #   geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", size = contour_linesize) +
+  #   geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1, stroke.color = "#FFFFFF", size = contour_label_textsize, min.size = 15, fontface = "bold") +
+  #   annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+  #                                       x=0.05,  y=1.15, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
+  #   annotation_custom(grobTree(textGrob(paste0("Fixed period (annual): ", mb_fixed_period_annual_lab),
+  #                                       x=0.05,  y=1.06, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
+  #   annotation_custom(grobTree(textGrob(bquote(bold(b[n]*" = "*.(mb_fixed_annual_lab)*" m w.e.")),
+  #                                       x = 0.05, y = 1.0, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
+  #   labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
+  #        subtitle = " ") +
+  #   scale_fill_stepsn(name = "SMB [m w.e.]", colors = palette_RdBu_ext,
+  #                     limits = max_mb*c(-1,1),
+  #                     breaks = run_params$mb_colorscale_breaks) +
+  #   theme_map_massbal
 
   
   

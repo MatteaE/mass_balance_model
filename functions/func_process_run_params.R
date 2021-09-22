@@ -15,9 +15,6 @@ func_process_run_params <- function(run_params) {
   # Useful for faster debugging.
   run_params$save_simulation_RData <- FALSE
   
-
-  
-  
   # The base directory for all the data
   run_params$dir_data_base               <-   file.path("input", run_params$name_glacier)
   
@@ -54,6 +51,12 @@ func_process_run_params <- function(run_params) {
   run_params$ele_bands_plot_size         <-   50          # [m]: plot the annual mass balance profile as function of elevation, using elevation bands with this vertical extent.
   run_params$plot_daily_maps             <-   FALSE       # [TRUE/FALSE]: produce daily plots of mass balance and SWE (slow!).
   
+  #### FIXED MASS BALANCE PERIODS choice ####
+  # run_params$massbal_fixed_annual_start   <-   "10/31"    # [month/day]: start of the user-defined fixed period for annual mass balance evaluation. This is referred to (<year_cur> - 1).
+  # run_params$massbal_fixed_annual_end     <-   "8/31"     # [month/day]: end of the user-defined fixed period for annual mass balance evaluation. This is referred to <year_cur>.
+  run_params$massbal_fixed_winter_start  <-   "10/1"      # [month/day]: start of the user-defined fixed period for winter mass balance evaluation. This is referred to (<year_cur> - 1).
+  run_params$massbal_fixed_winter_end    <-   "4/30"      # [month/day]: end of the user-defined fixed period for winter mass balance evaluation. This is referred to <year_cur>.
+  
   
   #### DERIVED parameters, automatically computed ####
   # The model might not work if you change anything below this line.
@@ -75,8 +78,8 @@ func_process_run_params <- function(run_params) {
   
   run_params$stakes_unknown_latest_start <- format(as.Date(run_params$stakes_unknown_latest_start, format = "%m/%d"), format = "%m/%d") # Same.
   
-  run_params$massbal_fixed_annual_start <- format(as.Date(run_params$massbal_fixed_annual_start, format = "%m/%d"), format = "%m/%d")
-  run_params$massbal_fixed_annual_end <- format(as.Date(run_params$massbal_fixed_annual_end, format = "%m/%d"), format = "%m/%d")
+  # run_params$massbal_fixed_annual_start <- format(as.Date(run_params$massbal_fixed_annual_start, format = "%m/%d"), format = "%m/%d")
+  # run_params$massbal_fixed_annual_end <- format(as.Date(run_params$massbal_fixed_annual_end, format = "%m/%d"), format = "%m/%d")
   run_params$massbal_fixed_winter_start <- format(as.Date(run_params$massbal_fixed_winter_start, format = "%m/%d"), format = "%m/%d")
   run_params$massbal_fixed_winter_end <- format(as.Date(run_params$massbal_fixed_winter_end, format = "%m/%d"), format = "%m/%d")
   

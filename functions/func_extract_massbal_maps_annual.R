@@ -46,18 +46,18 @@ func_extract_massbal_maps_annual <- function(year_data,
     massbal_measperiod_map_masked <- mask(massbal_measperiod_map, data_dems$elevation[[year_data$dem_grid_id]])
   }
   
-  id_fixed_start <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$fixed_annual_start)
-  id_fixed_end <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$fixed_annual_end)
-  massbal_fixed_start_values <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_fixed_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
-  massbal_fixed_end_values   <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_fixed_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
-  massbal_fixed_map <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_fixed_end_values - massbal_fixed_start_values)
-  massbal_fixed_map_masked <- mask(massbal_fixed_map, data_dems$elevation[[year_data$dem_grid_id]])
+  # id_fixed_start <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$fixed_annual_start)
+  # id_fixed_end <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$fixed_annual_end)
+  # massbal_fixed_start_values <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_fixed_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
+  # massbal_fixed_end_values   <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_fixed_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
+  # massbal_fixed_map <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_fixed_end_values - massbal_fixed_start_values)
+  # massbal_fixed_map_masked <- mask(massbal_fixed_map, data_dems$elevation[[year_data$dem_grid_id]])
   
 
   # We can't use ifelse() with rasters!
-  massbal_maps <- list(hydro       = massbal_hydro_map_masked,
+  massbal_maps <- list(hydro       = massbal_hydro_map_masked)
                        # meas_period = NA,
-                       fixed       = massbal_fixed_map_masked)
+                       # fixed       = massbal_fixed_map_masked)
   if (year_data$nstakes_annual > 0) {
     massbal_maps$meas_period <- massbal_measperiod_map_masked
   }

@@ -43,7 +43,7 @@ func_run_model <- function(run_params) {
   # Compute global grid parameters (numbers of cells and cell size).
   run_params        <- func_compute_grid_parameters(run_params, data_all$data_dhms)
   
-  # Compute fixed grids (avalanches, topographic snow distribution, variable ice albedo).
+  # Compute static grids (avalanches, topographic snow distribution, variable ice albedo).
   grids_static_list <- func_compute_all_static_grids(run_params, data_all$data_dhms, data_all$data_dems)
   
   # Setup list with annual values and plots (1 per year).

@@ -31,8 +31,10 @@ func_compute_modeling_periods <- function(year_data, run_params, year_cur_params
   # set at Sep 30.
   # We use year_cur_params$hydro_end-1 since hydro_end is Oct 1 (00:00, i.e. as.Date(Oct 1)),
   # which means we can stop modeling after the (weather series) time step of Sep 30.
-  annual_start <- min(c(year_cur_params$hydro_start, year_data$massbal_annual_meas_cur$start_date, year_cur_params$fixed_annual_start), na.rm = T)
-  annual_end   <- max(c(year_cur_params$hydro_end-1, year_data$massbal_annual_meas_cur$end_date, year_cur_params$fixed_annual_end))
+  # annual_start <- min(c(year_cur_params$hydro_start, year_data$massbal_annual_meas_cur$start_date, year_cur_params$fixed_annual_start), na.rm = T)
+  # annual_end   <- max(c(year_cur_params$hydro_end-1, year_data$massbal_annual_meas_cur$end_date, year_cur_params$fixed_annual_end))
+  annual_start <- min(c(year_cur_params$hydro_start, year_data$massbal_annual_meas_cur$start_date), na.rm = T)
+  annual_end   <- max(c(year_cur_params$hydro_end-1, year_data$massbal_annual_meas_cur$end_date))
   
   winter_start <- NA
   winter_end   <- NA

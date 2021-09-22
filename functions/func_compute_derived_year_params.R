@@ -8,7 +8,7 @@
 #                 This code is called at the end of the year parameters loading.                  #
 ###################################################################################################
 
-func_compute_derived_year_params <- function(year_data, year_cur_params) {
+func_compute_derived_year_params <- function(year_data, year_cur_params, run_params) {
   
   # Compute ratio of snow to ice radiation factors.
   # We will keep this ratio constant as we optimize
@@ -24,8 +24,8 @@ func_compute_derived_year_params <- function(year_data, year_cur_params) {
   year_cur_params$hydro_start <- as.Date(paste(year_data$year_cur-1, 10, 1), format="%Y %m %d")
   year_cur_params$hydro_end   <- as.Date(paste(year_data$year_cur, 10, 1), format = "%Y %m %d")
   
-  year_cur_params$fixed_annual_start <- as.Date(paste(year_data$year_cur-1, run_params$massbal_fixed_annual_start), format = "%Y %m/%d")
-  year_cur_params$fixed_annual_end   <- as.Date(paste(year_data$year_cur, run_params$massbal_fixed_annual_end), format = "%Y %m/%d")
+  # year_cur_params$fixed_annual_start <- as.Date(paste(year_data$year_cur-1, run_params$massbal_fixed_annual_start), format = "%Y %m/%d")
+  # year_cur_params$fixed_annual_end   <- as.Date(paste(year_data$year_cur, run_params$massbal_fixed_annual_end), format = "%Y %m/%d")
   
   year_cur_params$fixed_winter_start <- as.Date(paste(year_data$year_cur-1, run_params$massbal_fixed_winter_start), format = "%Y %m/%d")
   year_cur_params$fixed_winter_end   <- as.Date(paste(year_data$year_cur, run_params$massbal_fixed_winter_end), format = "%Y %m/%d")

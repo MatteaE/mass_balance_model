@@ -13,10 +13,10 @@ func_extract_year_massbalance <- function(year_data,
                                           data_dhms,
                                           data_dems) {
   
-  # We extract three maps of cumulative annual mass balances:
+  # We extract two maps of cumulative annual mass balances:
   # (1) "hydro":       hydrological year (1 October <Year-1> - 30 September <Year>)
   # (2) "meas_period": measurement period, defined as (earliest annual stake start - latest annual stake end)
-  # (3) "fixed":       user-defined fixed period.
+  # [DISABLED, CONFUSING AND NOT USEFUL] (3) "fixed":       user-defined fixed period.
   massbal_annual_maps_data <- func_extract_massbal_maps_annual(year_data,
                                                                run_params,
                                                                year_cur_params,
@@ -28,7 +28,7 @@ func_extract_year_massbalance <- function(year_data,
   year_data$massbal_annual_meas_period_ids <- massbal_annual_maps_data$meas_period_ids
   
   # We also extract two winter mass balances:
-  # (1) "fixed":       user-defined fixed period.
+  # (1) "fixed":       user-defined fixed period, such as Oct 1 to Mar 31.
   # (2) "meas_period": measurement period, defined as (earliest winter stake start - latest winter stake end).
   # If process_winter is FALSE, the list contains only (1).
   massbal_winter_maps_data <- func_extract_massbal_maps_winter(year_data,
