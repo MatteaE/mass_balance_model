@@ -8,7 +8,11 @@
 
 #### Set parameters and load function definitions ####
 # Set English language for dates (in the plots).
-Sys.setlocale(category = "LC_TIME", locale = "en_US.UTF-8")
+if (Sys.info()["sysname"] == "Windows") {
+  Sys.setlocale(category = "LC_TIME", locale = "English")
+} else {
+  Sys.setlocale(category = "LC_TIME", locale = "en_US.UTF-8")
+}
 
 # This creates list run_params with the model parameters.
 source("set_params.R")
