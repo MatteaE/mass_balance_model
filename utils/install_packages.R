@@ -34,6 +34,7 @@ func_install_all <- function() {
                       "Rfast",
                       "RStoolbox",
                       "scales",
+                      "shadowtext",
                       "shiny",
                       "shinyFiles",
                       "shinyjs",

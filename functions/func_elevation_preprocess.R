@@ -60,7 +60,7 @@ func_elevation_preprocess <- function(run_params, elevation) {
   
   while (length(ids_sink_4neighbors) > 0) {
     
-    cat("    Iteration", sinkfill_iter_count, "to fill all sinks...\n")
+    # cat("    Iteration", sinkfill_iter_count, "to fill all sinks...\n")
     
     # Raise isolated 4-connectivity sinks to the mean of the 4-neighbors.
     elevation_filled_mean_nofocal <- focal(elevation_filled, w = rbind(c(0,1/4,0),c(1/4,0,1/4),c(0,1/4,0)))
