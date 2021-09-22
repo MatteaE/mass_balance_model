@@ -41,10 +41,10 @@ func_compute_massbal_colorscale_multiplier <- function(data_massbalance_annual,
       year_cur <- run_params$years[year_id]
       ids_year <- which(data_weather_sim$year_hydro == year_cur)
       ids_cold <- which(data_weather_sim$t2m_mean < run_params$weather_snowfall_temp)
-      prec_solid_annual[year_id] <- sum(data_weather_sim$precip[intersect(ids_year, ids_cold)]) * (1 + (ele_max - run_params$weather_aws_elevation) * run_params$default_prec_elegrad / 1e4)
+      prec_solid_annual_max[year_id] <- sum(data_weather_sim$precip[intersect(ids_year, ids_cold)]) * (1 + (ele_max - run_params$weather_aws_elevation) * run_params$default_prec_elegrad / 1e4)
     }
     
-    mb_val <- as.numeric(quantile(prec_solid_annual, 0.9)) / 1e3
+    mb_val <- as.numeric(quantile(prec_solid_annual_max, 0.9)) / 1e3
     
   }
   
