@@ -303,7 +303,7 @@ func_do_processing <- function(dem_filepath,
   #### Finish messages ####
   cat("Program finished succesfully!\n")
   message("Your new files are located here:")
-  cat(normalizePath(file.path(getwd(), "input")), "\n")
+  cat(normalizePath(file.path(getwd())), "\n")
   cat("Before you run the mass balance model, remember to move them to the correct place.\n")
   message("You can now close the program.")
   
@@ -329,6 +329,7 @@ ui <- fluidPage(useShinyjs(),
        em("As"), strong(" INPUT DATA "), em("please provide:")),
     tags$div(tags$ul(
       tags$li(em("the ", strong("glacier name "), "with no whitespaces")),
+      tags$li(em("the ", strong("modeled year"), ", used for the file names")),
       tags$li(em("an ", strong("elevation grid "), "of the region of interest (for example .tif or .hgt, from EarthExplorer, SRTM, ASTER or any other)")),
       tags$li(em("a ", strong("glacier outline, "), "for example as shapefile (.shp)")),
       tags$li("(OPTIONAL): ", em("a shapefile with the ", strong("firn area"))),
@@ -477,9 +478,9 @@ server <- function(input, output, session) {
     debrisfilepath_sel    <- ifelse(isTruthy(debrisfilepath()), debrisfilepath(), NA)
     referencefilepath_sel <- ifelse(isTruthy(referencefilepath()), referencefilepath(), NA)
     showModal(modalDialog(h3("Processing... See RStudio console for progress."), footer=NULL))
-    func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$checkbox_compute_radiation, file.path("input", glaciername()))
-    file.rename(file.path(getwd(), "input", glaciername(), "dhm", "dhm_glacier.tif"), file.path(getwd(), "input", glaciername(), "dhm", paste0("dhm_", glaciername(), "_", modelyear(), ".tif")))
-    file.rename(file.path(getwd(), "input", glaciername(), "surftype", "surface_type_glacier.tif"), file.path(getwd(), "input", glaciername(), "surftype", paste0("surface_type_", glaciername(), "_", modelyear(), ".tif")))
+    func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$checkbox_compute_radiation, file.path(glaciername()))
+    file.rename(file.path(getwd(), glaciername(), "dhm", "dhm_glacier.tif"), file.path(getwd(), glaciername(), "dhm", paste0("dhm_", glaciername(), "_", modelyear(), ".tif")))
+    file.rename(file.path(getwd(), glaciername(), "surftype", "surface_type_glacier.tif"), file.path(getwd(), glaciername(), "surftype", paste0("surface_type_", glaciername(), "_", modelyear(), ".tif")))
     removeModal()
     showModal(modalDialog(h3("Processing finished. See RStudio console for details. You can now close the program."), footer=NULL))
   })
