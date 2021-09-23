@@ -64,9 +64,9 @@ func_compute_day_rad <- function(dem_mat,
 func_compute_all_daily_pisr <- function(dem,
                                         year_cur,
                                         delta_t,
-                                        out_dirpath) {
+                                        outpath_base) {
   
-  dir.create(out_dirpath, showWarnings = FALSE)
+  dir.create(file.path(outpath_base, "radiation"), showWarnings = FALSE)
   
   # Setup useful DEM variables.
   dem_mat <- as.matrix(dem)
@@ -111,10 +111,10 @@ func_compute_all_daily_pisr <- function(dem,
     extent(rad_cur_ras) <- dem_ext
     NAvalue(rad_cur_ras) <- -9999
     
-    # Write file and rename to .grid.
-    rad_out_filepath_cur <- file.path(out_dirpath, paste0("dir", sprintf("%03d", doy_cur), "24.asc"))
+    # Write file to geotiff.
+    rad_out_filepath_cur <- file.path(outpath_base, "radiation", paste0("dir", sprintf("%03d", doy_cur), "24.tif"))
     writeRaster(rad_cur_ras, rad_out_filepath_cur, overwrite = TRUE, datatype = "FLT4S")
-    file.rename(rad_out_filepath_cur, paste0(file_path_sans_ext(rad_out_filepath_cur), ".grid"))
+    file.rename(rad_out_filepath_cur, paste0(file_path_sans_ext(rad_out_filepath_cur), ".tif"))
   }
   
   cat("\n")
@@ -135,9 +135,7 @@ func_do_processing <- function(dem_filepath,
                                reference_filepath,
                                dem_buffer,
                                compute_radiation_bool,
-                               # dem_outpath,
-                               dhm_outpath,
-                               surftype_outpath) {
+                               outpath_base) {
   
   resolution_proj_raster <- 20 # Always project grids to 20 m.
   
@@ -286,11 +284,11 @@ func_do_processing <- function(dem_filepath,
   
   #### Write grids to output ####
   NAvalue(dhm_out)      <- -9999
-  # NAvalue(dem_out)      <- -9999
   NAvalue(surftype_out) <- -9999
-  writeRaster(dhm_out, dhm_outpath, overwrite = TRUE)
-  # writeRaster(dem_out, dem_outpath, overwrite = TRUE)
-  writeRaster(surftype_out, surftype_outpath, overwrite = TRUE)
+  dir.create(file.path(outpath_base, "dhm"), recursive = TRUE)
+  dir.create(file.path(outpath_base, "surftype"))
+  writeRaster(dhm_out, file.path(outpath_base, "dhm", "dhm_glacier.tif"), overwrite = TRUE)
+  writeRaster(surftype_out, file.path(outpath_base, "surftype", "surface_type_glacier.tif"), overwrite = TRUE)
   
   #### Compute radiation if asked to do so ####
   if (compute_radiation_bool) {
@@ -298,16 +296,15 @@ func_do_processing <- function(dem_filepath,
     func_compute_all_daily_pisr(dhm_out,
                                 2020,
                                 0.1,
-                                file.path(getwd(), "radiation"))
+                                outpath_base)
   }
   
   
   #### Finish messages ####
   cat("Program finished succesfully!\n")
   message("Your new files are located here:")
-  cat(normalizePath(dirname(dhm_outpath)), "\n")
-  if (compute_radiation_bool) cat("Radiation files are in the same place, under the name \"radiation\".\n")
-  cat("Before you run the mass balance model, remember to change the file names and to move them to the correct place.\n")
+  cat(normalizePath(file.path(getwd(), "input")), "\n")
+  cat("Before you run the mass balance model, remember to move them to the correct place.\n")
   message("You can now close the program.")
   
 } # End of function definition.
@@ -357,10 +354,14 @@ ui <- fluidPage(useShinyjs(),
   # .. Input: choose glacier name (with inline CSS modifier to have label and field on same row),
   # DEM, outline file, and (optionally) firn and debris shapefiles, as well as reference grid for alignment ----
   tags$head(
-    tags$style(type="text/css", "#inline label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 10px; } 
-                #inline .form-group { display: table-row;}")
+    tags$style(type="text/css", "#inline1 label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 10px; } 
+                #inline1 .form-group { display: table-row;}"),
+  tags$style(type="text/css", "#inline2 label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 22px; } 
+                #inline2 .form-group { display: table-row;}")
   ),
-  tags$div(id = "inline", textInput("choose_glacier_name", "Choose glacier name:", placeholder = "Glacier name")),
+  tags$div(id = "inline1", textInput("choose_glacier_name", "Choose glacier name:", placeholder = "Glacier name")),
+  p(),
+  tags$div(id = "inline2", numericInput("choose_model_year", "Choose model year:", value = NA, min = 0, max = 3000, step = 1)),
   p(),
   shinyFilesButton("choose_dem_file", strong("Choose input DEM file"), "Choose input DEM file", FALSE, style = "width: 60%;"),
   p(),
@@ -388,6 +389,7 @@ ui <- fluidPage(useShinyjs(),
   
   # .. Text fields: show the full path of the chosen DEM and outline file ----
   htmlOutput("glaciername_chosen_string"),
+  htmlOutput("modelyear_chosen_string"),
   htmlOutput("dem_chosen_string"),
   htmlOutput("shp_chosen_string"),
   htmlOutput("firn_chosen_string"),
@@ -413,6 +415,7 @@ server <- function(input, output, session) {
   shinyFileChoose(input, "choose_reference_file", roots=volumes, session=session)
 
   glaciername       <- reactive(input$choose_glacier_name)
+  modelyear         <- reactive(input$choose_model_year)
   demfilepath       <- reactive(as.character(parseFilePaths(volumes, input$choose_dem_file)$datapath))
   shpfilepath       <- reactive(as.character(parseFilePaths(volumes, input$choose_shp_file)$datapath))
   firnfilepath      <- reactive(as.character(parseFilePaths(volumes, input$choose_firn_file)$datapath))
@@ -421,7 +424,7 @@ server <- function(input, output, session) {
   
   # Disable "RUN!" button if the required input is missing.
   observe({
-    toggleState("startprocessing", isTruthy(glaciername()) && isTruthy(demfilepath()) && isTruthy(shpfilepath()))
+    toggleState("startprocessing", isTruthy(glaciername()) && isTruthy(modelyear()) && isTruthy(demfilepath()) && isTruthy(shpfilepath()))
   })
   
   # Show the user which input has been provided and which is still missing.
@@ -429,6 +432,11 @@ server <- function(input, output, session) {
     ifelse(isTruthy(glaciername()),
            "<font color=\"#00C000\"><b>Glacier name selected.</b></font color>",
            "<font color=\"#FF0000\"><b>Glacier name not yet selected.</b></font color>")
+  })
+  output$modelyear_chosen_string <- renderText({
+    ifelse(isTruthy(modelyear()),
+           "<font color=\"#00C000\"><b>Model year selected.</b></font color>",
+           "<font color=\"#FF0000\"><b>Model year not yet selected.</b></font color>")
   })
   output$dem_chosen_string <- renderText({
     ifelse(isTruthy(demfilepath()),
@@ -459,17 +467,19 @@ server <- function(input, output, session) {
   
   # Button to start processing.
   observeEvent(input$startprocessing, {
+    # These 4 below are probably not needed since the RUN! button is
+    # disabled by shinyjs, but we keep them anyway since the make sense.
     req(input$choose_glacier_name)
+    req(input$choose_model_year)
     req(input$choose_dem_file)
     req(input$choose_shp_file)
     firnfilepath_sel      <- ifelse(isTruthy(firnfilepath()), firnfilepath(), NA)
     debrisfilepath_sel    <- ifelse(isTruthy(debrisfilepath()), debrisfilepath(), NA)
     referencefilepath_sel <- ifelse(isTruthy(referencefilepath()), referencefilepath(), NA)
     showModal(modalDialog(h3("Processing... See RStudio console for progress."), footer=NULL))
-    func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$checkbox_compute_radiation, file.path(getwd(), "dhm_glacier.asc"), file.path(getwd(), "surface_type_glacier.asc"))
-    # file.rename(file.path(getwd(), "dem_glacier.asc"), file.path(getwd(), "dem_glacier.grid"))
-    file.rename(file.path(getwd(), "dhm_glacier.asc"), file.path(getwd(), paste0("dhm_", glaciername(), "_YEAR.grid")))
-    file.rename(file.path(getwd(), "surface_type_glacier.asc"), file.path(getwd(), paste0("surface_type_", glaciername(), "_YEAR.grid")))
+    func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$checkbox_compute_radiation, file.path("input", glaciername()))
+    file.rename(file.path(getwd(), "input", glaciername(), "dhm", "dhm_glacier.tif"), file.path(getwd(), "input", glaciername(), "dhm", paste0("dhm_", glaciername(), "_", modelyear(), ".tif")))
+    file.rename(file.path(getwd(), "input", glaciername(), "surftype", "surface_type_glacier.tif"), file.path(getwd(), "input", glaciername(), "surftype", paste0("surface_type_", glaciername(), "_", modelyear(), ".tif")))
     removeModal()
     showModal(modalDialog(h3("Processing finished. See RStudio console for details. You can now close the program."), footer=NULL))
   })

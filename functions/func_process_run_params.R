@@ -29,14 +29,14 @@ func_process_run_params <- function(run_params) {
   
   
   # File names as created by make_input.
-  run_params$filename_dhm_prefix         <-   "dhm_pers"
-  run_params$filename_dhm_suffix         <-   ".grid"                      # DHM name is <prefix><year><suffix>
+  run_params$filename_dhm_prefix         <-   paste0("dhm_", run_params$name_glacier, "_")
+  run_params$filename_dhm_suffix         <-   ".tif"                      # DHM name is <prefix><year><suffix>
   
-  run_params$filename_surftype_prefix    <-   paste0("surface_type_", run_params$name_glacier)
-  run_params$filename_surftype_suffix    <-   ".grid"                      # Surface type filename is <prefix><year><suffix>
+  run_params$filename_surftype_prefix    <-   paste0("surface_type_", run_params$name_glacier, "_")
+  run_params$filename_surftype_suffix    <-   ".tif"                      # Surface type filename is <prefix><year><suffix>
   
   run_params$filename_radiation_prefix   <-   "dir"
-  run_params$filename_radiation_suffix   <-   "24.grid"                    # Radiation files are called <prefix><doy><suffix> where <doy> is the day of year, zero-padded to length 3 (e.g. 001).
+  run_params$filename_radiation_suffix   <-   "24.tif"                    # Radiation files are called <prefix><doy><suffix> where <doy> is the day of year, zero-padded to length 3 (e.g. 001).
   
   
   #### MODEL OPTIMIZATION parameters ####
