@@ -258,7 +258,7 @@ func_do_processing <- function(dem_filepath,
   # If we just give the buffer size, we just extract the DHM region.
   # Instead, if we give a reference DEM we may have to resample (bilinear filter) ours, because
   # resolution/origin/extent could be different (even after adjusting projection, which we have done above).
-  cat("Preparing output...\n")
+  cat("\nPreparing output...\n")
   if (!has_reference) {
     ext_out <- st_bbox(outline_l2) + dem_buffer * c(-1,-1,1,1)
     dhm_out <- crop(dem_l2, ext_out)

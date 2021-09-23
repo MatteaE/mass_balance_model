@@ -37,11 +37,18 @@ func_run_model <- function(run_params) {
                                                                          data_all$data_dems,
                                                                          data_all$data_weather,
                                                                          run_params)
-  
   run_params$mb_colorscale_breaks <- run_params$mb_colorscale_breaks * mb_colorscale_multiplier
   
   # Compute global grid parameters (numbers of cells and cell size).
-  run_params        <- func_compute_grid_parameters(run_params, data_all$data_dhms)
+  run_params <- func_compute_grid_parameters(run_params, data_all$data_dhms)
+  
+  # Estimate (if missing) three parameters which depend on the DEM:
+  # weather_max_precip_ele, elevation_effect_threshold and initial_snowline_elevation.
+  run_params <- func_compute_altitude_params(run_params, data_all$data_dems)
+  
+  # Estimate (if missing) the max avalanche deposition (kg m-2),
+  # it depends somewhat on the amounts of accumulation.
+  run_params <- func_compute_deposition_lim(run_params, data_all$data_dems, data_all$data_weather)
   
   # Compute static grids (avalanches, topographic snow distribution, variable ice albedo).
   grids_static_list <- func_compute_all_static_grids(run_params, data_all$data_dhms, data_all$data_dems)

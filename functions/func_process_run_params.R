@@ -28,6 +28,17 @@ func_process_run_params <- function(run_params) {
   run_params$dir_annual_params           <-   file.path(run_params$dir_data_base, "params")      # The annual model parameter files go here
   
   
+  # File names as created by make_input.
+  run_params$filename_dhm_prefix         <-   "dhm_pers"
+  run_params$filename_dhm_suffix         <-   ".grid"                      # DHM name is <prefix><year><suffix>
+  
+  run_params$filename_surftype_prefix    <-   paste0("surface_type_", run_params$name_glacier)
+  run_params$filename_surftype_suffix    <-   ".grid"                      # Surface type filename is <prefix><year><suffix>
+  
+  run_params$filename_radiation_prefix   <-   "dir"
+  run_params$filename_radiation_suffix   <-   "24.grid"                    # Radiation files are called <prefix><doy><suffix> where <doy> is the day of year, zero-padded to length 3 (e.g. 001).
+  
+  
   #### MODEL OPTIMIZATION parameters ####
   run_params$optim_max_corr_fact         <-   1           # [-]: maximum allowable positive correction to the melt factor and the radiation factor during optimization, in units of the factors themselves (i.e. by how many times these can be increased). Only positive values make sense. A larger value is safer if a reasonable value for the melt factors is not known, but the optimization will be a bit slower. There is no parameter for the negative correction: it is automatically set to maximum 0.
   run_params$optim_bias_threshold        <-   1           # [mm w.e.]: if abs(bias) is below this threshold then we stop the optimization. This saves us a couple iterations since the optim() function will stop when the value *change* is less than a threshold, not the value itself.
