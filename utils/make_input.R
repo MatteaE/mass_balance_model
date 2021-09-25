@@ -144,7 +144,19 @@ func_do_processing <- function(dem_filepath,
   has_reference <- !is.na(reference_filepath)
   
   #### Load input ####
-  dem_l1     <- raster(dem_filepath)
+  # If multiple dems: first merge.
+  # Else: just load.
+  ndems <- length(dem_filepath)
+  if (ndems > 1) {
+    cat("You provided more than 1 DEM, I am merging them before proceeding...")
+    dems <- list()
+    for (dem_id in 1:ndems) {
+      dems[[dem_id]] <- raster(dem_filepath[dem_id])
+    }
+    dem_l1 <- do.call(merge, dems)
+  } else {
+    dem_l1     <- raster(dem_filepath)
+  }
   outline_l1 <- st_zm(st_read(outline_filepath, quiet = TRUE))
   if (has_firn)      firn_l1      <- st_zm(st_read(firn_filepath, quiet = TRUE))
   if (has_debris)    debris_l1    <- st_zm(st_read(debris_filepath, quiet = TRUE))
@@ -299,6 +311,16 @@ func_do_processing <- function(dem_filepath,
                                 outpath_base)
   }
   
+  # Errors? Show them!
+  if (any(is.na(getValues(dhm_out)))) {
+    warning("\n*** ERROR: there are NA values in the ouput DHM. Please check that the input DEMs cover the entire area of interest. ***")
+    return(1)
+  }
+  if (any(is.na(getValues(surftype_out)))) {
+    warning("\n*** ERROR: there are NA values in the ouput surface type grid. Please check the input outline shapefile. ***")
+    return(1)
+  }
+  
   
   #### Finish messages ####
   cat("Program finished succesfully!\n")
@@ -306,6 +328,8 @@ func_do_processing <- function(dem_filepath,
   cat(normalizePath(file.path(getwd())), "\n")
   cat("Before you run the mass balance model, remember to move them to the correct place.\n")
   message("You can now close the program.")
+  
+  return(0)
   
 } # End of function definition.
 
@@ -329,7 +353,7 @@ ui <- fluidPage(useShinyjs(),
        em("As"), strong(" INPUT DATA "), em("please provide:")),
     tags$div(tags$ul(
       tags$li(em("the ", strong("glacier name "), "with no whitespaces")),
-      tags$li(em("the ", strong("modeled year"), ", used for the file names")),
+      tags$li(em("the ", strong("modeled year,"), "used to set the file names")),
       tags$li(em("an ", strong("elevation grid "), "of the region of interest (for example .tif or .hgt, from EarthExplorer, SRTM, ASTER or any other)")),
       tags$li(em("a ", strong("glacier outline, "), "for example as shapefile (.shp)")),
       tags$li("(OPTIONAL): ", em("a shapefile with the ", strong("firn area"))),
@@ -364,7 +388,7 @@ ui <- fluidPage(useShinyjs(),
   p(),
   tags$div(id = "inline2", numericInput("choose_model_year", "Choose model year:", value = NA, min = 0, max = 3000, step = 1)),
   p(),
-  shinyFilesButton("choose_dem_file", strong("Choose input DEM file"), "Choose input DEM file", FALSE, style = "width: 60%;"),
+  shinyFilesButton("choose_dem_file", strong("Choose one or more input DEM files"), "Choose one or more input DEM files", multiple = TRUE, style = "width: 60%;"),
   p(),
   shinyFilesButton("choose_shp_file", strong("Choose input glacier shapefile"), "Choose input glacier shapefile", FALSE, style = "width: 60%;"),
   p(),
@@ -441,8 +465,8 @@ server <- function(input, output, session) {
   })
   output$dem_chosen_string <- renderText({
     ifelse(isTruthy(demfilepath()),
-           "<font color=\"#00C000\"><b>Input DEM file selected.</b></font color>",
-           "<font color=\"#FF0000\"><b>Input DEM file not yet selected.</b></font color>")
+           "<font color=\"#00C000\"><b>Input DEM file(s) selected.</b></font color>",
+           "<font color=\"#FF0000\"><b>Input DEM file(s) not yet selected.</b></font color>")
   })
   output$shp_chosen_string <- renderText({
     ifelse(isTruthy(shpfilepath()),
@@ -478,11 +502,16 @@ server <- function(input, output, session) {
     debrisfilepath_sel    <- ifelse(isTruthy(debrisfilepath()), debrisfilepath(), NA)
     referencefilepath_sel <- ifelse(isTruthy(referencefilepath()), referencefilepath(), NA)
     showModal(modalDialog(h3("Processing... See RStudio console for progress."), footer=NULL))
-    func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$checkbox_compute_radiation, file.path(glaciername()))
-    file.rename(file.path(getwd(), glaciername(), "dhm", "dhm_glacier.tif"), file.path(getwd(), glaciername(), "dhm", paste0("dhm_", glaciername(), "_", modelyear(), ".tif")))
-    file.rename(file.path(getwd(), glaciername(), "surftype", "surface_type_glacier.tif"), file.path(getwd(), glaciername(), "surftype", paste0("surface_type_", glaciername(), "_", modelyear(), ".tif")))
-    removeModal()
-    showModal(modalDialog(h3("Processing finished. See RStudio console for details. You can now close the program."), footer=NULL))
+    processing_output <- func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$checkbox_compute_radiation, file.path(glaciername()))
+    if (processing_output == 0) {
+      file.rename(file.path(getwd(), glaciername(), "dhm", "dhm_glacier.tif"), file.path(getwd(), glaciername(), "dhm", paste0("dhm_", glaciername(), "_", modelyear(), ".tif")))
+      file.rename(file.path(getwd(), glaciername(), "surftype", "surface_type_glacier.tif"), file.path(getwd(), glaciername(), "surftype", paste0("surface_type_", glaciername(), "_", modelyear(), ".tif")))
+      removeModal()
+      showModal(modalDialog(h3("Processing finished. See RStudio console for details. You can now close the program."), footer=NULL))
+    } else {
+      unlink(file.path(getwd(), glaciername()), recursive = TRUE)
+      showModal(modalDialog(h3("Processing ERROR! See RStudio console for details. Please CORRECT THE ERROR and run the program again."), footer=NULL))
+    }
   })
   
 }

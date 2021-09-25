@@ -14,20 +14,10 @@ func_load_outlines <- function(run_params) {
   
   cat("  Loading glacier outlines...\n")
   
-  ext_str_raw <- str_split(run_params$filename_outline_suffix, fixed("."))[[1]]
-  ext_str <- ext_str_raw[length(ext_str_raw)]
-  if (ext_str == "xyzn") {
-    outline_filetype <- "xyzn"
-  } else if (ext_str == "shp") {
-    outline_filetype <- "shapefile"
-  } else {
-    stop("    FATAL: outline file specification is not either XYZN or shapefile (.shp). Please convert outlines to the correct format and run the model again.")
-  }
-  
   outlines_out <- list(outlines = list(),
                        outline_year_id = rep(NA, run_params$n_years)) # Here we put all the loaded outlines.
   
-  cat("    Looking for", outline_filetype, "outline files...\n")
+  cat("    Looking for outline files...\n")
   
   run_params <- func_find_input_files_single(run_params, "outline")
   outline_paths <- run_params$outline_paths
@@ -41,9 +31,12 @@ func_load_outlines <- function(run_params) {
   
   # Load outlines
   for (outline_id in 1:length(outline_paths)) {
+    outline_path_split <- strsplit(outline_paths[outline_id], ".", fixed = TRUE)
+    outline_filetype <- outline_path_split[[1]][length(outline_path_split[[1]])]
+    
     if (outline_filetype == "xyzn") {
       outlines_out$outlines[[outline_id]] <- func_load_xyzn(outline_paths[outline_id], run_params$grids_crs)
-    } else if (outline_filetype == "shapefile") {
+    } else if (outline_filetype == "shp") {
       invisible(capture.output(outlines_out$outlines[[outline_id]] <- as(as_Spatial(st_read(outline_paths[outline_id])), "SpatialPolygons")))
     }
     # Aspect ratio: > 1 if tall glacier, < 1 if wide glacier. Used to add margins to the area plots,

@@ -30,14 +30,16 @@ func_process_run_params <- function(run_params) {
   
   # File names as created by make_input.
   run_params$filename_dhm_prefix         <-   paste0("dhm_", run_params$name_glacier, "_")
-  run_params$filename_dhm_suffix         <-   ".tif"                      # DHM name is <prefix><year><suffix>
+  run_params$filename_dhm_suffix         <-   ""                      # DHM name is <prefix><year><suffix>.tif (or .grid or .asc).
   
   run_params$filename_surftype_prefix    <-   paste0("surface_type_", run_params$name_glacier, "_")
-  run_params$filename_surftype_suffix    <-   ".tif"                      # Surface type filename is <prefix><year><suffix>
+  run_params$filename_surftype_suffix    <-   ""                      # Surface type filename is <prefix><year><suffix>.tif (or .grid or .asc).
   
   run_params$filename_radiation_prefix   <-   "dir"
-  run_params$filename_radiation_suffix   <-   "24.tif"                    # Radiation files are called <prefix><doy><suffix> where <doy> is the day of year, zero-padded to length 3 (e.g. 001).
+  run_params$filename_radiation_suffix   <-   "24"                    # Radiation files are called <prefix><doy><suffix> where <doy> is the day of year, zero-padded to length 3 (e.g. 001).
   
+  run_params$years_input_allowed         <-   1500:2500                     # Years over which we should search for input data.
+  run_params$years_input_allowed_n       <-   diff(range(run_params$years_input_allowed)) + 1
   
   #### MODEL OPTIMIZATION parameters ####
   run_params$optim_max_corr_fact         <-   1           # [-]: maximum allowable positive correction to the melt factor and the radiation factor during optimization, in units of the factors themselves (i.e. by how many times these can be increased). Only positive values make sense. A larger value is safer if a reasonable value for the melt factors is not known, but the optimization will be a bit slower. There is no parameter for the negative correction: it is automatically set to maximum 0.

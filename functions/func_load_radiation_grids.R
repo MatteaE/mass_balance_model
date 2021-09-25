@@ -36,10 +36,31 @@ func_load_radiation_grids <- function(run_params, raster_blueprint) {
   radiation_boot_file_path <- file.path(run_params$dir_data_radiation, "radiation_grids.RData")
   
   # 365 paths to radiation grid files.
-  grid_paths <- file.path(run_params$dir_data_radiation,
-                          paste0(run_params$filename_radiation_prefix,
-                                 sprintf("%03d", 1:365),
-                                 run_params$filename_radiation_suffix))
+  # We allow different extensions.
+  grid_exts             <- c(".tif", ".grid", ".asc")
+  grid_ext_id           <- 0
+  grid_found            <- FALSE
+  grid_exts_checked_all <- FALSE
+
+  # Check for grids with different extensions.
+  while ((!grid_found) && (!grid_exts_checked_all)) {
+    grid_ext_id <- grid_ext_id + 1
+    grid_paths <- file.path(run_params$dir_data_radiation,
+                            paste0(run_params$filename_radiation_prefix,
+                                   sprintf("%03d", 1:365),
+                                   run_params$filename_radiation_suffix,
+                                   grid_exts[grid_ext_id]
+                            ))
+    if (file.exists(grid_paths[1])) {
+      grid_found <- TRUE
+    }
+    if (grid_ext_id == length(grid_exts)) {
+      grid_exts_checked_all <- TRUE
+    }
+  }
+  if ((!grid_found) && (grid_exts_checked_all)) {
+    stop("FATAL: no radiation grids found. Please check parameters dir_data_radiation, filename_radiation_prefix and filename_radiation_suffix.")
+  }
   
   # Do we have an RData file to speed up loading of radiation grids?
   # If so, use it!
