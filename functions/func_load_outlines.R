@@ -37,7 +37,7 @@ func_load_outlines <- function(run_params) {
     if (outline_filetype == "xyzn") {
       outlines_out$outlines[[outline_id]] <- func_load_xyzn(outline_paths[outline_id], run_params$grids_crs)
     } else if (outline_filetype == "shp") {
-      invisible(capture.output(outlines_out$outlines[[outline_id]] <- as(as_Spatial(st_read(outline_paths[outline_id])), "SpatialPolygons")))
+      invisible(capture.output(outlines_out$outlines[[outline_id]] <- as(as_Spatial(st_zm(st_read(outline_paths[outline_id]))), "SpatialPolygons")))
     }
     # Aspect ratio: > 1 if tall glacier, < 1 if wide glacier. Used to add margins to the area plots,
     # in order to keep the plot titles within the page margins.
