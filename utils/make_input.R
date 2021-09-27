@@ -354,7 +354,7 @@ ui <- fluidPage(useShinyjs(),
     tags$div(tags$ul(
       tags$li(em("the ", strong("glacier name "), "with no whitespaces")),
       tags$li(em("the ", strong("modeled year,"), "used to set the file names")),
-      tags$li(em("an ", strong("elevation grid "), "of the region of interest (for example .tif or .hgt, from EarthExplorer, SRTM, ASTER or any other)")),
+      tags$li(em("one or more ", strong("elevation grids "), "of the region of interest (for example .tif or .hgt, from EarthExplorer, SRTM, ASTER or any other). If you provide ", strong("more than one grid,"), "all grids", strong("will be merged"), "(mosaic) before processing.")),
       tags$li(em("a ", strong("glacier outline, "), "for example as shapefile (.shp)")),
       tags$li("(OPTIONAL): ", em("a shapefile with the ", strong("firn area"))),
       tags$li("(OPTIONAL): ", em("a shapefile with the ", strong("debris cover"))),
