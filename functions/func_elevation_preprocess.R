@@ -57,6 +57,7 @@ func_elevation_preprocess <- function(run_params, elevation) {
   ids_sink_4neighbors <- which(getValues(elevation_filled - (elevation_filled_focal_min + 0.01)) < 0)
   
   sinkfill_iter_count <- 1
+  cat("    Filling all sinks...\n")
   
   while (length(ids_sink_4neighbors) > 0) {
     

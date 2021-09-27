@@ -18,10 +18,10 @@ rasterOptions(todisk = TRUE) # Saves a lot of memory usage when processing large
 
 #### Functions called by the app ####
 # This function computes gridded total potential incoming solar radiation for one specific day.
-  # norm_mat: matrix with surface normals
-  # lat, lon: DEM center, as reference to compute day length
-  # ele_ref: elevation to use for the calculation. We use the mean of the DEM.
-  # delta_t: time-step of the computation, in hours
+# norm_mat: matrix with surface normals
+# lat, lon: DEM center, as reference to compute day length
+# ele_ref: elevation to use for the calculation. We use the mean of the DEM.
+# delta_t: time-step of the computation, in hours
 func_compute_day_rad <- function(dem_mat,
                                  norm_mat,
                                  dem_res,
@@ -60,7 +60,7 @@ func_compute_day_rad <- function(dem_mat,
 
 # This function computes 365 daily radiation grids and stores them on disk.
 # It calls the previous function.
-  # delta_t: time-step for the calculation, in hours.
+# delta_t: time-step for the calculation, in hours.
 func_compute_all_daily_pisr <- function(dem,
                                         year_cur,
                                         delta_t,
@@ -137,8 +137,6 @@ func_do_processing <- function(dem_filepath,
                                compute_radiation_bool,
                                outpath_base) {
   
-  resolution_proj_raster <- 20 # Always project grids to 20 m.
-  
   has_firn   <- !is.na(firn_filepath)
   has_debris <- !is.na(debris_filepath)
   has_reference <- !is.na(reference_filepath)
@@ -158,6 +156,15 @@ func_do_processing <- function(dem_filepath,
     dem_l1     <- raster(dem_filepath)
   }
   outline_l1 <- st_zm(st_read(outline_filepath, quiet = TRUE))
+  
+  # Compute glacier area, to automatically decide the cell size.
+  # We aim for 10000 cells, we allow cell sizes of
+  # 10, 20, 50, 100, 200, 500 and 1000 m.
+  outline_area <- as.numeric(st_area(outline_l1))
+  cellsizes_allowed <- c(10, 20, 50, 100, 200, 500, 1000)
+  ncells_target <- 10000
+  resolution_proj_raster <- cellsizes_allowed[which.min(abs(((outline_area / (cellsizes_allowed^2)) / ncells_target) - 1))]
+  
   if (has_firn)      firn_l1      <- st_zm(st_read(firn_filepath, quiet = TRUE))
   if (has_debris)    debris_l1    <- st_zm(st_read(debris_filepath, quiet = TRUE))
   if (has_reference) reference_l1 <- raster(reference_filepath)
@@ -183,36 +190,38 @@ func_do_processing <- function(dem_filepath,
   
   cat("\nCoordinate system is checked...\n")
   
-    # Find which UTM zone we should be using here in principle.
-    # Also works if the outline is in some weird CRS.
-    if (outline_crs@projargs == wgs84_crs@projargs) {
-      outline_centroid   <- suppressWarnings(st_coordinates(st_centroid(outline_l1)))
-    } else {
-      outline_wgs84      <- st_transform(outline_l1, crs("EPSG:4326"))
-      outline_centroid   <- suppressWarnings(st_coordinates(st_centroid(outline_wgs84)))
-    }
-    utm_crs_number       <- func_long2utmzonenumber(outline_centroid[1])
-    utm_crs              <- crs(paste0("EPSG:", 32600 + utm_crs_number))
+  # Find which UTM zone we should be using here in principle.
+  # Also works if the outline is in some weird CRS.
+  if (outline_crs@projargs == wgs84_crs@projargs) {
+    outline_centroid   <- suppressWarnings(st_coordinates(st_centroid(outline_l1)))
+  } else {
+    outline_wgs84      <- st_transform(outline_l1, crs("EPSG:4326"))
+    outline_centroid   <- suppressWarnings(st_coordinates(st_centroid(outline_wgs84)))
+  }
+  utm_crs_number       <- func_long2utmzonenumber(outline_centroid[1])
+  utm_crs              <- crs(paste0("EPSG:", 32600 + utm_crs_number))
+  
+  if (has_reference) {
+    cat("Reference grid is available. I am reprojecting as needed...\n")
     
-    if (has_reference) {
-      reference_crs <- crs(reference_l1)
-      
-      # If the reference is a .grid file
-      # (e.g. which we have just produced),
-      # it has no CRS! So in that case we
-      # assume that the grid uses the UTM CRS
-      # of our choice.
-      if (is.na(reference_crs@projargs)) {
-        crs(reference_l1) <- utm_crs
-      }
-      
-      target_crs    <- reference_crs
-      
-      if (dem_crs@projargs     != reference_crs@projargs) reproj_dem     <- TRUE
-      if (outline_crs@projargs != reference_crs@projargs) reproj_outline <- TRUE
-      
+    reference_crs <- crs(reference_l1)
+    
+    # If the reference is a .grid file
+    # (e.g. which we have just produced),
+    # it has no CRS! So in that case we
+    # assume that the grid uses the UTM CRS
+    # of our choice.
+    if (is.na(reference_crs@projargs)) {
+      crs(reference_l1) <- utm_crs
+    }
+    
+    target_crs    <- reference_crs
+    
+    if (dem_crs@projargs     != reference_crs@projargs) reproj_dem     <- TRUE
+    if (outline_crs@projargs != reference_crs@projargs) reproj_outline <- TRUE
+    
     # If there is no reference grid supplied for alignment.
-    } else {
+  } else {
     
     if ((dem_crs@projargs == outline_crs@projargs) && (dem_crs@projargs != wgs84_crs@projargs)) {
       
@@ -282,12 +291,12 @@ func_do_processing <- function(dem_filepath,
     if ((nrow(dem_l2)   != nrow(reference_l1))   ||
         (ncol(dem_l2)   != ncol(reference_l1))   ||
         (extent(dem_l2) != extent(reference_l1))) {
-          
-          dhm_out <- resample(dem_l2, reference_l1, method = "bilinear")
+      
+      dhm_out <- resample(dem_l2, reference_l1, method = "bilinear")
       
     }
   }
-
+  
   dem_out <- mask(dhm_out, outline_l2)
   surftype_out <- 4*is.na(dem_out) # This is the base rock/ice mask.
   if (has_firn)   surftype_out <- mask(surftype_out, firn_l2, inverse = TRUE, updatevalue = 1)   # Add firn if we have it.
@@ -297,10 +306,12 @@ func_do_processing <- function(dem_filepath,
   #### Write grids to output ####
   NAvalue(dhm_out)      <- -9999
   NAvalue(surftype_out) <- -9999
-  dir.create(file.path(outpath_base, "dhm"), recursive = TRUE)
-  dir.create(file.path(outpath_base, "surftype"))
+  dir.create(file.path(outpath_base, "dhm"), recursive = TRUE, showWarnings = FALSE)
+  dir.create(file.path(outpath_base, "surftype"), showWarnings = FALSE)
+  dir.create(file.path(outpath_base, "outline"), showWarnings = FALSE)
   writeRaster(dhm_out, file.path(outpath_base, "dhm", "dhm_glacier.tif"), overwrite = TRUE)
   writeRaster(surftype_out, file.path(outpath_base, "surftype", "surface_type_glacier.tif"), overwrite = TRUE)
+  st_write(outline_l2, file.path(outpath_base, "outline", "outline_glacier.shp"), append = FALSE, quiet = TRUE)
   
   #### Compute radiation if asked to do so ####
   if (compute_radiation_bool) {
@@ -337,108 +348,109 @@ func_do_processing <- function(dem_filepath,
 #### Definition of shiny app to use the above function ####
 # Define UI for app ----
 ui <- fluidPage(useShinyjs(),
-  
-  # . App title and description ----
-  titlePanel("Mass balance model assistant"),
-  
-  
-  checkboxInput("checkbox_show_help_text", "Show help text", FALSE),
-
-  # . . Help text which can be shown by ticking a checkbox.
-  conditionalPanel(condition = "input.checkbox_show_help_text == 1",
-    h5(style="text-align: justify; margin-top: 0px; margin-bottom: 5px;",
-       em("This program generates the grids of DEM, surface type and radiation which are used in the glacier mass balance model.")),
-    p(),
-    h5(style="text-align: justify; margin-top: 0px; margin-bottom: 5px;",
-       em("As"), strong(" INPUT DATA "), em("please provide:")),
-    tags$div(tags$ul(
-      tags$li(em("the ", strong("glacier name "), "with no whitespaces")),
-      tags$li(em("the ", strong("modeled year,"), "used to set the file names")),
-      tags$li(em("one or more ", strong("elevation grids "), "of the region of interest (for example .tif or .hgt, from EarthExplorer, SRTM, ASTER or any other). If you provide ", strong("more than one grid,"), "all grids", strong("will be merged"), "(mosaic) before processing.")),
-      tags$li(em("a ", strong("glacier outline, "), "for example as shapefile (.shp)")),
-      tags$li("(OPTIONAL): ", em("a shapefile with the ", strong("firn area"))),
-      tags$li("(OPTIONAL): ", em("a shapefile with the ", strong("debris cover"))),
-      tags$li("(OPTIONAL): ", em("a ", strong("reference grid file, to align"), " the output grids (useful to create input for multi-year simulations)")),
-      tags$li("(OPTIONAL): ", em("the ", strong("margin distance"), " around the outline, in meters.", strong("This is ignored if you provide the reference grid file."))),
-      style = "margin-top: 0px; margin-bottom: 5px; text-align: justify;")),
-    p(),
-    h5(style="text-align: justify; margin-top: 0px; margin-bottom: 5px;",
-       em("As"), strong(" OUTPUT "), em("the model will create several grids:")),
-    tags$div(tags$ul(
-      tags$li(em("a ", strong("DHM"), " (altitude grid, as a full rectangle around the glacier)")),
-      # tags$li(em("a ", strong("DEM"), " (altitude grid, only where there is ice, with no data outside the glacier)")),
-      tags$li(em("a grid of ", strong("surface type"), " (rock/ice/firn/debris, important for albedo)")),
-      tags$li("(OPTIONAL): ", em("365 grids of ", strong("daily potential solar radiation."))),
-      style = "margin-top: 0px; margin-bottom: 5px;")),
-    h5(style="text-align: justify; margin-top: 0px; margin-bottom: 30px; text-align: justify;",
-       em("The ", strong("coordinate system"), " (UTM / WGS84) is adjusted automatically."))),
-  
-  # . UI layout below the help text ----
-  p(),
-  
-  # .. Input: choose glacier name (with inline CSS modifier to have label and field on same row),
-  # DEM, outline file, and (optionally) firn and debris shapefiles, as well as reference grid for alignment ----
-  tags$head(
-    tags$style(type="text/css", "#inline1 label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 10px; } 
+                
+                # . App title and description ----
+                titlePanel("Mass balance model assistant"),
+                
+                
+                checkboxInput("checkbox_show_help_text", "Show help text", FALSE),
+                
+                # . . Help text which can be shown by ticking a checkbox.
+                conditionalPanel(condition = "input.checkbox_show_help_text == 1",
+                                 h5(style="text-align: justify; margin-top: 0px; margin-bottom: 5px;",
+                                    em("This program generates the grids of DEM, surface type and radiation which are used in the glacier mass balance model.")),
+                                 p(),
+                                 h5(style="text-align: justify; margin-top: 0px; margin-bottom: 5px;",
+                                    em("As"), strong(" INPUT DATA "), em("please provide:")),
+                                 tags$div(tags$ul(
+                                   tags$li(em("the ", strong("glacier name "), "with no whitespaces")),
+                                   tags$li(em("the ", strong("modeled year,"), "used to set the file names")),
+                                   tags$li(em("one or more ", strong("elevation grids "), "of the region of interest (for example .tif or .hgt, from EarthExplorer, SRTM, ASTER or any other). If you provide ", strong("more than one grid,"), "all grids", strong("will be merged"), "(mosaic) before processing.")),
+                                   tags$li(em("a ", strong("glacier outline, "), "for example as shapefile (.shp)")),
+                                   tags$li("(OPTIONAL): ", em("a shapefile with the ", strong("firn area"))),
+                                   tags$li("(OPTIONAL): ", em("a shapefile with the ", strong("debris cover"))),
+                                   tags$li("(OPTIONAL): ", em("a ", strong("reference grid file, to align"), " the output grids (useful to create input for multi-year simulations)")),
+                                   tags$li("(OPTIONAL): ", em("the ", strong("margin distance"), " around the outline, in meters.", strong("This is ignored if you provide the reference grid file."))),
+                                   style = "margin-top: 0px; margin-bottom: 5px; text-align: justify;")),
+                                 p(),
+                                 h5(style="text-align: justify; margin-top: 0px; margin-bottom: 5px;",
+                                    em("As"), strong(" OUTPUT "), em("the model will create several grids:")),
+                                 tags$div(tags$ul(
+                                   tags$li(em("a ", strong("DHM"), " (altitude grid, as a full rectangle around the glacier)")),
+                                   # tags$li(em("a ", strong("DEM"), " (altitude grid, only where there is ice, with no data outside the glacier)")),
+                                   tags$li(em("a grid of ", strong("surface type"), " (rock/ice/firn/debris, important for albedo)")),
+                                   tags$li(em("the input", strong("outline shapefile, processed"), "and ready to be used in the mass balance model")),
+                                   tags$li("(OPTIONAL): ", em("365 grids of ", strong("daily potential solar radiation."))),
+                                   style = "margin-top: 0px; margin-bottom: 5px;")),
+                                 h5(style="text-align: justify; margin-top: 0px; margin-bottom: 30px; text-align: justify;",
+                                    em("The ", strong("coordinate system"), " (UTM / WGS84) is adjusted automatically."))),
+                
+                # . UI layout below the help text ----
+                p(),
+                
+                # .. Input: choose glacier name (with inline CSS modifier to have label and field on same row),
+                # DEM, outline file, and (optionally) firn and debris shapefiles, as well as reference grid for alignment ----
+                tags$head(
+                  tags$style(type="text/css", "#inline1 label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 10px; } 
                 #inline1 .form-group { display: table-row;}"),
-  tags$style(type="text/css", "#inline2 label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 22px; } 
+                  tags$style(type="text/css", "#inline2 label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 22px; } 
                 #inline2 .form-group { display: table-row;}")
-  ),
-  tags$div(id = "inline1", textInput("choose_glacier_name", "Choose glacier name:", placeholder = "Glacier name")),
-  p(),
-  tags$div(id = "inline2", numericInput("choose_model_year", "Choose model year:", value = NA, min = 0, max = 3000, step = 1)),
-  p(),
-  shinyFilesButton("choose_dem_file", strong("Choose one or more input DEM files"), "Choose one or more input DEM files", multiple = TRUE, style = "width: 60%;"),
-  p(),
-  shinyFilesButton("choose_shp_file", strong("Choose input glacier shapefile"), "Choose input glacier shapefile", FALSE, style = "width: 60%;"),
-  p(),
-  shinyFilesButton("choose_firn_file", strong("Choose input firn shapefile (optional)"), "Choose input firn shapefile (optional)", FALSE, style = "width: 60%;"),
-  p(),
-  shinyFilesButton("choose_debris_file", strong("Choose input debris shapefile (optional)"), "Choose input debris shapefile (optional)", FALSE, style = "width: 60%;"),
-  p(),
-  shinyFilesButton("choose_reference_file", strong("Choose reference grid file (optional)"), "Choose reference grid file (optional)", FALSE, style = "width: 60%; margin-bottom: 20px"),
-
-  
-  # .. Input: choose margin in meters ----
-  numericInput(inputId = "buffersize",
-               label = "Choose margin size around the outline, in meters:",
-               value = 500,
-               min = 1,
-               max = 10000,
-               width = "60%"),
-  p(),
-  
-  # .. Input: should we also compute radiation files? ----
-  checkboxInput("checkbox_compute_radiation", strong("Compute daily potential solar radiation (SLOW!)"), FALSE, width = "100%"),
-  p(),
-  
-  # .. Text fields: show the full path of the chosen DEM and outline file ----
-  htmlOutput("glaciername_chosen_string"),
-  htmlOutput("modelyear_chosen_string"),
-  htmlOutput("dem_chosen_string"),
-  htmlOutput("shp_chosen_string"),
-  htmlOutput("firn_chosen_string"),
-  htmlOutput("debris_chosen_string"),
-  htmlOutput("reference_chosen_string"),
-  p(),
-  
-  # .. Input: do-it button ----
-  actionButton(inputId = "startprocessing",
-               label = strong("RUN!")),
-  p()
-  
+                ),
+                tags$div(id = "inline1", textInput("choose_glacier_name", "Choose glacier name:", placeholder = "Glacier name")),
+                p(),
+                tags$div(id = "inline2", numericInput("choose_model_year", "Choose model year:", value = NA, min = 0, max = 3000, step = 1)),
+                p(),
+                shinyFilesButton("choose_dem_file", strong("Choose one or more input DEM files"), "Choose one or more input DEM files", multiple = TRUE, style = "width: 60%;"),
+                p(),
+                shinyFilesButton("choose_shp_file", strong("Choose input glacier shapefile"), "Choose input glacier shapefile", FALSE, style = "width: 60%;"),
+                p(),
+                shinyFilesButton("choose_firn_file", strong("Choose input firn shapefile (optional)"), "Choose input firn shapefile (optional)", FALSE, style = "width: 60%;"),
+                p(),
+                shinyFilesButton("choose_debris_file", strong("Choose input debris shapefile (optional)"), "Choose input debris shapefile (optional)", FALSE, style = "width: 60%;"),
+                p(),
+                shinyFilesButton("choose_reference_file", strong("Choose reference grid file (optional)"), "Choose reference grid file (optional)", FALSE, style = "width: 60%; margin-bottom: 20px"),
+                
+                
+                # .. Input: choose margin in meters ----
+                numericInput(inputId = "buffersize",
+                             label = "Choose margin size around the outline, in meters:",
+                             value = 500,
+                             min = 1,
+                             max = 10000,
+                             width = "60%"),
+                p(),
+                
+                # .. Input: should we also compute radiation files? ----
+                checkboxInput("checkbox_compute_radiation", strong("Compute daily potential solar radiation (SLOW!)"), FALSE, width = "100%"),
+                p(),
+                
+                # .. Text fields: show the full path of the chosen DEM and outline file ----
+                htmlOutput("glaciername_chosen_string"),
+                htmlOutput("modelyear_chosen_string"),
+                htmlOutput("dem_chosen_string"),
+                htmlOutput("shp_chosen_string"),
+                htmlOutput("firn_chosen_string"),
+                htmlOutput("debris_chosen_string"),
+                htmlOutput("reference_chosen_string"),
+                p(),
+                
+                # .. Input: do-it button ----
+                actionButton(inputId = "startprocessing",
+                             label = strong("RUN!")),
+                p()
+                
 )
 
 # Define server logic to read selected file ----
 server <- function(input, output, session) {
-
-  volumes <- c(getVolumes()(), setNames(getwd(), basename(getwd())))
+  
+  volumes <- c(getVolumes()(), setNames(dirname(getwd()), basename(dirname(getwd()))), setNames(dirname(dirname(getwd())), basename(dirname(dirname(getwd())))))
   shinyFileChoose(input, "choose_dem_file", roots=volumes, session=session)
   shinyFileChoose(input, "choose_shp_file", roots=volumes, session=session)
   shinyFileChoose(input, "choose_firn_file", roots=volumes, session=session)
   shinyFileChoose(input, "choose_debris_file", roots=volumes, session=session)
   shinyFileChoose(input, "choose_reference_file", roots=volumes, session=session)
-
+  
   glaciername       <- reactive(input$choose_glacier_name)
   modelyear         <- reactive(input$choose_model_year)
   demfilepath       <- reactive(as.character(parseFilePaths(volumes, input$choose_dem_file)$datapath))
@@ -488,7 +500,7 @@ server <- function(input, output, session) {
            "<font color=\"#00C000\"><b>Input reference grid file selected. <i>NOTE: margin distance will be ignored.</i></b></font color>",
            "<font color=\"#FF8000\"><b>Input reference grid file (optional) not yet selected.</b></font color>")
   })
-
+  
   
   # Button to start processing.
   observeEvent(input$startprocessing, {
@@ -506,6 +518,10 @@ server <- function(input, output, session) {
     if (processing_output == 0) {
       file.rename(file.path(getwd(), glaciername(), "dhm", "dhm_glacier.tif"), file.path(getwd(), glaciername(), "dhm", paste0("dhm_", glaciername(), "_", modelyear(), ".tif")))
       file.rename(file.path(getwd(), glaciername(), "surftype", "surface_type_glacier.tif"), file.path(getwd(), glaciername(), "surftype", paste0("surface_type_", glaciername(), "_", modelyear(), ".tif")))
+      file.rename(file.path(getwd(), glaciername(), "outline", "outline_glacier.shp"), file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear(), ".shp")))
+      file.rename(file.path(getwd(), glaciername(), "outline", "outline_glacier.shx"), file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear(), ".shx")))
+      file.rename(file.path(getwd(), glaciername(), "outline", "outline_glacier.prj"), file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear(), ".prj")))
+      file.rename(file.path(getwd(), glaciername(), "outline", "outline_glacier.dbf"), file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear(), ".dbf")))
       removeModal()
       showModal(modalDialog(h3("Processing finished. See RStudio console for details. You can now close the program."), footer=NULL))
     } else {

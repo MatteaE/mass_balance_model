@@ -115,8 +115,15 @@ func_process_year <- function(year_data,
                          data_all$data_outlines)
   }
   
-  if ((year_data$nstakes_annual > 0) && (max(abs((extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear") - year_data$massbal_annual_meas_cur$massbal_standardized) - (year_data$mod_output_annual_cur$stakes_mb_mod - year_data$mod_output_annual_cur$stakes_mb_meas))) > 1)) {
-    stop("FATAL: the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear filtering of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.")
+  if (year_data$nstakes_annual > 0) {
+    stake_errors <- abs((extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear") - year_data$massbal_annual_meas_cur$massbal_standardized) - (year_data$mod_output_annual_cur$stakes_mb_mod - year_data$mod_output_annual_cur$stakes_mb_meas))
+    max_error <- max(stake_errors)
+    max_error_id <- which.max(stake_errors)
+    if (max_error > 1) {
+      message("SERIOUS WARNING: the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear extraction of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.")
+      message(paste0("The max error is at stake ", max_error_id, ", with value ", round(max_error, 1), " mm w.e."))
+      cat("Stake data:", paste(year_data$massbal_annual_meas_cur[max_error_id,]), sep = "  |  ")
+    }
   }
   
   return(list(year_data       = year_data,

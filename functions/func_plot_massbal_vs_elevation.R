@@ -118,7 +118,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
     df_scatterplot <- data.frame(ele = data_dems$elevation[[year_data$dem_grid_id]][data_dems$glacier_cell_ids[[year_data$dem_grid_id]]],
                                  mb = getValues(year_data$massbal_annual_maps$meas_period)[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]])
     
-    df_stakes <- data.frame(z    = year_data$massbal_annual_meas_cur$z,
+    df_stakes <- data.frame(z    = year_data$massbal_annual_meas_cur$z_dem,
                             meas = year_data$massbal_annual_meas_cur$massbal_standardized,
                             mod  = stakes_mod_massbal_meas_period)
     

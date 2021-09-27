@@ -52,7 +52,7 @@ func_plot_stakes <- function(year_data) {
   if ((months_cur_rle$lengths[1] < 28) && (as.integer(format(days[1], "%d")) < 15)) { 
     months_labels_df <- months_labels_df[-1,]
   }
-  if ((months_cur_rle$lengths[length(months_cur_rle$lengths)] < 28) && (as.integer(format(days[length(days)])) > 15)) { # Same, for last month.
+  if ((months_cur_rle$lengths[length(months_cur_rle$lengths)] < 28) && (as.integer(format(days[length(days)], "%d")) > 15)) { # Same, for last month.
     months_labels_df <- months_labels_df[-nrow(months_labels_df),]
   }
   

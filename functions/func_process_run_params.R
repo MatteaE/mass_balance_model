@@ -38,6 +38,9 @@ func_process_run_params <- function(run_params) {
   run_params$filename_radiation_prefix   <-   "dir"
   run_params$filename_radiation_suffix   <-   "24"                    # Radiation files are called <prefix><doy><suffix> where <doy> is the day of year, zero-padded to length 3 (e.g. 001).
   
+  run_params$filename_outline_prefix     <-   paste0("outline_", run_params$name_glacier, "_")
+  run_params$filename_outline_suffix     <-   ""                      # Outline name is <prefix><year><suffix>.shp (or .xyzn).
+  
   run_params$years_input_allowed         <-   1500:2500                     # Years over which we should search for input data.
   run_params$years_input_allowed_n       <-   diff(range(run_params$years_input_allowed)) + 1
   

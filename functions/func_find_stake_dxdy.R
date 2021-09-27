@@ -13,8 +13,15 @@
 # dx1 = x distance from the two cells to the left (i.e. with lower X coordinate than the stake),
 # dy1 = y distance from the two cells below (i.e. with lower Y coordinate),
 # dy2 = y distance from the two cells above (i.e. with higher Y coordinate).
-# We compute dy2 first so that it can be 0 (i.e. stake aligned with center of the two
+# We compute dy2 first so that it can also be 0 (i.e. stake aligned with center of the two
 # cells on the upper row of the 4 neighbors).
+# If we computed dy1 first, then if it were 0 we would be placing the stake one row below
+# its actual position (because the computation uses the %% operator, so a cell which is
+# vertically aligned with the grid centers gets 0, and if dy1_annual were computed as 0
+# it would mean that the cell is aligned with the lower row of the 4 neighbors,
+# but (see lines below) the "lower row" is in fact an artifact due to duplicates = FALSE,
+# while the stake is well aligned with the *upper* row).
+# duplicates = FALSE is needed to always have 4 cells, else bad things would happen.
 # This is important for the bilinear filtering since we use fourCellsFromXY(..., duplicates = FALSE),
 # else the filtering would fail (duplicates = FALSE returns (if needed) additional cells which have higher index,
 # i.e. which are lower in the raster matrix, i.e. which would be the lower row of the 4 neighbors).

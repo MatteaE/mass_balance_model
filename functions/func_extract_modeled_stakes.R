@@ -38,6 +38,10 @@ func_extract_modeled_stakes <- function(run_params, dx1, dx2, dy1, dy2, vec_mass
     cell_series3 <- vec_massbal_cumul[stakes_cells[stake_id, 3] + seq(0,nval-1,run_params$grid_ncells)]
     cell_series4 <- vec_massbal_cumul[stakes_cells[stake_id, 4] + seq(0,nval-1,run_params$grid_ncells)]
     
+    # dx1 = x distance from the two cells to the left (i.e. with lower X coordinate than the stake),
+    # dy1 = y distance from the two cells below (i.e. with lower Y coordinate),
+    # dy2 = y distance from the two cells above (i.e. with higher Y coordinate).
+    # TODO: if one of cells 1-4 is outside the glacier, discard it.
     stakes_series_mod_all[, stake_id] <- (cell_series1 * dx2[stake_id] * dy1[stake_id] +
                                           cell_series2 * dx1[stake_id] * dy1[stake_id] +
                                           cell_series3 * dx2[stake_id] * dy2[stake_id] +

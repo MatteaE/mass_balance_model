@@ -287,7 +287,7 @@ func_plot_overview <- function(overview_annual,
     geom_hline(yintercept = 0, linetype = "dashed", size = 1) +
     geom_line(data = mb_cumul_df,  aes(x = year, y = mb_cumul), color = "#FF0000", size = 1) +
     geom_point(data = mb_cumul_df, aes(x = year, y = mb_cumul), color = "#FF0000", shape = 2, size = point_size, stroke = point_size/2.5) +
-    scale_y_continuous(breaks = pretty(c(max(mb_all_df$mb), overview_annual$summary_df$mb_cumul))) +
+    scale_y_continuous(breaks = pretty(c(0, max(mb_all_df$mb), overview_annual$summary_df$mb_cumul))) +
     scale_x_date(date_labels = "%Y/%m") +
     ylab("Cumulative mass balance [m w.e.]") +
     ggtitle("Cumulative mass balance (hydrological years)") +

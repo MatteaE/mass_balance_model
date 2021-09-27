@@ -8,23 +8,20 @@
 
 run_params <- list(
   
-  name_glacier                =    "yakarcha",                    # Glacier name, used for output directory naming.
+  name_glacier                =    "abramov",                    # Glacier name, used for output directory naming.
   
   #### INPUT-related parameters ####
-  dir_data_recursive           =   TRUE,                         # [TRUE/FALSE]: should we look recursively for the input files in the specified directories?
+  dir_data_recursive           =   FALSE,                         # [TRUE/FALSE]: should we look recursively for the input files in the specified directories?
   
   # Set FILE NAMES and input file properties.
-  filename_weather             =   "weather_yakarcha.dat",       # File name of the weather series
-  file_weather_nskip           =   4,                            # [-]: number of lines to skip in the weather file
+  filename_weather             =   "weather_abramov.dat",       # File name of the weather series
+  file_weather_nskip           =   2,                            # [-]: number of lines to skip in the weather file
   
   grids_crs                    =   32642,                        # Reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
   
   dhm_interpolate              =   FALSE,                        # [TRUE/FALSE]: should we use linear interpolation to compute each year's DHM?
   
-  filename_outline_prefix      =   "outline_yakarcha_",
-  filename_outline_suffix      =   "",                # Outline name is <prefix><year><suffix>.shp (or .xyzn).
-  
-  filename_massbalance_annual  =   "mb_yakarcha.dat",       # File name of the annual mass balance observations
+  filename_massbalance_annual  =   "mb_abramov.dat",       # File name of the annual mass balance observations
   filename_massbalance_winter  =   "",                           # File name of the winter mass balance observations
   
   filename_params_prefix       =   "param_",
@@ -32,7 +29,7 @@ run_params <- list(
   
   
   #### WEATHER INPUT parameters ####
-  weather_aws_elevation        =   4000,                         # [m a.s.l.]: AWS elevation
+  weather_aws_elevation        =   3837,                         # [m a.s.l.]: AWS elevation
   weather_snowfall_temp        =   1.5,                          # [°C]: at this temperature precipitation is half rain, half snow. One degree above it is all rain, one degree below it is all snow (snow fraction is linearly interpolated).
   weather_max_precip_ele       =   NA,                         # [m a.s.l.]: above this altitude, precipitation does not increase any more but becomes constant (cutoff). If NA, it is estimated automatically from the first DEM grid.
   
@@ -87,7 +84,7 @@ run_params <- list(
   
   
   #### MODELED YEARS choice ####
-  first_year                   =   2020,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   2020                          # Last modeled year (same as previous comment)
+  first_year                   =   1986,                         # First modeled year (usually from October of the previous year to September of this year)
+  last_year                    =   1986                          # Last modeled year (same as previous comment)
   
 )
