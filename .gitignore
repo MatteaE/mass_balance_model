@@ -26,5 +26,5 @@ utils/data/
 # Old procedures superseded by functions #
 procedures/*.old
 
-# Compiled C++ avalanche function (platform-specific! #
+# Compiled C++ avalanche function (platform-specific!) #
 functions/sourceCpp*
