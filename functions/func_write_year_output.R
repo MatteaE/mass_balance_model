@@ -39,11 +39,18 @@ func_write_year_output <- function(year_data,
   day_id_offset <- (length(model_annual_dates) - as.integer(format(model_annual_dates[length(model_annual_dates)], "%j"))) + 1
   df_annual_daily <- data.frame(date                = model_annual_dates,
                                 day_id              = seq_along(model_annual_dates) - day_id_offset,
-                                gl_massbal_bandcorr = ifelse(year_data$nstakes_annual > 0, sprintf("%.1f", year_data$mod_output_annual_cur$gl_massbal_cumul_bandcorr), NA),
+                                gl_massbal_bandcorr = NA,
                                 gl_massbal          = sprintf("%.1f", year_data$mod_output_annual_cur$gl_massbal_cumul),
                                 gl_accum            = sprintf("%.1f", year_data$mod_output_annual_cur$gl_accum_cumul),
                                 gl_melt             = sprintf("%.1f", year_data$mod_output_annual_cur$gl_melt_cumul),
-                                gl_melt_bandcorr    = ifelse(year_data$nstakes_annual > 0, sprintf("%.1f", year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr), NA))
+                                gl_melt_bandcorr    = NA)
+  
+  if (year_data$nstakes_annual > 0) {
+    df_annual_daily$gl_massbal_bandcorr <- sprintf("%.1f", year_data$mod_output_annual_cur$gl_massbal_cumul_bandcorr)
+    df_annual_daily$gl_melt_bandcorr    <- sprintf("%.1f", year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr)
+  }
+  
+  
   write.csv(df_annual_daily,
             file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_glacier_", year_data$year_cur, ".csv")),
             quote = FALSE,

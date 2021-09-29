@@ -58,7 +58,9 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
                         (data_massbalance$x > ext_limits@xmax) |
                         (data_massbalance$y < ext_limits@ymin) |
                         (data_massbalance$y > ext_limits@ymax))
-  if (length(ids_df_bad) > 0) {
+  ids_bad_n <- length(ids_df_bad)
+  if (ids_bad_n > 0) {
+    message("WARNING: the ", load_what, " mass balance file contains ", ids_bad_n, " stake(s) which fall outside the DHM. I am discarding them now, but you should investigate.")
     data_massbalance <- data_massbalance[-ids_df_bad,]
   }
   
@@ -66,10 +68,10 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
   # Cluster measurements according to a user-defined distance.
   # We skip this step in case we have only one measurement
   # (can be the case if we have a dummy file for winter stakes).
-  if (nrow(data_massbalance) > 1) {
+  if ((nrow(data_massbalance) > 1) && (run_params$stake_cluster_distance > 0)) {
     
     # We only cluster together stakes which are within the distance
-    # AND have were measured on the same date (both at the start
+    # AND were measured on the same date (both at the start
     # and at the end of their observation period).
     stakes_dists_spatial <- spDists(cbind(data_massbalance$x, data_massbalance$y), longlat = FALSE)
     # This temporary vector of starting dates is used

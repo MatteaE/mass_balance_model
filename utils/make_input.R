@@ -134,6 +134,7 @@ func_do_processing <- function(dem_filepath,
                                debris_filepath,
                                reference_filepath,
                                dem_buffer,
+                               cell_size,
                                compute_radiation_bool,
                                outpath_base) {
   
@@ -157,18 +158,34 @@ func_do_processing <- function(dem_filepath,
   }
   outline_l1 <- st_zm(st_read(outline_filepath, quiet = TRUE))
   
-  # Compute glacier area, to automatically decide the cell size.
-  # We aim for 10000 cells, we allow cell sizes of
-  # 10, 20, 50, 100, 200, 500 and 1000 m.
-  outline_area <- as.numeric(st_area(outline_l1))
-  cellsizes_allowed <- c(10, 20, 50, 100, 200, 500, 1000)
-  ncells_target <- 10000
-  resolution_proj_raster <- cellsizes_allowed[which.min(abs(((outline_area / (cellsizes_allowed^2)) / ncells_target) - 1))]
-  
   if (has_firn)      firn_l1      <- st_zm(st_read(firn_filepath, quiet = TRUE))
   if (has_debris)    debris_l1    <- st_zm(st_read(debris_filepath, quiet = TRUE))
   if (has_reference) reference_l1 <- raster(reference_filepath)
   gc()
+  
+  
+  # If a reference grid is given, just use its
+  # resolution as cell size. Else:
+  # if cell size is not supplied by the user,
+  # determine it automatically from the glacier area.
+  # We aim for 10000 cells, we allow cell sizes of
+  # 10, 20, 50, 100, 200, 500 and 1000 m.
+  if (has_reference) {
+    cat("Reference grid supplied. Overriding cell size with reference cell size...\n")
+    resolution_proj_raster <- xres(reference_l1)
+  } else {
+    if (is.na(cell_size)) {
+      cat("Cell size not supplied. Automatically computing cell size...\n")
+      outline_area <- as.numeric(st_area(outline_l1))
+      cellsizes_allowed <- c(10, 20, 50, 100, 200, 500, 1000)
+      ncells_target <- 10000
+      resolution_proj_raster <- cellsizes_allowed[which.min(abs(((outline_area / (cellsizes_allowed^2)) / ncells_target) - 1))]
+      cat("Cell size selected:", resolution_proj_raster, "m\n")
+    } else {
+      resolution_proj_raster <- cell_size
+      cat("Cell size supplied:", resolution_proj_raster, "m\n")
+    }
+  }
   
   
   #### Fix coordinate systems ####
@@ -371,6 +388,7 @@ ui <- fluidPage(useShinyjs(),
                                    tags$li("(OPTIONAL): ", em("a shapefile with the ", strong("debris cover"))),
                                    tags$li("(OPTIONAL): ", em("a ", strong("reference grid file, to align"), " the output grids (useful to create input for multi-year simulations)")),
                                    tags$li("(OPTIONAL): ", em("the ", strong("margin distance"), " around the outline, in meters.", strong("This is ignored if you provide the reference grid file."))),
+                                   tags$li("(OPTIONAL): ", em("the ", strong("cell size of the grids,"), " in meters. If you don't provide this it is estimated automatically.", strong("This is ignored if you provide the reference grid file."))),
                                    style = "margin-top: 0px; margin-bottom: 5px; text-align: justify;")),
                                  p(),
                                  h5(style="text-align: justify; margin-top: 0px; margin-bottom: 5px;",
@@ -419,6 +437,16 @@ ui <- fluidPage(useShinyjs(),
                              max = 10000,
                              width = "60%"),
                 p(),
+                
+                # .. Input: choose grid cell size in meters ----
+                numericInput(inputId = "cellsize",
+                             label = "Choose grid cell size in meters (leave blank for automatic cell size):",
+                             value = NA,
+                             min = 1,
+                             max = 10000,
+                             width = "60%"),
+                p(),
+                
                 
                 # .. Input: should we also compute radiation files? ----
                 checkboxInput("checkbox_compute_radiation", strong("Compute daily potential solar radiation (SLOW!)"), FALSE, width = "100%"),
@@ -497,7 +525,7 @@ server <- function(input, output, session) {
   })
   output$reference_chosen_string <- renderText({
     ifelse(isTruthy(referencefilepath()),
-           "<font color=\"#00C000\"><b>Input reference grid file selected. <i>NOTE: margin distance will be ignored.</i></b></font color>",
+           "<font color=\"#00C000\"><b>Input reference grid file selected. <i>NOTE: margin distance and cell size will be ignored.</i></b></font color>",
            "<font color=\"#FF8000\"><b>Input reference grid file (optional) not yet selected.</b></font color>")
   })
   
@@ -505,7 +533,7 @@ server <- function(input, output, session) {
   # Button to start processing.
   observeEvent(input$startprocessing, {
     # These 4 below are probably not needed since the RUN! button is
-    # disabled by shinyjs, but we keep them anyway since the make sense.
+    # disabled by shinyjs, but we keep them anyway since they make sense.
     req(input$choose_glacier_name)
     req(input$choose_model_year)
     req(input$choose_dem_file)
@@ -514,7 +542,7 @@ server <- function(input, output, session) {
     debrisfilepath_sel    <- ifelse(isTruthy(debrisfilepath()), debrisfilepath(), NA)
     referencefilepath_sel <- ifelse(isTruthy(referencefilepath()), referencefilepath(), NA)
     showModal(modalDialog(h3("Processing... See RStudio console for progress."), footer=NULL))
-    processing_output <- func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$checkbox_compute_radiation, file.path(glaciername()))
+    processing_output <- func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$cellsize, input$checkbox_compute_radiation, file.path(glaciername()))
     if (processing_output == 0) {
       file.rename(file.path(getwd(), glaciername(), "dhm", "dhm_glacier.tif"), file.path(getwd(), glaciername(), "dhm", paste0("dhm_", glaciername(), "_", modelyear(), ".tif")))
       file.rename(file.path(getwd(), glaciername(), "surftype", "surface_type_glacier.tif"), file.path(getwd(), glaciername(), "surftype", paste0("surface_type_", glaciername(), "_", modelyear(), ".tif")))

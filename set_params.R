@@ -31,7 +31,7 @@ run_params <- list(
   #### WEATHER INPUT parameters ####
   weather_aws_elevation        =   3837,                         # [m a.s.l.]: AWS elevation
   weather_snowfall_temp        =   1.5,                          # [°C]: at this temperature precipitation is half rain, half snow. One degree above it is all rain, one degree below it is all snow (snow fraction is linearly interpolated).
-  weather_max_precip_ele       =   NA,                         # [m a.s.l.]: above this altitude, precipitation does not increase any more but becomes constant (cutoff). If NA, it is estimated automatically from the first DEM grid.
+  weather_max_precip_ele       =   4600,                         # [m a.s.l.]: above this altitude, precipitation does not increase any more but becomes constant (cutoff). If NA, it is estimated automatically from the first DEM grid.
   
   
   #### TOPOGRAPHICAL SNOW DISTRIBUTION-related parameters ####
@@ -39,7 +39,7 @@ run_params <- list(
   curvature_cutoff_fact        =   1.2,                          # [-]: multiplier for the curvature cutoff threshold at which the snow distribution is not further changed. The threshold is given by the smaller of the two curvature extremes (positive and negative) divided by this factor. Only values >  = 1 make sense.
   curvature_effect_limit       =   0.5,                          # [-]: maximum effect of curvature, i.e. the curvature multiplier will be within [1 ± curvature_effect_limit]. Only values between 0 and 1 make sense.
   
-  elevation_effect_threshold   =   NA,                         # [m]: elevation above which snow accumulation decreases (wind effect). If NA, it is estimated automatically from the first DEM grid.
+  elevation_effect_threshold   =   4600,                         # [m]: elevation above which snow accumulation decreases (wind effect). If NA, it is estimated automatically from the first DEM grid.
   elevation_effect_fact        =   1.0,                          # [-]: strength of snow accumulation decrease at very high altitude. Only values between 0 and 1 make sense. At 0 accumulation does not decrease, at 1 accumulation decreases to 0 at the highest point in the DHM.
   
   
@@ -69,10 +69,10 @@ run_params <- list(
 
     
   #### ACCUMULATION and MELT MODEL default year parameters ####
-  default_prec_corr            =   150,                          # [%]: default precipitation correction in case no data are available.
-  default_prec_summer_fact     =   0.8,                          # [-]: default multiplicative reduction of precipitation correction in summer.
-  default_prec_elegrad         =   10,                           # [% / 100 m]: default altitudinal gradient of precipitation.
-  default_temp_elegrad         =   -0.6,                         # [°C / 100 m]: default altitudinal gradient of air temperature.
+  default_prec_corr            =   100,                          # [%]: default precipitation correction in case no winter data or annual parameters are available.
+  default_prec_summer_fact     =   3,                          # [-]: default multiplicative reduction of precipitation correction in summer.
+  default_prec_elegrad         =   5,                           # [% / 100 m]: default altitudinal gradient of precipitation.
+  default_temp_elegrad         =   -1.8,                         # [°C / 100 m]: default altitudinal gradient of air temperature.
   default_melt_factor          =   4.0,                          # [mm w.e. C-1 d-1]: default melt factor for DDF model.
   default_rad_fact_ice         =   0.8,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: default radiation factor for ice within DDF model.
   default_rad_fact_snow        =   0.5,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: default radiation factor for snow within DDF model.
@@ -84,7 +84,7 @@ run_params <- list(
   
   
   #### MODELED YEARS choice ####
-  first_year                   =   1986,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   1986                          # Last modeled year (same as previous comment)
+  first_year                   =   1990,                         # First modeled year (usually from October of the previous year to September of this year)
+  last_year                    =   1990                          # Last modeled year (same as previous comment)
   
 )
