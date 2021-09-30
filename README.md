@@ -45,3 +45,5 @@ The model is iteratively tuned to stake readings with an optimization procedure,
 Finally, the computed mass balance is corrected in elevation bands to better match the stakes measurements.
 
 NOTE in the mass balance plots: the effect of avalanches is included in the time series of accumulation, so that accumulation can theoretically be negative in case an avalanche takes snow away from the glacier (unlikely!)
+
+NOTE: model parameters are set (1) in set_params.R (should be edited by all users); (2) in functions/func_process_run_params.R (should be edited by advanced users only); (3) in parameter files under input/<glacier_name>/params/param_<YYYY>.dat, to set annual parameters which override the default ones of set_params.R only for the respective year.

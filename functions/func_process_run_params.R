@@ -56,7 +56,7 @@ func_process_run_params <- function(run_params) {
   
   #### STAKES parameters ####
   run_params$stakes_unknown_latest_start <-   "2/28"      # [month/day]: in the automatic search of the start date for snow pits and depth probings without a measured start date, we search no later than this day of year. The starting date will be set to the day of the minimum cumulative mass balance between the start of the simulation and the date set here. Something like end of February should be safe for all stakes. 
-  run_params$stake_cluster_distance      <-   50          # [m]: threshold distance for clustering stakes together. This is used to ensure a more uniform distribution of the stakes: if measurements are very dense in one place they can induce a bias in the optimization, so we average stakes in clusters. This can reduce the total number of stakes. Only stakes measured on the same days can be clustered. A value of 0 corresponds to no clustering.
+  run_params$stake_cluster_distance      <-   100          # [m]: threshold distance for clustering stakes together. This is used to ensure a more uniform distribution of the stakes: if measurements are very dense in one place they can induce a bias in the optimization, so we average stakes in clusters. This can reduce the total number of stakes. Only stakes measured on the same days can be clustered. A value of 0 corresponds to no clustering.
   run_params$snow_probes_idw_exp         <-   0.75        # [-]: exponent for the IDW interpolation of winter snow measurements
   
   #### MASS BALANCE PROCESSING parameters ####

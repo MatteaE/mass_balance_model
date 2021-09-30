@@ -147,7 +147,7 @@ func_do_processing <- function(dem_filepath,
   # Else: just load.
   ndems <- length(dem_filepath)
   if (ndems > 1) {
-    cat("You provided more than 1 DEM, I am merging them before proceeding...")
+    cat("You provided more than one DEM, I am merging them before proceeding...")
     dems <- list()
     for (dem_id in 1:ndems) {
       dems[[dem_id]] <- raster(dem_filepath[dem_id])
