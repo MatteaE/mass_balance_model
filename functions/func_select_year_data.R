@@ -52,30 +52,34 @@ func_select_year_data <- function(data_all,
   year_data$massbal_winter_meas_cur         <- data_all$data_massbalance_winter[massbal_winter_ids,] # Empty if we have no winter stakes for the year.
   
   
-  # Add DEM elevation of the stakes, we use it
-  # instead of reported stake elevation.
   # If a stake falls outside the DEM (glaciated)
   # cells, discard it with a warning.
-  year_data$massbal_annual_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), method = "bilinear")
-  
-  stakes_annual_outside_ids <- which(is.na(year_data$massbal_annual_meas_cur$z_dem))
+  stakes_annual_cells_ids <- cellFromXY(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]))
+  stakes_annual_dem_values <- data_all$data_dems$elevation[[year_data$dem_grid_id]][stakes_annual_cells_ids]
+  stakes_annual_outside_ids <- which(is.na(stakes_annual_dem_values))
   stakes_annual_outside_n   <- length(stakes_annual_outside_ids)
   if (stakes_annual_outside_n > 0) {
-    cat(paste0("* WARNING: I found ", stakes_annual_outside_n, " annual measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
+    cat(paste0("* WARNING: found ", stakes_annual_outside_n, " annual measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
     cat("They are:\n")
     cat(paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$x[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$y[stakes_annual_outside_ids], "\n"))
     year_data$massbal_annual_meas_cur <- year_data$massbal_annual_meas_cur[-stakes_annual_outside_ids,]
   }
+  # Add DEM elevation of the stakes, we use it
+  # instead of reported stake elevation.
+  year_data$massbal_annual_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), method = "bilinear")
+
   
-  year_data$massbal_winter_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), method = "bilinear")
-  stakes_winter_outside_ids <- which(is.na(year_data$massbal_winter_meas_cur$z_dem))
+  stakes_winter_cells_ids <- cellFromXY(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]))
+  stakes_winter_dem_values <- data_all$data_dems$elevation[[year_data$dem_grid_id]][stakes_winter_cells_ids]
+  stakes_winter_outside_ids <- which(is.na(stakes_winter_dem_values))
   stakes_winter_outside_n   <- length(stakes_winter_outside_ids)
   if (stakes_winter_outside_n > 0) {
-    cat(paste0("* WARNING: I found ", stakes_winter_outside_n, " winter measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
+    cat(paste0("* WARNING: found ", stakes_winter_outside_n, " winter measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
     cat("They are:\n")
     cat(paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$x[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$y[stakes_winter_outside_ids], "\n"))
     year_data$massbal_winter_meas_cur <- year_data$massbal_winter_meas_cur[-stakes_winter_outside_ids,]
   }
+  year_data$massbal_winter_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), method = "bilinear")
   
   year_data$nstakes_annual   <- nrow(year_data$massbal_annual_meas_cur)
   year_data$nstakes_winter   <- nrow(year_data$massbal_winter_meas_cur)

@@ -51,29 +51,41 @@ func_find_stake_cells_dx_dy <- function(year_data,
   # not be part of the actual adjacent cells) have higher index than the "true" adjacent cells.
   cells_annual <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), duplicates = FALSE))
   cells_annual_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][t(cells_annual)], ncol = 4, byrow = TRUE)
+  stakes_annual_edge_ids <- integer(0)
   for (stake_id in 1:year_data$nstakes_annual) {
     stake_na_cells_logi <- is.na(cells_annual_dem_value[stake_id,])
     if (length(which(stake_na_cells_logi)) > 0) {
-      cat("* WARNING: annual measurement", stake_id, "is at the very edge of the glacier. Bilinear extraction of the modeled series will be impossible, I will use nearest neighbor. Id:", year_data$massbal_annual_meas_cur$id[stake_id], "\n")
       cell_distances <- spDistsN1(xyFromCell(data_dhms$elevation[[year_data$dhm_grid_id]], cells_annual[stake_id,]), as.matrix(year_data$massbal_annual_meas_cur[stake_id,4:5]))
       cell_scores <- cell_distances / (!stake_na_cells_logi)
       cell_selected <- which.min(cell_scores)
       cells_annual[stake_id,] <- cells_annual[stake_id, cell_selected]
+      stakes_annual_edge_ids <- append(stakes_annual_edge_ids, stake_id)
     }
+  }
+  stakes_annual_edge_n <- length(stakes_annual_edge_ids)
+  if (stakes_annual_edge_n > 0) {
+    cat("* WARNING: found", stakes_annual_edge_n, "annual measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n")
+    cat("They are: ", paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_edge_ids], collapse = " | "), "\n")
   }
   
   if (year_data$nstakes_winter > 0) {
     cells_winter <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), duplicates = FALSE))
     cells_winter_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][t(cells_winter)], ncol = 4, byrow = TRUE)
+    stakes_winter_edge_ids <- integer(0)
     for (stake_id in 1:year_data$nstakes_winter) {
       stake_na_cells_logi <- is.na(cells_winter_dem_value[stake_id,])
       if (length(which(stake_na_cells_logi)) > 0) {
-        cat("* WARNING: winter measurement", stake_id, "is at the very edge of the glacier. Bilinear extraction of the modeled series will be impossible, I will use nearest neighbor. Id:", year_data$massbal_winter_meas_cur$id[stake_id], "\n")
         cell_distances <- spDistsN1(xyFromCell(data_dhms$elevation[[year_data$dhm_grid_id]], cells_winter[stake_id,]), as.matrix(year_data$massbal_winter_meas_cur[stake_id,4:5]))
         cell_scores <- cell_distances / (!stake_na_cells_logi)
         cell_selected <- which.min(cell_scores)
         cells_winter[stake_id,] <- cells_winter[stake_id, cell_selected]
+        stakes_winter_edge_ids <- append(stakes_winter_edge_ids, stake_id)
       }
+    }
+    stakes_winter_edge_n <- length(stakes_winter_edge_ids)
+    if (stakes_winter_edge_n > 0) {
+      cat("* WARNING: found", stakes_winter_edge_n, "winter measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n")
+      cat("They are: ", paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_edge_ids], collapse = " | "), "\n")
     }
   }
   
