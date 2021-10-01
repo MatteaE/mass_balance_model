@@ -16,7 +16,12 @@
 # so that we pre-compute them just once
 # per year (stakes don't move around
 # during optimization).
-func_extract_modeled_stakes <- function(run_params, dx1, dx2, dy1, dy2, vec_massbal_cumul, nstakes, model_days_n, stakes_cells) {
+func_extract_modeled_stakes <- function(run_params,
+                                        dx1, dx2, dy1, dy2,
+                                        vec_massbal_cumul,
+                                        nstakes,
+                                        model_days_n,
+                                        stakes_cells) {
   
   stakes_series_mod_all <- matrix(NA, nrow = model_days_n + 1, ncol = nstakes) # One row per day, one column per stake
   
@@ -28,6 +33,10 @@ func_extract_modeled_stakes <- function(run_params, dx1, dx2, dy1, dy2, vec_mass
     # 1 2
     # 3 4
     # with the stake somewhere in the middle.
+    # This means that within the raster cell 2 has
+    # index ((cell 1) + 1), and cell 3 has index
+    # ((cell 2) + (ncol - 1)), because raster cells
+    # start at 1 from top-left and go row by row.
     # Repeated cells (i.e. if the stake lies at
     # the same x and/or y as a cell center) CAUSE A BUG!!!!
     # Observed if dy1 is 0: we have just two cells (1 and 2 in the square above),

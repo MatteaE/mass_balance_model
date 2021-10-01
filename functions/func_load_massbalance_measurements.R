@@ -60,7 +60,7 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
                         (data_massbalance$y > ext_limits@ymax))
   ids_bad_n <- length(ids_df_bad)
   if (ids_bad_n > 0) {
-    message("WARNING: the ", load_what, " mass balance file contains ", ids_bad_n, " stake(s) which fall outside the DHM. I am discarding them now, but you should investigate.")
+    cat("* WARNING: the ", load_what, " mass balance file contains ", ids_bad_n, " stake(s) which fall outside the DHM. I am discarding them now, but you should investigate.\n")
     data_massbalance <- data_massbalance[-ids_df_bad,]
   }
   
@@ -130,6 +130,8 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
   } else {
     data_massbalance_filtered <- data_massbalance[,c(1:6,9)]
   }
+  
+  cat("    I have", nrow(data_massbalance_filtered), "values.\n")
   
   return(data_massbalance_filtered)
   

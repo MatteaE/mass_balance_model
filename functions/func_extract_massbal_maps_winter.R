@@ -28,7 +28,7 @@ func_extract_massbal_maps_winter <- function(year_data,
     # If there are no winter stakes, this is
     # just NULL.
     id_measperiod_start             <- min(year_data$mod_output_winter_cur$stakes_start_ids_corr)
-    id_measperiod_end               <- max(year_data$mod_output_winter_cur$stakes_end_ids) + 1 # For the "+ 1": see comment above, about indices. We want the mass balance at the *end* of the last day.
+    id_measperiod_end               <- max(year_data$mod_output_winter_cur$stakes_end_ids)
     massbal_measperiod_start_values <- year_data$mod_output_winter_cur$vec_massbal_cumul[(id_measperiod_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
     massbal_measperiod_end_values   <- year_data$mod_output_winter_cur$vec_massbal_cumul[(id_measperiod_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
     massbal_measperiod_map          <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_measperiod_end_values - massbal_measperiod_start_values)
@@ -54,7 +54,6 @@ func_extract_massbal_maps_winter <- function(year_data,
     massbal_maps_out <- list(massbal_maps = massbal_maps,
                              meas_period  = year_data$weather_series_winter_cur$timestamp[c(id_measperiod_start, id_measperiod_end)],
                              meas_period_ids = c(id_measperiod_start, id_measperiod_end))
-  
   } else {
     massbal_maps     <- list(fixed = massbal_fixed_map_masked)
     massbal_maps_out <- list(massbal_maps = massbal_maps)

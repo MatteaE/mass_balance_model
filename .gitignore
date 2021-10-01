@@ -20,6 +20,9 @@ input/abramov/
 # Output files #
 output/
 
+# Model run logs #
+logs/
+
 # Data used to develop the input preparation app #
 utils/data/
 

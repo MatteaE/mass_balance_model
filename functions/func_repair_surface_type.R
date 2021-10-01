@@ -36,7 +36,7 @@ func_repair_surface_type <- function(run_params,
       # these cells and we extract() the value at these positions.
       if (ncells_bad > 0) {
         
-        cat(paste0("    WARNING: found ", ncells_bad, " rock cells inside glacier outline, in surface type grid #", surftype_id, ". I am fixing them right now.\n"))
+        cat(paste0("* WARNING: found ", ncells_bad, " rock cells inside glacier outline, in surface type grid #", surftype_id, ". I am fixing them right now.\n"))
         
         data_surftype$grids[[surftype_id]][surftype_rock_ids] <- NA
         dist_ras <- distance(data_surftype$grids[[surftype_id]])

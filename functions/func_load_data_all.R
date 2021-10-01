@@ -12,7 +12,7 @@
 #### Load input data ####
 func_load_data_all <- function(run_params) {
   
-  message("Loading all input data...")
+  cat("Loading all input data...\n")
   
   data_all <- list()
   

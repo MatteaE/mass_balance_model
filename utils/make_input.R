@@ -341,11 +341,11 @@ func_do_processing <- function(dem_filepath,
   
   # Errors? Show them!
   if (any(is.na(getValues(dhm_out)))) {
-    warning("\n*** ERROR: there are NA values in the ouput DHM. Please check that the input DEMs cover the entire area of interest. ***")
+    cat("\n*** ERROR: there are NA values in the ouput DHM. Please check that the input DEMs cover the entire area of interest. ***\n")
     return(1)
   }
   if (any(is.na(getValues(surftype_out)))) {
-    warning("\n*** ERROR: there are NA values in the ouput surface type grid. Please check the input outline shapefile. ***")
+    cat("\n*** ERROR: there are NA values in the ouput surface type grid. Please check the input outline shapefile. ***\n")
     return(1)
   }
   

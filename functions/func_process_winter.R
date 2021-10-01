@@ -32,11 +32,11 @@ func_process_winter <- function(year_data,
     # aligned with a cell center, unless we are at the lower raster border (which we should
     # always avoid!) the additional cells returned with duplicates = FALSE (cells which would
     # not be part of the actual adjacent cells) have higher index than the "true" adjacent cells.
-    year_data$winter_stakes_cells <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), duplicates = FALSE))
+    # year_data$winter_stakes_cells <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), duplicates = FALSE))
     
     # Select weather series period.
     year_data$weather_series_winter_cur <- data_weather[which(data_weather$timestamp == year_data$model_time_bounds[3]):(which(data_weather$timestamp == year_data$model_time_bounds[4])),]
-    year_data$model_winter_days_n <- nrow(weather_series_winter_cur)
+    year_data$model_winter_days_n <- nrow(year_data$weather_series_winter_cur)
     
     # The NA is for the optimized corr_fact_winter (which we are
     # determining here, so we don't use a previous value: it is ignored).

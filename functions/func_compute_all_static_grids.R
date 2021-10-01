@@ -11,7 +11,7 @@ func_compute_all_static_grids <- function(run_params,
                                          data_dhms,
                                          data_dems) {
 
-  message("Computing static grids...")
+  cat("Computing static grids...\n")
   grids_static_list <- list()
   
   grids_static_list$grids_avalanche            <-   func_compute_avalanche_static_grids(run_params, data_dhms)

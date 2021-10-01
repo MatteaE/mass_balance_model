@@ -59,7 +59,8 @@ func_load_radiation_grids <- function(run_params, raster_blueprint) {
     }
   }
   if ((!grid_found) && (grid_exts_checked_all)) {
-    stop("FATAL: no radiation grids found. Please check parameters dir_data_radiation, filename_radiation_prefix and filename_radiation_suffix.")
+    cat("** FATAL: no radiation grids found. Please check parameters dir_data_radiation, filename_radiation_prefix and filename_radiation_suffix.")
+    stop()
   }
   
   # Do we have an RData file to speed up loading of radiation grids?

@@ -20,6 +20,8 @@ func_select_year_data <- function(data_all,
   year_data$year_id                         <- year_id
   year_data$year_cur                        <- run_params$years[year_id]
   
+  cat("\n\nLooking for input data of year", paste0(year_data$year_cur, "...\n"))
+  
   # Select grids of the current year from the list of available grids.
   # We could be using different ids for DEM and DHM (since DEM = DHM + outline, it depends
   # on the available outlines); and also w.r.t. surface type because the
@@ -59,21 +61,26 @@ func_select_year_data <- function(data_all,
   stakes_annual_outside_ids <- which(is.na(year_data$massbal_annual_meas_cur$z_dem))
   stakes_annual_outside_n   <- length(stakes_annual_outside_ids)
   if (stakes_annual_outside_n > 0) {
+    cat(paste0("* WARNING: I found ", stakes_annual_outside_n, " annual measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
+    cat("They are:\n")
+    cat(paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$x[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$y[stakes_annual_outside_ids], "\n"))
     year_data$massbal_annual_meas_cur <- year_data$massbal_annual_meas_cur[-stakes_annual_outside_ids,]
-    message(paste0("WARNING: there are ", stakes_annual_outside_n, " annual stakes which are outside the glacier outline! I am discarding them, but you should investigate!"))
   }
   
   year_data$massbal_winter_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), method = "bilinear")
   stakes_winter_outside_ids <- which(is.na(year_data$massbal_winter_meas_cur$z_dem))
   stakes_winter_outside_n   <- length(stakes_winter_outside_ids)
   if (stakes_winter_outside_n > 0) {
+    cat(paste0("* WARNING: I found ", stakes_winter_outside_n, " winter measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
+    cat("They are:\n")
+    cat(paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$x[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$y[stakes_winter_outside_ids], "\n"))
     year_data$massbal_winter_meas_cur <- year_data$massbal_winter_meas_cur[-stakes_winter_outside_ids,]
-    message(paste0("WARNING: there are ", stakes_winter_outside_n, " winter stakes which are outside the glacier outline! I am discarding them, but you should investigate!"))
   }
   
   year_data$nstakes_annual   <- nrow(year_data$massbal_annual_meas_cur)
   year_data$nstakes_winter   <- nrow(year_data$massbal_winter_meas_cur)
   
+  cat("Mass balance measurements available:", year_data$nstakes_annual, "annual,", year_data$nstakes_winter, "winter.\n")
   
   return(year_data)
 }

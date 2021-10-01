@@ -8,17 +8,23 @@
 
 func_run_model <- function(run_params) {
   
-  message("\n\n|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|")
-  message("|++++++++++++++++                          ++++++++++++++++|")
-  message("|+++++++++               DMBSim v1.0              +++++++++|")
-  message("|++++++++++++++++                          ++++++++++++++++|")
-  message("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n\n")
+  cat("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n")
+  cat("|++++++++++++++++                          ++++++++++++++++|\n")
+  cat("|+++++++++               DMBSim v1.0              +++++++++|\n")
+  cat("|++++++++++++++++                          ++++++++++++++++|\n")
+  cat("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n\n\n")
   
+  cat("Called at", as.character(Sys.time()), paste0("(", Sys.timezone(), ")"), "\n")
+  
+  cat("System info:")
+  print(R.version)
+  cat("\n")
   
   # Load required R packages.
   packages_loaded <- func_load_packages(run_params)
   if (packages_loaded == FALSE) {
-    stop("FATAL: please install required packages before proceeding!")
+    cat("** FATAL: please install required packages before proceeding!")
+    stop()
   }
   
   #### Setup simulation ####
@@ -65,7 +71,10 @@ func_run_model <- function(run_params) {
   # Here year_data is a list which is gradually built and
   # modified during one iteration of the main loop.
   year_data <- list()
+  cat("\n\nEntering main loop...\n")
   for (year_id in 1:run_params$n_years) {
+    
+    cat("\n\n")
     
     #### . Select current year, parameters, data ####
     # Select data from the current year.
@@ -79,7 +88,7 @@ func_run_model <- function(run_params) {
     
     if (year_data$nstakes_annual > 0) {
       
-      cat("\n\n\n\n============  STARTING NEW YEAR:", year_data$year_cur, " ============\n")
+      cat("\n============  STARTING simulation of year", year_data$year_cur, " ============\n")
       
       year_cur_params   <- func_set_year_params(year_data, run_params)
       year_results_list <- func_process_year(year_data,
@@ -93,11 +102,11 @@ func_run_model <- function(run_params) {
       overview_annual   <- year_results_list$overview_annual
       
     } else {
-      cat("\n\n============  DEFERRING simulation of year", paste0(year_data$year_cur, ", which has no mass balance measurements... ============\n"))
+      cat("\n============  DEFERRING simulation of year", paste0(year_data$year_cur, ", which has no mass balance measurements... ============\n"))
     }
   }
   
-  message("\n** Finished simulation of all years with mass balance measurements. **")
+  cat("\n** Finished simulation of all years with mass balance measurements. **\n")
   
   # Here: compute mean of optimized parameters, to use on nodata years.
   run_params <- func_compute_mean_optimized_params(run_params, overview_annual)
@@ -108,7 +117,7 @@ func_run_model <- function(run_params) {
   years_todo_n  <- length(year_ids_todo)
   if (length(year_ids_todo) > 0) {
     
-    message("\n** Processing ", years_todo_n, " year(s) without mass balance measurements... **")
+    cat("\n\n\n** Processing ", years_todo_n, " year(s) without mass balance measurements... **\n")
     
     for (year_id in year_ids_todo) {
       #### . Select current year, parameters, data ####
@@ -137,7 +146,7 @@ func_run_model <- function(run_params) {
     }
   }
   
-  message("\n** All simulation loops have finished. **")
+  cat("\n** All simulation loops have finished. **\n")
   
   #### Plot and write overview ####
   func_plot_write_overview(overview_annual,
@@ -149,7 +158,7 @@ func_run_model <- function(run_params) {
     
   }
   
-  message("\n============  All done! Model has finished succesfully.  ============\n")
+  cat("\n============  All done! Model has finished succesfully.  ============\n\n")
   
   return(0)
   

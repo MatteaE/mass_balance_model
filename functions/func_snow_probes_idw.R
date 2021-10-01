@@ -19,7 +19,7 @@ func_snow_probes_idw <- function(run_params, snow_probes, data_dhms) {
 
   # Use prescribed distance exponent.
   gs <- gstat(formula=swe~1, data=snow_probes_spdf, set=list(idp=run_params$snow_probes_idw_exp))
-  snowdist_idw <- interpolate(data_dhms$elevation[[1]], gs)
+  snowdist_idw <- interpolate(data_dhms$elevation[[1]], gs, debug.level = 0)
   
   # writeRaster(snowdist_idw, "snowdist_idw.tif", overwrite = T)
   

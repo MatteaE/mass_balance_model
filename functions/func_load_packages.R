@@ -9,6 +9,8 @@
 
 func_load_packages <- function(run_params) {
   
+  cat("Loading required R packages...\n")
+  
   options("rgdal_show_exportToProj4_warnings"="none") # Suppress "Discarded datum" errors - see https://cran.r-project.org/web/packages/rgdal/vignettes/PROJ6_GDAL3.html
   
   package_list <- c("raster",
@@ -42,7 +44,7 @@ func_load_packages <- function(run_params) {
   
   if (!exit_status_all) {
     pkg_missing_ids <- which(!exit_status)
-    message(paste0("  WARNING: some required packages are missing. They are: ", paste(package_list[pkg_missing_ids], collapse = ", ")))
+    cat(paste0("* WARNING: some required packages are missing. They are: ", paste(package_list[pkg_missing_ids], collapse = ", ")), "\n")
   }
   
   return(exit_status_all)
