@@ -25,7 +25,7 @@ func_plot_year_mb_maps <- function(year_data,
   base_size <- 16 # For the plots.
   # Empirical top margin to keep plots inside page borders
   # when the glacier is tall (aspect ratio > 1.07).
-  margin_top <- max(0, (data_outlines$aspect_ratio[[year_data$outline_id]] - 1.05) * 1000)
+  margin_top <- min(100, max(0, (data_outlines$aspect_ratio[[year_data$outline_id]] - 1.05) * 1000))
   theme_map_massbal <- theme_void(base_size = base_size) +
                        theme(legend.position = "bottom",
                              legend.key.width = unit(3, "cm"),
@@ -38,6 +38,11 @@ func_plot_year_mb_maps <- function(year_data,
   contour_label_textsize <- 4
   contour_linesize <- 0.4
   outline_linesize <- 0.7
+  y_line_mult <- max(1, data_outlines$aspect_ratio[[year_data$outline_id]])
+  y_line1 <- 1 + (0.15 / y_line_mult)
+  y_line2 <- 1 + (0.06 / y_line_mult)
+  y_line3 <- 1 + (0.00 / y_line_mult)
+  y_line4 <- 1 - (0.06 / y_line_mult)
   
   palette_RdBu_ext <- c("#33000F", RColorBrewer::brewer.pal(11, "RdBu")[c(1:4,6,8:11)], "#011830")
   # Values exceeding +/- max_mb will be clamped.
@@ -61,11 +66,11 @@ func_plot_year_mb_maps <- function(year_data,
     geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", size = contour_linesize) +
     geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1, stroke.color = "#FFFFFF", size = contour_label_textsize, min.size = 15, fontface = "bold") +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-                                        x=0.05,  y=1.15, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
+                                        x=0.05,  y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob("Hydrological year: 10/01 - 09/30",
-                                        x=0.05,  y=1.06, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
+                                        x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(bquote(bold(b[n]*" = "*.(mb_hydro_lab)*" m w.e.")),
-                                        x = 0.05, y = 1.0, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
+                                        x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
     scale_fill_stepsn(name = "SMB [m w.e.]", colors = palette_RdBu_ext,

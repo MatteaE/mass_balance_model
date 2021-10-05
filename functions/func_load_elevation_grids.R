@@ -36,7 +36,7 @@ func_load_elevation_grids <- function(run_params) {
   dhm_n <- length(grid_paths)
   
   if (dhm_n == 0) {
-    cat("** FATAL: no DHM files found. Please check parameters dir_data_dhm, filename_dhm_prefix and filename_dhm_suffix.")
+    cat("** FATAL: no DHM files found. Please check parameters dir_data_dhm, filename_dhm_prefix and filename_dhm_suffix.\n")
     stop()
   } else {
     cat("    Found", dhm_n, "DHM file(s). Available year(s):", run_params$dhm_years, "\n")

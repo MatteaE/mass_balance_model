@@ -23,7 +23,7 @@ func_run_model <- function(run_params) {
   # Load required R packages.
   packages_loaded <- func_load_packages(run_params)
   if (packages_loaded == FALSE) {
-    cat("** FATAL: please install required packages before proceeding!")
+    cat("** FATAL: please install required packages before proceeding!\n")
     stop()
   }
   

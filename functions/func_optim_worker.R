@@ -34,7 +34,7 @@ func_optim_worker <- function(optimization_period, corr_fact_cur, corr_fact_wint
     
   } else {
     
-    cat("** FATAL: wrong optimization_period!")
+    cat("** FATAL: wrong optimization_period!\n")
     stop()
     
   }

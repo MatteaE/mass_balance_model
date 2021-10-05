@@ -12,8 +12,25 @@ func_load_weather <- function(run_params) {
   
   filepath_weather <- file.path(run_params$dir_data_weather, run_params$filename_weather)
   
-  data_raw <- read.table(filepath_weather, header = FALSE, skip = run_params$file_weather_nskip)
+  data_raw <- read.table(filepath_weather, header = FALSE, skip = run_params$file_weather_nskip, stringsAsFactors = FALSE)
   names(data_raw) <- c("year", "doy", "hour", "t2m_mean", "precip")
+  
+  if (typeof(data_raw$t2m_mean) == "character") {
+    t2m_mean_numeric <- as.numeric(data_raw$t2m_mean)
+    id_wrong_first <- which(is.na(t2m_mean_numeric))[1]
+    cat("* WARNING: there is a problem in the meteo data. One or more temperature values are wrong. Please fix them and run the model again.\n The first bad value is:\n")
+    cat(paste(data_raw[id_wrong_first,], collapse = " "))
+    stop()
+    # data_raw$t2m_mean <- as.numeric(interpNA(timeSeries(t2m_mean_numeric), method = "linear"))
+  }
+  if (typeof(data_raw$precip) == "character") {
+    precip_mean_numeric <- as.numeric(data_raw$precip)
+    id_wrong_first <- which(is.na(precip_mean_numeric))[1]
+    cat("* WARNING: there is a problem in the meteo data. One or more precipitation values are wrong. Please fix them and run the model again.\n The first bad value is:\n")
+    cat(paste(data_raw[id_wrong_first,], collapse = " "))
+    stop()
+    # data_raw$t2m_mean <- as.numeric(interpNA(timeSeries(t2m_mean_numeric), method = "linear"))
+  }
   
   # Sometimes we may have negative precipitation artifacts, remove them.
   data_raw$precip[which(data_raw$precip < 0.0)] <- 0.0

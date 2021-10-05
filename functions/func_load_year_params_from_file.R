@@ -37,6 +37,16 @@ func_load_year_params_from_file <- function(year_data,
                              strip.white = TRUE)
     
     params_available_ids <- pmatch(params_raw[,3], params_names_all)
+    # Remove param ids if they don't match parameters which can be set.
+    # This prevents an unhandled error in case the user supplies some
+    # additional parameters which cannot be set (e.g. evaluate_snowdist
+    # from the old parameter file format).
+    params_available_remove <- which(is.na(params_available_ids))
+    if (length(params_available_remove) > 0) {
+      params_available_ids <- params_available_ids[-params_available_remove]
+      params_raw <- params_raw[-params_available_remove,]
+    }
+    
     params_available_n   <- length(params_available_ids)
     
     # Assemble output, already converting to numeric types.

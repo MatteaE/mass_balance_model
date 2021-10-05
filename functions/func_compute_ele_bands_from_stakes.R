@@ -17,7 +17,7 @@
 # with the smaller of the two neighbors.
 # While there are bands whose vertical extent is smaller than q25-1.5*IQR
 # (recompute at each iteration), merge them (same logic as above).
-# At the end of this, if there are fewer than 4 bands give up,
+# At the end of this, if there are fewer than 3 bands give up,
 # if there are more than 10 bands merge them with the usual logic,
 # starting from the smallest one (recompute at each iteration).
 func_compute_ele_bands_from_stakes <- function(stakes_ele,
@@ -65,7 +65,7 @@ func_compute_ele_bands_from_stakes <- function(stakes_ele,
   # If fewer than 4 correction bands give up,
   # #if more than 10 keep merging until we have 10 or fewer.
   ele_bands_n <- nrow(ele_bands)
-  if (ele_bands_n < 4) {
+  if (ele_bands_n < 3) {
     return(NA)
   }
   if (ele_bands_n > 10) {
