@@ -18,6 +18,11 @@ func_process_run_params <- function(run_params) {
   # The base directory for all the data
   run_params$dir_data_base               <-   file.path("input", run_params$name_glacier)
   
+  # Should we run the model if we find the
+  # output directory already present?
+  # Or stop with a warning?
+  run_params$overwrite_output            <-   FALSE
+  
   # Set input data paths. We force the user to use these, which are tidy and easy to understand.
   run_params$dir_data_weather            <-   file.path(run_params$dir_data_base, "weather")     # The weather series goes here
   run_params$dir_data_dhm                <-   file.path(run_params$dir_data_base, "dhm")         # Path to the DHM(s) = elevation grids(s) (rectangular, to compute slopes and curvatures)

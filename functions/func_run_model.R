@@ -30,6 +30,19 @@ func_run_model <- function(run_params) {
   #### Setup simulation ####
   run_params <- func_process_run_params(run_params) # Process fixed run parameters, computing derived ones.
   
+  # If output directory already exists, stop with an
+  # error unless run_params$overwrite_output is TRUE,
+  # in which case overwrite with a warning.
+  if (file.exists(run_params$output_dirname) == TRUE) {
+    if (run_params$overwrite_output == FALSE) {
+      cat("** FATAL: output destination already exists! Please move, remove or rename it before running the model.\n")
+      stop()
+    } else {
+      cat("* WARNING: output destination already exists. I am overwriting any files already present!\n")
+    }
+  }
+    
+  
   # Load all input data.
   data_all   <- func_load_data_all(run_params)
   
