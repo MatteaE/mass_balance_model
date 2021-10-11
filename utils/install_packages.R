@@ -24,6 +24,7 @@ func_install_all <- function() {
                       "ggplot2",
                       "ggpubr",
                       "gstat",
+                      "ggtext",
                       "insol",
                       "metR",
                       "qpdf",

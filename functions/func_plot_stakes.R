@@ -7,7 +7,8 @@
 #                 balance of each stake.                                                          #
 ################################################################################################### 
 
-func_plot_stakes <- function(year_data) {
+func_plot_stakes <- function(year_data,
+                             run_params) {
   
   plots_stakes <- list()
   
@@ -25,7 +26,7 @@ func_plot_stakes <- function(year_data) {
   # of all stake series.
   stake_offset <- numeric(year_data$nstakes_annual)
   for (annual_stake_id in 1:year_data$nstakes_annual) {
-    stake_offset[annual_stake_id] <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id],annual_stake_id]
+    stake_offset[annual_stake_id] <- (year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id],annual_stake_id]) * run_params$output_mult
   }
   
   # Compute plot ranges. Same for all plots.
@@ -34,7 +35,7 @@ func_plot_stakes <- function(year_data) {
   # accounting for the stake_offset which is used
   # to set the modeled stake series to 0 at the date
   # of stake measurement.
-  stakes_mb_lims <- (range(c(year_data$mod_output_annual_cur$stakes_mb_meas, range(year_data$mod_output_annual_cur$stakes_series_mod_all) + c(min(0,-max(stake_offset)), max(0,-min(stake_offset)))))) / 1e3
+  stakes_mb_lims <- (range(c(year_data$mod_output_annual_cur$stakes_mb_meas, range(year_data$mod_output_annual_cur$stakes_series_mod_all) + c(min(0,-max(stake_offset)), max(0,-min(stake_offset)))))) * run_params$output_mult / 1e3
   
   
   # Setup month labels.
@@ -60,13 +61,13 @@ func_plot_stakes <- function(year_data) {
   # Loop to plot all stakes.
   for (annual_stake_id in 1:year_data$nstakes_annual) {
     
-    stake_mod_series <- year_data$mod_output_annual_cur$stakes_series_mod_all[,annual_stake_id]
+    stake_mod_series <- year_data$mod_output_annual_cur$stakes_series_mod_all[,annual_stake_id] * run_params$output_mult
     stake_start_id <- year_data$mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id]
     stake_end_id <- year_data$mod_output_annual_cur$stakes_end_ids[annual_stake_id]
     stake_mod_series_offset <- stake_mod_series - stake_mod_series[stake_start_id]
     stake_mod_df <- data.frame(day_id = day_ids, mb = stake_mod_series_offset)
     stake_meas_df <- data.frame(day_id = stake_end_id - day_id_offset,
-                                mb = year_data$mod_output_annual_cur$stakes_mb_meas[annual_stake_id])
+                                mb = year_data$mod_output_annual_cur$stakes_mb_meas[annual_stake_id] * run_params$output_mult)
     base_size <- 12 # For the plots
     theme_stakes_plots <- theme_bw(base_size = base_size) +
       theme(axis.title.x = element_blank(),
@@ -86,11 +87,11 @@ func_plot_stakes <- function(year_data) {
       annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = base_size * 0.2) +
       geom_line(aes(x = day_id, y = mb/1e3)) +
       geom_point(data = stake_meas_df, aes(x = day_id, y = mb/1e3), shape = 5, stroke = 1.2, size = 1) +
-      annotation_custom(grobTree(textGrob(paste0(year_data$massbal_annual_meas_cur$id[annual_stake_id], ": ", sprintf("%+.2f", -year_data$mod_output_annual_cur$stakes_bias[annual_stake_id]/1e3), " m w.e."), x=0.05, y = 0.3, hjust = 0,
+      annotation_custom(grobTree(textGrob(paste0(year_data$massbal_annual_meas_cur$id[annual_stake_id], ": ", sprintf("%+.2f", -year_data$mod_output_annual_cur$stakes_bias[annual_stake_id] * run_params$output_mult/1e3), " ", run_params$output_unit, " w.e."), x=0.05, y = 0.3, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       scale_x_continuous(expand = expansion(0,0)) +
       scale_y_continuous(limits = stakes_mb_lims, breaks = pretty(stakes_mb_lims, n = 3), expand = expansion(mult = c(0.12,0.07))) +
-      ylab("Mass balance [m w.e.]") +
+      ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
       theme_stakes_plots
   }
   

@@ -33,6 +33,10 @@ func_select_year_data <- function(data_all,
   year_data$surftype_grid_id                <- data_all$data_surftype$grid_year_id[year_id]
   year_data$outline_id                      <- data_all$data_outlines$outline_year_id[year_id]
   
+  # Glacier area, used to convert the daily melt from mm w.e. to m3.
+  # We compute this as cell size in m2 times number of glaciated cells.
+  year_data$glacier_area                    <- length(data_all$data_dems$glacier_cell_ids[[year_data$dem_grid_id]]) * prod(res(data_all$data_dems$elevation[[year_data$dem_grid_id]]))
+  
   # Extract avalanche grids for this year
   # (pre-computed before the start of the loop).
   year_data$grids_avalanche_cur             <- sapply(grids_static_list$grids_avalanche, `[[`, year_data$dhm_grid_id)

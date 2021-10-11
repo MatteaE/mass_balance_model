@@ -39,7 +39,7 @@ func_plot_overview <- function(overview_annual,
                    linetype = "dashed", size = 1) +
       single_year_point +
       scale_x_continuous(breaks = x_breaks) +
-      ylab("Mass balance [m w.e.]") +
+      ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
       ggtitle("Mass balance (measurement period + local correction)") +
       theme_overview_plots
   }
@@ -65,7 +65,7 @@ func_plot_overview <- function(overview_annual,
     {if (any(overview_annual$summary_df$year_has_data) == TRUE) single_year_point1} +
     single_year_point2 +
     # single_year_point3 +
-    ylab("Mass balance [m w.e.]") +
+    ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
     scale_y_continuous(expand = expansion(0.3, 0)) +
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("Annual mass balance (no local correction)") +
@@ -95,7 +95,7 @@ func_plot_overview <- function(overview_annual,
     geom_line(aes(x = year, y = mb_winter_fixed), color = "#00FFFF", size = 1) +
     single_year_point1 +
     single_year_point2 +
-    ylab("Mass balance [m w.e.]") +
+    ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
     scale_y_continuous(expand = expansion(0.3, 0)) +
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("Winter mass balance") +
@@ -142,7 +142,7 @@ func_plot_overview <- function(overview_annual,
     plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
       geom_line(aes(x = year, y = rmse), size = 1) +
       single_year_point +
-      ylab("RMSE [m w.e.]") +
+      ylab(paste0("RMSE [", run_params$output_unit, " w.e.]")) +
       scale_y_continuous(limits = c(0,NA), expand = expansion(mult = c(0, 0.2))) +
       scale_x_continuous(breaks = x_breaks) +
       ggtitle("Root-Mean-Square Error") +
@@ -246,7 +246,7 @@ func_plot_overview <- function(overview_annual,
                        labels = c("TRUE" = "Year measured", "FALSE" = "Year not measured")) +
     scale_linetype_manual(values = c("TRUE" = "solid", "FALSE" = "11"),
                           labels = c("TRUE" = "Year measured", "FALSE" = "Year not measured")) +
-    ylab("Cumulative mass balance [m w.e.]") +
+    ylab(paste0("Cumulative mass balance [", run_params$output_unit, " w.e.]")) +
     ggtitle("Cumulative mass balance (hydrological years)") +
     theme_overview_plots +
     theme_mbcumul_legend
@@ -289,7 +289,7 @@ func_plot_overview <- function(overview_annual,
     geom_point(data = mb_cumul_df, aes(x = year, y = mb_cumul), color = "#FF0000", shape = 2, size = point_size, stroke = point_size/2.5) +
     scale_y_continuous(breaks = pretty(c(0, max(mb_all_df$mb), overview_annual$summary_df$mb_cumul))) +
     scale_x_date(date_labels = "%Y/%m") +
-    ylab("Cumulative mass balance [m w.e.]") +
+    ylab(paste0("Cumulative mass balance [", run_params$output_unit, " w.e.]")) +
     ggtitle("Cumulative mass balance (hydrological years)") +
     theme_overview_plots
   

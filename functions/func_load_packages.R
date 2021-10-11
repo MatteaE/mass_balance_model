@@ -25,6 +25,7 @@ func_load_packages <- function(run_params) {
                     "sf",           # st_read(), to load shapefile outlines.
                     "metR",         # geom_text_contour()
                     "ggplot2",      # Base plotting library
+                    "ggtext",       # Additional plotting functions (element_markdown(), for bold superscripts)
                     "ggpubr",       # Additional plotting functions (multi-page PDF)
                     "grid",         # Additional plotting functions (text annotations)
                     "cowplot",      # Additional plotting functions (align plots)

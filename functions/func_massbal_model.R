@@ -64,14 +64,14 @@ func_massbal_model <- function(run_params,
   vec_items_n <- run_params$grid_ncol * run_params$grid_nrow * (model_days_n + 1)
   
   # The first three vectors will hold all the output of the mass balance model.
-  # NOTE BUG BUG BUG: here we have 245 MB (for Pers) which are allocated but never freed, big memory leak!!
   vec_snow_swe      <- rep(NA_real_, vec_items_n)
   vec_surf_type     <- rep(NA_real_, vec_items_n) # We use 0 for ice, 1 for firn, 2 for snow, 4 for rock, 5 for debris.
   vec_massbal_cumul <- rep(NA_real_, vec_items_n)
   melt_cur          <- rep(NA_real_, run_params$grid_ncells) # This instead holds only a single timestep. Here goes the daily melt amount.
-  gl_massbal_cumul  <- rep(0.0, model_days_n + 1)   # This holds the cumulative glacier-wide mass balance.
-  gl_melt_daily     <- rep(0.0, model_days_n + 1)   # This holds the daily mean melt amount over the glacier.
-  gl_accum_daily    <- rep(0.0, model_days_n + 1)   # This holds the daily mean accumulation amount over the glacier.
+  gl_massbal_cumul  <- rep(0.0, model_days_n + 1)   # This holds the cumulative glacier-wide mass balance *AT THE BEGINNING* of the corresponding day (i.e. before adding the day's melt and accumulation and avalanches).
+  gl_melt_daily     <- rep(0.0, model_days_n + 1)   # This holds the daily mean melt amount over the glacier *OVER* the corresponding day.
+  gl_accum_daily    <- rep(0.0, model_days_n + 1)   # This holds the daily mean accumulation amount over the glacier *OVER* the corresponding day.
+  gl_rainfall_daily <- rep(0.0, model_days_n + 1)   # This holds the daily mean rainfall amount over the glacier *OVER* the corresponding day.
   
   # Fill vectors with initial conditions.
   vec_snow_swe[1:run_params$grid_ncells]  <- snowdist_init_values
@@ -95,10 +95,17 @@ func_massbal_model <- function(run_params,
     
     #### .  COMPUTE GRIDDED WEATHER OF THE DAY ####
     # Temperature in °C, snowfall in mm w.e.
-    temp_cur <- weather_series_cur$t2m_mean[day_id] + year_cur_params$temp_elegrad * (dhm_values - run_params$weather_aws_elevation) / 100
+    temp_cur            <- weather_series_cur$t2m_mean[day_id] + year_cur_params$temp_elegrad * (dhm_values - run_params$weather_aws_elevation) / 100
     solid_prec_frac_cur <- clamp(((1 + run_params$weather_snowfall_temp) - temp_cur) / 2, 0, 1)
-    accumulation_cur    <- snowdist_probes_norm_values_red * snowdist_topographic_values_red * solid_prec_frac_cur * weather_series_cur$precip_corr[day_id] * (1 + (pmin(run_params$weather_max_precip_ele, dhm_values) - run_params$weather_aws_elevation) * year_cur_params$prec_elegrad / 1e4 ) # 1e4: gradient is in [% / 100 m], we want [fraction / m].
-    
+    precip_cur          <- snowdist_probes_norm_values_red * snowdist_topographic_values_red * weather_series_cur$precip_corr[day_id] * (1 + (pmin(run_params$weather_max_precip_ele, dhm_values) - run_params$weather_aws_elevation) * year_cur_params$prec_elegrad / 1e4 ) # 1e4: gradient is in [% / 100 m], we want [fraction / m].
+    accumulation_cur    <- precip_cur * solid_prec_frac_cur
+    # We assume that the spatial distribution of rainfall
+    # is the same as the distribution of snowfall.
+    # That is, we assume that the snowdist (from probes and topographic grids)
+    # controls the distribution of *total* precipitation,
+    # which then is split into a solid and a liquid part
+    # for each cell.
+    rainfall_cur        <- precip_cur * (1 - solid_prec_frac_cur)
     
     #### .  SETUP INDICES ####
     doy <- weather_series_cur$doy[day_id]
@@ -141,7 +148,7 @@ func_massbal_model <- function(run_params,
       swe_post_previous_avalanche   <- avalanche_output + (vec_snow_swe[cells_prev] - avalanche_input_values)
       
       vec_massbal_cumul[cells_prev] <- vec_massbal_cumul[cells_prev] + swe_post_previous_avalanche - vec_snow_swe[cells_prev]
-      gl_accum_daily[day_id + 1] <- gl_accum_daily[day_id + 1] + mean(swe_post_previous_avalanche[glacier_cell_ids] - vec_snow_swe[cells_prev][glacier_cell_ids]) # Update accumulation after avalanche.
+      gl_accum_daily[day_id] <- gl_accum_daily[day_id] + mean(swe_post_previous_avalanche[glacier_cell_ids] - vec_snow_swe[cells_prev][glacier_cell_ids]) # Update accumulation after avalanche.
       
       vec_snow_swe[cells_prev]      <- swe_post_previous_avalanche
       
@@ -195,17 +202,21 @@ func_massbal_model <- function(run_params,
     vec_massbal_cumul[cells_cur] <- vec_massbal_cumul[cells_prev] - melt_cur + accumulation_cur
     vec_surf_type[cells_cur][which(accumulation_cur > 0.0)] <- 2 # Mark surface as snow after snowfall.
     gl_massbal_cumul[day_id + 1] <- mean(vec_massbal_cumul[offset_cur + glacier_cell_ids])
-    gl_melt_daily[day_id + 1] <- mean(melt_cur[glacier_cell_ids])
-    gl_accum_daily[day_id + 1] <- gl_accum_daily[day_id + 1] + mean(accumulation_cur[glacier_cell_ids]) # We use the sum because we may already have a non-zero value here in case there has been an avalanche.
-
+    gl_melt_daily[day_id] <- mean(melt_cur[glacier_cell_ids])
+    gl_accum_daily[day_id] <- gl_accum_daily[day_id] + mean(accumulation_cur[glacier_cell_ids]) # We use the sum because we may already have a non-zero value here in case there has been an avalanche.
+    gl_rainfall_daily[day_id] <- mean(rainfall_cur[glacier_cell_ids])
+    
   }
   
   mb_model_output <- list(vec_swe_all       = vec_snow_swe,
                           vec_surftype_all  = vec_surf_type,
                           vec_massbal_cumul = vec_massbal_cumul,
                           gl_massbal_cumul  = gl_massbal_cumul,
-                          gl_melt_cumul     = cumsum(gl_melt_daily),
-                          gl_accum_cumul    = cumsum(gl_accum_daily))
+                          gl_melt_daily     = gl_melt_daily,
+                          gl_melt_cumul     = c(0.0, cumsum(gl_melt_daily)[1:model_days_n]),
+                          gl_accum_daily    = gl_accum_daily,
+                          gl_accum_cumul    = c(0.0, cumsum(gl_accum_daily)[1:model_days_n]),
+                          gl_rainfall_daily = gl_rainfall_daily)
   
   # t2 <- Sys.time()
   # print(t2-t1)

@@ -81,6 +81,7 @@ run_params <- list(
   
   #### PLOTTING parameters ####
   mb_colorscale_multiplier     =   1,                            # NA for automatic colorscale limits, or a number to multiply the colorscale limits. 1 = colorscale between -2 and +2 m w.e.
+  output_unit                  =   "m",                          # Either "m" for meters water-equivalent, or "mm" for millimeters water-equivalent.
   
   
   #### MODELED YEARS choice ####

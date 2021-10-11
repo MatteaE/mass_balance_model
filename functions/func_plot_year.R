@@ -57,7 +57,8 @@ func_plot_year <- function(year_data,
   #### . PLOT MODELED SERIES OF EACH STAKE ####
   if (year_data$nstakes_annual > 0) {
     cat("  Mass balance at the stakes...\n")
-    plots_stakes <- func_plot_stakes(year_data)
+    plots_stakes <- func_plot_stakes(year_data,
+                                     run_params)
     for (stakes_page_id in 1:length(plots_stakes)) {
       plots_year <- append(plots_year, list(plots_stakes[[stakes_page_id]]))
     }

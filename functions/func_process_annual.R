@@ -15,12 +15,6 @@ func_process_annual <- function(year_data,
                                 data_radiation,
                                 data_weather) {
   
-  # Here do the annual processing.
-  # Find grid cells corresponding to the annual stakes.
-  # We sort them to enable vectorized bilinear filtering.
-  # if (year_data$nstakes_annual > 0) {
-    # year_data$annual_stakes_cells <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), duplicates = FALSE))
-  # }
   
   # Select weather series period.
   # model_time_bounds[1] is the start of the annual run, 

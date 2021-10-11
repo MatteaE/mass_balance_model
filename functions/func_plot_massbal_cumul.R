@@ -19,9 +19,9 @@ func_plot_massbal_cumul <- function(year_data,
   
   # Prepare the data for plotting.
   massbal_cumul_df <- data.frame(date  = seq.Date(year_data$model_time_bounds[1]-1, year_data$model_time_bounds[2], by = "1 day"),
-                                 mb    = year_data$mod_output_annual_cur$gl_massbal_cumul,
-                                 melt  = year_data$mod_output_annual_cur$gl_melt_cumul,
-                                 accum = year_data$mod_output_annual_cur$gl_accum_cumul)
+                                 mb    = year_data$mod_output_annual_cur$gl_massbal_cumul * run_params$output_mult,
+                                 melt  = year_data$mod_output_annual_cur$gl_melt_cumul * run_params$output_mult,
+                                 accum = year_data$mod_output_annual_cur$gl_accum_cumul * run_params$output_mult)
   day_id_offset <- (length(massbal_cumul_df$date) - as.integer(format(massbal_cumul_df$date[length(massbal_cumul_df$date)], "%j"))) + 1
   massbal_cumul_df$day_id <- seq_along(massbal_cumul_df$date) - day_id_offset # So that day_id = 1 is Jan 1.
   
@@ -84,7 +84,7 @@ func_plot_massbal_cumul <- function(year_data,
     # geom_vline(xintercept = c(massbal_cumul_df$day_id[months_labels_ids] - 14, massbal_cumul_df$day_id[months_labels_ids[length(months_labels_ids)]] + 16)) +
     scale_x_continuous(expand = expansion(mult = 0.02)) +
     scale_y_continuous(breaks = pretty(massbal_cumul_df$mb/1e3)) +
-    ylab("Mass balance [m w.e.]") +
+    ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
     theme_mbcumul_plots
   
   
@@ -102,14 +102,27 @@ func_plot_massbal_cumul <- function(year_data,
     # geom_vline(xintercept = c(massbal_cumul_df$day_id[months_labels_ids] - 14, massbal_cumul_df$day_id[months_labels_ids[length(months_labels_ids)]] + 16)) +
     scale_x_continuous(expand = expansion(mult = 0.02)) +
     scale_y_continuous(breaks = pretty(c(massbal_cumul_df$mb, -massbal_cumul_df$melt, massbal_cumul_df$accum)/1e3)) +
-    ylab("Mass balance [m w.e.]") +
+    ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
     theme_mbcumul_plots
   
   
   # Generate plot of daily melt, could be compared to a hydrograph.
   massbal_daily_df <- data.frame(date  = seq.Date(year_data$model_time_bounds[1], year_data$model_time_bounds[2], by = "1 day"),
-                                 melt  = diff(year_data$mod_output_annual_cur$gl_melt_cumul),
+                                 melt  = year_data$mod_output_annual_cur$gl_melt_daily[1:(length(year_data$mod_output_annual_cur$gl_melt_daily)-1)] * year_data$glacier_area / 1e3,
+                                 rain  = year_data$mod_output_annual_cur$gl_rainfall_daily[1:(length(year_data$mod_output_annual_cur$gl_rainfall_daily)-1)] * year_data$glacier_area / 1e3,
                                  day_id = massbal_cumul_df$day_id[2:nrow(massbal_cumul_df)])
+  
+  fluxes_divs <- 10^(c(0,3:12))
+  fluxes_div_id <- which.min(abs((max(massbal_daily_df$melt)/fluxes_divs)/100 - 1))
+  fluxes_div <- fluxes_divs[fluxes_div_id]
+  massbal_daily_df$melt <- massbal_daily_df$melt / fluxes_div
+  massbal_daily_df$rain <- massbal_daily_df$rain / fluxes_div
+  fluxes_div_lab = ""
+  if (fluxes_div == 1) {
+    plot_ylab <- "<b>Water fluxes [m<sup>3</sup> day<sup>-1</sup>]</b>"
+  } else {
+    plot_ylab <- paste0("<b>Water fluxes [10<sup>", round(log10(fluxes_div)), "</sup> m<sup>3</sup> day<sup>-1</sup>", "]</b>")
+  }
   
   plots_mb[[3]] <- ggplot(massbal_daily_df) +
     annotate("text", x = months_labels_df$day_id, y = Inf, label = months_labels_df$label, vjust = 2, fontface = "bold", size = 5) +
@@ -117,11 +130,23 @@ func_plot_massbal_cumul <- function(year_data,
     geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", size = 0.5, color = "#0000FF") +
     {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF")} +
     {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", size = 0.5, color = "#FF00FF")} +
-    geom_line(aes(x = day_id, y = melt), color = "#FF0000", size = 0.7) +
+    # geom_line(aes(x = day_id, y = rain), color = "#0000FF", size = 0.7) +
+    # geom_line(aes(x = day_id, y = melt), color = "#FF0000", size = 0.7) +
+    geom_line(aes(x = day_id, y = rain, color = "rain"), size = 0.7) +
+    geom_line(aes(x = day_id, y = melt, color = "melt"), size = 0.7) +
+    scale_color_manual(breaks = c("melt", "rain"),
+                       values = c("rain" = "#00FFFF", "melt" = "#FF0000"),
+                       labels = c("rain" = "Rainfall", "melt" = "Melt")) +
     scale_x_continuous(expand = expansion(mult = 0.02)) +
-    scale_y_continuous(breaks = pretty(massbal_daily_df$melt, n = 5), expand = expansion(mult = c(0,0.05))) +
-    ylab("Daily melt [mm w.e.]") +
-    theme_mbcumul_plots
+    scale_y_continuous(breaks = pretty(massbal_daily_df$melt, n = 5), expand = expansion(mult = c(0,0.1))) +
+    ylab(plot_ylab) +
+    theme_mbcumul_plots +
+    theme(legend.position = c(0.45,0.8),
+          legend.justification = 0.5,
+          legend.background = element_blank(),
+          legend.box.background = element_blank(),
+          legend.title = element_blank(),
+          axis.title.y = element_markdown())
   
   # Align panels.
   plots_mb_out <- plot_grid(plotlist = plots_mb, align = "hv", ncol = 1, nrow = 3)

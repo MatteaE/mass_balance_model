@@ -13,7 +13,7 @@ func_process_run_params <- function(run_params) {
   
   # Should we call save.image() at the end of the model run?
   # Useful for faster debugging.
-  run_params$save_simulation_RData <- FALSE
+  run_params$save_simulation_RData       <-   FALSE
   
   # The base directory for all the data
   run_params$dir_data_base               <-   file.path("input", run_params$name_glacier)
@@ -21,7 +21,31 @@ func_process_run_params <- function(run_params) {
   # Should we run the model if we find the
   # output directory already present?
   # Or stop with a warning?
-  run_params$overwrite_output            <-   FALSE
+  run_params$overwrite_output            <-   TRUE
+  
+  # If output unit is unspecified or invalid, use meters water equivalent.
+  if (is.null(run_params$output_unit)) {
+    run_params$output_unit <- "m"
+  } else {
+    if (!(run_params$output_unit %in% c("mm", "m"))) {
+      run_params$output_unit <- "m"
+    }
+  }
+  
+  # Adapt formats to chosen m w.e. or mm w.e.
+  if (run_params$output_unit == "m") {
+    run_params$output_mult <- 1
+    run_params$output_fmt1 <- "%.3f" # For sprintf()
+    run_params$output_fmt2 <- "%.2f"
+    run_params$output_fmt3 <- "%+.3f"
+    run_params$output_fmt4 <- "%.4f"
+  } else {
+    run_params$output_mult <- 1000
+    run_params$output_fmt1 <- "%.0f"
+    run_params$output_fmt2 <- "%.0f"
+    run_params$output_fmt3 <- "%+.0f"
+    run_params$output_fmt4 <- "%.1f"
+  }
   
   # Set input data paths. We force the user to use these, which are tidy and easy to understand.
   run_params$dir_data_weather            <-   file.path(run_params$dir_data_base, "weather")     # The weather series goes here
@@ -69,6 +93,7 @@ func_process_run_params <- function(run_params) {
   
   #### PLOT parameters ####
   run_params$mb_colorscale_breaks        <-   c(-2,-1.5,-1,-0.5,-0.2,0,0.2,0.5,1,1.5,2) # [m w.e.]: use these breaks in the color scale for mass balance maps. NOTE: these have to be exactly 11 at the moment.
+  run_params$mb_colorscale_breaks        <-   run_params$mb_colorscale_breaks * run_params$output_mult
   run_params$ele_bands_plot_size         <-   50          # [m]: plot the annual mass balance profile as function of elevation, using elevation bands with this vertical extent.
   run_params$plot_daily_maps             <-   FALSE       # [TRUE/FALSE]: produce daily plots of mass balance and SWE (slow!).
   

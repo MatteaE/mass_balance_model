@@ -17,9 +17,6 @@ func_process_year <- function(year_data,
   
   # Find stake offsets on the grid.
   if (year_data$nstakes_annual > 0) {
-    # year_data <- func_find_stake_dxdy(year_data,
-    #                                   data_all$data_dhms,
-    #                                   run_params)
     year_data <- func_find_stake_cells_dx_dy(year_data,
                                              data_all$data_dhms,
                                              data_all$data_dems,
@@ -36,6 +33,18 @@ func_process_year <- function(year_data,
   year_data <- func_compute_modeling_periods(year_data,
                                              run_params,
                                              year_cur_params)
+  # Stop with an error in case we don't have all
+  # weather data we need for the simulation period.
+  model_time_bounds_range <- range(year_data$model_time_bounds, na.rm = T)
+  time_bounds_match <- match(model_time_bounds_range, data_all$data_weather$timestamp)
+  if (any(is.na(time_bounds_match))) {
+    offending_id1 <- which(is.na(time_bounds_match))[1] # The [1] to handle the case where both simulation start and end don't have meteo data. This index then is either value 1 or 2
+    offending_date <- model_time_bounds_range[offending_id1]
+    cat("* FATAL: meteo data for the current year are missing. Please check the meteo file and the first_year/last_year! Offending date:", format(offending_date, "%Y/%m/%d"), "(day-of-year:", format(offending_date, "%j)."), "\n")
+    stop()
+  }
+  
+  
   
   #### .  Setup initial snow cover from previous year or estimation ####
   year_data <- func_setup_initial_snow_cover(year_data,
@@ -93,6 +102,7 @@ func_process_year <- function(year_data,
   #### . Save to overview_annual$summary_df the overview values for the current year ####
   overview_annual$summary_df <- func_save_overview_values(year_data,
                                                           year_cur_params,
+                                                          run_params,
                                                           overview_annual$summary_df)
   
   #### . Produce all plots for the year ####

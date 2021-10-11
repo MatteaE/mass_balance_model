@@ -17,6 +17,20 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
   
   if (load_what == "annual") {
     
+    # No winter measurements. Return dummy data frame.
+    if (nchar(run_params$filename_massbalance_annual) == 0) {
+      
+      data_massbalance_annual_dummy <- data.frame(id = "none",
+                                                  start_date = as.Date("1000/10/01"),
+                                                  end_date = as.Date("1001/09/30"),
+                                                  x = 0,
+                                                  y = 0,
+                                                  z = 0,
+                                                  dh_cm = 0,
+                                                  density = 0)
+      return(data_massbalance_annual_dummy)
+    }
+    
     massbalance_path <- file.path(run_params$dir_data_massbalance,
                                   run_params$filename_massbalance_annual)
     
@@ -40,6 +54,10 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
                                   run_params$filename_massbalance_winter)
   }
   
+  if (!file.exists(massbalance_path)) {
+    cat("* FATAL: I could not find the file with mass balance measurements. The specified path is", massbalance_path, "\n")
+    stop()
+  }
 
   # Read file, assign column names.
   data_massbalance <- read.table(massbalance_path, header = FALSE, stringsAsFactors = FALSE)
