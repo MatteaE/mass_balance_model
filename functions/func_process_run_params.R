@@ -108,7 +108,7 @@ func_process_run_params <- function(run_params) {
   # The model might not work if you change anything below this line.
   
   # Convert CRS from number to CRS class.
-  run_params$grids_crs <- CRS(paste0("EPSG:", run_params$grids_crs))
+  run_params$grids_crs_epsg <- CRS(paste0("EPSG:", run_params$grids_crs))
   
   run_params$years                       <- run_params$first_year:run_params$last_year
   run_params$n_years                     <- length(run_params$years)

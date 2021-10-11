@@ -87,7 +87,7 @@ func_plot_stakes <- function(year_data,
       annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = base_size * 0.2) +
       geom_line(aes(x = day_id, y = mb/1e3)) +
       geom_point(data = stake_meas_df, aes(x = day_id, y = mb/1e3), shape = 5, stroke = 1.2, size = 1) +
-      annotation_custom(grobTree(textGrob(paste0(year_data$massbal_annual_meas_cur$id[annual_stake_id], ": ", sprintf("%+.2f", -year_data$mod_output_annual_cur$stakes_bias[annual_stake_id] * run_params$output_mult/1e3), " ", run_params$output_unit, " w.e."), x=0.05, y = 0.3, hjust = 0,
+      annotation_custom(grobTree(textGrob(paste0(year_data$massbal_annual_meas_cur$id[annual_stake_id], ": ", sprintf(run_params$output_fmt3, -year_data$mod_output_annual_cur$stakes_bias[annual_stake_id] * run_params$output_mult/1e3), " ", run_params$output_unit, " w.e."), x=0.05, y = 0.3, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       scale_x_continuous(expand = expansion(0,0)) +
       scale_y_continuous(limits = stakes_mb_lims, breaks = pretty(stakes_mb_lims, n = 3), expand = expansion(mult = c(0.12,0.07))) +

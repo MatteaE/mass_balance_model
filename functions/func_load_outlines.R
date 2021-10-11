@@ -36,7 +36,7 @@ func_load_outlines <- function(run_params) {
     outline_filetype <- outline_path_split[[1]][length(outline_path_split[[1]])]
     
     if (outline_filetype == "xyzn") {
-      outlines_out$outlines[[outline_id]] <- func_load_xyzn(outline_paths[outline_id], run_params$grids_crs)
+      outlines_out$outlines[[outline_id]] <- func_load_xyzn(outline_paths[outline_id], run_params$grids_crs_epsg)
     } else if (outline_filetype == "shp") {
       invisible(capture.output(outlines_out$outlines[[outline_id]] <- as(as_Spatial(st_zm(st_read(outline_paths[outline_id]))), "SpatialPolygons")))
     }

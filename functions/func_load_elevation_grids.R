@@ -50,7 +50,7 @@ func_load_elevation_grids <- function(run_params) {
   if (length(grid_years) == 1) {
     
     grids_out$elevation[[1]] <- readAll(raster(grid_paths[1]))
-    crs(grids_out$elevation[[1]]) <- run_params$grids_crs
+    crs(grids_out$elevation[[1]]) <- run_params$grids_crs_epsg
     
     for (year_cur_id in 1:run_params$n_years) {
       grids_out$grid_year_id[year_cur_id] <- 1
@@ -62,7 +62,7 @@ func_load_elevation_grids <- function(run_params) {
     # Load base grids (their indices correspond to the grid_years vector).
     for (grid_id in 1:length(grid_paths)) {
       grids_out$elevation[[grid_id]] <- readAll(raster(grid_paths[grid_id]))
-      crs(grids_out$elevation[[grid_id]]) <- run_params$grids_crs
+      crs(grids_out$elevation[[grid_id]]) <- run_params$grids_crs_epsg
     }
     
     
@@ -99,7 +99,7 @@ func_load_elevation_grids <- function(run_params) {
           
           cat("* WARNING: func_load_elevation_grids.R: I am resampling DHM grid ", grid_id, " to enable DHM interpolation!\n")
           grids_out$elevation[[grid_id]] <- resample(grids_out$elevation[[grid_id]], raster_blueprint, method = "bilinear")
-          crs(grids_out$elevation[[grid_id]]) <- run_params$grids_crs
+          crs(grids_out$elevation[[grid_id]]) <- run_params$grids_crs_epsg
           
           # Any NA in elevation is set to the mean value of the grid.
           grids_out$elevation[[grid_id]][is.na(grids_out$elevation[[grid_id]][])] <- cellStats(grids_out$elevation[[grid_id]], stat = "mean", na.rm = TRUE)
@@ -141,7 +141,7 @@ func_load_elevation_grids <- function(run_params) {
             grid_later   <- grids_out$elevation[[grid_year_later_id]]
             
             grid_interpolated <- grid_earlier + (grid_later - grid_earlier) * (year_cur - grid_year_earlier) / (grid_year_later - grid_year_earlier)
-            crs(grid_interpolated) <- run_params$grids_crs
+            crs(grid_interpolated) <- run_params$grids_crs_epsg
             grids_out$elevation[[length(grids_out$elevation) + 1]] <- grid_interpolated
             grids_out$grid_year_id[year_cur_id] <- length(grids_out$elevation)
             

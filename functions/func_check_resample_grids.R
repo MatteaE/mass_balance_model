@@ -21,7 +21,7 @@ func_check_resample_grids <- function(run_params,
       
       cat("* WARNING: func_check_resample_grids: I am resampling surface type grid ", grid_id, "!\n")
       data_all$data_surftype$grids[[grid_id]]      <- resample(data_all$data_surftype$grids[[grid_id]], data_all$raster_blueprint, method = "ngb")
-      crs(data_all$data_surftype$grids[[grid_id]]) <- run_params$grids_crs
+      crs(data_all$data_surftype$grids[[grid_id]]) <- run_params$grids_crs_epsg
       
       # Any NA in surface type becomes rock.
       data_all$data_surftype$grids[[grid_id]][is.na(data_all$data_surftype$grids[[grid_id]][])] <- 4
@@ -32,7 +32,7 @@ func_check_resample_grids <- function(run_params,
       
       cat("* WARNING: func_check_resample_grids: I am resampling DHM grid ", grid_id, "!")
       data_all$data_dhms$elevation[[grid_id]]      <- resample(data_all$data_dhms$elevation[[grid_id]], data_all$raster_blueprint, method = "bilinear")
-      crs(data_all$data_dhms$elevation[[grid_id]]) <- run_params$grids_crs
+      crs(data_all$data_dhms$elevation[[grid_id]]) <- run_params$grids_crs_epsg
       
       # Any NA in elevation is set to the mean value of the grid.
       data_all$data_dhms$elevation[[grid_id]][is.na(data_all$data_dhms$elevation[[grid_id]][])] <- cellStats(data_all$data_dhms$elevation[[grid_id]], stat = "mean", na.rm = TRUE)

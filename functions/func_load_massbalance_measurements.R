@@ -78,8 +78,30 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
                         (data_massbalance$y > ext_limits@ymax))
   ids_bad_n <- length(ids_df_bad)
   if (ids_bad_n > 0) {
-    cat("* WARNING: the ", load_what, " mass balance file contains", ids_bad_n, "stake(s) which fall outside the DHM. I am discarding them now, but you should investigate.\n")
-    data_massbalance <- data_massbalance[-ids_df_bad,]
+    cat("* WARNING: the", load_what, "mass balance file contains", ids_bad_n, "entries which fall outside the DHM.\n")
+    stake_coords_rescued_ids <- NULL
+    for (i in 1:ids_bad_n) {
+      stake_coords_fixed <- func_fix_stake_coordinates(c(data_massbalance$x[ids_df_bad[i]], data_massbalance$y[ids_df_bad[i]]),
+                                                       ext_limits,
+                                                       run_params$grids_crs + c(-2, -1, 1, 2),
+                                                       run_params$grids_crs)
+      # Rescued the current pair by changing coordinates system!
+      if (all(!is.na(stake_coords_fixed))) {
+        data_massbalance$x[ids_df_bad[i]] <- stake_coords_fixed[1]
+        data_massbalance$y[ids_df_bad[i]] <- stake_coords_fixed[2]
+        stake_coords_rescued_ids <- c(stake_coords_rescued_ids, ids_df_bad[i])
+      }
+    }
+    stake_coords_rescued_n <- length(stake_coords_rescued_ids)
+    cat("    I could rescue", stake_coords_rescued_n, "entries with a wrong coordinate system.\n")
+    ids_df_bad <- setdiff(ids_df_bad, stake_coords_rescued_ids) # Don't remove rescued stakes.
+    if (stake_coords_rescued_n < ids_bad_n) {
+      cat("* WARNING: I am discarding the", ids_bad_n - stake_coords_rescued_n, "remaining entries, I could not fix them. You should investigate and correct them manually.\n")
+      cat("    The first problematic entry reports these coordinates:", data_massbalance$x[ids_df_bad[1]], "|", data_massbalance$y[ids_df_bad[1]], "\n")
+      data_massbalance <- data_massbalance[-ids_df_bad,]
+    } else {
+      cat("    All problematic entries could be rescued by reprojection.\n")
+    }
   }
   
   
@@ -149,7 +171,7 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
     data_massbalance_filtered <- data_massbalance[,c(1:6,9)]
   }
   
-  cat("    I have", nrow(data_massbalance_filtered), "values.\n")
+  cat("    Loading complete. I have", nrow(data_massbalance_filtered), load_what, "mass balance values.\n")
   
   return(data_massbalance_filtered)
   

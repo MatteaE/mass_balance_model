@@ -14,7 +14,7 @@ func_snow_probes_idw <- function(run_params, snow_probes, data_dhms) {
   
   snow_probes_spdf <- SpatialPointsDataFrame(coords = snow_probes[,c(4,5)],
                                              data = data.frame(swe = snow_probes$massbal / 1e3),
-                                             proj4string = run_params$grids_crs)
+                                             proj4string = run_params$grids_crs_epsg)
     
 
   # Use prescribed distance exponent.
