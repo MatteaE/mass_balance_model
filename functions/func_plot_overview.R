@@ -128,7 +128,7 @@ func_plot_overview <- function(overview_annual,
     geom_line(aes(x = year, y = aar), size = 1) +
     single_year_point +
     ylab("Accumulation-Area Ratio [%]") +
-    scale_y_continuous(expand = expansion(0.5, 0), limits = c(NA, 100)) +
+    scale_y_continuous(expand = expansion(0.05, 0), limits = c(0, 100)) +
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("Accumulation-Area Ratio") +
     theme_overview_plots

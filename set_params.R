@@ -8,20 +8,20 @@
 
 run_params <- list(
   
-  name_glacier                =    "West_Suek",                    # Glacier name, used for output directory naming.
+  name_glacier                =    "ala-archa",                    # Glacier name, used for output directory naming.
   
   #### INPUT-related parameters ####
   dir_data_recursive           =   FALSE,                         # [TRUE/FALSE]: should we look recursively for the input files in the specified directories?
   
   # Set FILE NAMES and input file properties.
-  filename_weather             =   "weather_suek.dat",       # File name of the weather series
+  filename_weather             =   "weather_ala-archa.dat",       # File name of the weather series
   file_weather_nskip           =   4,                            # [-]: number of lines to skip in the weather file
   
   grids_crs                    =   32643,                        # Reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
   
   dhm_interpolate              =   FALSE,                        # [TRUE/FALSE]: should we use linear interpolation to compute each year's DHM?
   
-  filename_massbalance_annual  =   "mb_suek.dat",       # File name of the annual mass balance observations
+  filename_massbalance_annual  =   "",       # File name of the annual mass balance observations
   filename_massbalance_winter  =   "",                           # File name of the winter mass balance observations
   
   filename_params_prefix       =   "param_",
@@ -29,7 +29,7 @@ run_params <- list(
   
   
   #### WEATHER INPUT parameters ####
-  weather_aws_elevation        =   3837,                         # [m a.s.l.]: AWS elevation
+  weather_aws_elevation        =   4200,                         # [m a.s.l.]: AWS elevation
   weather_snowfall_temp        =   1.5,                          # [°C]: at this temperature precipitation is half rain, half snow. One degree above it is all rain, one degree below it is all snow (snow fraction is linearly interpolated).
   weather_max_precip_ele       =   4600,                         # [m a.s.l.]: above this altitude, precipitation does not increase any more but becomes constant (cutoff). If NA, it is estimated automatically from the first DEM grid.
   
@@ -69,13 +69,13 @@ run_params <- list(
 
     
   #### ACCUMULATION and MELT MODEL default year parameters ####
-  default_prec_corr            =   200,                          # [%]: default precipitation correction in case no winter data or annual parameters are available.
+  default_prec_corr            =   300,                          # [%]: default precipitation correction in case no winter data or annual parameters are available.
   default_prec_summer_fact     =   1,                          # [-]: default multiplicative reduction of precipitation correction in summer.
   default_prec_elegrad         =   10,                           # [% / 100 m]: default altitudinal gradient of precipitation.
   default_temp_elegrad         =   -0.6,                         # [°C / 100 m]: default altitudinal gradient of air temperature.
-  default_melt_factor          =   4.0,                          # [mm w.e. C-1 d-1]: default melt factor for DDF model.
-  default_rad_fact_ice         =   0.8,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: default radiation factor for ice within DDF model.
-  default_rad_fact_snow        =   0.5,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: default radiation factor for snow within DDF model.
+  default_melt_factor          =   1.0,                          # [mm w.e. C-1 d-1]: default melt factor for DDF model.
+  default_rad_fact_ice         =   0.3,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: default radiation factor for ice within DDF model.
+  default_rad_fact_snow        =   0.2,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: default radiation factor for snow within DDF model.
   nodata_years_automatic       =   TRUE,                         # [TRUE/FALSE]: if TRUE, the prec_corr/melt_factor/rad_fact_ice/rad_fact_snow parameters for years with no mass balance will be taken as the mean of the parameters optimized over the years with measured mass balance data (only IF there is no overriding value in an annual parameter file AND there is at least one year with measured mass balances). If FALSE, the parameters are taken from the defaults under run_params (only IF there is no overriding value in an annual parameter file).
 
   
@@ -85,7 +85,7 @@ run_params <- list(
   
   
   #### MODELED YEARS choice ####
-  first_year                   =   2018,                         # First modeled year (usually from October of the previous year to September of this year)
+  first_year                   =   2012,                         # First modeled year (usually from October of the previous year to September of this year)
   last_year                    =   2018                          # Last modeled year (same as previous comment)
   
 )
