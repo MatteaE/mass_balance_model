@@ -130,7 +130,7 @@ func_run_model <- function(run_params) {
   years_todo_n  <- length(year_ids_todo)
   if (length(year_ids_todo) > 0) {
     
-    cat("\n\n\n** Processing ", years_todo_n, " year(s) without mass balance measurements... **\n")
+    cat("\n\n\n** Processing", years_todo_n, "year(s) without mass balance measurements... **\n")
     
     for (year_id in year_ids_todo) {
       #### . Select current year, parameters, data ####
