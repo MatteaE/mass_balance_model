@@ -1,0 +1,2 @@
+year,mb_annual_meas_corr,mb_annual_meas,mb_annual_hydro,mb_winter_meas,mb_winter_fixed,ela,aar,rmse,melt_factor,rad_fact_ice,rad_fact_snow,prec_corr,mb_cumul
+2020,-1.033,-0.978,-0.531,NA,1.245,4130,26.7,0.921,2.217,0.443,0.277,150,-0.53

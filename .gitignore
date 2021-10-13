@@ -34,3 +34,7 @@ procedures/*.old
 
 # Compiled C++ avalanche function (platform-specific!) #
 functions/sourceCpp*
+
+# Documentation which is not ready yet #
+doc/tutorial2_multiyear/
+doc/literature/
