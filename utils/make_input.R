@@ -237,12 +237,21 @@ func_do_processing <- function(dem_filepath,
     if (dem_crs@projargs     != reference_crs@projargs) reproj_dem     <- TRUE
     if (outline_crs@projargs != reference_crs@projargs) reproj_outline <- TRUE
     
+    # We also want square cells.
+    if (abs(xres(dem_l1) - yres(dem_l1)) > 1e-5)        reproj_dem     <- TRUE
+    
     # If there is no reference grid supplied for alignment.
   } else {
     
     if ((dem_crs@projargs == outline_crs@projargs) && (dem_crs@projargs != wgs84_crs@projargs)) {
       
-      cat("DEM and shapefile are already in the same projected coordinates. I don't reproject them.\n")
+      cat("DEM and shapefile are already in the same projected coordinates.\n")
+      
+      if ((abs(xres(dem_l1) - yres(dem_l1)) > 1e-5)) {
+        message("DEM cells are not square! I will have to reproject the DEM, but I will keep the same coordinate system.")
+        reproj_dem <- TRUE
+        target_crs <- dem_crs
+      }
       
     } else if ((dem_crs@projargs == outline_crs@projargs) && (dem_crs@projargs == wgs84_crs@projargs)) {
       
@@ -262,6 +271,12 @@ func_do_processing <- function(dem_filepath,
         message("DEM coordinate system is good, I am reprojecting the shapefile.")
         reproj_outline <- TRUE
         target_crs     <- dem_crs
+        
+        if ((abs(xres(dem_l1) - yres(dem_l1)) > 1e-5)) {
+          message("But DEM cells are not square! I will have to also reproject the DEM, but I will keep the same coordinate system.")
+          reproj_dem <- TRUE
+          target_crs <- dem_crs
+        }
         
       } else if (outline_crs@projargs %in% utm_crs_allowed) { # Reproject DEM.
         

@@ -138,7 +138,7 @@ func_plot_massbal_cumul <- function(year_data,
                        values = c("rain" = "#00FFFF", "melt" = "#FF0000"),
                        labels = c("rain" = "Rainfall", "melt" = "Melt")) +
     scale_x_continuous(expand = expansion(mult = 0.02)) +
-    scale_y_continuous(breaks = pretty(massbal_daily_df$melt, n = 5), expand = expansion(mult = c(0,0.1))) +
+    scale_y_continuous(breaks = pretty(c(massbal_daily_df$melt, massbal_daily_df$rain), n = 5), expand = expansion(mult = c(0,0.1))) +
     ylab(plot_ylab) +
     theme_mbcumul_plots +
     theme(legend.position = c(0.45,0.8),

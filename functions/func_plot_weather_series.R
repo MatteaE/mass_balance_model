@@ -48,7 +48,7 @@ func_plot_weather_series <- function(year_data) {
     geom_vline(xintercept = date_df$date[date_df$day_id == 0], linetype = "dashed", size = 0.5) +
     annotate("text", x = months_labels_df$date, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
     scale_x_date(expand = expansion(0,0)) +
-    ylab("AWS daily mean air temperature [°C]") +
+    ylab("AWS daily mean air temperature [\u00B0C]") +
     theme_weather_plot
   
   
