@@ -164,30 +164,6 @@ func_do_processing <- function(dem_filepath,
   gc()
   
   
-  # If a reference grid is given, just use its
-  # resolution as cell size. Else:
-  # if cell size is not supplied by the user,
-  # determine it automatically from the glacier area.
-  # We aim for 10000 cells, we allow cell sizes of
-  # 10, 20, 50, 100, 200, 500 and 1000 m.
-  if (has_reference) {
-    cat("Reference grid supplied. Overriding cell size with reference cell size...\n")
-    resolution_proj_raster <- xres(reference_l1)
-  } else {
-    if (is.na(cell_size)) {
-      cat("Cell size not supplied. Automatically computing cell size...\n")
-      outline_area <- as.numeric(st_area(outline_l1))
-      cellsizes_allowed <- c(10, 20, 50, 100, 200, 500, 1000)
-      ncells_target <- 10000
-      resolution_proj_raster <- cellsizes_allowed[which.min(abs(((outline_area / (cellsizes_allowed^2)) / ncells_target) - 1))]
-      cat("Cell size selected:", resolution_proj_raster, "m\n")
-    } else {
-      resolution_proj_raster <- cell_size
-      cat("Cell size supplied:", resolution_proj_raster, "m\n")
-    }
-  }
-  
-  
   #### Fix coordinate systems ####
   # If reference grid is given: use its CRS.
   # Else check CRS of both DEM and outline.
@@ -256,7 +232,7 @@ func_do_processing <- function(dem_filepath,
     } else if ((dem_crs@projargs == outline_crs@projargs) && (dem_crs@projargs == wgs84_crs@projargs)) {
       
       message(paste0("DEM and shapefile are both in WGS84 (EPSG:4326). I am reprojecting them to UTM (zone ", utm_crs_number, "N) before proceeding."))
-      message("This can take some minutes if the DEM is big.")
+      message("This can take some minutes if the DEM is big.\n")
       
       reproj_dem       <- TRUE
       reproj_outline   <- TRUE
@@ -296,10 +272,39 @@ func_do_processing <- function(dem_filepath,
   } # End of "if (has_reference)".
   
   # Now do the reprojections which we have decided above.
+  # To compute the cell size for the DEM reprojection,
+  # we need to first reproject the outline
+  # so that its extent is in meters, then
+  # compute cell size.
   dem_l2             <- dem_l1
   outline_l2         <- outline_l1
-  if (reproj_dem)     dem_l2      <- projectRaster(dem_l1, res = resolution_proj_raster, crs = target_crs, method = "bilinear")
   if (reproj_outline) outline_l2  <- st_transform(outline_l1, target_crs)
+  
+  # If a reference grid is given, just use its
+  # resolution as cell size. Else:
+  # if cell size is not supplied by the user,
+  # determine it automatically from the extent of the outline bbox.
+  # We aim for 50000 total (DHM) cells, we allow cell sizes of
+  # 10, 20, 50, 100, 200, 500 and 1000 m.
+  if (has_reference) {
+    cat("Reference grid supplied. Overriding cell size with reference cell size...\n")
+    resolution_proj_raster <- xres(reference_l1)
+  } else {
+    if (is.na(cell_size)) {
+      cat("Cell size not supplied. Automatically computing cell size...\n")
+      outline_extent <- st_bbox(outline_l2)
+      outline_extent_area <- (outline_extent[3] - outline_extent[1]) * (outline_extent[4] - outline_extent[2])
+      cellsizes_allowed <- c(10, 20, 50, 100, 200, 500, 1000)
+      ncells_target <- 50000
+      resolution_proj_raster <- cellsizes_allowed[which.min(abs(((outline_extent_area / (cellsizes_allowed^2)) / ncells_target) - 1))]
+      cat("Cell size selected:", resolution_proj_raster, "m\n")
+    } else {
+      resolution_proj_raster <- cell_size
+      cat("Cell size supplied:", resolution_proj_raster, "m\n")
+    }
+  }
+  
+  if (reproj_dem)     dem_l2      <- projectRaster(dem_l1, res = resolution_proj_raster, crs = target_crs, method = "bilinear")
   # Always reproject firn and debris shapefiles. Easier than doing all comparisons of the projection.
   if (has_firn)   firn_l2   <- st_transform(firn_l1, crs(outline_l2))
   if (has_debris) debris_l2 <- st_transform(debris_l1, crs(outline_l2))

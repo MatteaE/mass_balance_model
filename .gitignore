@@ -10,15 +10,7 @@ innovations
 zNOTE*
 
 # Input files for other glaciers #
-input/barkrak/
-input/barkrak2/*.qgs*
-input/yakarcha/
-input/zulmart/
-input/pers/
-input/abramov/
-input/West_Suek/
-input/barkrak2/
-input/ala-archa/
+input/
         
 # Output files #
 output/

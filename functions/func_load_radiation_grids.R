@@ -100,6 +100,7 @@ func_load_radiation_grids <- function(run_params, raster_blueprint) {
       cat("\r    Loading daily radiation files...", doy, "/", 365)
       ras_cur <- raster(grid_paths[doy])
       if ((extent(ras_cur) != extent(raster_blueprint)) || (xres(ras_cur) != xres(raster_blueprint))) {
+        # cat("\nResampling radiation grid!")
         ras_cur <- resample(ras_cur, raster_blueprint, method = "bilinear")
       }
       grids_out[[doy]] <- getValues(ras_cur)
