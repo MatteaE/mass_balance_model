@@ -27,6 +27,6 @@ procedures/*.old
 # Compiled C++ avalanche function (platform-specific!) #
 functions/sourceCpp*
 
-# Documentation which is not ready yet #
-doc/tutorial2_multiyear/
+# Documentation which should not be shared #
 doc/literature/
+doc/tutorial2_multiyear/abramov_shapefiles/
