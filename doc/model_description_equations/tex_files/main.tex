@@ -140,7 +140,7 @@ f_s(x,y)& --       &   \begin{cases}
                        & \text{if }\abs{T(x,y) - T_{r/s}} < \qty{1}{\celsius} \\
                        0   & \text{if }T(x,y)\geq T_{r/s} + \qty{1}{\celsius}
                        \end{cases}
-                       & Fraction of \textbf{solid precipitation} over each grid cell. It is linearly interpolated within \qty{±1}{\celsius} of $T_{r/s}$ \\
+                       & Fraction of \textbf{solid precipitation} over each grid cell. It is linearly interpolated within \qty{\pm1}{\celsius} of $T_{r/s}$ \\
 %
 C(x,y) & mm w.e.        & P(x,y)\cdot f_s(x,y)
                        & \textbf{New snow accumulation} over each grid cell \\

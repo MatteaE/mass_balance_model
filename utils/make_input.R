@@ -8,6 +8,7 @@
 # Latest change: 2021/9/21                                                                        #
 ###################################################################################################
 
+suppressPackageStartupMessages(library(lwgeom))
 suppressPackageStartupMessages(library(insol))
 suppressPackageStartupMessages(library(shinyFiles))
 suppressPackageStartupMessages(library(shinyjs))
@@ -157,9 +158,27 @@ func_do_processing <- function(dem_filepath,
     dem_l1     <- raster(dem_filepath)
   }
   outline_l1 <- st_zm(st_read(outline_filepath, quiet = TRUE))
+  if (any(!st_is_valid(outline_l1))) {
+    cat("Glacier outline has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
+    st_geometry(outline_l1) <- lwgeom_make_valid(st_geometry(outline_l1))
+  }
   
-  if (has_firn)      firn_l1      <- st_zm(st_read(firn_filepath, quiet = TRUE))
-  if (has_debris)    debris_l1    <- st_zm(st_read(debris_filepath, quiet = TRUE))
+  if (has_firn) {
+       firn_l1 <- st_zm(st_read(firn_filepath, quiet = TRUE))
+       if (any(!st_is_valid(firn_l1))) {
+         cat("Firn shapefile has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
+         st_geometry(firn_l1) <- lwgeom_make_valid(st_geometry(firn_l1))
+       }
+  }
+  
+  if (has_debris) {
+    debris_l1 <- st_zm(st_read(debris_filepath, quiet = TRUE))
+    if (any(!st_is_valid(debris_l1))) {
+      cat("Debris shapefile has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
+      st_geometry(debris_l1) <- lwgeom_make_valid(st_geometry(debris_l1))
+    }
+  }
+  
   if (has_reference) reference_l1 <- raster(reference_filepath)
   gc()
   

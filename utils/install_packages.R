@@ -26,6 +26,7 @@ func_install_all <- function() {
                       "gstat",
                       "ggtext",
                       "insol",
+                      "lwgeom",
                       "metR",
                       "qpdf",
                       "raster",
