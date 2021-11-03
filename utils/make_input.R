@@ -164,11 +164,11 @@ func_do_processing <- function(dem_filepath,
   }
   
   if (has_firn) {
-       firn_l1 <- st_zm(st_read(firn_filepath, quiet = TRUE))
-       if (any(!st_is_valid(firn_l1))) {
-         cat("Firn shapefile has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
-         st_geometry(firn_l1) <- lwgeom_make_valid(st_geometry(firn_l1))
-       }
+    firn_l1 <- st_zm(st_read(firn_filepath, quiet = TRUE))
+    if (any(!st_is_valid(firn_l1))) {
+      cat("Firn shapefile has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
+      st_geometry(firn_l1) <- lwgeom_make_valid(st_geometry(firn_l1))
+    }
   }
   
   if (has_debris) {
