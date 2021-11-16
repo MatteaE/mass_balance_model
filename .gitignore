@@ -30,3 +30,5 @@ functions/sourceCpp*
 # Documentation which should not be shared #
 doc/literature/
 doc/tutorial2_multiyear/abramov_shapefiles/
+doc/melt_surface_equations/melt_surfaces.png
+doc/melt_surface_equations/melt_surface_equations.odp
