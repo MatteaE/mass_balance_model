@@ -28,6 +28,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
   ele_bands_plot_max    <- max(ele_bands_plot_values, na.rm = T)
   ele_bands_plot_df     <- data.frame(ele                 = seq(ele_bands_plot_min, ele_bands_plot_max, run_params$ele_bands_plot_size),
                                       ncells              = NA,
+                                      area_km2            = NA,
                                       mb_annual_meas_corr = NA,
                                       mb_annual_meas      = NA,
                                       mb_annual_hydro     = NA,
@@ -37,6 +38,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
   for (band_id in 1:nrow(ele_bands_plot_df)) {
     band_cell_ids                                  <- which(ele_bands_plot_values == ele_bands_plot_df$ele[band_id])
     ele_bands_plot_df$ncells[band_id]              <- length(band_cell_ids)
+    ele_bands_plot_df$area_km2[band_id]            <- ele_bands_plot_df$ncells[band_id] * (run_params$grid_cell_size * run_params$grid_cell_size) / 1e6
     if (year_data$nstakes_annual > 0) {
       ele_bands_plot_df$mb_annual_meas_corr[band_id] <- mean(mb_meas_period_corr_values[band_cell_ids]) * run_params$output_mult / 1000
       ele_bands_plot_df$mb_annual_meas[band_id]      <- mean(getValues(year_data$massbal_annual_maps$meas_period)[band_cell_ids]) * run_params$output_mult / 1000

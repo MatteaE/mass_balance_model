@@ -52,7 +52,8 @@ func_write_year_output <- function(year_data,
                                 gl_melt_cumul_bandcorr    = NA,
                                 gl_melt_daily_m3          = sprintf("%.1f", year_data$mod_output_annual_cur$gl_melt_daily * year_data$glacier_area / 1e3),
                                 gl_melt_daily_m3_bandcorr = NA,
-                                gl_rainfall_daily_m3      = sprintf("%.1f", year_data$mod_output_annual_cur$gl_rainfall_daily * year_data$glacier_area / 1e3))
+                                gl_rainfall_daily_m3      = sprintf("%.1f", year_data$mod_output_annual_cur$gl_rainfall_daily * year_data$glacier_area / 1e3),
+                                gl_scaf                   = sprintf("%.2f", year_data$gl_scaf_daily))
   
   if (year_data$nstakes_annual > 0) {
     df_annual_daily$gl_massbal_cumul_bandcorr <- sprintf(run_params$output_fmt4, year_data$mod_output_annual_cur$gl_massbal_cumul_bandcorr * run_params$output_mult / 1000)
@@ -82,12 +83,13 @@ func_write_year_output <- function(year_data,
   
   # Write mass balance in vertical bands.
   # Note: we have disabled the fixed annual period,
-  # This has changed the indices below from 3:8 to 3:7.
+  # This has changed the indices below from 4:9 to 4:8.
   # Note: df_ele_bands_out already uses the correct unit (mm or m,
   # as chosen by the user). The convertion is done in func_plot_massbal_vs_elevation().
   df_ele_bands_out <- data.frame(year_data$ele_bands_plot_df$ele,
                                  year_data$ele_bands_plot_df$ncells,
-                                 apply(year_data$ele_bands_plot_df[,3:7], 2, sprintf, fmt=run_params$output_fmt4))
+                                 sprintf("%.4f",year_data$ele_bands_plot_df$area_km2),
+                                 apply(year_data$ele_bands_plot_df[,4:8], 2, sprintf, fmt=run_params$output_fmt4))
   names(df_ele_bands_out) <- names(year_data$ele_bands_plot_df)
   write.csv(df_ele_bands_out,
             file.path(run_params$output_dirname, "annual_results", paste0("mb_ele_bands_", year_data$year_cur, ".csv")),

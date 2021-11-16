@@ -59,6 +59,12 @@ func_massbal_postprocess <- function(year_data,
                                             data_dems)
   
   
+  #### Compute daily SCAF in percent ####
+  year_data$gl_scaf_daily <- func_compute_scaf(year_data,
+                                               run_params,
+                                               data_dems)
+  
+  
   #### Compute standardized stake measurements ####
   if (year_data$nstakes_annual > 0) {
     year_data$massbal_annual_meas_cur$massbal_standardized <- func_compute_stake_mb_standardized(year_data)
