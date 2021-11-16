@@ -1,4 +1,5 @@
-func_plot_weather_series <- function(year_data) {
+func_plot_weather_series <- function(year_data,
+                                     run_params) {
   
   plots <- list()
   
@@ -14,7 +15,8 @@ func_plot_weather_series <- function(year_data) {
   
   date_df <- data.frame(date  = seq.Date(year_data$model_time_bounds[1]-1, year_data$model_time_bounds[2], by = "1 day"))
   day_id_offset <- (length(date_df$date) - as.integer(format(date_df$date[length(date_df$date)], "%j"))) + 1
-  date_df$day_id <- seq_along(date_df$date) - day_id_offset # So that day_id = 1 is Jan 1.
+  date_df$day_id <- seq_along(date_df$date) - day_id_offset # So that day_id = 0 is Jan 1.
+  
   # Setup month labels.
   months_labels_all <- format(date_df$date, "%b")
   months_doy <- c(15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349)
@@ -41,11 +43,18 @@ func_plot_weather_series <- function(year_data) {
   dat_Tair$Tair_pos <- pmax(dat_Tair$t2m_mean,0)
   dat_Tair$Tair_neg <- pmin(dat_Tair$t2m_mean,0)
   
+  # Setup vertical lines dividing months.
+  month_starts <- setdiff(intersect(dat_Tair$timestamp,
+                                    seq.Date(from = as.Date(paste0(format(year_data$model_time_bounds[1], "%Y/%m"), "/01")),
+                                             to   = as.Date(paste0(format(year_data$model_time_bounds[2], "%Y/%m"), "/01")),
+                                             by   = "1 month")),
+                          as.Date(paste0(format(year_data$model_time_bounds[2], "%Y"), "/01/01")))                          
   
   plots[[1]] <- ggplot(dat_Tair) +
     geom_ribbon(aes(x = timestamp, ymin = 0, ymax = Tair_pos), fill = "#FF0000") +
     geom_ribbon(aes(x = timestamp, ymin = Tair_neg, ymax = 0), fill = "#0000FF") +
     geom_vline(xintercept = date_df$date[date_df$day_id == 0], linetype = "dashed", size = 0.5) +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_starts, linetype = "dashed", color = "#C0C0C0", size = 0.4)} +
     annotate("text", x = months_labels_df$date, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
     scale_x_date(expand = expansion(0,0)) +
     ylab("AWS daily mean air temperature [\u00B0C]") +
@@ -77,6 +86,7 @@ func_plot_weather_series <- function(year_data) {
               fill = "#A4CBE0", color = "#00000000") +
     geom_col(aes(x = timestamp, y = precip), fill = "#000088", color = "#00004400") +
     geom_vline(xintercept = date_df$date[date_df$day_id == 0], linetype = "dashed", size = 0.5) +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_starts, linetype = "dashed", color = "#C0C0C0", size = 0.4)} +
     annotate("text", x = months_labels_df$date, y = Inf, label = months_labels_df$label, vjust = 2, fontface = "bold", size = 5) +
     scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05))) +
     scale_x_date(expand = expansion(0,0)) +

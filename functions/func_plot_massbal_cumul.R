@@ -23,13 +23,17 @@ func_plot_massbal_cumul <- function(year_data,
                                  melt  = year_data$mod_output_annual_cur$gl_melt_cumul * run_params$output_mult,
                                  accum = year_data$mod_output_annual_cur$gl_accum_cumul * run_params$output_mult)
   day_id_offset <- (length(massbal_cumul_df$date) - as.integer(format(massbal_cumul_df$date[length(massbal_cumul_df$date)], "%j"))) + 1
-  massbal_cumul_df$day_id <- seq_along(massbal_cumul_df$date) - day_id_offset # So that day_id = 1 is Jan 1.
+  massbal_cumul_df$day_id <- seq_along(massbal_cumul_df$date) - day_id_offset # So that day_id = 0 is Jan 1.
   
+  # Setup vertical lines dividing months.
+  month_starts <- seq.Date(from = as.Date(paste0(format(year_data$model_time_bounds[1], "%Y/%m"), "/01")),
+                           to   = as.Date(paste0(format(year_data$model_time_bounds[2], "%Y/%m"), "/01")),
+                           by   = "1 month")
+  month_start_ids <- setdiff(as.integer(month_starts[2:length(month_starts)] - year_data$model_time_bounds[1]) + 2 - day_id_offset, 0)
   
   # Setup month labels.
   months_labels_all <- format(massbal_cumul_df$date, "%b")
   months_doy <- c(15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349)
-  
   # Select the day at the middle of each month.
   # If the simulation starts after day 15 of the first month,
   # the first item of months_labels_ids refers to the second
@@ -80,6 +84,7 @@ func_plot_massbal_cumul <- function(year_data,
     geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", size = 0.5, color = "#0000FF") +
     {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF")} +
     {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", size = 0.5, color = "#FF00FF")} +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", size = 0.4)} +
     geom_line(aes(x = day_id, y = mb / 1e3), size = 0.7) +
     # geom_vline(xintercept = c(massbal_cumul_df$day_id[months_labels_ids] - 14, massbal_cumul_df$day_id[months_labels_ids[length(months_labels_ids)]] + 16)) +
     scale_x_continuous(expand = expansion(mult = 0.02)) +
@@ -96,6 +101,7 @@ func_plot_massbal_cumul <- function(year_data,
     geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", size = 0.5, color = "#0000FF") +
     {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF")} +
     {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", size = 0.5, color = "#FF00FF")} +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", size = 0.4)} +
     geom_line(aes(x = day_id, y = mb / 1e3), size = 0.7) +
     geom_line(aes(x = day_id, y = -melt / 1e3), color = "#FF0000", size = 0.7) +
     geom_line(aes(x = day_id, y = accum / 1e3), color = "#0000FF", size = 0.7) +
@@ -130,8 +136,7 @@ func_plot_massbal_cumul <- function(year_data,
     geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", size = 0.5, color = "#0000FF") +
     {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF")} +
     {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", size = 0.5, color = "#FF00FF")} +
-    # geom_line(aes(x = day_id, y = rain), color = "#0000FF", size = 0.7) +
-    # geom_line(aes(x = day_id, y = melt), color = "#FF0000", size = 0.7) +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", size = 0.4)} +
     geom_line(aes(x = day_id, y = rain, color = "rain"), size = 0.7) +
     geom_line(aes(x = day_id, y = melt, color = "melt"), size = 0.7) +
     scale_color_manual(breaks = c("melt", "rain"),

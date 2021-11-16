@@ -30,7 +30,8 @@ func_plot_year <- function(year_data,
   
   #### . PLOT THE DAILY METEOROLOGICAL SERIES ####
   cat("  Meteorological series...\n")
-  plot_weather_series <- func_plot_weather_series(year_data)
+  plot_weather_series <- func_plot_weather_series(year_data,
+                                                  run_params)
   plots_year <- append(plots_year, list(plot_weather_series))
   
   

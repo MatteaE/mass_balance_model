@@ -13,12 +13,12 @@ func_plot_stakes <- function(year_data,
   plots_stakes <- list()
   
   day_id_offset <- (year_data$model_annual_days_n + 1 - as.integer(format(year_data$model_time_bounds[2], "%j"))) + 1
-  day_ids <- 1:(year_data$model_annual_days_n+1) - day_id_offset # So that day_id = 1 is Jan 1.
+  day_ids <- 1:(year_data$model_annual_days_n+1) - day_id_offset # So that day_id = 0 is Jan 1.
   
   month_starts <- seq.Date(from = as.Date(paste0(format(year_data$model_time_bounds[1], "%Y/%m"), "/01")),
                            to   = as.Date(paste0(format(year_data$model_time_bounds[2], "%Y/%m"), "/01")),
                            by   = "1 month")
-  month_start_ids <- as.integer(month_starts[2:length(month_starts)] - year_data$model_time_bounds[1]) + 1 - day_id_offset
+  month_start_ids <- as.integer(month_starts[2:length(month_starts)] - year_data$model_time_bounds[1]) + 2 - day_id_offset
   
   # Compute vertical offset of each series.
   # We need this to make all plotting regions
@@ -83,7 +83,7 @@ func_plot_stakes <- function(year_data,
       ggplot(stake_mod_df) +
       geom_hline(yintercept = 0, linetype = "longdash", size = 0.3) +
       geom_vline(xintercept = c(stake_start_id, stake_end_id) - day_id_offset, linetype = "longdash", color = "#FF00FF", size = 0.4) +
-      geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", size = 0.2) +
+      {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", size = 0.2)} +
       annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = base_size * 0.2) +
       geom_line(aes(x = day_id, y = mb/1e3)) +
       geom_point(data = stake_meas_df, aes(x = day_id, y = mb/1e3), shape = 5, stroke = 1.2, size = 1) +
