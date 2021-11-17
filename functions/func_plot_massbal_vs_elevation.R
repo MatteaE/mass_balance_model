@@ -53,7 +53,12 @@ func_plot_massbal_vs_elevation <- function(year_data,
   
   # Convert the data frame into a shape suitable for multi-color plot.
   # The na.omit() also removes the empty mb_winter_meas values if we don't have winter measurements.
-  ele_bands_plot_df_melt <- na.omit(melt(ele_bands_plot_df, id.vars = c("ele", "ncells")))
+  ele_bands_plot_df_melt <- na.omit(melt(ele_bands_plot_df,
+                                         id.vars = c("ele", "ncells"),
+                                         measure.vars = intersect(names(ele_bands_plot_df), # intersect() because we want to drop the area_km2 column.
+                                                                  c("mb_annual_meas", "mb_annual_hydro",
+                                                                    "mb_winter_fixed", "mb_winter_meas",
+                                                                    "mb_annual_meas_corr"))))
   # Re-order the data frame so that the final (meas_corr) mass balance profile is plotted on top of the others.
   ele_bands_plot_df_melt$variable <- factor(ele_bands_plot_df_melt$variable, levels = c("mb_annual_meas", "mb_annual_hydro", # DEV NOTE: first one would have been "mb_annual_fixed", but we have disabled that period.
                                                                                         "mb_winter_fixed", "mb_winter_meas",
