@@ -8,23 +8,23 @@
 
 run_params <- list(
   
-  name_glacier                =    "West_Suek",                    # Glacier name, used for output directory naming.
+  name_glacier                =    "abramov",                    # Glacier name, used for output directory naming.
   
   #### INPUT-related parameters ####
   dir_data_recursive           =   FALSE,                         # [TRUE/FALSE]: should we look recursively for the input files in the specified directories?
   
   # Set FILE NAMES and input file properties.
-  filename_weather             =   "weather_suek.dat",       # File name of the weather series
-  file_weather_nskip           =   4,                            # [-]: number of lines to skip in the weather file
+  filename_weather             =   "weather_abramov.dat",       # File name of the weather series
+  file_weather_nskip           =   2,                            # [-]: number of lines to skip in the weather file
   
-  grids_crs                    =   32643,                        # Reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
+  grids_crs                    =   32642,                        # Reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
   
   dhm_interpolate              =   FALSE,                        # [TRUE/FALSE]: should we use linear interpolation to compute each year's DHM?
   
-  filename_massbalance_annual  =   "mb_suek.dat",       # File name of the annual mass balance observations
+  filename_massbalance_annual  =   "mb_abramov_subset_corrected_dates.dat",       # File name of the annual mass balance observations
   filename_massbalance_winter  =   "",                           # File name of the winter mass balance observations
   
-  filename_params_prefix       =   "param_",
+  filename_params_prefix       =   "paramX_",
   filename_params_suffix       =   ".dat",                       # Annual parameters filename is <prefix><year><suffix>
   
   
@@ -61,7 +61,7 @@ run_params <- list(
   
   
   #### ACCUMULATION and MELT MODEL fixed parameters ####
-  debris_red_fac               =   0.9,                          # [-]: reduction factor of melt over debris-covered ice.
+  debris_red_fac               =   0.6,                          # [-]: reduction factor of melt over debris-covered ice.
   accum_probes_red_fac         =   0.5,                          # [-]: reduction factor to decrease the importance of the snow probes distribution when distributing snowfall over the grid, in case those are measured also over avalanche deposits (else we would be accounting twice for avalanche redistribution, since we run a process-based avalanche model). 0 means uniform distribution, 1 means no redution in variability.
   accum_snow_dist_red_fac      =   0.5,                          # [-]: reduction factor to decrease the importance of the topographic snow distribution variability (curvature and elevation cutoff) when distributing snowfall over the grid. 0 means uniform snow distribution, 1 means no reduction.
   albedo_ice_decrease_elev     =   0.,                           # [m]: below this altitude, the ice albedo decreases linearly with altitude (darker ice).
@@ -71,7 +71,7 @@ run_params <- list(
   #### ACCUMULATION and MELT MODEL default year parameters ####
   default_prec_corr            =   200,                          # [%]: default precipitation correction in case no winter data or annual parameters are available.
   default_prec_summer_fact     =   1,                          # [-]: default multiplicative reduction of precipitation correction in summer.
-  default_prec_elegrad         =   10,                           # [% / 100 m]: default altitudinal gradient of precipitation.
+  default_prec_elegrad         =   5,                           # [% / 100 m]: default altitudinal gradient of precipitation.
   default_temp_elegrad         =   -0.6,                         # [°C / 100 m]: default altitudinal gradient of air temperature.
   default_melt_factor          =   4.0,                          # [mm w.e. C-1 d-1]: default melt factor for DDF model.
   default_rad_fact_ice         =   0.8,                          # [10^-3 mm w.e. C-1 h-1 (W m-2)-1]: default radiation factor for ice within DDF model.
@@ -84,11 +84,11 @@ run_params <- list(
   output_unit                  =   "m",                          # Either "m" for meters water-equivalent, or "mm" for millimeters water-equivalent.
   show_contour_labels          =   TRUE,                         # In the mass balance maps, show the labels of contour lines (TRUE) or not (FALSE).
   show_stake_labels            =   TRUE,                         # In the mass balance maps, show the labels of stake measurements (TRUE) or not (FALSE).
-  show_month_lines             =   FALSE,                         # In the time series plots (mass balance and meteo series), show vertical lines to divide the months (TRUE) or not (FALSE).
+  show_month_lines             =   TRUE,                         # In the time series plots (mass balance and meteo series), show vertical lines to divide the months (TRUE) or not (FALSE).
   
   
   #### MODELED YEARS choice ####
-  first_year                   =   2018,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   2018                          # Last modeled year (same as previous comment)
+  first_year                   =   1983,                         # First modeled year (usually from October of the previous year to September of this year)
+  last_year                    =   1991                          # Last modeled year (same as previous comment)
   
 )

@@ -75,7 +75,7 @@
 \section{Introduction}
 \textbf{NOTE:} this document presents the model architecture and the main equations. If you want to start \textbf{using the model} right away, you may check out the \textbf{tutorials} instead.
 
-\textbf{DMBSim} is a physical model of glacier \textbf{surface mass balance.} It simulates the mass balance of one or more glaciers based on \textbf{meteorological and topographic data.} Moreover, it can use \textbf{mass balance measurements} to calibrate automatically the parameters of the simulation. The \textbf{model output} consists of \textbf{maps and time series} of surface mass balance over different periods, such as the hydrological year and the winter season. The model is entirely written in the open-source \textbf{R} programming language and works on both Windows and Linux systems.
+\textbf{DMBSim} is a physical model of glacier \textbf{surface mass balance,} inspired by \citet{huss_homogenization_2009}. It simulates the mass balance of one or more glaciers based on \textbf{meteorological and topographic data.} Moreover, it can use \textbf{mass balance measurements} to calibrate automatically the parameters of the simulation. The \textbf{model output} consists of \textbf{maps and time series} of surface mass balance over different periods, such as the hydrological year and the winter season. The model is entirely written in the open-source \textbf{R} programming language and works on both Windows and Linux systems.
 
 \section{Model description}
 The simulation is performed \textbf{on a grid}, which is defined by a \textbf{digital elevation model} (DEM). Mass balance is driven by a \textbf{daily meteorological series} of mean daily \textbf{temperature} and total \textbf{precipitation}, and also a set of 365 grids of \textbf{potential incoming solar radiation.} The simulation can span \textbf{one or more years:} in the latter case, each year is modeled \textbf{individually} and can use different parameters from the others.
@@ -166,4 +166,4 @@ The main model file is \textit{main.R}, it calls the functions located in folder
 }
     
 \bibliography{refs.bib}
-\end{document} 
+\end{document}

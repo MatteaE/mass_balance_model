@@ -84,6 +84,7 @@ run_params <- list(
   output_unit                  =   "m",                          # Either "m" for meters water-equivalent, or "mm" for millimeters water-equivalent.
   show_contour_labels          =   TRUE,                         # In the mass balance maps, show the labels of contour lines (TRUE) or not (FALSE).
   show_stake_labels            =   TRUE,                         # In the mass balance maps, show the labels of stake measurements (TRUE) or not (FALSE).
+  show_month_lines             =   TRUE,                         # In the time series plots (mass balance and meteo series), show vertical lines to divide the months (TRUE) or not (FALSE).
   
   
   #### MODELED YEARS choice ####
