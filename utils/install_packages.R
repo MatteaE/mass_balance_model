@@ -70,6 +70,8 @@ if (Sys.info()["sysname"] == "Windows") {
       writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron")
       Sys.sleep(1)
       .rs.restartR("func_install_all()")
+   } else {
+      func_install_all()
    }
 # Install stuff in case we don't have Windows i.e. we don't need to restart R.
 } else {
