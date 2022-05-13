@@ -57,9 +57,21 @@ func_do_processing <- function(temp_filepath,
   ts_end <- max(temp$timestamp[temp_n], prec$timestamp[prec_n])
   ts_end_midnight <- as.POSIXct(paste(format(ts_end, "%Y-%m-%d"), "00:00:00"), tz = "UTC") + 86400
   
-  # Try a 1-minute interval. It should usually work
+
+  # If the two series are just hourly
+  # and well behaved, no need to 
+  if ((length(temp_ts_diff) == 1) &&
+      (length(prec_ts_diff) == 1) &&
+      (as.numeric(temp_ts_diff) == 1) &&
+      (length(temp_ts_diff) == length(prec_ts_diff))) {
+    proc_freq <- "1 hour"
+  } else {
+    proc_freq <- "1 min"
+  }
+  
+  # Else, try a 1-minute interval. It should usually work
   # unless the input series is really odd.
-  ts_all <- seq.POSIXt(ts_start_midnight, ts_end_midnight, by = "1 min")
+  ts_all <- seq.POSIXt(ts_start_midnight, ts_end_midnight, by = proc_freq)
   
   # Now insert the input series into the 1-minute one.
   temp_match_ids <- match(temp$timestamp, ts_all)
@@ -70,17 +82,17 @@ func_do_processing <- function(temp_filepath,
   # by dropping the seconds information (else processing is too
   # slow and memory hungry).
   if (any(is.na(temp_match_ids)) || any(is.na(prec_match_ids))) {
-    message("WARNING: there are some measurements with sub-minute offsets.")
+    message("WARNING: there are some measurements with strange (sub-minute) offsets.")
     message("I am dropping the seconds information, to work at 1 minute intervals.")
     temp$timestamp <- as.POSIXct(format(temp$timestamp, format = "%Y%m%d%H%M"), format = "%Y%m%d%H%M", tz = "UTC")
     prec$timestamp <- as.POSIXct(format(prec$timestamp, format = "%Y%m%d%H%M"), format = "%Y%m%d%H%M", tz = "UTC")
     temp_match_ids <- match(temp$timestamp, ts_all)
     prec_match_ids <- match(prec$timestamp, ts_all)
   } else {
-    cat("Using 1 minute intervals...\n")
+    cat("All measurements have found their place in the series...\n")
   }
 
-  # Create 1-minute (or 1-second) series with longest possible extent
+  # Create 1-minute (or 1-hour) series with longest possible extent
   # (extended to midnights on the first and last days).
   df_all <- data.frame(timestamp = ts_all, date = as.Date(ts_all), temp = NA_real_, prec = NA_real_)  
   all_n <- length(ts_all)
