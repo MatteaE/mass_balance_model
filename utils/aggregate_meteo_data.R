@@ -58,12 +58,11 @@ func_do_processing <- function(temp_filepath,
   ts_end_midnight <- as.POSIXct(paste(format(ts_end, "%Y-%m-%d"), "00:00:00"), tz = "UTC") + 86400
   
 
-  # If the two series are just hourly
-  # and well behaved, no need to 
-  if ((length(temp_ts_diff) == 1) &&
-      (length(prec_ts_diff) == 1) &&
-      (as.numeric(temp_ts_diff) == 1) &&
-      (length(temp_ts_diff) == length(prec_ts_diff))) {
+  # If the two series are just (N-)hourly and
+  # well behaved, no need to go to minute resolution.
+  # Work hourly.
+  if (((as.numeric(temp_ts_diff) %% 1) == 0) &&
+    ((as.numeric(prec_ts_diff) %% 1) == 0)) {
     proc_freq <- "1 hour"
   } else {
     proc_freq <- "1 min"
