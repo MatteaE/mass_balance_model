@@ -129,6 +129,24 @@ func_process_run_params <- function(run_params) {
   run_params$massbal_fixed_winter_start <- format(as.Date(run_params$massbal_fixed_winter_start, format = "%m/%d"), format = "%m/%d")
   run_params$massbal_fixed_winter_end <- format(as.Date(run_params$massbal_fixed_winter_end, format = "%m/%d"), format = "%m/%d")
   
+  # If we have just 1 value for the default prec_elegrad or temp_elegrad,
+  # repeat 12 times (to support month-wise lapse rates while also allowing
+  # user input of just 1 annual value - easier and backwards-compatible).
+  if (!(length(run_params$default_prec_elegrad) %in% c(1,12))) {
+    stop(paste0("Parameter default_prec_elegrad in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_prec_elegrad, collapse = " "), "\n"))
+  } else {
+    if (length(run_params$default_prec_elegrad) == 1) {
+      run_params$default_prec_elegrad <- rep(run_params$default_prec_elegrad, 12)
+    }
+  }
+  if (!(length(run_params$default_temp_elegrad) %in% c(1,12))) {
+    stop(paste0("Parameter default_temp_elegrad in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_temp_elegrad, collapse = " "), "\n"))
+  } else {
+    if (length(run_params$default_temp_elegrad) == 1) {
+      run_params$default_temp_elegrad <- rep(run_params$default_temp_elegrad, 12)
+    }
+  }
+  
   run_params$output_dirname <- file.path("output", run_params$name_glacier)
   
   run_params$size_mult <- 1.183267/3 # To get A4 PDF pages.

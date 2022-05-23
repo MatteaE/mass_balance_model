@@ -52,11 +52,42 @@ func_load_year_params_from_file <- function(year_data,
     # Assemble output, already converting to numeric types.
     for (param_id_raw in 1:params_available_n) {
       param_id_year_cur <- params_available_ids[param_id_raw]
-      # All parameters are numeric except for the elevation bands which are comma-separated.
-      if (params_names_all[param_id_year_cur] != "mb_corr_ele_bands") {
-        year_cur_params[[param_id_year_cur]] <- as.numeric(params_raw[param_id_raw,1])
-      } else {
+      # Parameters are usually numeric, except for:
+        # the temperature and precipitation gradients, which can be either 1 numeric or 12 comma-separated;
+        # the elevation bands, which are always comma-separated.
+      # So if we are loading the elevation bands we process them as comma-separated.
+      # If we are loading the temperature/precipitation gradients, we process them
+      # as either comma-separated or simple numeric, and if they are a simple numeric
+      # we repeat the value 12 times.
+      # For the other parameters, we simply load them as numeric.
+      if (params_names_all[param_id_year_cur] == "mb_corr_ele_bands") {
         year_cur_params[[param_id_year_cur]] <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+      }
+      
+      else if (params_names_all[param_id_year_cur] == "prec_elegrad") {
+        val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+        if (length(val_tmp) == 1) {
+          year_cur_params[[param_id_year_cur]] <- rep(val_tmp, 12)
+        } else if (length(val_tmp) == 12) {
+          year_cur_params[[param_id_year_cur]] <- val_tmp
+        } else {
+          stop(paste0("Year ", year_data$year_cur, ": parameter prec_elegrad must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = "")))
+        }
+      }
+      
+      else if (params_names_all[param_id_year_cur] == "temp_elegrad") {
+        val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+        if (length(val_tmp) == 1) {
+          year_cur_params[[param_id_year_cur]] <- rep(val_tmp, 12)
+        } else if (length(val_tmp) == 12) {
+          year_cur_params[[param_id_year_cur]] <- val_tmp
+        } else {
+          stop(paste0("Year ", year_data$year_cur, ": parameter temp_elegrad must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = "")))
+        }
+      }
+      
+      else {
+        year_cur_params[[param_id_year_cur]] <- as.numeric(params_raw[param_id_raw,1])
       }
     }
   }

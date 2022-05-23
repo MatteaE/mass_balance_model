@@ -8,10 +8,10 @@
 ###################################################################################################
 
 # NOTE: this R implementation is actually quite fast.
-# The C++ implementation (under directory old/) is actually
+# The C++ implementation (under directory old/) is
 # slower, so we keep this one.
 
-# year_cur_params are the melt/accumulation model parameters which we will optimize!
+# year_cur_params include the melt/accumulation model parameters which we will optimize!
 # (For the first iteration we take the ones loaded from file).
 func_massbal_model <- function(run_params,
                                year_cur_params,
@@ -95,9 +95,9 @@ func_massbal_model <- function(run_params,
     
     #### .  COMPUTE GRIDDED WEATHER OF THE DAY ####
     # Temperature in °C, snowfall in mm w.e.
-    temp_cur            <- weather_series_cur$t2m_mean[day_id] + year_cur_params$temp_elegrad * (dhm_values - run_params$weather_aws_elevation) / 100
+    temp_cur            <- weather_series_cur$t2m_mean[day_id] + year_cur_params$temp_elegrad[weather_series_cur$month[day_id]] * (dhm_values - run_params$weather_aws_elevation) / 100
     solid_prec_frac_cur <- clamp(((1 + run_params$weather_snowfall_temp) - temp_cur) / 2, 0, 1)
-    precip_cur          <- snowdist_probes_norm_values_red * snowdist_topographic_values_red * weather_series_cur$precip_corr[day_id] * (1 + (pmin(run_params$weather_max_precip_ele, dhm_values) - run_params$weather_aws_elevation) * year_cur_params$prec_elegrad / 1e4 ) # 1e4: gradient is in [% / 100 m], we want [fraction / m].
+    precip_cur          <- snowdist_probes_norm_values_red * snowdist_topographic_values_red * weather_series_cur$precip_corr[day_id] * (1 + (pmin(run_params$weather_max_precip_ele, dhm_values) - run_params$weather_aws_elevation) * year_cur_params$prec_elegrad[weather_series_cur$month[day_id]] / 1e4 ) # 1e4: gradient is in [% / 100 m], we want [fraction / m].
     accumulation_cur    <- precip_cur * solid_prec_frac_cur
     # We assume that the spatial distribution of rainfall
     # is the same as the distribution of snowfall.
