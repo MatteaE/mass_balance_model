@@ -9,12 +9,16 @@ func_install_all <- function() {
    
    if (Sys.info()["sysname"] == "Windows") {
       old_path <- Sys.getenv("PATH")
-      Sys.setenv(PATH = paste0(old_path, ";C:\\rtools40\\usr\\bin"))
+      Sys.setenv(PATH = paste0(old_path, ";C:\\rtools40\\usr\\bin;C:\\rtools42\\usr\\bin"))
    }
    
    if (nchar(as.character(Sys.which("make"))) == 0) {
       if (Sys.info()["sysname"] == "Windows") {
-         stop("FATAL: there was a problem with the installation of RTools. Try to close and reopen RStudio.")
+         cat("FATAL: there was a problem with the installation of RTools.\n")
+         cat("       Try to close and reopen RStudio and run again this program.\n")
+         cat("       If it doesn't work, try to INSTALL RTools MANUALLY from https://cran.r-project.org/bin/windows/Rtools/\n")
+         cat("       Choose the correct version of RTools! You have", R.version[["version.string"]])
+         stop()
       } else {
          stop("FATAL: no code compiler found. Please get a code compiler before proceeding.")
       }
@@ -31,6 +35,7 @@ func_install_all <- function() {
                       "qpdf",
                       "raster",
                       "Rcpp",
+                      "readxl",
                       "remotes",
                       "reshape2",
                       "Rfast",
