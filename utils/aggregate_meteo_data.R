@@ -43,13 +43,23 @@ fileread_xls <- function(filepath,
     endrow <- NA
   }
   dat_raw_ts <- tryCatch(read_excel(filepath, sheet = 1, range = cell_limits(c(startrow, column_ts), c(endrow, column_ts)), col_names = "ts"),
-                         finally = eval(expression(cat("** ERROR: there was a problem reading the date/time from the Excel file. Please check it manually.\n"),
-                                                   cat("   Sometimes you can fix this error by opening the file in Excel and saving it with a different name.\n"),
-                                                   return(NULL))))
+                         error = function(e) {
+                           cat("** ERROR: there was a problem reading the date/time from the Excel file. Please check it manually.\n")
+                           cat("   Sometimes you can fix this error by opening the file in Excel and saving it with a different name.\n")
+                           return(NULL)
+                         })
+  if (is.null(dat_raw_ts)) {
+    return(NULL)
+  }
   dat_raw_val<- tryCatch(read_excel(filepath, sheet = 1, range = cell_limits(c(startrow, column_data), c(endrow, column_data)), col_names = "value"),
-                         finally = eval(expression(cat("** ERROR: there was a problem reading the data from the Excel file. Please check it manually.\n"),
-                                                   cat("   Sometimes you can fix this error by opening the file in Excel and saving it with a different name.\n"),
-                                                   return(NULL))))
+                         error = function(e) {
+                           cat("** ERROR: there was a problem reading the data from the Excel file. Please check it manually.\n")
+                           cat("   Sometimes you can fix this error by opening the file in Excel and saving it with a different name.\n")
+                           return(NULL)
+                         })
+  if (is.null(dat_raw_val)) {
+    return(NULL)
+  }
   # If endrow is NA, read_excel will stop reading at the last non-empty cell.
   # If the file uses empty cells for e.g. zero precipitation, then dat_raw_val
   # will only have entries up to the last nonzero precipitation, i.e. it will
