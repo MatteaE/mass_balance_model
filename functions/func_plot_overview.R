@@ -136,9 +136,14 @@ func_plot_overview <- function(overview_annual,
   
   # Time series of RMSE.
   # If we model just one year, add point plot so that something is visible.
+  # Also in case there are isolated years with mass balance measurements,
+  # else they are not visible (geom_line of a single point).
   if (any(overview_annual$summary_df$year_has_data) == TRUE) {
     single_year_point <- NULL
-    if (single_year) {single_year_point <- geom_point(aes(x = year, y = rmse))}
+    year_has_data_rle <- rle(overview_annual$summary_df$year_has_data)
+    if (single_year || any((year_has_data_rle$values == TRUE) & (year_has_data_rle$lengths == 1))) {
+      single_year_point <- geom_point(aes(x = year, y = rmse))
+    }
     plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
       geom_line(aes(x = year, y = rmse), size = 1) +
       single_year_point +
