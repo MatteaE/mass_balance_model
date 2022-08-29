@@ -6,6 +6,11 @@
 #                 This file contains the main loop and instructions.                              #
 ###################################################################################################
 
+# If in utils folder, move one up.
+if (basename(getwd()) == "utils") {
+  setwd("..")
+}
+
 # Start logging console output.
 dir.create("logs", showWarnings = FALSE)
 sink(file = file.path("logs", paste0("mb_model_run_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".log")), split = TRUE)
