@@ -50,6 +50,8 @@ func_plot_overview <- function(overview_annual,
   # over the hydrological year,
   # [DISABLED] over a fixed (user-defined) period.
   # If we model just one year, add point plot so that something is visible.
+  # Add point plot of MB over measurement period also if there are any isolated
+  # years with available mass balance measurements, else they are invisible.
   single_year_point1 <- NULL
   single_year_point2 <- NULL
   # single_year_point3 <- NULL
@@ -57,6 +59,10 @@ func_plot_overview <- function(overview_annual,
     single_year_point1 <- geom_point(aes(x = year, y = mb_annual_meas), color = "#FF00FF")
     single_year_point2 <- geom_point(aes(x = year, y = mb_annual_hydro), color = "#0000FF")
     # single_year_point3 <- geom_point(aes(x = year, y = mb_annual_fixed), color = "#00FFFF")
+  }
+  year_has_data_rle <- rle(overview_annual$summary_df$year_has_data)
+  if (any((year_has_data_rle$values == TRUE) & (year_has_data_rle$lengths == 1))) {
+    single_year_point1 <- geom_point(aes(x = year, y = mb_annual_meas), color = "#FF00FF")
   }
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
     {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_line(aes(x = year, y = mb_annual_meas), color = "#FF00FF", size = 1)} +
