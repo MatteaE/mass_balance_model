@@ -422,7 +422,7 @@ func_do_processing <- function(process_params_T,
                                stop_flags_logi,
                                outdir) {
   
-  sink(file = file.path(paste0("meteo_aggregate_run_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".log")), split = TRUE)
+  #sink(file = file.path(paste0("meteo_aggregate_run_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".log")), split = TRUE)
   cat("Meteo aggregate called at", as.character(Sys.time()), paste0("(", Sys.timezone(), ")"), "\n")
   cat("System info:\n")
   print(R.version)
@@ -454,7 +454,7 @@ func_do_processing <- function(process_params_T,
   cat(normalizePath(file.path(outdir, "meteo_daily.dat")), "\n")
   cat("You can now close the app and RStudio.")
   
-  sink()
+  #sink()
   return(0)
 }
 
