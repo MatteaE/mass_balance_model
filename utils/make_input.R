@@ -275,7 +275,7 @@ func_do_processing <- function(dem_filepath,
         
       } else if (outline_crs@projargs %in% utm_crs_allowed) { # Reproject DEM.
         
-        cat("Shapefile coordinate system is good, I am reprojecting the DEM. This can take some minutes if the DEM is big.")
+        message("Shapefile coordinate system is good, I am reprojecting the DEM. This can take some minutes if the DEM is big.")
         reproj_dem     <- TRUE
         target_crs     <- outline_crs
         
