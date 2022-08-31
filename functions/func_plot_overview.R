@@ -272,6 +272,7 @@ func_plot_overview <- function(overview_annual,
   mb_first_year_hydro_start <- overview_annual$daily_data_list$mb_series_all_raw[[1]][first_year_hydro_start_id]
   mb_series_all <- overview_annual$daily_data_list$mb_series_all_raw
   mb_series_all[[1]] <- mb_series_all[[1]] - mb_first_year_hydro_start
+  date_labels_cur <- "%Y/%m"
   if (run_params$n_years > 1) {
     for (year_id in 2:run_params$n_years) {
       # Note: the two ids below are used to align the two
@@ -281,6 +282,9 @@ func_plot_overview <- function(overview_annual,
       year_prev_mb <- mb_series_all[[year_id-1]][year_prev_hydro_end_id]
       year_cur_mb <- mb_series_all[[year_id]][year_cur_hydro_start_id]
       mb_series_all[[year_id]] <- mb_series_all[[year_id]] + year_prev_mb - year_cur_mb
+    }
+    if (run_params$n_years > 2) {
+      date_labels_cur <- "%Y"
     }
   }  
   mb_all_lengths <- sapply(mb_series_all, FUN = length) # Length of each annual simulation [days].
@@ -299,7 +303,7 @@ func_plot_overview <- function(overview_annual,
     geom_line(data = mb_cumul_df,  aes(x = year, y = mb_cumul), color = "#FF0000", size = 1) +
     geom_point(data = mb_cumul_df, aes(x = year, y = mb_cumul), color = "#FF0000", shape = 2, size = point_size, stroke = point_size/2.5) +
     scale_y_continuous(breaks = pretty(c(0, max(mb_all_df$mb), overview_annual$summary_df$mb_cumul))) +
-    scale_x_date(date_labels = "%Y/%m") +
+    scale_x_date(date_labels = date_labels_cur) +
     ylab(paste0("Cumulative mass balance [", run_params$output_unit, " w.e.]")) +
     ggtitle("Cumulative mass balance (hydrological years)") +
     theme_overview_plots
