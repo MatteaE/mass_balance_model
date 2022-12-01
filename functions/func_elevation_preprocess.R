@@ -23,7 +23,7 @@ func_elevation_preprocess <- function(run_params, elevation) {
   
   while (length(ids_patch_flat) > 0) {
     
-    smoothing_mat <- gaussian.kernel(sigma = n_flat_iter, n = max(5, 2 * n_flat_iter + 1))
+    smoothing_mat <- gaussian.kernel(n_flat_iter, max(5, 2 * n_flat_iter + 1))
     elevation_smoothed <- focal(elevation_unpatched, w = smoothing_mat, fun = sum, na.rm = TRUE, pad = TRUE, padValue = elevation_mean)
     elevation_unpatched[ids_patch_flat] <- elevation_smoothed[ids_patch_flat]
     n_flat_iter <- n_flat_iter + 1
