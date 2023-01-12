@@ -35,7 +35,7 @@ func_load_surftype_grids <- function(run_params) {
   
   # Load grids.
   for (grid_id in 1:length(grid_paths)) {
-    grids_out$grids[[grid_id]] <- readAll(raster(grid_paths[grid_id]))
+    grids_out$grids[[grid_id]] <- rast(grid_paths[grid_id])
     crs(grids_out$grids[[grid_id]]) <- run_params$grids_crs_epsg
   }
   

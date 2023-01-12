@@ -43,10 +43,10 @@ func_correct_massbal_elebands <- function(year_data,
     # We select the cells between two band midpoints
     # (not equal to all cells within a single band!).
     meas_period_corr  <- year_data$massbal_annual_maps$meas_period
-    dem_values_cur    <- getValues(data_dems$elevation[[year_data$dem_grid_id]])
+    dem_values_cur    <- values(data_dems$elevation[[year_data$dem_grid_id]])
     for (band_id in 2:(nbands+2)) { # This index is relative to all bands including the two virtual ones!
       gl_cells_cur <- which((dem_values_cur <= band_midpoints[band_id]) & (dem_values_cur > band_midpoints[band_id - 1]))
-      meas_period_corr[gl_cells_cur] <- meas_period_corr[gl_cells_cur] - band_biases[band_id - 1] - (band_biases[band_id] - band_biases[band_id - 1]) * ((dem_values_cur[gl_cells_cur] - band_midpoints[band_id - 1]) / (band_midpoints[band_id] - band_midpoints[band_id - 1]))
+      meas_period_corr[gl_cells_cur] <- (meas_period_corr[gl_cells_cur] - band_biases[band_id - 1] - (band_biases[band_id] - band_biases[band_id - 1]) * ((dem_values_cur[gl_cells_cur] - band_midpoints[band_id - 1]) / (band_midpoints[band_id] - band_midpoints[band_id - 1])))[,1]
     }
     
     # If we have not enough bands to do the correction.

@@ -81,9 +81,9 @@ func_plot_stakes <- function(year_data,
     
     plots_stakes[[annual_stake_id]] <-
       ggplot(stake_mod_df) +
-      geom_hline(yintercept = 0, linetype = "longdash", size = 0.3) +
-      geom_vline(xintercept = c(stake_start_id, stake_end_id) - day_id_offset, linetype = "longdash", color = "#FF00FF", size = 0.4) +
-      {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", size = 0.2)} +
+      geom_hline(yintercept = 0, linetype = "longdash", linewidth = 0.3) +
+      geom_vline(xintercept = c(stake_start_id, stake_end_id) - day_id_offset, linetype = "longdash", color = "#FF00FF", linewidth = 0.4) +
+      {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", linewidth = 0.2)} +
       annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = base_size * 0.2) +
       geom_line(aes(x = day_id, y = mb/1e3)) +
       geom_point(data = stake_meas_df, aes(x = day_id, y = mb/1e3), shape = 5, stroke = 1.2, size = 1) +

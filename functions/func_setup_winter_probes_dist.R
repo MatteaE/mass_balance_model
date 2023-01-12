@@ -21,13 +21,13 @@ func_setup_winter_probes_dist <- function(year_data,
   
   if (year_data$process_winter) {
     dist_probes_idw                 <- func_snow_probes_idw(run_params, year_data$massbal_winter_meas_cur, data_dhms)
-    dist_probes_idw                 <- clamp(dist_probes_idw, lower = 0, upper = Inf)
+    dist_probes_idw                 <- clamp(dist_probes_idw, lower = 0, upper = Inf, values = TRUE)
     year_data$dist_probes_idw_norm  <- dist_probes_idw / mean(dist_probes_idw[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]])
   } else {
     # No winter probes to work with, so uniform distribution for the probes component.
     year_data$dist_probes_idw_norm  <- setValues(data_dhms$elevation[[1]], 1.0)
   }
-  dist_probes_norm_values               <- getValues(year_data$dist_probes_idw_norm) # For the accumulation model.
+  dist_probes_norm_values               <- values(year_data$dist_probes_idw_norm)[,1] # For the accumulation model.
   dist_probes_norm_mean                 <- mean(dist_probes_norm_values, na.rm = TRUE)
   year_data$dist_probes_norm_values_red <- dist_probes_norm_mean + run_params$accum_probes_red_fac * (dist_probes_norm_values - dist_probes_norm_mean)
   

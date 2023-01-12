@@ -33,10 +33,10 @@ func_plot_overview <- function(overview_annual,
     single_year_point <- NULL
     if (single_year) {single_year_point <- geom_point(aes(x = year, y = mb_annual_meas_corr))}
     plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-      geom_line(aes(x = year, y = mb_annual_meas_corr), size = 1) +
+      geom_line(aes(x = year, y = mb_annual_meas_corr), linewidth = 1) +
       geom_segment(x = overview_annual$summary_df$year[1], xend = overview_annual$summary_df$year[length(overview_annual$summary_df$year)],
                    y = mean(overview_annual$summary_df$mb_annual_meas_corr), yend = mean(overview_annual$summary_df$mb_annual_meas_corr),
-                   linetype = "dashed", size = 1) +
+                   linetype = "dashed", linewidth = 1) +
       single_year_point +
       scale_x_continuous(breaks = x_breaks) +
       ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
@@ -65,9 +65,9 @@ func_plot_overview <- function(overview_annual,
     single_year_point1 <- geom_point(aes(x = year, y = mb_annual_meas), color = "#FF00FF")
   }
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-    {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_line(aes(x = year, y = mb_annual_meas), color = "#FF00FF", size = 1)} +
-    geom_line(aes(x = year, y = mb_annual_hydro), color = "#0000FF", size = 1) +
-    # geom_line(aes(x = year, y = mb_annual_fixed), color = "#00FFFF", size = 1) +
+    {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_line(aes(x = year, y = mb_annual_meas), color = "#FF00FF", linewidth = 1)} +
+    geom_line(aes(x = year, y = mb_annual_hydro), color = "#0000FF", linewidth = 1) +
+    # geom_line(aes(x = year, y = mb_annual_fixed), color = "#00FFFF", linewidth = 1) +
     {if (any(overview_annual$summary_df$year_has_data) == TRUE) single_year_point1} +
     single_year_point2 +
     # single_year_point3 +
@@ -97,8 +97,8 @@ func_plot_overview <- function(overview_annual,
     }
   }
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-    {if(any(!is.na(overview_annual$summary_df$mb_winter_meas))) geom_line(aes(x = year, y = mb_winter_meas), color = "#FF00FF", size = 1)} +
-    geom_line(aes(x = year, y = mb_winter_fixed), color = "#00FFFF", size = 1) +
+    {if(any(!is.na(overview_annual$summary_df$mb_winter_meas))) geom_line(aes(x = year, y = mb_winter_meas), color = "#FF00FF", linewidth = 1)} +
+    geom_line(aes(x = year, y = mb_winter_fixed), color = "#00FFFF", linewidth = 1) +
     single_year_point1 +
     single_year_point2 +
     ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
@@ -117,7 +117,7 @@ func_plot_overview <- function(overview_annual,
   single_year_point <- NULL
   if (single_year) {single_year_point <- geom_point(aes(x = year, y = ela))}
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-    geom_line(aes(x = year, y = ela), size = 1) +
+    geom_line(aes(x = year, y = ela), linewidth = 1) +
     single_year_point +
     ylab("Equilibrium Line Altitude [m a.s.l.]") +
     scale_y_continuous(expand = expansion(0.5, 0)) +
@@ -131,7 +131,7 @@ func_plot_overview <- function(overview_annual,
   single_year_point <- NULL
   if (single_year) {single_year_point <- geom_point(aes(x = year, y = aar))}
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-    geom_line(aes(x = year, y = aar), size = 1) +
+    geom_line(aes(x = year, y = aar), linewidth = 1) +
     single_year_point +
     ylab("Accumulation-Area Ratio [%]") +
     scale_y_continuous(expand = expansion(0.05, 0), limits = c(0, 100)) +
@@ -151,7 +151,7 @@ func_plot_overview <- function(overview_annual,
       single_year_point <- geom_point(aes(x = year, y = rmse))
     }
     plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-      geom_line(aes(x = year, y = rmse), size = 1) +
+      geom_line(aes(x = year, y = rmse), linewidth = 1) +
       single_year_point +
       ylab(paste0("RMSE [", run_params$output_unit, " w.e.]")) +
       scale_y_continuous(limits = c(0,NA), expand = expansion(mult = c(0, 0.2))) +
@@ -172,9 +172,9 @@ func_plot_overview <- function(overview_annual,
     single_year_point3 <- geom_point(aes(x = year, y = rad_fact_ice), color = "#00FFFF")
   }
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-    geom_line(aes(x = year, y = rad_fact_snow), color = "#0000FF", size = 1) +
-    geom_line(aes(x = year, y = melt_factor), color = "#FF00FF", size = 1.25) + # Different size since the melt factor is sometimes the same as the rad_fact_ice.
-    geom_line(aes(x = year, y = rad_fact_ice), color = "#00FFFF", size = 0.5) +
+    geom_line(aes(x = year, y = rad_fact_snow), color = "#0000FF", linewidth = 1) +
+    geom_line(aes(x = year, y = melt_factor), color = "#FF00FF", linewidth = 1.25) + # Different size since the melt factor is sometimes the same as the rad_fact_ice.
+    geom_line(aes(x = year, y = rad_fact_ice), color = "#00FFFF", linewidth = 0.5) +
     single_year_point1 +
     single_year_point2 +
     single_year_point3 +
@@ -199,7 +199,7 @@ func_plot_overview <- function(overview_annual,
   single_year_point <- NULL
   if (single_year) {single_year_point <- geom_point(aes(x = year, y = prec_corr), color = "#0000FF")}
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-    geom_line(aes(x = year, y = prec_corr), color = "#0000FF", size = 1) +
+    geom_line(aes(x = year, y = prec_corr), color = "#0000FF", linewidth = 1) +
     single_year_point +
     ylab("Precipitation correction [%]") +
     scale_y_continuous(limits = c(min(min(overview_annual$summary_df$prec_corr), mean(overview_annual$summary_df$prec_corr) - 0.1 * mean(overview_annual$summary_df$prec_corr)), max(max(overview_annual$summary_df$prec_corr), mean(overview_annual$summary_df$prec_corr + 0.1 * overview_annual$summary_df$prec_corr)))) +
@@ -245,11 +245,11 @@ func_plot_overview <- function(overview_annual,
   plots[[length(plots)+1]] <- ggplot(data.frame(year = overview_annual$summary_df$year,
                                                 mb_cumul = overview_annual$summary_df$mb_cumul,
                                                 has_data = as.character(overview_annual$summary_df$year_has_data))) +
-    geom_hline(yintercept = 0, linetype = "dashed", size = 1) +
+    geom_hline(yintercept = 0, linetype = "dashed", linewidth = 1) +
     geom_segment(data = df_lines, aes(x = year_start, xend = year_end,
                                       y = mb_start, yend = mb_end,
                                       linetype = has_data),
-                 color = "#FF0000", size = 1) +
+                 color = "#FF0000", linewidth = 1) +
     geom_point(aes(x = year, y = mb_cumul, shape = has_data), color = "#FF0000", size = point_size, stroke = point_size/2.5) +
     scale_y_continuous(breaks = pretty(c(0, overview_annual$summary_df$mb_cumul))) +
     scale_x_continuous(breaks = x_breaks_cumul) +
@@ -295,12 +295,12 @@ func_plot_overview <- function(overview_annual,
   mb_cumul_df <- data.frame(year = as.Date(paste0(c(overview_annual$summary_df$year[1]-1, overview_annual$summary_df$year), "/10/1")),
                             mb_cumul = c(0, overview_annual$summary_df$mb_cumul))
   plots[[length(plots)+1]] <- ggplot() +
-    geom_vline(xintercept = as.Date(paste0(c(run_params$years[1]-1,run_params$years), "/10/1")), color = "#0000FF", size = point_size/6) +
-    geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 1), color = "#FF00FF", linetype = "dashed", size = point_size/6) +
-    geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 2), color = "#FF00FF", linetype = "dotted", size = point_size/6) +
-    geom_line(data = mb_all_df, aes(x = day, y = mb, group = year_id), size = point_size/6) +
-    geom_hline(yintercept = 0, linetype = "dashed", size = 1) +
-    geom_line(data = mb_cumul_df,  aes(x = year, y = mb_cumul), color = "#FF0000", size = 1) +
+    geom_vline(xintercept = as.Date(paste0(c(run_params$years[1]-1,run_params$years), "/10/1")), color = "#0000FF", linewidth = point_size/6) +
+    geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 1), color = "#FF00FF", linetype = "dashed", linewidth = point_size/6) +
+    geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 2), color = "#FF00FF", linetype = "dotted", linewidth = point_size/6) +
+    geom_line(data = mb_all_df, aes(x = day, y = mb, group = year_id), linewidth = point_size/6) +
+    geom_hline(yintercept = 0, linetype = "dashed", linewidth = 1) +
+    geom_line(data = mb_cumul_df,  aes(x = year, y = mb_cumul), color = "#FF0000", linewidth = 1) +
     geom_point(data = mb_cumul_df, aes(x = year, y = mb_cumul), color = "#FF0000", shape = 2, size = point_size, stroke = point_size/2.5) +
     scale_y_continuous(breaks = pretty(c(0, max(mb_all_df$mb), overview_annual$summary_df$mb_cumul))) +
     scale_x_date(date_labels = date_labels_cur) +

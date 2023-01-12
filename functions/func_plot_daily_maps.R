@@ -16,25 +16,25 @@ func_plot_daily_maps <- function(year_data,
   
   
   
-  surf_r    <- subs(data_surftype$grids[[year_data$surftype_grid_id]], data.frame(from = c(0, 1, 4, 5), to = c(100, 170, 0, 70)))
-  surf_g    <- subs(data_surftype$grids[[year_data$surftype_grid_id]], data.frame(from = c(0, 1, 4, 5), to = c(150, 213, 0, 20)))
-  surf_b    <- subs(data_surftype$grids[[year_data$surftype_grid_id]], data.frame(from = c(0, 1, 4, 5), to = c(200, 255, 0, 20)))
+  surf_r    <- subst(data_surftype$grids[[year_data$surftype_grid_id]], from = c(0, 1, 4, 5), to = c(100, 170, 0, 70))
+  surf_g    <- subst(data_surftype$grids[[year_data$surftype_grid_id]], from = c(0, 1, 4, 5), to = c(150, 213, 0, 20))
+  surf_b    <- subst(data_surftype$grids[[year_data$surftype_grid_id]], from = c(0, 1, 4, 5), to = c(200, 255, 0, 20))
   surf_base <- ggRGB(stack(surf_r, surf_g, surf_b), r = 1, g = 2, b = 3, ggLayer = TRUE)
   
   dir.create(file.path(run_params$output_dirname, "daily", year_cur, "massbal"), recursive = TRUE)
   dir.create(file.path(run_params$output_dirname, "daily", year_cur, "swe_surftype"), recursive = TRUE)
   
-  plot_df <- data.frame(coordinates(data_dems$elevation[[year_data$dem_grid_id]]))
+  plot_df <- data.frame(crds(data_dems$elevation[[year_data$dem_grid_id]], na.rm = FALSE))
   
   # elevation_df is to plot the contours.
-  elevation_df <- data.frame(plot_df, z = getValues(data_dems$elevation[[year_data$dem_grid_id]]))
+  elevation_df <- data.frame(plot_df, z = values(data_dems$elevation[[year_data$dem_grid_id]])[,1])
   
   # Plot of daily SWE evolution.
   for (day_id in 1:(year_data$model_annual_days_n + 1)) {
     cat("\r** Generating daily SWE plots...", day_id, "/", year_data$model_annual_days_n+1, "**")
     cells_cur <- (day_id-1) * run_params$grid_ncells + 1:(run_params$grid_ncells)
     max_swe <- 3500
-    plot_df$swe <- clamp(year_data$mod_output_annual_cur$vec_swe_all[cells_cur], -Inf, max_swe)
+    plot_df$swe <- clamp(year_data$mod_output_annual_cur$vec_swe_all[cells_cur], -Inf, max_swe, values = TRUE)
     plot_df$snow <- as.integer(plot_df$swe > 0)
     plot_df$surf <- year_data$mod_output_annual_cur$vec_surftype_all[cells_cur]
     date_text <- format(c(year_data$weather_series_annual_cur$timestamp, year_data$weather_series_annual_cur$timestamp[year_data$model_annual_days_n] + 1)[day_id], "%Y/%m/%d")
@@ -43,7 +43,7 @@ func_plot_daily_maps <- function(year_data,
       geom_raster(aes(x = x, y = y, fill = swe, alpha = as.character(snow))) +
       scale_alpha_manual(values = c("0" = 0, "1" = 1)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", size = 0.2) +
-      geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", size = 0.15) +
+      geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = 0.15) +
       geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.2, stroke.color = "#FFFFFF", size = 1.6, min.size = 10) +
       annotate("label", x = Inf, y = Inf, hjust = 1.3, vjust = 1.5, label = date_text) +
       scale_fill_fermenter(name = "SWE [mm]", palette = "RdPu",
@@ -68,7 +68,7 @@ func_plot_daily_maps <- function(year_data,
       surf_base +
       geom_raster(aes(x = x, y = y, fill = massbal)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", size = 0.2) +
-      geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", size = 0.15) +
+      geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = 0.15) +
       geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.2, stroke.color = "#FFFFFF", size = 1.6, min.size = 10) +
       annotate("label", x = Inf, y = Inf, hjust = 1.3, vjust = 1.5, label = date_text) +
       scale_fill_fermenter(name = "Cumulative\nSMB [mm w.e.]", palette = "RdBu",

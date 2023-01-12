@@ -58,7 +58,7 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
     cat("* FATAL: I could not find the file with mass balance measurements. The specified path is", massbalance_path, "\n")
     stop()
   }
-
+  
   # Read file, assign column names.
   data_massbalance <- read.table(massbalance_path, header = FALSE, stringsAsFactors = FALSE)
   names(data_massbalance) <- c("id", "start_date", "end_date", "x", "y", "z", "dh_cm", "density")
@@ -71,11 +71,11 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
   data_massbalance$massbal <- data_massbalance$dh_cm * data_massbalance$density * 10 # 10: cm w.e. to mm w.e.
   
   # Remove from mass balance df any stakes with coordinates outside the DHM.
-  ext_limits <- extent(data_dhms$elevation[[1]])
-  ids_df_bad <- which((data_massbalance$x < ext_limits@xmin) |
-                        (data_massbalance$x > ext_limits@xmax) |
-                        (data_massbalance$y < ext_limits@ymin) |
-                        (data_massbalance$y > ext_limits@ymax))
+  ext_limits <- ext(data_dhms$elevation[[1]])
+  ids_df_bad <- which((data_massbalance$x < xmin(ext_limits)) |
+                        (data_massbalance$x > xmax(ext_limits)) |
+                        (data_massbalance$y < ymin(ext_limits)) |
+                        (data_massbalance$y > ymax(ext_limits)))
   ids_bad_n <- length(ids_df_bad)
   if (ids_bad_n > 0) {
     cat("* WARNING: the", load_what, "mass balance file contains", ids_bad_n, "entries which fall outside the DHM.\n")
@@ -128,8 +128,8 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
       stakes_start_date_temp[stake_start_na_ids_logi] <- as.Date(paste0(as.integer(format(data_massbalance$end_date[stake_start_na_ids_logi], "%Y")) - 1, "/01/01"))
     }
     
-    stakes_dists_startdate <- as.matrix(dist(stakes_start_date_temp))
-    stakes_dists_enddate <- as.matrix(dist(data_massbalance$end_date))
+    stakes_dists_startdate <- as.matrix(stats::dist(stakes_start_date_temp))
+    stakes_dists_enddate <- as.matrix(stats::dist(data_massbalance$end_date))
     stakes_dists_date <- 1/((stakes_dists_startdate == 0) * (stakes_dists_enddate == 0)) # 1 if two stakes have the same observation period, else Infinity.
     
     stakes_dist_proc <- stakes_dists_spatial*stakes_dists_date
@@ -137,7 +137,7 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
     stakes_dist_proc[is.nan(stakes_dist_proc)] <- 1e9 # This in case we have two stakes at the same place but on different years (0*Inf = NaN, we shouldn't merge them).
     
     # Clustering happens here.
-    stakes_clusters <- hclust(as.dist(stakes_dist_proc))
+    stakes_clusters <- hclust(stats::as.dist(stakes_dist_proc))
     stakes_clusters_cut <- cutree(stakes_clusters, h = run_params$stake_cluster_distance)
     
     # Prepare output data frame. We discard the dh_cm and density columns, we only keep mass balance.

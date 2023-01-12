@@ -36,13 +36,13 @@ func_load_outlines <- function(run_params) {
     outline_filetype <- outline_path_split[[1]][length(outline_path_split[[1]])]
     
     if (outline_filetype == "xyzn") {
-      outlines_out$outlines[[outline_id]] <- func_load_xyzn(outline_paths[outline_id], run_params$grids_crs_epsg)
+      outlines_out$outlines[[outline_id]] <- func_load_xyzn(outline_paths[outline_id], CRS(run_params$grids_crs_epsg))
     } else if (outline_filetype == "shp") {
       invisible(capture.output(outlines_out$outlines[[outline_id]] <- as(as_Spatial(st_zm(st_read(outline_paths[outline_id]))), "SpatialPolygons")))
     }
     # Aspect ratio: > 1 if tall glacier, < 1 if wide glacier. Used to add margins to the area plots,
     # in order to keep the plot titles within the page margins.
-    outline_ext <- extent(outlines_out$outlines[[outline_id]])
+    outline_ext <- ext(outlines_out$outlines[[outline_id]])
     outlines_out$aspect_ratio[[outline_id]] <- (outline_ext[4] - outline_ext[3]) / (outline_ext[2] - outline_ext[1])
   }
   

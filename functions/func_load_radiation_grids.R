@@ -70,11 +70,11 @@ func_load_radiation_grids <- function(run_params, raster_blueprint) {
     cat("    Radiation boot file found! Checking first grid...\n")
     
     load(radiation_boot_file_path)
-    grid_day1 <- raster(grid_paths[1])
-    if ((extent(grid_day1) != extent(raster_blueprint)) || (xres(grid_day1) != xres(raster_blueprint))) {
+    grid_day1 <- rast(grid_paths[1])
+    if ((ext(grid_day1) != ext(raster_blueprint)) || (xres(grid_day1) != xres(raster_blueprint))) {
       grid_day1 <- resample(grid_day1, raster_blueprint, method = "bilinear")
     }
-    grid_day1_val <- getValues(grid_day1)
+    grid_day1_val <- values(grid_day1)
     grid_day1_val[is.na(grid_day1_val)] <- 0
     
     # If first grid from boot file and from grid files
@@ -98,12 +98,12 @@ func_load_radiation_grids <- function(run_params, raster_blueprint) {
     for (doy in 1:365) {
       
       cat("\r    Loading daily radiation files...", doy, "/", 365)
-      ras_cur <- raster(grid_paths[doy])
-      if ((extent(ras_cur) != extent(raster_blueprint)) || (xres(ras_cur) != xres(raster_blueprint))) {
+      ras_cur <- rast(grid_paths[doy])
+      if ((ext(ras_cur) != ext(raster_blueprint)) || (xres(ras_cur) != xres(raster_blueprint))) {
         # cat("\nResampling radiation grid!")
         ras_cur <- resample(ras_cur, raster_blueprint, method = "bilinear")
       }
-      grids_out[[doy]] <- getValues(ras_cur)
+      grids_out[[doy]] <- values(ras_cur)
       
       # We don't want any NAs in the radiation (they can arise with resampling to larger extent).
       grids_out[[doy]][is.na(grids_out[[doy]])] <- 0

@@ -25,8 +25,8 @@ func_massbal_postprocess <- function(year_data,
   }
   
   # Compute time series of glacier-wide mean values.
-  year_data$massbal_annual_values <- sapply(year_data$massbal_annual_maps, cellStats, stat = "mean", na.rm = TRUE)
-  year_data$massbal_winter_values <- sapply(year_data$massbal_winter_maps, cellStats, stat = "mean", na.rm = TRUE)
+  year_data$massbal_annual_values <- sapply(year_data$massbal_annual_maps, global, fun = "mean", na.rm = TRUE)
+  year_data$massbal_winter_values <- sapply(year_data$massbal_winter_maps, global, fun = "mean", na.rm = TRUE)
   
   if (year_data$nstakes_annual > 0) {
     
@@ -34,7 +34,7 @@ func_massbal_postprocess <- function(year_data,
     # including the bias correction in elevation bands.
     # We assign the correction to the melt component,
     # accumulation stays the same.
-    mb_band_bias <- year_data$massbal_annual_values[["meas_period"]] - year_data$massbal_annual_values[["meas_period_corr"]]
+    mb_band_bias <- year_data$massbal_annual_values[["meas_period.mean"]] - year_data$massbal_annual_values[["meas_period_corr.mean"]]
     mb_band_corr_fact <- (year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[2]] - year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[1]] + mb_band_bias) / (year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[2]] - year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[1]])
     year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr <- year_data$mod_output_annual_cur$gl_melt_cumul * mb_band_corr_fact
     year_data$mod_output_annual_cur$gl_massbal_cumul_bandcorr <- year_data$mod_output_annual_cur$gl_accum_cumul - year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr
@@ -50,7 +50,7 @@ func_massbal_postprocess <- function(year_data,
   # id_hydro_start <- which(weather_series_annual_cur$timestamp == year_cur_params$hydro_start)
   # id_hydro_end   <- which(weather_series_annual_cur$timestamp == (year_cur_params$hydro_end - 1)) + 1
   # massbal_corr_series <- mod_output_annual_cur$gl_massbal_cumul_bandcorr - mod_output_annual_cur$gl_massbal_cumul
-  # massbal_annual_values[["hydro_corr"]] <- massbal_annual_values[["hydro"]] + massbal_corr_series[id_hydro_end] - massbal_corr_series[id_hydro_start]
+  # massbal_annual_values[["hydro_corr.mean"]] <- massbal_annual_values[["hydro.mean"]] + massbal_corr_series[id_hydro_end] - massbal_corr_series[id_hydro_start]
   
   
   #### Compute ELA and AAR ####

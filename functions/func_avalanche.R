@@ -15,16 +15,16 @@
 
 
 # The deposition_max_multiplier can be used to enable consistent modelling on different input grids
-  # (e.g., the normalized snow distribution grid, which has cell values close to 1; an actual snow cover grid,
-  # with cell values of maybe 1000 (kg m-2); and a seasonal sum (if we choose to have a single avalanche over
-  # a whole year), with cell values of maybe 5000 (kg m-2)).
-  # This addresses the discussion of Section 4.4 in Gruber (2007).
+# (e.g., the normalized snow distribution grid, which has cell values close to 1; an actual snow cover grid,
+# with cell values of maybe 1000 (kg m-2); and a seasonal sum (if we choose to have a single avalanche over
+# a whole year), with cell values of maybe 5000 (kg m-2)).
+# This addresses the discussion of Section 4.4 in Gruber (2007).
 # The preserve_edges switch makes the function put back the mass_initial value
-  # at the edges, so that the output of func_avalanche has no NAs.
+# at the edges, so that the output of func_avalanche has no NAs.
 func_avalanche <- function(run_params, grids_avalanche_cur, mass_initial_values, deposition_max_multiplier = 1.0, preserve_edges = TRUE) {
   
-  deposition <- setValues(grids_avalanche_cur$elevation_proc, 0.0)
-  mass_movable <- mass_initial_values * grids_avalanche_cur$movable_frac
+  deposition <- rast(grids_avalanche_cur$elevation_proc, vals = 0.0)
+  mass_movable <- mass_initial_values * as.numeric(values(grids_avalanche_cur$movable_frac))
   mass_fixed <- mass_initial_values - mass_movable  # Mass which stays in place no matter what.
   
   # The snow transport loop is implemented in C++
@@ -32,26 +32,26 @@ func_avalanche <- function(run_params, grids_avalanche_cur, mass_initial_values,
   # An R version is in file "func_avalanche_gruber.R",
   # to use it set run_params$avalanche_routine_cpp to FALSE.
   transport_deposit_mass_chosen <- ifelse(run_params$avalanche_routine_cpp == TRUE, transport_deposit_mass, transport_deposit_mass_R)
-  deposition <- setValues(deposition, transport_deposit_mass_chosen(grids_avalanche_cur$elevation_sorted_ids,
-                                                                    run_params$grid_ncol,
-                                                                    getValues(deposition),
-                                                                    getValues(mass_movable),
-                                                                    getValues(grids_avalanche_cur$deposition_max) * deposition_max_multiplier,
-                                                                    getValues(grids_avalanche_cur$draining_fraction[[1]]),
-                                                                    getValues(grids_avalanche_cur$draining_fraction[[2]]),
-                                                                    getValues(grids_avalanche_cur$draining_fraction[[3]]),
-                                                                    getValues(grids_avalanche_cur$draining_fraction[[4]])))
+  values(deposition) <- transport_deposit_mass_chosen(grids_avalanche_cur$elevation_sorted_ids,
+                                                      run_params$grid_ncol,
+                                                      as.numeric(values(deposition)),
+                                                      mass_movable,
+                                                      as.numeric(values(grids_avalanche_cur$deposition_max) * deposition_max_multiplier),
+                                                      as.numeric(values(grids_avalanche_cur$draining_fraction[[1]])),
+                                                      as.numeric(values(grids_avalanche_cur$draining_fraction[[2]])),
+                                                      as.numeric(values(grids_avalanche_cur$draining_fraction[[3]])),
+                                                      as.numeric(values(grids_avalanche_cur$draining_fraction[[4]])))
   
   
   
   
-  mass_final_values <- getValues(mass_fixed + deposition)
+  mass_final_values <- mass_fixed + as.numeric(values(deposition))
   
   if (preserve_edges) {
     ids_na_logi                    <- is.na(mass_final_values)
     mass_final_values[ids_na_logi] <- mass_initial_values[ids_na_logi]
   }
-
+  
   return(mass_final_values)
   
 }

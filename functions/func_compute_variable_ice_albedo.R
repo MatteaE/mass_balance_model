@@ -18,7 +18,8 @@ func_compute_variable_ice_albedo <- function(run_params,
     
     ice_albedo_fact[[grid_id]] <- clamp((run_params$albedo_ice_decrease_elev - data_dhms$elevation[[grid_id]]) * run_params$albedo_ice_decrease_fact,
                                         lower = 0,
-                                        upper = Inf) + 1
+                                        upper = Inf,
+                                        values = TRUE) + 1
     
   }
 

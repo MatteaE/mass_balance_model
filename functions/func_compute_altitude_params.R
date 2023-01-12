@@ -15,7 +15,7 @@
 func_compute_altitude_params <- function(run_params,
                                          data_dems) {
   
-  ele_vals <- getValues(data_dems$elevation[[1]])
+  ele_vals <- as.numeric(values(data_dems$elevation[[1]]))
   ele_quant <- as.numeric(quantile(ele_vals, c(0.8, 0.95, 0.7), na.rm = T))
   
   if (is.na(run_params$weather_max_precip_ele)) {

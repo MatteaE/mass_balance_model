@@ -142,7 +142,7 @@ func_process_year <- function(year_data,
   # It is no longer very useful since we now switch automatically
   # to nearest glaciated neighbor for cells on the edge.
   # if (year_data$nstakes_annual > 0) {
-    # stake_errors <- abs((extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear") - year_data$massbal_annual_meas_cur$massbal_standardized) - (year_data$mod_output_annual_cur$stakes_mb_mod - year_data$mod_output_annual_cur$stakes_mb_meas))
+    # stake_errors <- abs((extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear")[,1] - year_data$massbal_annual_meas_cur$massbal_standardized) - (year_data$mod_output_annual_cur$stakes_mb_mod - year_data$mod_output_annual_cur$stakes_mb_meas))
     # max_error <- max(stake_errors)
     # max_error_id <- which.max(stake_errors)
     # if (max_error > 1) {

@@ -17,25 +17,26 @@ func_check_resample_grids <- function(run_params,
   
   # Resample grids if needed, remove NAs.
   for (grid_id in 1:length(data_all$data_surftype$grids)) {
-    if (!compareRaster(data_all$data_surftype$grids[[grid_id]], data_all$raster_blueprint, stopiffalse = FALSE)) {
+    if (!compareGeom(data_all$data_surftype$grids[[grid_id]], data_all$raster_blueprint, stopOnError = FALSE)) {
       
       cat("* WARNING: func_check_resample_grids: I am resampling surface type grid ", grid_id, "!\n")
-      data_all$data_surftype$grids[[grid_id]]      <- resample(data_all$data_surftype$grids[[grid_id]], data_all$raster_blueprint, method = "ngb")
+      data_all$data_surftype$grids[[grid_id]]      <- resample(data_all$data_surftype$grids[[grid_id]], data_all$raster_blueprint, method = "near")
       crs(data_all$data_surftype$grids[[grid_id]]) <- run_params$grids_crs_epsg
       
       # Any NA in surface type becomes rock.
-      data_all$data_surftype$grids[[grid_id]][is.na(data_all$data_surftype$grids[[grid_id]][])] <- 4
+      data_all$data_surftype$grids[[grid_id]] <- subst(data_all$data_surftype$grids[[grid_id]], NA, 4)
     }
   }
   for (grid_id in 1:length(data_all$data_dhms$elevation)) {
-    if (!compareRaster(data_all$data_dhms$elevation[[grid_id]], data_all$raster_blueprint, stopiffalse = FALSE)) {
+    if (!compareGeom(data_all$data_dhms$elevation[[grid_id]], data_all$raster_blueprint, stopOnError = FALSE)) {
       
-      cat("* WARNING: func_check_resample_grids: I am resampling DHM grid ", grid_id, "!")
+      cat("* WARNING: func_check_resample_grids: I am resampling DHM grid ", grid_id, "!\n")
       data_all$data_dhms$elevation[[grid_id]]      <- resample(data_all$data_dhms$elevation[[grid_id]], data_all$raster_blueprint, method = "bilinear")
       crs(data_all$data_dhms$elevation[[grid_id]]) <- run_params$grids_crs_epsg
       
-      # Any NA in elevation is set to the mean value of the grid.
-      data_all$data_dhms$elevation[[grid_id]][is.na(data_all$data_dhms$elevation[[grid_id]][])] <- cellStats(data_all$data_dhms$elevation[[grid_id]], stat = "mean", na.rm = TRUE)
+      # Any NA in elevation (potentially present e.g. on the borders
+      # after resampling) is set to the mean value of the grid.
+      data_all$data_dhms$elevation[[grid_id]] <- subst(data_all$data_dhms$elevation[[grid_id]], NA, global(data_all$data_dhms$elevation[[grid_id]], fun = "mean", na.rm = TRUE))
     }
   }
   

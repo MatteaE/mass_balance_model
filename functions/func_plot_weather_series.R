@@ -53,8 +53,8 @@ func_plot_weather_series <- function(year_data,
   plots[[1]] <- ggplot(dat_Tair) +
     geom_ribbon(aes(x = timestamp, ymin = 0, ymax = Tair_pos), fill = "#FF0000") +
     geom_ribbon(aes(x = timestamp, ymin = Tair_neg, ymax = 0), fill = "#0000FF") +
-    geom_vline(xintercept = date_df$date[date_df$day_id == 0], linetype = "dashed", size = 0.5) +
-    {if (run_params$show_month_lines) geom_vline(xintercept = month_starts, linetype = "dashed", color = "#C0C0C0", size = 0.4)} +
+    geom_vline(xintercept = date_df$date[date_df$day_id == 0], linetype = "dashed", linewidth = 0.5) +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_starts, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
     annotate("text", x = months_labels_df$date, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
     scale_x_date(expand = expansion(0,0)) +
     ylab("AWS daily mean air temperature [\u00B0C]") +
@@ -85,8 +85,8 @@ func_plot_weather_series <- function(year_data,
     geom_rect(data = dat_precip_monthly, aes(xmin = date_start, xmax = date_end, ymin = 0, ymax = precip_sum),
               fill = "#A4CBE0", color = "#00000000") +
     geom_col(aes(x = timestamp, y = precip), fill = "#000088", color = "#00004400") +
-    geom_vline(xintercept = date_df$date[date_df$day_id == 0], linetype = "dashed", size = 0.5) +
-    {if (run_params$show_month_lines) geom_vline(xintercept = month_starts, linetype = "dashed", color = "#C0C0C0", size = 0.4)} +
+    geom_vline(xintercept = date_df$date[date_df$day_id == 0], linetype = "dashed", linewidth = 0.5) +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_starts, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
     annotate("text", x = months_labels_df$date, y = Inf, label = months_labels_df$label, vjust = 2, fontface = "bold", size = 5) +
     scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05))) +
     scale_x_date(expand = expansion(0,0)) +

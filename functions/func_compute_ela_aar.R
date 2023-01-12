@@ -21,14 +21,14 @@ func_compute_ela_aar <- function(year_data,
                                  run_params,
                                  data_dems) {
   
-  ele_bands_values <- getValues(data_dems$elevation_bands_ela[[year_data$dem_grid_id]])
+  ele_bands_values <- values(data_dems$elevation_bands_ela[[year_data$dem_grid_id]])
   ele_bands_min <- min(ele_bands_values, na.rm = T)
   ele_bands_max <- max(ele_bands_values, na.rm = T)
   ele_bands_df <- data.frame(ele = seq(ele_bands_min, ele_bands_max, run_params$ele_bands_ela_size),
                              mb_hydro = NA)
                              # mb_corr = NA)
   
-  mb_hydro_map_values <- getValues(year_data$massbal_annual_maps$hydro)
+  mb_hydro_map_values <- values(year_data$massbal_annual_maps$hydro)
   
   for (band_id in 1:nrow(ele_bands_df)) {
     ele_bands_df$mb_hydro[band_id] <- mean(mb_hydro_map_values[ele_bands_values == ele_bands_df$ele[band_id]], na.rm=T)

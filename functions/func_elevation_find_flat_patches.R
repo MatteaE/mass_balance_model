@@ -13,17 +13,24 @@ func_find_flat_patches <- function(elevation, run_params) {
   grid_nrow <- nrow(elevation)
   
   # Look for flat patches (contiguous cells with exact same elevation).
-  dz1 <- setValues(elevation, c(rep(NA, grid_ncol), elevation[2:grid_nrow,] - elevation[1:(grid_nrow - 1),]))
-  dz2 <- dz1
-  dz2[,1:grid_ncol] <- c(rep(NA, grid_nrow), elevation[,2:grid_ncol] - elevation[,1:(grid_ncol - 1)]) # We cannot use setValues() here because we compute by column and setValues sets by row.
-  dz3 <- dz1
-  dz3[,1:grid_ncol] <- c(elevation[,1:(grid_ncol - 1)] - elevation[,2:grid_ncol], rep(NA, grid_nrow)) # We cannot use setValues() here because we compute by column and setValues sets by row.
-  dz4 <- setValues(elevation, c(elevation[1:(grid_nrow - 1),] - elevation[2:grid_nrow,], rep(NA, grid_ncol)))
+  # We do this with focal() and a 3x3 matrix getting the proper neighbor.
+  dz1 <- elevation - focal(elevation, w = rbind(c(0,1,0),
+                                                c(0,0,0),
+                                                c(0,0,0)), expand = FALSE, fillvalue = NA)
+  dz2 <- elevation - focal(elevation, w = rbind(c(0,0,0),
+                                                c(0,0,1),
+                                                c(0,0,0)), expand = FALSE, fillvalue = NA)
+  dz3 <- elevation - focal(elevation, w = rbind(c(0,0,0),
+                                                c(1,0,0),
+                                                c(0,0,0)), expand = FALSE, fillvalue = NA)
+  dz4 <- elevation - focal(elevation, w = rbind(c(0,0,0),
+                                                c(0,0,0),
+                                                c(0,1,0)), expand = FALSE, fillvalue = NA)
   
-  ids_patch_flat <- which((abs(getValues(dz1)) < run_params$elevation_equal_threshold) |
-                          (abs(getValues(dz2)) < run_params$elevation_equal_threshold) |
-                          (abs(getValues(dz3)) < run_params$elevation_equal_threshold) |
-                          (abs(getValues(dz4)) < run_params$elevation_equal_threshold))
+  ids_patch_flat <- which((abs(values(dz1)) < run_params$elevation_equal_threshold) |
+                          (abs(values(dz2)) < run_params$elevation_equal_threshold) |
+                          (abs(values(dz3)) < run_params$elevation_equal_threshold) |
+                          (abs(values(dz4)) < run_params$elevation_equal_threshold))
   
   return(ids_patch_flat)
   

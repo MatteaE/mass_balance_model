@@ -42,12 +42,12 @@ func_select_year_data <- function(data_all,
   year_data$grids_avalanche_cur             <- sapply(grids_static_list$grids_avalanche, `[[`, year_data$dhm_grid_id)
   
   # Compute reduced-intensity base topographic distribution of solid precipitation.
-  dist_topographic_values                   <- getValues(grids_static_list$grids_snowdist_topographic[[year_data$dem_grid_id]])
+  dist_topographic_values                   <- values(grids_static_list$grids_snowdist_topographic[[year_data$dem_grid_id]])[,1]
   dist_topographic_values_mean              <- mean(dist_topographic_values)
   year_data$dist_topographic_values_red     <- dist_topographic_values_mean + run_params$accum_snow_dist_red_fac * (dist_topographic_values - dist_topographic_values_mean)
   
   # Extract ice albedo factor grid for this year.
-  year_data$grid_ice_albedo_fact_cur_values <- getValues(grids_static_list$grids_ice_albedo_fact[[year_data$dhm_grid_id]])
+  year_data$grid_ice_albedo_fact_cur_values <- values(grids_static_list$grids_ice_albedo_fact[[year_data$dhm_grid_id]])[,1]
   
   # Select mass balance measurements of the current year.
   massbal_annual_ids                        <- func_select_year_mb_measurements(data_all$data_massbalance_annual, year_data$year_cur)
@@ -70,7 +70,7 @@ func_select_year_data <- function(data_all,
   }
   # Add DEM elevation of the stakes, we use it
   # instead of reported stake elevation.
-  year_data$massbal_annual_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), method = "bilinear")
+  year_data$massbal_annual_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), method = "bilinear")[,1]
 
   
   stakes_winter_cells_ids <- cellFromXY(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]))
@@ -83,7 +83,7 @@ func_select_year_data <- function(data_all,
     cat(paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$x[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$y[stakes_winter_outside_ids], "\n"))
     year_data$massbal_winter_meas_cur <- year_data$massbal_winter_meas_cur[-stakes_winter_outside_ids,]
   }
-  year_data$massbal_winter_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), method = "bilinear")
+  year_data$massbal_winter_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), method = "bilinear")[,1]
   
   year_data$nstakes_annual   <- nrow(year_data$massbal_annual_meas_cur)
   year_data$nstakes_winter   <- nrow(year_data$massbal_winter_meas_cur)

@@ -45,13 +45,13 @@ func_dhm_to_dem <- function(run_params,
   
   for (dem_id in 1:data_dems$n_grids) {
     
-    dhm_id <- as.integer(str_split(dhm_outline_combinations_unique[dem_id], fixed(" "))[[1]][1])
-    outline_id <- as.integer(str_split(dhm_outline_combinations_unique[dem_id], fixed(" "))[[1]][2])
-    dem_cur <- rasterize(data_outlines$outlines[[outline_id]], data_dhms$elevation[[dhm_id]], mask = TRUE)
-    data_dems$elevation[[dem_id]] <- dem_cur
-    dem_cur_values <- getValues(dem_cur)
-    cur_combination_year_ids <- which(dhm_outline_combinations == dhm_outline_combinations_unique[dem_id])
-    data_dems$grid_year_id[cur_combination_year_ids] <- dem_id
+    dhm_id                                            <- as.integer(str_split(dhm_outline_combinations_unique[dem_id], fixed(" "))[[1]][1])
+    outline_id                                        <- as.integer(str_split(dhm_outline_combinations_unique[dem_id], fixed(" "))[[1]][2])
+    dem_cur                                           <- mask(data_dhms$elevation[[dhm_id]], vect(data_outlines$outlines[[outline_id]]))
+    data_dems$elevation[[dem_id]]                     <- dem_cur
+    dem_cur_values                                    <- values(dem_cur)
+    cur_combination_year_ids                          <- which(dhm_outline_combinations == dhm_outline_combinations_unique[dem_id])
+    data_dems$grid_year_id[cur_combination_year_ids]  <- dem_id
     
     # Each DEM grid can have only a single corresponding DHM
     # (but not vice-versa, because of possibly different outline polygons).

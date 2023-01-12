@@ -79,13 +79,13 @@ func_plot_massbal_cumul <- function(year_data,
   # Generate plot of mass balance alone.
   plots_mb[[1]] <- ggplot(massbal_cumul_df) +
     annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
-    geom_hline(yintercept = 0, linetype = "dashed", size = 0.5) +
-    geom_vline(xintercept = 0, linetype = "longdash", size = 0.5) +
-    geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", size = 0.5, color = "#0000FF") +
-    {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF")} +
-    {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", size = 0.5, color = "#FF00FF")} +
-    {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", size = 0.4)} +
-    geom_line(aes(x = day_id, y = mb / 1e3), size = 0.7) +
+    geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.5) +
+    geom_vline(xintercept = 0, linetype = "longdash", linewidth = 0.5) +
+    geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", linewidth = 0.5, color = "#0000FF") +
+    {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", linewidth = 0.5, color = "#FF00FF")} +
+    {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", linewidth = 0.5, color = "#FF00FF")} +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
+    geom_line(aes(x = day_id, y = mb / 1e3), linewidth = 0.7) +
     # geom_vline(xintercept = c(massbal_cumul_df$day_id[months_labels_ids] - 14, massbal_cumul_df$day_id[months_labels_ids[length(months_labels_ids)]] + 16)) +
     scale_x_continuous(expand = expansion(mult = 0.02)) +
     scale_y_continuous(breaks = pretty(massbal_cumul_df$mb/1e3)) +
@@ -96,15 +96,15 @@ func_plot_massbal_cumul <- function(year_data,
   # Generate plot of mass balance with accumulation and ablation.
   plots_mb[[2]] <- ggplot(massbal_cumul_df) +
     annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
-    geom_hline(yintercept = 0, linetype = "dashed", size = 0.5) +
-    geom_vline(xintercept = 0, linetype = "longdash", size = 0.5) +
-    geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", size = 0.5, color = "#0000FF") +
-    {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF")} +
-    {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", size = 0.5, color = "#FF00FF")} +
-    {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", size = 0.4)} +
-    geom_line(aes(x = day_id, y = mb / 1e3), size = 0.7) +
-    geom_line(aes(x = day_id, y = -melt / 1e3), color = "#FF0000", size = 0.7) +
-    geom_line(aes(x = day_id, y = accum / 1e3), color = "#0000FF", size = 0.7) +
+    geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.5) +
+    geom_vline(xintercept = 0, linetype = "longdash", linewidth = 0.5) +
+    geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", linewidth = 0.5, color = "#0000FF") +
+    {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", linewidth = 0.5, color = "#FF00FF")} +
+    {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", linewidth = 0.5, color = "#FF00FF")} +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
+    geom_line(aes(x = day_id, y = mb / 1e3), linewidth = 0.7) +
+    geom_line(aes(x = day_id, y = -melt / 1e3), color = "#FF0000", linewidth = 0.7) +
+    geom_line(aes(x = day_id, y = accum / 1e3), color = "#0000FF", linewidth = 0.7) +
     # geom_vline(xintercept = c(massbal_cumul_df$day_id[months_labels_ids] - 14, massbal_cumul_df$day_id[months_labels_ids[length(months_labels_ids)]] + 16)) +
     scale_x_continuous(expand = expansion(mult = 0.02)) +
     scale_y_continuous(breaks = pretty(c(massbal_cumul_df$mb, -massbal_cumul_df$melt, massbal_cumul_df$accum)/1e3)) +
@@ -132,13 +132,13 @@ func_plot_massbal_cumul <- function(year_data,
   
   plots_mb[[3]] <- ggplot(massbal_daily_df) +
     annotate("text", x = months_labels_df$day_id, y = Inf, label = months_labels_df$label, vjust = 2, fontface = "bold", size = 5) +
-    geom_vline(xintercept = 0, linetype = "longdash", size = 0.5) +
-    geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", size = 0.5, color = "#0000FF") +
-    {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", size = 0.5, color = "#FF00FF")} +
-    {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", size = 0.5, color = "#FF00FF")} +
-    {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", size = 0.4)} +
-    geom_line(aes(x = day_id, y = rain, color = "rain"), size = 0.7) +
-    geom_line(aes(x = day_id, y = melt, color = "melt"), size = 0.7) +
+    geom_vline(xintercept = 0, linetype = "longdash", linewidth = 0.5) +
+    geom_vline(xintercept = c(day_id_hydro1, day_id_hydro2), linetype = "solid", linewidth = 0.5, color = "#0000FF") +
+    {if (year_data$nstakes_annual > 0) geom_vline(xintercept = c(day_id_meas1, day_id_meas2), linetype = "solid", linewidth = 0.5, color = "#FF00FF")} +
+    {if (year_data$process_winter) geom_vline(xintercept = c(day_id_meas1_winter, day_id_meas2_winter), linetype = "solid", linewidth = 0.5, color = "#FF00FF")} +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
+    geom_line(aes(x = day_id, y = rain, color = "rain"), linewidth = 0.7) +
+    geom_line(aes(x = day_id, y = melt, color = "melt"), linewidth = 0.7) +
     scale_color_manual(breaks = c("melt", "rain"),
                        values = c("rain" = "#00FFFF", "melt" = "#FF0000"),
                        labels = c("rain" = "Rainfall", "melt" = "Melt")) +

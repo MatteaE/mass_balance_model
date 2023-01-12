@@ -14,18 +14,19 @@ func_elevation_preprocess <- function(run_params, elevation) {
   
   #### REMOVE FLAT PATCHES ####
   # Find flat patches and replace them with smoothed DEM.
-  # We iterate while we enlargen the smoothing window and amount,
+  # We iterate while we enlarge the smoothing window and amount,
   # so that even large flat patches (lakes!) will eventually disappear.
   elevation_unpatched <- elevation # elevation_unpatched will be the output.
   ids_patch_flat <- func_find_flat_patches(elevation, run_params)
-  elevation_mean <- mean(getValues(elevation_unpatched), na.rm = T) # To add padding at the DEM borders with a value not too far from the DEM itself.
+  elevation_mean <- mean(values(elevation_unpatched), na.rm = T) # To add padding at the DEM borders with a value not too far from the DEM itself.
   n_flat_iter <- 1
   
   while (length(ids_patch_flat) > 0) {
     
+    # cat("\nRemoval of flat patches, iteration", n_flat_iter, " --", length(ids_patch_flat), "flat patches remaining...")
     smoothing_mat <- gaussian.kernel(n_flat_iter, max(5, 2 * n_flat_iter + 1))
-    elevation_smoothed <- focal(elevation_unpatched, w = smoothing_mat, fun = sum, na.rm = TRUE, pad = TRUE, padValue = elevation_mean)
-    elevation_unpatched[ids_patch_flat] <- elevation_smoothed[ids_patch_flat]
+    elevation_smoothed <- focal(elevation_unpatched, w = smoothing_mat, fun = sum, na.rm = TRUE, expand = FALSE, fillvalue = elevation_mean)
+    elevation_unpatched[ids_patch_flat] <- elevation_smoothed[ids_patch_flat][,1]
     n_flat_iter <- n_flat_iter + 1
     ids_patch_flat <- func_find_flat_patches(elevation_unpatched, run_params) # Check again for any flat patches left.
     
@@ -46,15 +47,15 @@ func_elevation_preprocess <- function(run_params, elevation) {
   # and we iterate until there are no sinks of any kind left.
   invisible(capture.output(
     elevation_filled <- setValues(elevation_unpatched,    # elevation_filled is the raster returned at the end.
-                                  topmodel::sinkfill(as.matrix(elevation_unpatched),
+                                  topmodel::sinkfill(as.matrix(elevation_unpatched, wide = TRUE),
                                                      res = xres(elevation_unpatched),
                                                      degree = 0.5))
   ))
   
-  elevation_filled_focal_min <- focal(elevation_filled, w = rbind(c(Inf,1,Inf),c(1,1,1),c(Inf,1,Inf)), fun = min)
+  elevation_filled_focal_min <- focal(elevation_filled, w = rbind(c(Inf,1,Inf),c(1,1,1),c(Inf,1,Inf)), fun = min, expand = FALSE, fillvalue = NA)
   # Remove NAs at the border of elevation_filled_focal_min
-  elevation_filled_focal_min <- subs(elevation_filled_focal_min, data.frame(ID = NA, repl = 0), subsWithNA = FALSE)
-  ids_sink_4neighbors <- which(getValues(elevation_filled - (elevation_filled_focal_min + 0.01)) < 0)
+  elevation_filled_focal_min <- subst(elevation_filled_focal_min, NA, 0.0)
+  ids_sink_4neighbors <- which(values(elevation_filled - (elevation_filled_focal_min + 0.01)) < 0)
   
   sinkfill_iter_count <- 1
   cat("    Filling all sinks...\n")
@@ -65,16 +66,16 @@ func_elevation_preprocess <- function(run_params, elevation) {
     
     # Raise isolated 4-connectivity sinks to the mean of the 4-neighbors.
     elevation_filled_mean_nofocal <- focal(elevation_filled, w = rbind(c(0,1/4,0),c(1/4,0,1/4),c(0,1/4,0)))
-    elevation_filled[ids_sink_4neighbors] <- elevation_filled_mean_nofocal[ids_sink_4neighbors]
+    elevation_filled[ids_sink_4neighbors] <- elevation_filled_mean_nofocal[ids_sink_4neighbors][,1]
     # Fill again in case we have created new sinks.
     invisible(capture.output(
-      elevation_filled <- setValues(elevation_filled, topmodel::sinkfill(as.matrix(elevation_filled), res = xres(elevation_filled), degree = 0.5))
+      elevation_filled <- setValues(elevation_filled, topmodel::sinkfill(as.matrix(elevation_filled, wide = TRUE), res = xres(elevation_filled), degree = 0.5))
       ))
     # Look again for 4-connectivity sinks.
     elevation_filled_focal_min <- focal(elevation_filled, w = rbind(c(Inf,1,Inf),c(1,1,1),c(Inf,1,Inf)), fun = min)
     # Remove NAs at the border of elevation_filled_focal_min
-    elevation_filled_focal_min <- subs(elevation_filled_focal_min, data.frame(ID = NA, repl = 0), subsWithNA = FALSE)
-    ids_sink_4neighbors <- which(getValues(elevation_filled - (elevation_filled_focal_min + 0.01)) < 0)
+    elevation_filled_focal_min <- subst(elevation_filled_focal_min, NA, 0.0)
+    ids_sink_4neighbors <- which(values(elevation_filled - (elevation_filled_focal_min + 0.01)) < 0)
     
     sinkfill_iter_count <- sinkfill_iter_count + 1
     
@@ -82,10 +83,10 @@ func_elevation_preprocess <- function(run_params, elevation) {
   
   cat("    All sinks gone after", sinkfill_iter_count-1, "iteration(s).\n")
   
-  dem_diff <- getValues(elevation_filled - elevation)
+  dem_diff <- values(elevation_filled - elevation)
   
   cat("    Altered cells:", length(which(abs(dem_diff) > 1e-9)), "\n")
-  cat("    New DEM bias compared to the original: within [", as.numeric(min(dem_diff)), ",", as.numeric(max(dem_diff)), "] m\n")
+  cat("    New DEM bias compared to the original: within [", round(as.numeric(min(dem_diff)), 3), ",", round(as.numeric(max(dem_diff)), 3), "] m\n")
 
   # [LEGACY] (Optionally) add tiny jitter (noise) to the DEM to avoid problematic
   # cases where cell patches have a constant (flat) value, which disturbes drainage.

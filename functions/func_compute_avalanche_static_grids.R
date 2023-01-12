@@ -57,27 +57,27 @@ func_compute_avalanche_static_grids <- function(run_params, data_dhms) {
     # (nearest neighbor: we replicate
     # the closest row/column)
     # to avoid having dangerous NA values.
-    avalanche$slope_proc[[grid_id]]  <- terrain(avalanche$elevation_proc[[grid_id]], "slope", "degrees")
-    avalanche$slope_proc[[grid_id]][1:run_params$grid_ncol] <- avalanche$slope_proc[[grid_id]][run_params$grid_ncol + (1:run_params$grid_ncol)]
-    avalanche$slope_proc[[grid_id]][run_params$grid_ncells - run_params$grid_ncol + 1:run_params$grid_ncol] <- avalanche$slope_proc[[grid_id]][run_params$grid_ncells - (2*run_params$grid_ncol) + 1:run_params$grid_ncol]
-    avalanche$slope_proc[[grid_id]][seq(1,run_params$grid_ncells,run_params$grid_ncol)] <- avalanche$slope_proc[[grid_id]][seq(2,run_params$grid_ncells,run_params$grid_ncol)]
-    avalanche$slope_proc[[grid_id]][seq(run_params$grid_ncol,run_params$grid_ncells,run_params$grid_ncol)] <- avalanche$slope_proc[[grid_id]][seq(run_params$grid_ncol-1,run_params$grid_ncells,run_params$grid_ncol)]
+    avalanche$slope_proc[[grid_id]]  <- terrain(avalanche$elevation_proc[[grid_id]], v = "slope", unit = "degrees")
+    avalanche$slope_proc[[grid_id]][1:run_params$grid_ncol] <- avalanche$slope_proc[[grid_id]][run_params$grid_ncol + (1:run_params$grid_ncol)][,1]
+    avalanche$slope_proc[[grid_id]][run_params$grid_ncells - run_params$grid_ncol + 1:run_params$grid_ncol] <- avalanche$slope_proc[[grid_id]][run_params$grid_ncells - (2*run_params$grid_ncol) + 1:run_params$grid_ncol][,1]
+    avalanche$slope_proc[[grid_id]][seq(1,run_params$grid_ncells,run_params$grid_ncol)] <- avalanche$slope_proc[[grid_id]][seq(2,run_params$grid_ncells,run_params$grid_ncol)][,1]
+    avalanche$slope_proc[[grid_id]][seq(run_params$grid_ncol,run_params$grid_ncells,run_params$grid_ncol)] <- avalanche$slope_proc[[grid_id]][seq(run_params$grid_ncol-1,run_params$grid_ncells,run_params$grid_ncol)][,1]
     
-    avalanche$aspect_proc[[grid_id]] <- terrain(avalanche$elevation_proc[[grid_id]], "aspect", "degrees")
-    avalanche$aspect_proc[[grid_id]][1:run_params$grid_ncol] <- avalanche$aspect_proc[[grid_id]][run_params$grid_ncol + (1:run_params$grid_ncol)]
-    avalanche$aspect_proc[[grid_id]][run_params$grid_ncells - run_params$grid_ncol + 1:run_params$grid_ncol] <- avalanche$aspect_proc[[grid_id]][run_params$grid_ncells - (2*run_params$grid_ncol) + 1:run_params$grid_ncol]
-    avalanche$aspect_proc[[grid_id]][seq(1,run_params$grid_ncells,run_params$grid_ncol)] <- avalanche$aspect_proc[[grid_id]][seq(2,run_params$grid_ncells,run_params$grid_ncol)]
-    avalanche$aspect_proc[[grid_id]][seq(run_params$grid_ncol,run_params$grid_ncells,run_params$grid_ncol)] <- avalanche$aspect_proc[[grid_id]][seq(run_params$grid_ncol-1,run_params$grid_ncells,run_params$grid_ncol)]
+    avalanche$aspect_proc[[grid_id]] <- terrain(avalanche$elevation_proc[[grid_id]], v = "aspect", unit = "degrees")
+    avalanche$aspect_proc[[grid_id]][1:run_params$grid_ncol] <- avalanche$aspect_proc[[grid_id]][run_params$grid_ncol + (1:run_params$grid_ncol)][,1]
+    avalanche$aspect_proc[[grid_id]][run_params$grid_ncells - run_params$grid_ncol + 1:run_params$grid_ncol] <- avalanche$aspect_proc[[grid_id]][run_params$grid_ncells - (2*run_params$grid_ncol) + 1:run_params$grid_ncol][,1]
+    avalanche$aspect_proc[[grid_id]][seq(1,run_params$grid_ncells,run_params$grid_ncol)] <- avalanche$aspect_proc[[grid_id]][seq(2,run_params$grid_ncells,run_params$grid_ncol)][,1]
+    avalanche$aspect_proc[[grid_id]][seq(run_params$grid_ncol,run_params$grid_ncells,run_params$grid_ncol)] <- avalanche$aspect_proc[[grid_id]][seq(run_params$grid_ncol-1,run_params$grid_ncells,run_params$grid_ncol)][,1]
     
     
     
     # Movable fraction of the initial mass distribution
     # linearly increases from 0 to 1 between the lower
     # and upper slope thresholds.
-    avalanche$movable_frac[[grid_id]]         <- setValues(avalanche$slope_proc[[grid_id]],
-                                                           pmax(0, pmin(1, scales::rescale(getValues(avalanche$slope_proc[[grid_id]]),
-                                                                                           to = c(0, 1),
-                                                                                           from = c(run_params$movable_slope_lim_lower, run_params$movable_slope_lim_upper)))))
+    avalanche$movable_frac[[grid_id]] <- rast(avalanche$slope_proc[[grid_id]],
+                                              vals = pmax(0, pmin(1, scales::rescale(values(avalanche$slope_proc[[grid_id]]),
+                                                                                     to = c(0, 1),
+                                                                                     from = c(run_params$movable_slope_lim_lower, run_params$movable_slope_lim_upper)))))
     # Compute flow widths to 4-neighbors (Eqs. 3-6 of Gruber, 2007).
     # Indices: 1 top, 2 left, 3 right, 4 bottom (as in Gruber, 2007, Fig. 1).
     avalanche$flow_width[[grid_id]][[1]] <- cos(conv_deg2rad * avalanche$aspect_proc[[grid_id]]) * run_params$grid_cell_size
@@ -87,12 +87,19 @@ func_compute_avalanche_static_grids <- function(run_params, data_dhms) {
     
     # Compute elevation difference to 4-neighbors.
     # Same indexing as above.
-    avalanche$dz[[grid_id]][[1]] <- setValues(avalanche$elevation_proc[[grid_id]], c(rep(NA, run_params$grid_ncol), avalanche$elevation_proc[[grid_id]][2:run_params$grid_nrow,] - avalanche$elevation_proc[[grid_id]][1:(run_params$grid_nrow - 1),]))
-    avalanche$dz[[grid_id]][[2]] <- avalanche$dz[[grid_id]][[1]]
-    avalanche$dz[[grid_id]][[2]][,1:run_params$grid_ncol] <- c(rep(NA, run_params$grid_nrow), avalanche$elevation_proc[[grid_id]][,2:run_params$grid_ncol] - avalanche$elevation_proc[[grid_id]][,1:(run_params$grid_ncol - 1)]) # We cannot use setValues() here because we compute by column and setValues sets by row.
-    avalanche$dz[[grid_id]][[3]] <- avalanche$dz[[grid_id]][[1]]
-    avalanche$dz[[grid_id]][[3]][,1:run_params$grid_ncol] <- c(avalanche$elevation_proc[[grid_id]][,1:(run_params$grid_ncol - 1)] - avalanche$elevation_proc[[grid_id]][,2:run_params$grid_ncol], rep(NA, run_params$grid_nrow)) # We cannot use setValues() here because we compute by column and setValues sets by row.
-    avalanche$dz[[grid_id]][[4]] <- setValues(avalanche$elevation_proc[[grid_id]], c(avalanche$elevation_proc[[grid_id]][1:(run_params$grid_nrow - 1),] - avalanche$elevation_proc[[grid_id]][2:run_params$grid_nrow,], rep(NA, run_params$grid_ncol)))
+    avalanche$dz[[grid_id]][[1]] <- avalanche$elevation_proc[[grid_id]] - focal(avalanche$elevation_proc[[grid_id]], w = rbind(c(0,1,0),
+                                                                                                                               c(0,0,0),
+                                                                                                                               c(0,0,0)), expand = FALSE, fillvalue = NA)
+    avalanche$dz[[grid_id]][[2]] <- avalanche$elevation_proc[[grid_id]] - focal(avalanche$elevation_proc[[grid_id]], w = rbind(c(0,0,0),
+                                                                                                                               c(1,0,0),
+                                                                                                                               c(0,0,0)), expand = FALSE, fillvalue = NA)
+    avalanche$dz[[grid_id]][[3]] <- avalanche$elevation_proc[[grid_id]] - focal(avalanche$elevation_proc[[grid_id]], w = rbind(c(0,0,0),
+                                                                                                                               c(0,0,1),
+                                                                                                                               c(0,0,0)), expand = FALSE, fillvalue = NA)
+    avalanche$dz[[grid_id]][[4]] <- avalanche$elevation_proc[[grid_id]] - focal(avalanche$elevation_proc[[grid_id]], w = rbind(c(0,0,0),
+                                                                                                                               c(0,0,0),
+                                                                                                                               c(0,1,0)), expand = FALSE, fillvalue = NA)
+    
     
     # Compute draining coefficient to 4-neighbors (Eq. 7 in Gruber, 2007).
     for (dir_id in 1:4) {
@@ -115,7 +122,7 @@ func_compute_avalanche_static_grids <- function(run_params, data_dhms) {
     # we force drainage towards the most likely direction
     # (i.e., of all the directions with dz<i> > 0, the direction
     # for which flow width is least negative).
-    avalanche$residual_sink_cell_ids[[grid_id]] <- which(getValues(avalanche$draining_coeff_sum[[grid_id]]) == 0)
+    avalanche$residual_sink_cell_ids[[grid_id]] <- which(values(avalanche$draining_coeff_sum[[grid_id]]) == 0)
     residual_sinks_n <- length(avalanche$residual_sink_cell_ids[[grid_id]])
     # cat("Residual sinks detected:", residual_sinks_n, "\n")
     
@@ -162,8 +169,8 @@ func_compute_avalanche_static_grids <- function(run_params, data_dhms) {
     # all the second row; the last cell is the bottom-right corner).
     # We exclude all cells along the border since their drainage is problematic.
     # Of course the glacier should not reach the grid border.
-    elevation_sorted_ids_raw <- sort(getValues(avalanche$elevation_proc[[grid_id]]), decreasing = TRUE, index.return = TRUE)[[2]]
-    elevation_ids_border <- unique(c(cellFromRow(avalanche$elevation_proc[[grid_id]], c(1, run_params$grid_nrow)), cellFromCol(avalanche$elevation_proc[[grid_id]], c(1, run_params$grid_ncol))))
+    elevation_sorted_ids_raw <- sort(values(avalanche$elevation_proc[[grid_id]]), decreasing = TRUE, index.return = TRUE)[[2]]
+    elevation_ids_border <- unique(c(cellFromRowColCombine(avalanche$elevation_proc[[grid_id]], c(1, run_params$grid_nrow), 1:run_params$grid_ncol), cellFromRowColCombine(avalanche$elevation_proc[[grid_id]], 1:run_params$grid_nrow, c(1, run_params$grid_ncol))))
     avalanche$elevation_sorted_ids[[grid_id]] <- setdiff(elevation_sorted_ids_raw, elevation_ids_border)
     
   }

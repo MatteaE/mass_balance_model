@@ -13,7 +13,7 @@ func_load_packages <- function(run_params) {
   
   options("rgdal_show_exportToProj4_warnings"="none") # Suppress "Discarded datum" errors - see https://cran.r-project.org/web/packages/rgdal/vignettes/PROJ6_GDAL3.html
   
-  package_list <- c("raster",
+  package_list <- c("terra",
                     "sp",           # SpatialPolygons(), for the outline.
                     "spatialEco",   # curvature()
                     "scales",       # rescale()
@@ -36,9 +36,10 @@ func_load_packages <- function(run_params) {
                     "RStoolbox",    # For the surface type basemap under the daily SWE plots (currently disabled)
                     "qpdf")         # To extract the annual hydrological mass balance maps and put them into the overview PDF.
   
-  if (run_params$avalanche_routine_cpp == TRUE) {
+  # As of 2023/01/12, we need Rcpp for fourCellsFromXY, which is not yet implemented in the terra package.
+  # if (run_params$avalanche_routine_cpp == TRUE) {
     package_list <- c(package_list, "Rcpp")
-  }
+  # }
   
   exit_status <- suppressPackageStartupMessages(sapply(package_list, require, character.only = TRUE))
   exit_status_all <- all(exit_status)

@@ -10,7 +10,7 @@ func_run_model <- function(run_params) {
   
   cat("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n")
   cat("|++++++++++++++++                          ++++++++++++++++|\n")
-  cat("|+++++++++               DMBSim v1.0              +++++++++|\n")
+  cat("|+++++++++               DMBSim v2.0              +++++++++|\n")
   cat("|++++++++++++++++                          ++++++++++++++++|\n")
   cat("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n\n\n")
   
@@ -51,6 +51,12 @@ func_run_model <- function(run_params) {
     sourceCpp(file.path("functions", "func_avalanche_gruber.cpp"), cacheDir = "functions")
   }
   
+  # Source C++ definition of fourCellsFromXY,
+  # which we have taken from the raster package
+  # since it is not yet implemented in the terra package.
+  sourceCpp(file.path("functions", "func_four_cells_from_xy.cpp"), cacheDir = "functions")
+
+    
   # Compute and apply multiplier for color scale of mass balance maps.
   if (is.na(run_params$mb_colorscale_multiplier)) {
     run_params$mb_colorscale_multiplier <- func_compute_massbal_colorscale_multiplier(data_all$data_massbalance_annual,

@@ -29,14 +29,14 @@ func_find_stake_cells_dx_dy <- function(year_data,
                                         data_dems,
                                         run_params) {
   
-  dx1_annual <- (year_data$massbal_annual_meas_cur$x - (extent(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
+  dx1_annual <- (year_data$massbal_annual_meas_cur$x - (ext(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
   dx2_annual <- run_params$grid_cell_size - dx1_annual
-  dy2_annual <- ((extent(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$massbal_annual_meas_cur$y) %% run_params$grid_cell_size
+  dy2_annual <- ((ext(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$massbal_annual_meas_cur$y) %% run_params$grid_cell_size
   dy1_annual <- run_params$grid_cell_size - dy2_annual
   
-  dx1_winter <- (year_data$massbal_winter_meas_cur$x - (extent(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
+  dx1_winter <- (year_data$massbal_winter_meas_cur$x - (ext(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
   dx2_winter <- run_params$grid_cell_size - dx1_winter
-  dy2_winter <- ((extent(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$massbal_winter_meas_cur$y) %% run_params$grid_cell_size
+  dy2_winter <- ((ext(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$massbal_winter_meas_cur$y) %% run_params$grid_cell_size
   dy1_winter <- run_params$grid_cell_size - dy2_winter
   
   
@@ -50,7 +50,7 @@ func_find_stake_cells_dx_dy <- function(year_data,
   # always avoid!) the additional cells returned with duplicates = FALSE (cells which would
   # not be part of the actual adjacent cells) have higher index than the "true" adjacent cells.
   cells_annual <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), duplicates = FALSE))
-  cells_annual_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][t(cells_annual)], ncol = 4, byrow = TRUE)
+  cells_annual_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][as.integer(t(cells_annual))][,1], ncol = 4, byrow = TRUE)
   stakes_annual_edge_ids <- integer(0)
   for (stake_id in 1:year_data$nstakes_annual) {
     stake_na_cells_logi <- is.na(cells_annual_dem_value[stake_id,])

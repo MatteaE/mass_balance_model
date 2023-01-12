@@ -31,9 +31,9 @@ func_load_elevation_grids <- function(run_params) {
   
   cat("    Looking for DHM files...\n")
   
-  run_params <- func_find_input_files_single(run_params, "dhm")
-  grid_paths <- run_params$dhm_paths
-  dhm_n <- length(grid_paths)
+  run_params  <- func_find_input_files_single(run_params, "dhm")
+  grid_paths  <- run_params$dhm_paths
+  dhm_n       <- length(grid_paths)
   
   if (dhm_n == 0) {
     cat("** FATAL: no DHM files found. Please check parameters dir_data_dhm, filename_dhm_prefix and filename_dhm_suffix.\n")
@@ -42,14 +42,14 @@ func_load_elevation_grids <- function(run_params) {
     cat("    Found", dhm_n, "DHM file(s). Available year(s):", run_params$dhm_years, "\n")
   }
   
-  grid_interpolate <- run_params$dhm_interpolate
-  grid_years <- run_params$dhm_years
+  grid_interpolate  <- run_params$dhm_interpolate
+  grid_years        <- run_params$dhm_years
   
   
   # Do we have a single DHM? If so just use it every year.
   if (length(grid_years) == 1) {
     
-    grids_out$elevation[[1]] <- readAll(raster(grid_paths[1]))
+    grids_out$elevation[[1]]      <- rast(grid_paths[1])
     crs(grids_out$elevation[[1]]) <- run_params$grids_crs_epsg
     
     for (year_cur_id in 1:run_params$n_years) {
@@ -61,7 +61,7 @@ func_load_elevation_grids <- function(run_params) {
     
     # Load base grids (their indices correspond to the grid_years vector).
     for (grid_id in 1:length(grid_paths)) {
-      grids_out$elevation[[grid_id]] <- readAll(raster(grid_paths[grid_id]))
+      grids_out$elevation[[grid_id]]      <- rast(grid_paths[grid_id])
       crs(grids_out$elevation[[grid_id]]) <- run_params$grids_crs_epsg
     }
     
@@ -90,19 +90,20 @@ func_load_elevation_grids <- function(run_params) {
       xmax_all   <- max(sapply(grids_out$elevation, "xmax"))
       ymin_all   <- min(sapply(grids_out$elevation, "ymin"))
       ymax_all   <- max(sapply(grids_out$elevation, "ymax"))
-      extent_all <- extent(xmin_all, xmax_all, ymin_all, ymax_all)
+      extent_all <- ext(xmin_all, xmax_all, ymin_all, ymax_all)
       res_all    <- func_get_mode(sapply(grids_out$elevation, "xres"))
-      raster_blueprint <- raster(ext = extent_all, resolution = res_all) # Used as reference for extent and resolution.
+      crs_all    <- run_params$grids_crs_epsg
+      raster_blueprint <- rast(ext = extent_all, resolution = res_all, crs = crs_all) # Used as reference for extent and resolution.
       # Resample if needed, removing NAs.
       for (grid_id in 1:length(grids_out$elevation)) {
-        if (!compareRaster(grids_out$elevation[[grid_id]], raster_blueprint, stopiffalse = FALSE)) {
+        if (!compareGeom(grids_out$elevation[[grid_id]], raster_blueprint, stopOnError = FALSE)) {
           
           cat("* WARNING: func_load_elevation_grids.R: I am resampling DHM grid ", grid_id, " to enable DHM interpolation!\n")
           grids_out$elevation[[grid_id]] <- resample(grids_out$elevation[[grid_id]], raster_blueprint, method = "bilinear")
           crs(grids_out$elevation[[grid_id]]) <- run_params$grids_crs_epsg
           
           # Any NA in elevation is set to the mean value of the grid.
-          grids_out$elevation[[grid_id]][is.na(grids_out$elevation[[grid_id]][])] <- cellStats(grids_out$elevation[[grid_id]], stat = "mean", na.rm = TRUE)
+          grids_out$elevation[[grid_id]] <- subst(grids_out$elevation[[grid_id]], NA, global(grids_out$elevation[[grid_id]], fun = "mean", na.rm = TRUE))
         }
       }
       

@@ -35,7 +35,7 @@ func_compute_massbal_colorscale_multiplier <- function(data_massbalance_annual,
   } else {
     
     data_weather_sim <- data_weather[data_weather$year_hydro %in% run_params$years,]
-    ele_max <- cellStats(data_dems$elevation[[1]], "max")
+    ele_max <- global(data_dems$elevation[[1]], fun = "max", na.rm = TRUE)
     prec_solid_annual_max <- rep(NA_real_, run_params$n_years)
     for (year_id in 1:run_params$n_years) {
       year_cur <- run_params$years[year_id]

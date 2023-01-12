@@ -16,14 +16,14 @@ func_plot_massbal_vs_elevation <- function(year_data,
                                            data_dems) {
   
   if (year_data$nstakes_annual > 0) {
-    mb_meas_period_corr_values <- getValues(year_data$massbal_annual_maps$meas_period_corr)
+    mb_meas_period_corr_values <- values(year_data$massbal_annual_maps$meas_period_corr)[,1]
   }
   
   plots_mb_vs_ele <- list()
   
   #### Plot #1: all the mass balance profiles with elevation bands ####
   # Also the number of cells in each elevation band.
-  ele_bands_plot_values <- getValues(data_dems$elevation_bands_plot[[year_data$dem_grid_id]])
+  ele_bands_plot_values <- values(data_dems$elevation_bands_plot[[year_data$dem_grid_id]])[,1]
   ele_bands_plot_min    <- min(ele_bands_plot_values, na.rm = T)
   ele_bands_plot_max    <- max(ele_bands_plot_values, na.rm = T)
   ele_bands_plot_df     <- data.frame(ele                 = seq(ele_bands_plot_min, ele_bands_plot_max, run_params$ele_bands_plot_size),
@@ -41,13 +41,13 @@ func_plot_massbal_vs_elevation <- function(year_data,
     ele_bands_plot_df$area_km2[band_id]            <- ele_bands_plot_df$ncells[band_id] * (run_params$grid_cell_size * run_params$grid_cell_size) / 1e6
     if (year_data$nstakes_annual > 0) {
       ele_bands_plot_df$mb_annual_meas_corr[band_id] <- mean(mb_meas_period_corr_values[band_cell_ids]) * run_params$output_mult / 1000
-      ele_bands_plot_df$mb_annual_meas[band_id]      <- mean(getValues(year_data$massbal_annual_maps$meas_period)[band_cell_ids]) * run_params$output_mult / 1000
+      ele_bands_plot_df$mb_annual_meas[band_id]      <- mean(values(year_data$massbal_annual_maps$meas_period)[band_cell_ids]) * run_params$output_mult / 1000
     }
-    ele_bands_plot_df$mb_annual_hydro[band_id]     <- mean(getValues(year_data$massbal_annual_maps$hydro)[band_cell_ids]) * run_params$output_mult / 1000
-    # ele_bands_plot_df$mb_annual_fixed[band_id]     <- mean(getValues(year_data$massbal_annual_maps$fixed)[band_cell_ids]) * run_params$output_mult / 1000
-    ele_bands_plot_df$mb_winter_fixed[band_id]     <- mean(getValues(year_data$massbal_winter_maps$fixed)[band_cell_ids]) * run_params$output_mult / 1000
+    ele_bands_plot_df$mb_annual_hydro[band_id]     <- mean(values(year_data$massbal_annual_maps$hydro)[band_cell_ids]) * run_params$output_mult / 1000
+    # ele_bands_plot_df$mb_annual_fixed[band_id]     <- mean(values(year_data$massbal_annual_maps$fixed)[band_cell_ids]) * run_params$output_mult / 1000
+    ele_bands_plot_df$mb_winter_fixed[band_id]     <- mean(values(year_data$massbal_winter_maps$fixed)[band_cell_ids]) * run_params$output_mult / 1000
     if (year_data$process_winter) {
-      ele_bands_plot_df$mb_winter_meas[band_id]    <- mean(getValues(year_data$massbal_winter_maps$meas_period)[band_cell_ids]) * run_params$output_mult / 1000
+      ele_bands_plot_df$mb_winter_meas[band_id]    <- mean(values(year_data$massbal_winter_maps$meas_period)[band_cell_ids]) * run_params$output_mult / 1000
     }
   }
   
@@ -89,8 +89,8 @@ func_plot_massbal_vs_elevation <- function(year_data,
                          fill = "#FFFFFF", color = "#000000",
                          pattern_fill = "#000000", pattern_colour = "#000000",
                          pattern_angle = 35, pattern_size = 0.1, pattern_spacing = 0.02, pattern_density = 0.05) +
-    geom_hline(yintercept = 0, size = 0.4) +
-    geom_line(aes(x = ele, y = value, color = variable), size = 1) +
+    geom_hline(yintercept = 0, linewidth = 0.4) +
+    geom_line(aes(x = ele, y = value, color = variable), linewidth = 1) +
     scale_color_manual(breaks = c("mb_annual_meas", "mb_annual_hydro", "mb_winter_fixed", "mb_winter_meas", "mb_annual_meas_corr"), # DEV NOTE: first one would have been "mb_annual_fixed", but we have disabled that period.
                        values = c("#FF0000", "#FF9000", "#0000FF", "#8080FF", "#000000"), # "#8C00D4" was the first color, for mb_annual_fixed.
                        labels = c("Annual, measurement period", "Annual, hydrological year", # DEV NOTE: first one would have been "Annual, fixed dates", but we have disabled that period.
@@ -116,15 +116,15 @@ func_plot_massbal_vs_elevation <- function(year_data,
     # period, since stake standardization uses the model output which by definition
     # cannot add BIAS or RMS w.r.t. the model output itself.
     df_bias_rms <- data.frame(meas = year_data$massbal_annual_meas_cur$massbal_standardized/1e3,
-                              mod = extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear") / 1e3)
+                              mod = extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear")[,1] / 1e3)
     stakes_bias <- mean(df_bias_rms$mod - df_bias_rms$meas)
     stakes_rms <- sqrt(mean((df_bias_rms$mod - df_bias_rms$meas)^2))
     
     stakes_mod_massbal_meas_period <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[2],] - year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[1],]
     
     # This data.frame contains only the mass balance values on glaciated cells.
-    df_scatterplot <- data.frame(ele = data_dems$elevation[[year_data$dem_grid_id]][data_dems$glacier_cell_ids[[year_data$dem_grid_id]]],
-                                 mb = getValues(year_data$massbal_annual_maps$meas_period)[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]] * run_params$output_mult)
+    df_scatterplot <- data.frame(ele = data_dems$elevation[[year_data$dem_grid_id]][data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1],
+                                 mb = values(year_data$massbal_annual_maps$meas_period)[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]] * run_params$output_mult)
     
     df_stakes <- data.frame(z    = year_data$massbal_annual_meas_cur$z_dem,
                             meas = year_data$massbal_annual_meas_cur$massbal_standardized * run_params$output_mult,

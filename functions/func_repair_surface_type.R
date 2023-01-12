@@ -25,7 +25,7 @@ func_repair_surface_type <- function(run_params,
       dem_id                 <- data_dems$grid_year_id[year_id]
       
       # Look for rock cells inside the glacier outline.
-      surftype_rock_ids                <- which(getValues(data_surftype$grids[[surftype_id]]) == 4)
+      surftype_rock_ids                <- which(values(data_surftype$grids[[surftype_id]]) == 4)
       surftype_rock_inside_outline_ids <- intersect(data_dems$glacier_cell_ids[[dem_id]], surftype_rock_ids)
       ncells_bad                       <- length(surftype_rock_inside_outline_ids)
       
@@ -42,11 +42,11 @@ func_repair_surface_type <- function(run_params,
         dist_ras <- distance(data_surftype$grids[[surftype_id]])
         dir_ras  <- direction(data_surftype$grids[[surftype_id]], from = FALSE)
         
-        bad_cells_coords    <- coordinates(data_surftype$grids[[surftype_id]])[surftype_rock_inside_outline_ids,]
+        bad_cells_coords    <- crds(data_surftype$grids[[surftype_id]], na.rm = FALSE)[surftype_rock_inside_outline_ids,]
         replacement_cells_x <- bad_cells_coords[,1] + dist_ras[surftype_rock_inside_outline_ids] * sin(dir_ras[surftype_rock_inside_outline_ids])
         replacement_cells_y <- bad_cells_coords[,2] + dist_ras[surftype_rock_inside_outline_ids] * cos(dir_ras[surftype_rock_inside_outline_ids])
         
-        replacement_values  <- extract(data_surftype$grids[[surftype_id]], cbind(replacement_cells_x, replacement_cells_y), method = "simple")
+        replacement_values  <- extract(data_surftype$grids[[surftype_id]], cbind(replacement_cells_x[,1], replacement_cells_y[,1]), method = "simple")[,1]
         data_surftype$grids[[surftype_id]][surftype_rock_inside_outline_ids] <- replacement_values
         
       }
