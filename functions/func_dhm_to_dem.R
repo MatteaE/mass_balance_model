@@ -47,7 +47,7 @@ func_dhm_to_dem <- function(run_params,
     
     dhm_id                                            <- as.integer(str_split(dhm_outline_combinations_unique[dem_id], fixed(" "))[[1]][1])
     outline_id                                        <- as.integer(str_split(dhm_outline_combinations_unique[dem_id], fixed(" "))[[1]][2])
-    dem_cur                                           <- mask(data_dhms$elevation[[dhm_id]], vect(data_outlines$outlines[[outline_id]]))
+    dem_cur                                           <- mask(data_dhms$elevation[[dhm_id]], vect(data_outlines$outlines[[outline_id]]), touches = FALSE)
     data_dems$elevation[[dem_id]]                     <- dem_cur
     dem_cur_values                                    <- values(dem_cur)
     cur_combination_year_ids                          <- which(dhm_outline_combinations == dhm_outline_combinations_unique[dem_id])

@@ -42,7 +42,7 @@ func_plot_daily_maps <- function(year_data,
       surf_base +
       geom_raster(aes(x = x, y = y, fill = swe, alpha = as.character(snow))) +
       scale_alpha_manual(values = c("0" = 0, "1" = 1)) +
-      geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", size = 0.2) +
+      geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = 0.2) +
       geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = 0.15) +
       geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.2, stroke.color = "#FFFFFF", size = 1.6, min.size = 10) +
       annotate("label", x = Inf, y = Inf, hjust = 1.3, vjust = 1.5, label = date_text) +
@@ -67,7 +67,7 @@ func_plot_daily_maps <- function(year_data,
     ggplot(plot_df) +
       surf_base +
       geom_raster(aes(x = x, y = y, fill = massbal)) +
-      geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", size = 0.2) +
+      geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = 0.2) +
       geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = 0.15) +
       geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.2, stroke.color = "#FFFFFF", size = 1.6, min.size = 10) +
       annotate("label", x = Inf, y = Inf, hjust = 1.3, vjust = 1.5, label = date_text) +

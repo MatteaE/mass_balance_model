@@ -62,10 +62,14 @@ func_load_year_params_from_file <- function(year_data,
       # For the other parameters, we simply load them as numeric.
       if (params_names_all[param_id_year_cur] == "mb_corr_ele_bands") {
         year_cur_params[[param_id_year_cur]] <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
-      }
-      
-      else if (params_names_all[param_id_year_cur] == "prec_elegrad") {
-        val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+        
+        
+      } else if (params_names_all[param_id_year_cur] == "prec_elegrad") {
+        if (typeof(params_raw[param_id_raw,1]) == "character") {
+          val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+        } else {
+          val_tmp <- as.numeric(params_raw[param_id_raw,1])
+        }
         if (length(val_tmp) == 1) {
           year_cur_params[[param_id_year_cur]] <- rep(val_tmp, 12)
         } else if (length(val_tmp) == 12) {
@@ -73,10 +77,14 @@ func_load_year_params_from_file <- function(year_data,
         } else {
           stop(paste0("Year ", year_data$year_cur, ": parameter prec_elegrad must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = "")))
         }
-      }
-      
-      else if (params_names_all[param_id_year_cur] == "temp_elegrad") {
-        val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+        
+        
+      } else if (params_names_all[param_id_year_cur] == "temp_elegrad") {
+        if (typeof(params_raw[param_id_raw,1]) == "character") {
+          val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+        } else {
+          val_tmp <- as.numeric(params_raw[param_id_raw,1])
+        }
         if (length(val_tmp) == 1) {
           year_cur_params[[param_id_year_cur]] <- rep(val_tmp, 12)
         } else if (length(val_tmp) == 12) {
@@ -84,9 +92,9 @@ func_load_year_params_from_file <- function(year_data,
         } else {
           stop(paste0("Year ", year_data$year_cur, ": parameter temp_elegrad must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = "")))
         }
-      }
-      
-      else {
+        
+        
+      } else {
         year_cur_params[[param_id_year_cur]] <- as.numeric(params_raw[param_id_raw,1])
       }
     }

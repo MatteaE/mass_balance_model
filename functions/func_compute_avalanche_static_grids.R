@@ -137,10 +137,10 @@ func_compute_avalanche_static_grids <- function(run_params, data_dhms) {
         # and positive dz.
         # Nested sapply(): we retrieve from the nested list the 4 grids (of both dz
         # and flow width) of the current grid index (inner sapply()), then for each
-        # we extract the value at cell index residaul_sink_cell_id.
+        # we extract the value at cell index residual_sink_cell_id.
         cell_orig_ids <- 1:4
-        cell_dzs <- sapply(avalanche$dz[[grid_id]], `[`, residual_sink_cell_id)
-        cell_flow_widths <- sapply(avalanche$flow_width[[grid_id]], `[`, residual_sink_cell_id)
+        cell_dzs <- unlist(sapply(avalanche$dz[[grid_id]], extract, residual_sink_cell_id))
+        cell_flow_widths <- unlist(sapply(avalanche$flow_width[[grid_id]], extract, residual_sink_cell_id))
 
         cell_df <- data.frame(cell_orig_ids, cell_dzs, cell_flow_widths)
         cell_df_downslope <- cell_df[which(cell_df$cell_dzs >= 0),]
