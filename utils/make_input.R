@@ -5,17 +5,16 @@
 # The 2 additional shapefiles are optional: in case they are not provided, the output grid        #
 # only has ice and rock (no firn and no debris).                                                  #
 # Author: Enrico Mattea (University of Fribourg)                                                  #
-# Latest change: 2021/9/21                                                                        #
 ###################################################################################################
 
 suppressPackageStartupMessages(library(lwgeom))
 suppressPackageStartupMessages(library(insol))
 suppressPackageStartupMessages(library(shinyFiles))
 suppressPackageStartupMessages(library(shinyjs))
-suppressPackageStartupMessages(library(raster))
+suppressPackageStartupMessages(library(terra))
 suppressPackageStartupMessages(library(sf))
 suppressPackageStartupMessages(library(tools))
-rasterOptions(todisk = TRUE) # Saves a lot of memory usage when processing large rasters.
+
 
 #### Functions called by the app ####
 # This function computes gridded total potential incoming solar radiation for one specific day.
@@ -70,20 +69,22 @@ func_compute_all_daily_pisr <- function(dem,
   dir.create(file.path(outpath_base, "radiation"), showWarnings = FALSE)
   
   # Setup useful DEM variables.
-  dem_mat <- as.matrix(dem)
-  norm_mat <- cgrad(dem)
+  dem_mat <- as.matrix(dem, wide = TRUE)
+  norm_mat <- cgrad(dem_mat, xres(dem), yres(dem))
   
   dem_res <- xres(dem)
   dem_crs <- crs(dem)
-  dem_ext <- extent(dem)
+  dem_ext <- ext(dem)
   
   # Get lat/lon extent, to compute midpoint lat/lon.
-  dem_proj_ext <- projectExtent(dem, crs("EPSG:4326"))@extent
-  lon <- (dem_proj_ext[1] + dem_proj_ext[2]) / 2
-  lat <- (dem_proj_ext[3] + dem_proj_ext[4]) / 2
+  xmid = (dem_ext[1] + dem_ext[2]) / 2
+  ymid = (dem_ext[3] + dem_ext[4]) / 2
+  lonlat <- terra::project(cbind(xmid, ymid), from = dem_crs, to = "EPSG:4326")
+  lon <- lonlat[,1]
+  lat <- lonlat[,2]
   
   # Reference altitude for irradiance calculation: the mean of the DEM.
-  ele_ref <- mean(getValues(dem))
+  ele_ref <- as.numeric(global(dem, mean))
   
   # Irradiance model constants.
   visibility <<- 50   # [km]
@@ -107,14 +108,14 @@ func_compute_all_daily_pisr <- function(dem,
                                         doy_cur,
                                         delta_t)
     
-    # Convert matrix to raster.
-    rad_cur_ras <- round(raster(rad_cur_mat, crs = dem_crs))
-    extent(rad_cur_ras) <- dem_ext
-    NAvalue(rad_cur_ras) <- -9999
+    # Convert matrix to SpatRaster.
+    rad_cur_ras <- round(rast(rad_cur_mat, crs = dem_crs))
+    ext(rad_cur_ras) <- dem_ext
+    NAflag(rad_cur_ras) <- -9999
     
     # Write file to geotiff.
     rad_out_filepath_cur <- file.path(outpath_base, "radiation", paste0("dir", sprintf("%03d", doy_cur), "24.tif"))
-    writeRaster(rad_cur_ras, rad_out_filepath_cur, overwrite = TRUE, datatype = "FLT4S")
+    terra::writeRaster(rad_cur_ras, rad_out_filepath_cur, overwrite = TRUE, datatype = "FLT4S")
     file.rename(rad_out_filepath_cur, paste0(file_path_sans_ext(rad_out_filepath_cur), ".tif"))
   }
   
@@ -139,8 +140,8 @@ func_do_processing <- function(dem_filepath,
                                compute_radiation_bool,
                                outpath_base) {
   
-  has_firn   <- !is.na(firn_filepath)
-  has_debris <- !is.na(debris_filepath)
+  has_firn      <- !is.na(firn_filepath)
+  has_debris    <- !is.na(debris_filepath)
   has_reference <- !is.na(reference_filepath)
   
   #### Load input ####
@@ -149,14 +150,14 @@ func_do_processing <- function(dem_filepath,
   ndems <- length(dem_filepath)
   if (ndems > 1) {
     cat("You provided more than one DEM, I am merging them before proceeding...")
-    dems <- list()
-    for (dem_id in 1:ndems) {
-      dems[[dem_id]] <- raster(dem_filepath[dem_id])
-    }
-    dem_l1 <- do.call(merge, dems)
+    dems <- sapply(as.list(dem_filepath), rast)
+    dem_l1 <- do.call(terra::merge, dems)
+    cat(" Done.\n")
   } else {
-    dem_l1     <- raster(dem_filepath)
+    dem_l1 <- rast(dem_filepath)
   }
+  
+  cat("Reading glacier outline...\n")
   outline_l1 <- st_zm(st_read(outline_filepath, quiet = TRUE))
   if (any(!st_is_valid(outline_l1))) {
     cat("Glacier outline has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
@@ -179,7 +180,7 @@ func_do_processing <- function(dem_filepath,
     }
   }
   
-  if (has_reference) reference_l1 <- raster(reference_filepath)
+  if (has_reference) reference_l1 <- rast(reference_filepath)
   gc()
   
   
@@ -192,9 +193,9 @@ func_do_processing <- function(dem_filepath,
   # Check whether either DEM or shapefile is UTM (allow for a 1-zone tolerance for glaciers spanning UTM zone borders)
   # If yes: project only the other to the same UTM and proceed (preferentially reproject outline as it is faster)
   # If no: project both to UTM, then proceed.
-  dem_crs            <- crs(dem_l1)
-  outline_crs        <- crs(outline_l1)
-  wgs84_crs          <- crs("EPSG:4326")
+  dem_crs            <- terra::crs(dem_l1, proj = TRUE)
+  outline_crs        <- terra::crs(outline_l1, proj = TRUE)
+  wgs84_crs          <- terra::crs("EPSG:4326", proj = TRUE)
   
   # Flags which are set according to the following logic routine.
   reproj_dem         <- FALSE
@@ -204,33 +205,33 @@ func_do_processing <- function(dem_filepath,
   
   # Find which UTM zone we should be using here in principle.
   # Also works if the outline is in some weird CRS.
-  if (outline_crs@projargs == wgs84_crs@projargs) {
+  if (outline_crs == wgs84_crs) {
     outline_centroid   <- suppressWarnings(st_coordinates(st_centroid(outline_l1)))
   } else {
-    outline_wgs84      <- st_transform(outline_l1, crs("EPSG:4326"))
+    outline_wgs84      <- st_transform(outline_l1, "EPSG:4326")
     outline_centroid   <- suppressWarnings(st_coordinates(st_centroid(outline_wgs84)))
   }
   utm_crs_number       <- func_long2utmzonenumber(outline_centroid[1])
-  utm_crs              <- crs(paste0("EPSG:", 32600 + utm_crs_number))
+  utm_crs              <- terra::crs(paste0("EPSG:", 32600 + utm_crs_number), proj = TRUE)
   
   if (has_reference) {
     cat("Reference grid is available. I am reprojecting as needed...\n")
     
-    reference_crs <- crs(reference_l1)
+    reference_crs <- crs(reference_l1, proj = TRUE)
     
     # If the reference is a .grid file
     # (e.g. which we have just produced),
     # it has no CRS! So in that case we
     # assume that the grid uses the UTM CRS
     # of our choice.
-    if (is.na(reference_crs@projargs)) {
+    if (reference_crs == "") {
       crs(reference_l1) <- utm_crs
     }
     
     target_crs    <- reference_crs
     
-    if (dem_crs@projargs     != reference_crs@projargs) reproj_dem     <- TRUE
-    if (outline_crs@projargs != reference_crs@projargs) reproj_outline <- TRUE
+    if (dem_crs     != reference_crs) reproj_dem     <- TRUE
+    if (outline_crs != reference_crs) reproj_outline <- TRUE
     
     # We also want square cells.
     if (abs(xres(dem_l1) - yres(dem_l1)) > 1e-5)        reproj_dem     <- TRUE
@@ -238,50 +239,50 @@ func_do_processing <- function(dem_filepath,
     # If there is no reference grid supplied for alignment.
   } else {
     
-    if ((dem_crs@projargs == outline_crs@projargs) && (dem_crs@projargs != wgs84_crs@projargs)) {
+    if ((dem_crs == outline_crs) && (dem_crs != wgs84_crs)) {
       
       cat("DEM and shapefile are already in the same projected coordinates.\n")
       
       if ((abs(xres(dem_l1) - yres(dem_l1)) > 1e-5)) {
-        message("DEM cells are not square! I will have to reproject the DEM, but I will keep the same coordinate system.")
+        message("DEM cells are not square! I will have to resample the DEM, but I will keep the same coordinate system.")
         reproj_dem <- TRUE
         target_crs <- dem_crs
       }
       
-    } else if ((dem_crs@projargs == outline_crs@projargs) && (dem_crs@projargs == wgs84_crs@projargs)) {
+    } else if ((dem_crs == outline_crs) && (dem_crs == wgs84_crs)) {
       
       message(paste0("DEM and shapefile are both in WGS84 (EPSG:4326). I am reprojecting them to UTM (zone ", utm_crs_number, "N) before proceeding."))
-      message("This can take some minutes if the DEM is big.\n")
+      # message("This can take some minutes if the DEM is big.\n")
       
       reproj_dem       <- TRUE
       reproj_outline   <- TRUE
       target_crs       <- utm_crs 
       
-    } else if (dem_crs@projargs != outline_crs@projargs) {
+    } else if (dem_crs != outline_crs) {
       
       message("DEM and shapefile do not have the same coordinate system.")
-      utm_crs_allowed  <- sapply(paste0("EPSG:", 32600 + utm_crs_number + -1:1), function(x) crs(x)@projargs) # Allow a 1-zone tolerance, for glaciers near the UTM zone borders.
+      utm_crs_allowed  <- sapply(paste0("EPSG:", 32600 + utm_crs_number + -1:1), function(x) terra::crs(x, proj = TRUE)) # Allow a 1-zone tolerance, for glaciers near the UTM zone borders.
       
-      if (dem_crs@projargs %in% utm_crs_allowed) { # Reproject outline.
+      if (dem_crs %in% utm_crs_allowed) { # Reproject outline.
         message("DEM coordinate system is good, I am reprojecting the shapefile.")
         reproj_outline <- TRUE
         target_crs     <- dem_crs
         
         if ((abs(xres(dem_l1) - yres(dem_l1)) > 1e-5)) {
-          message("But DEM cells are not square! I will have to also reproject the DEM, but I will keep the same coordinate system.")
+          message("But DEM cells are not square! I will have to also resample the DEM, but I will keep the same coordinate system.")
           reproj_dem <- TRUE
           target_crs <- dem_crs
         }
         
-      } else if (outline_crs@projargs %in% utm_crs_allowed) { # Reproject DEM.
+      } else if (outline_crs %in% utm_crs_allowed) { # Reproject DEM.
         
-        message("Shapefile coordinate system is good, I am reprojecting the DEM. This can take some minutes if the DEM is big.")
+        message("Shapefile coordinate system is good, I am reprojecting the DEM.") # This can take some minutes if the DEM is big.")
         reproj_dem     <- TRUE
         target_crs     <- outline_crs
         
       } else { # Reproject both.
         
-        message(paste0("I am reprojecting both DEM and shapefile to UTM (zone ", utm_crs_number, "N). This can take some minutes if the DEM is big."))
+        message(paste0("I am reprojecting both DEM and shapefile to UTM (zone ", utm_crs_number, "N)."))# This can take some minutes if the DEM is big."))
         reproj_dem     <- TRUE
         reproj_outline <- TRUE
         target_crs     <- utm_crs
@@ -323,11 +324,49 @@ func_do_processing <- function(dem_filepath,
     }
   }
   
-  if (reproj_dem)     dem_l2      <- projectRaster(dem_l1, res = resolution_proj_raster, crs = target_crs, method = "bilinear")
+  
+  
   # Always reproject firn and debris shapefiles. Easier than doing all comparisons of the projection.
-  if (has_firn)   firn_l2   <- st_transform(firn_l1, crs(outline_l2))
-  if (has_debris) debris_l2 <- st_transform(debris_l1, crs(outline_l2))
+  if (has_firn)   firn_l2   <- st_transform(firn_l1, terra::crs(outline_l2, proj = TRUE))
+  if (has_debris) debris_l2 <- st_transform(debris_l1, terra::crs(outline_l2, proj = TRUE))
   gc()
+  
+  
+  # Now project / crop DEM.
+  # If reference grid not available: generate one based on computed
+  # extent, target CRS and resolution, 
+  # and use it as template, reprojecting DEM if needed.
+  if (!(has_reference)) {
+    
+    ext_out <- ext(st_bbox(outline_l2) + dem_buffer * c(-1,-1,1,1))
+    reference_l1 <- rast(crs = target_crs,
+                         resolution = resolution_proj_raster,
+                         extent = ext_out)
+    has_reference = TRUE
+  }
+    
+    if (reproj_dem) {
+      ref_ext_proj <- project(ext(reference_l1),
+                              terra::crs(reference_l1, proj = TRUE),
+                              terra::crs(dem_l1, proj = TRUE))
+      dem_l2 <- crop(dem_l1, ref_ext_proj, snap = "out")
+      dem_l2 <- terra::project(dem_l2, reference_l1, method = "bilinear")
+      dhm_out <- dem_l2
+    }
+    
+    # In practice this if will be true only if the
+    # previous one (reproj_dem) was false, since
+    # terra::project always matches extent and nrow/ncol.
+    # In that case, the supplied DEM only has to be resampled
+    # but not reprojected.
+    if ((nrow(dem_l2)   != nrow(reference_l1))   ||
+        (ncol(dem_l2)   != ncol(reference_l1))   ||
+        (ext(dem_l2)    != ext(reference_l1))) {
+      
+      dhm_out <- terra::resample(dem_l2, reference_l1, method = "bilinear")
+    }
+    
+ 
   
   #### Extract grids with buffer ####
   # If we just give the buffer size, we just extract the DHM region.
@@ -335,22 +374,10 @@ func_do_processing <- function(dem_filepath,
   # resolution/origin/extent could be different (even after adjusting projection, which we have done above).
   cat("\nPreparing output...\n")
   if (!has_reference) {
-    ext_out <- st_bbox(outline_l2) + dem_buffer * c(-1,-1,1,1)
+    
     dhm_out <- crop(dem_l2, ext_out)
   } else {
-    ext_out <- extent(reference_l1)
-    
-    # Check resolution/origin/extent
-    # (actually, number of rows/columns and extent,
-    # that's enough also for origin).
-    # If needed, do the resampling.
-    if ((nrow(dem_l2)   != nrow(reference_l1))   ||
-        (ncol(dem_l2)   != ncol(reference_l1))   ||
-        (extent(dem_l2) != extent(reference_l1))) {
-      
-      dhm_out <- resample(dem_l2, reference_l1, method = "bilinear")
-      
-    }
+
   }
   
   dem_out <- mask(dhm_out, outline_l2)
@@ -360,8 +387,8 @@ func_do_processing <- function(dem_filepath,
   
   
   #### Write grids to output ####
-  NAvalue(dhm_out)      <- -9999
-  NAvalue(surftype_out) <- -9999
+  NAflag(dhm_out)      <- -9999
+  NAflag(surftype_out) <- -9999
   dir.create(file.path(outpath_base, "dhm"), recursive = TRUE, showWarnings = FALSE)
   dir.create(file.path(outpath_base, "surftype"), showWarnings = FALSE)
   dir.create(file.path(outpath_base, "outline"), showWarnings = FALSE)
@@ -379,11 +406,11 @@ func_do_processing <- function(dem_filepath,
   }
   
   # Errors? Show them!
-  if (any(is.na(getValues(dhm_out)))) {
+  if (any(is.na(values(dhm_out)))) {
     cat("\n*** ERROR: there are NA values in the ouput DHM. Please check that the input DEMs cover the entire area of interest. ***\n")
     return(1)
   }
-  if (any(is.na(getValues(surftype_out)))) {
+  if (any(is.na(values(surftype_out)))) {
     cat("\n*** ERROR: there are NA values in the ouput surface type grid. Please check the input outline shapefile. ***\n")
     return(1)
   }
