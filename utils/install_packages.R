@@ -1,7 +1,6 @@
 ###################################################################################################
 # This program installs all the R packages required to run the glacier mass balance model.        #
 # Author: Enrico Mattea (University of Fribourg)                                                  #
-# Latest change: 2021/9/20                                                                        #
 ###################################################################################################
 
 # This function is called after reloading R, needed (on windows) to find Rtools on the path.
@@ -33,7 +32,6 @@ func_install_all <- function() {
                       "lwgeom",
                       "metR",
                       "qpdf",
-                      "raster",
                       "Rcpp",
                       "readxl",
                       "remotes",
@@ -53,6 +51,14 @@ func_install_all <- function() {
                       "timeSeries")
    
    install.packages(setdiff(packages_cran, rownames(installed.packages())))  
+   
+   # Install terra package. We take a very recent
+   # version since it is still under development.
+   if (!("terra" %in% rownames(installed.packages()))) {
+    install.packages('terra', repos='https://rspatial.r-universe.dev')
+   } else if (compareVersion(as.character(packageVersion("terra")), "1.6.51") == -1) {
+     install.packages('terra', repos='https://rspatial.r-universe.dev')
+   }
    
    packages_github_repos <- c("coolbutuseless")
    packages_github_names <- c("ggpattern")
