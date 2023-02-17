@@ -37,7 +37,7 @@ func_install_all <- function() {
                       "remotes",
                       "reshape2",
                       "Rfast",
-                      "RStoolbox",
+                      # "RStoolbox",
                       "scales",
                       "shadowtext",
                       "shiny",
@@ -60,8 +60,8 @@ func_install_all <- function() {
      install.packages('terra', repos='https://rspatial.r-universe.dev')
    }
    
-   packages_github_repos <- c("coolbutuseless")
-   packages_github_names <- c("ggpattern")
+   packages_github_repos <- c("coolbutuseless", "bleutner")
+   packages_github_names <- c("ggpattern", "RStoolbox")
    packages_github_full <- paste(packages_github_repos, packages_github_names, sep="/")
    packages_github_missing_ids <- which(!(packages_github_names %in% rownames(installed.packages())))
    
