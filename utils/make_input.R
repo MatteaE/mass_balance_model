@@ -242,6 +242,7 @@ func_do_processing <- function(dem_filepath,
     if ((dem_crs == outline_crs) && (dem_crs != wgs84_crs)) {
       
       cat("DEM and shapefile are already in the same projected coordinates.\n")
+      target_crs <- dem_crs
       
       if ((abs(xres(dem_l1) - yres(dem_l1)) > 1e-5)) {
         message("DEM cells are not square! I will have to resample the DEM, but I will keep the same coordinate system.")
@@ -344,29 +345,29 @@ func_do_processing <- function(dem_filepath,
                          extent = ext_out)
     has_reference = TRUE
   }
+  
+  if (reproj_dem) {
+    ref_ext_proj <- project(ext(reference_l1),
+                            terra::crs(reference_l1, proj = TRUE),
+                            terra::crs(dem_l1, proj = TRUE))
+    dem_l2 <- crop(dem_l1, ref_ext_proj, snap = "out")
+    dem_l2 <- terra::project(dem_l2, reference_l1, method = "bilinear")
+    dhm_out <- dem_l2
+  }
+  
+  # In practice this if will be true only if the
+  # previous one (reproj_dem) was false, since
+  # terra::project always matches extent and nrow/ncol.
+  # In that case, the supplied DEM only has to be resampled
+  # but not reprojected.
+  if ((nrow(dem_l2)   != nrow(reference_l1))   ||
+      (ncol(dem_l2)   != ncol(reference_l1))   ||
+      (ext(dem_l2)    != ext(reference_l1))) {
     
-    if (reproj_dem) {
-      ref_ext_proj <- project(ext(reference_l1),
-                              terra::crs(reference_l1, proj = TRUE),
-                              terra::crs(dem_l1, proj = TRUE))
-      dem_l2 <- crop(dem_l1, ref_ext_proj, snap = "out")
-      dem_l2 <- terra::project(dem_l2, reference_l1, method = "bilinear")
-      dhm_out <- dem_l2
-    }
-    
-    # In practice this if will be true only if the
-    # previous one (reproj_dem) was false, since
-    # terra::project always matches extent and nrow/ncol.
-    # In that case, the supplied DEM only has to be resampled
-    # but not reprojected.
-    if ((nrow(dem_l2)   != nrow(reference_l1))   ||
-        (ncol(dem_l2)   != ncol(reference_l1))   ||
-        (ext(dem_l2)    != ext(reference_l1))) {
-      
-      dhm_out <- terra::resample(dem_l2, reference_l1, method = "bilinear")
-    }
-    
- 
+    dhm_out <- terra::resample(dem_l2, reference_l1, method = "bilinear")
+  }
+  
+  
   
   #### Extract grids with buffer ####
   # If we just give the buffer size, we just extract the DHM region.
@@ -377,7 +378,7 @@ func_do_processing <- function(dem_filepath,
     
     dhm_out <- crop(dem_l2, ext_out)
   } else {
-
+    
   }
   
   dem_out <- mask(dhm_out, outline_l2)
