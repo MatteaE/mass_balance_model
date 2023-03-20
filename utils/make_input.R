@@ -343,7 +343,7 @@ func_do_processing <- function(dem_filepath,
     reference_l1 <- rast(crs = target_crs,
                          resolution = resolution_proj_raster,
                          extent = ext_out)
-    has_reference = TRUE
+    has_reference <- TRUE
   }
   
   if (reproj_dem) {
@@ -365,6 +365,8 @@ func_do_processing <- function(dem_filepath,
       (ext(dem_l2)    != ext(reference_l1))) {
     
     dhm_out <- terra::resample(dem_l2, reference_l1, method = "bilinear")
+  } else {
+    dhm_out <- dem_l2
   }
   
   
@@ -374,12 +376,12 @@ func_do_processing <- function(dem_filepath,
   # Instead, if we give a reference DEM we may have to resample (bilinear filter) ours, because
   # resolution/origin/extent could be different (even after adjusting projection, which we have done above).
   cat("\nPreparing output...\n")
-  if (!has_reference) {
-    
-    dhm_out <- crop(dem_l2, ext_out)
-  } else {
-    
-  }
+  # if (!has_reference) {
+  #   
+  #   dhm_out <- crop(dem_l2, ext_out)
+  # } else {
+  #   
+  # }
   
   dem_out <- mask(dhm_out, outline_l2)
   surftype_out <- 4*is.na(dem_out) # This is the base rock/ice mask.
