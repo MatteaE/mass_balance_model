@@ -365,6 +365,10 @@ func_do_processing <- function(dem_filepath,
       (ext(dem_l2)    != ext(reference_l1))) {
     
     dhm_out <- terra::resample(dem_l2, reference_l1, method = "bilinear")
+    
+    # If the dem_l1 was already matching the reference exactly,
+    # with no reprojection/crop/resample involved,
+    # all we have to do is create dhm_out.
   } else {
     dhm_out <- dem_l2
   }
@@ -376,13 +380,7 @@ func_do_processing <- function(dem_filepath,
   # Instead, if we give a reference DEM we may have to resample (bilinear filter) ours, because
   # resolution/origin/extent could be different (even after adjusting projection, which we have done above).
   cat("\nPreparing output...\n")
-  # if (!has_reference) {
-  #   
-  #   dhm_out <- crop(dem_l2, ext_out)
-  # } else {
-  #   
-  # }
-  
+
   dem_out <- mask(dhm_out, outline_l2)
   surftype_out <- 4*is.na(dem_out) # This is the base rock/ice mask.
   if (has_firn)   surftype_out <- mask(surftype_out, firn_l2, inverse = TRUE, updatevalue = 1)   # Add firn if we have it.
