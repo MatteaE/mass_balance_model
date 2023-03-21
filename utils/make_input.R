@@ -15,6 +15,7 @@ suppressPackageStartupMessages(library(terra))
 suppressPackageStartupMessages(library(sf))
 suppressPackageStartupMessages(library(tools))
 
+debug_verbose <- TRUE
 
 #### Functions called by the app ####
 # This function computes gridded total potential incoming solar radiation for one specific day.
@@ -599,6 +600,12 @@ server <- function(input, output, session) {
   
   # Button to start processing.
   observeEvent(input$startprocessing, {
+    
+    if (debug_verbose == TRUE) {
+      sink("make_input.log",
+           split = TRUE)
+    }
+    
     # These 4 below are probably not needed since the RUN! button is
     # disabled by shinyjs, but we keep them anyway since they make sense.
     req(input$choose_glacier_name)
@@ -622,6 +629,9 @@ server <- function(input, output, session) {
     } else {
       unlink(file.path(getwd(), glaciername()), recursive = TRUE)
       showModal(modalDialog(h3("Processing ERROR! See RStudio console for details. Please CORRECT THE ERROR and run the program again."), footer=NULL))
+    }
+    if (debug_verbose == TRUE) {
+      sink()
     }
   })
   
