@@ -70,7 +70,7 @@ func_find_stake_cells_dx_dy <- function(year_data,
   
   if (year_data$nstakes_winter > 0) {
     cells_winter <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), duplicates = FALSE))
-    cells_winter_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][t(cells_winter)], ncol = 4, byrow = TRUE)
+    cells_winter_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][as.integer(t(cells_winter))][,1], ncol = 4, byrow = TRUE)
     stakes_winter_edge_ids <- integer(0)
     for (stake_id in 1:year_data$nstakes_winter) {
       stake_na_cells_logi <- is.na(cells_winter_dem_value[stake_id,])

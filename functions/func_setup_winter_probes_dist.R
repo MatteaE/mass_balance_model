@@ -20,9 +20,9 @@ func_setup_winter_probes_dist <- function(year_data,
   year_data$process_winter <- (year_data$nstakes_winter > 0) && ((year_data$nstakes_annual > 0))
   
   if (year_data$process_winter) {
-    dist_probes_idw                 <- func_snow_probes_idw(run_params, year_data$massbal_winter_meas_cur, data_dhms)
+    dist_probes_idw                 <- func_snow_probes_idw(run_params, year_data$massbal_winter_meas_cur, data_dhms)$var1.pred
     dist_probes_idw                 <- clamp(dist_probes_idw, lower = 0, upper = Inf, values = TRUE)
-    year_data$dist_probes_idw_norm  <- dist_probes_idw / mean(dist_probes_idw[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]])
+    year_data$dist_probes_idw_norm  <- dist_probes_idw / mean(dist_probes_idw[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
   } else {
     # No winter probes to work with, so uniform distribution for the probes component.
     year_data$dist_probes_idw_norm  <- setValues(data_dhms$elevation[[1]], 1.0)

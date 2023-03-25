@@ -12,13 +12,12 @@
 # snow_probes is an annual subset of data_massbalance_winter.
 func_snow_probes_idw <- function(run_params, snow_probes, data_dhms) {
   
-  snow_probes_spdf <- SpatialPointsDataFrame(coords = snow_probes[,c(4,5)],
-                                             data = data.frame(swe = snow_probes$massbal / 1e3),
-                                             proj4string = CRS(run_params$grids_crs_epsg))
-    
+  snow_probes_df <- data.frame(x = snow_probes[,4],
+                               y = snow_probes[,5],
+                               swe = snow_probes$massbal / 1e3)
 
   # Use prescribed distance exponent.
-  gs <- gstat(formula=swe~1, data=snow_probes_spdf, set=list(idp=run_params$snow_probes_idw_exp))
+  gs <- gstat(formula=swe~1, data=snow_probes_df, set=list(idp=run_params$snow_probes_idw_exp), locations = ~x+y)
   snowdist_idw <- terra::interpolate(data_dhms$elevation[[1]], gs, debug.level = 0)
   
   # writeRaster(snowdist_idw, "snowdist_idw.tif", overwrite = T)
