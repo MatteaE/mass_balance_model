@@ -8,7 +8,7 @@ func_install_all <- function() {
    
    if (Sys.info()["sysname"] == "Windows") {
       old_path <- Sys.getenv("PATH")
-      Sys.setenv(PATH = paste0(old_path, ";C:\\rtools40\\usr\\bin;C:\\rtools42\\usr\\bin"))
+      Sys.setenv(PATH = paste0(old_path, ";C:\\rtools40\\usr\\bin"))
    }
    
    if (nchar(as.character(Sys.which("make"))) == 0) {
