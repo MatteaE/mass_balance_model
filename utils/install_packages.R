@@ -24,6 +24,7 @@ func_install_all <- function() {
    }
    
    packages_cran <- c("cowplot",
+                      "ggpattern",
                       "ggplot2",
                       "ggpubr",
                       "gstat",
@@ -34,7 +35,7 @@ func_install_all <- function() {
                       "qpdf",
                       "Rcpp",
                       "readxl",
-                      "remotes",
+                      #"remotes",
                       "reshape2",
                       "Rfast",
                       "scales",
@@ -46,6 +47,7 @@ func_install_all <- function() {
                       "sf",
                       "sp",
                       "spatialEco",
+                      "terra",
                       "topmodel",
                       "timeSeries")
    
@@ -53,18 +55,18 @@ func_install_all <- function() {
    
    # Install terra package. We take a very recent
    # version since it is still under development.
-   if (!("terra" %in% rownames(installed.packages()))) {
-    install.packages('terra', repos='https://rspatial.r-universe.dev')
-   } else if (compareVersion(as.character(packageVersion("terra")), "1.6.51") == -1) {
-     install.packages('terra', repos='https://rspatial.r-universe.dev')
-   }
+   #if (!("terra" %in% rownames(installed.packages()))) {
+   # install.packages('terra', repos='https://rspatial.r-universe.dev')
+   #} else if (compareVersion(as.character(packageVersion("terra")), "1.6.51") == -1) {
+   #  install.packages('terra', repos='https://rspatial.r-universe.dev')
+   #}
    
-   packages_github_repos <- c("coolbutuseless", "bleutner")
-   packages_github_names <- c("ggpattern", "RStoolbox")
-   packages_github_full <- paste(packages_github_repos, packages_github_names, sep="/")
-   packages_github_missing_ids <- which(!(packages_github_names %in% rownames(installed.packages())))
+   #packages_github_repos <- c("coolbutuseless")
+   #packages_github_names <- c("ggpattern")
+   #packages_github_full <- paste(packages_github_repos, packages_github_names, sep="/")
+   #packages_github_missing_ids <- which(!(packages_github_names %in% rownames(installed.packages())))
    
-   remotes::install_github(packages_github_full[packages_github_missing_ids])
+   #remotes::install_github(packages_github_full[packages_github_missing_ids])
    
    message("\n\n====                                     ====\n==== All packages installed succesfully! ====\n====                                     ====")
    message("\nYou should now **CLOSE** and **RESTART** RStudio **BEFORE** running the model.\n")
@@ -77,7 +79,7 @@ if (Sys.info()["sysname"] == "Windows") {
    }
    if (nchar(as.character(Sys.which("make"))) == 0) {
       installr::install.Rtools()
-      writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron")
+      writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron") # This hack is for RTools 4.0, not needed on R >= 4.2.
       Sys.sleep(1)
       .rs.restartR("func_install_all()")
    } else {

@@ -120,14 +120,6 @@ func_process_year <- function(year_data,
                                                             data_all$data_dems,
                                                             overview_annual$daily_data_list)
   
-  #### . Produce daily plots (only if asked to do so) ####
-  if (run_params$plot_daily_maps) {
-    func_plot_daily_maps(year_data,
-                         run_params,
-                         data_all$data_surftype,
-                         data_all$data_dems,
-                         data_all$data_outlines)
-  }
   
   # Commented code below: if a stake is at the very edge of the
   # glacier, bilinear extraction of the modeled series is impossible

@@ -33,7 +33,6 @@ func_load_packages <- function(run_params) {
                     "shadowtext",   # Additional plotting functions (text with white outline)
                     "reshape2",     # melt() data frame
                     "stringr",      # str_split() of the outline filename suffix, to get the extension
-                    "RStoolbox",    # For the surface type basemap under the daily SWE plots (currently disabled)
                     "qpdf")         # To extract the annual hydrological mass balance maps and put them into the overview PDF.
   
   # As of 2023/01/12, we need Rcpp for fourCellsFromXY, which is not yet implemented in the terra package.

@@ -20,6 +20,7 @@ logs/
 
 # Data used to develop the input preparation app #
 utils/data/
+utils/make_input.log
 
 # Old procedures superseded by functions #
 procedures/*.old
