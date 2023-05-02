@@ -69,21 +69,25 @@ func_install_all <- function() {
    
 }
 
-if (Sys.info()["sysname"] == "Windows") {
-   if (!("installr" %in% rownames(installed.packages()))) {
-      install.packages("installr")
-   }
-   if (nchar(as.character(Sys.which("make"))) == 0) {
-      installr::install.Rtools()
-      writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron") # This hack is for RTools 4.0, not needed on R >= 4.2.
-      Sys.sleep(1)
-      .rs.restartR("func_install_all()")
-   } else {
-      func_install_all()
-   }
-# Install stuff in case we don't have Windows i.e. we don't need to restart R.
-} else {
-   func_install_all()
-}
+# NOTE: this only works on R >= 4.2.0, after installing RTools manually.
+# For older versions, consider using the commented code below.
+func_install_all()
+
+# if (Sys.info()["sysname"] == "Windows") {
+#    if (!("installr" %in% rownames(installed.packages()))) {
+#       install.packages("installr")
+#    }
+#    if (nchar(as.character(Sys.which("make"))) == 0) {
+#       # installr::install.Rtools()
+#       # writeLines('PATH="${RTOOLS40_HOME}\\usr\\bin;${PATH}"', con = "~/.Renviron") # This hack is for RTools 4.0, not needed on R >= 4.2.
+#       Sys.sleep(1)
+#       .rs.restartR("func_install_all()")
+#    } else {
+#       func_install_all()
+#    }
+# # Install stuff in case we don't have Windows i.e. we don't need to restart R.
+# } else {
+#    func_install_all()
+# }
 
 
