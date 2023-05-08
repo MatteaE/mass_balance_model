@@ -32,7 +32,6 @@ func_install_all <- function() {
                       "lwgeom",
                       "metR",
                       "qpdf",
-                      "raster",
                       "Rcpp",
                       "readxl",
                       "reshape2",
