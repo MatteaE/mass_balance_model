@@ -50,18 +50,14 @@ func_install_all <- function() {
                       "topmodel",
                       "timeSeries")
    
-   install.packages(setdiff(packages_cran, rownames(installed.packages())))  
-   
-   packages_archived <- c("insol" = "https://cran.r-project.org/src/contrib/Archive/insol/insol_1.2.2.tar.gz")
-   install.packages(packages_archived[setdiff("insol", rownames(installed.packages()))], repos = NULL)
-   
-   # Install terra package. We take a very recent
-   # version since it is still under development.
-   #if (!("terra" %in% rownames(installed.packages()))) {
-   # install.packages('terra', repos='https://rspatial.r-universe.dev')
-   #} else if (compareVersion(as.character(packageVersion("terra")), "1.6.51") == -1) {
-   #  install.packages('terra', repos='https://rspatial.r-universe.dev')
-   #}
+   install.packages(setdiff(packages_cran, rownames(installed.packages())))
+
+   packages_github_repos <- c("MatteaE")
+   packages_github_names <- c("insol2")
+   packages_github_full <- paste(packages_github_repos, packages_github_names, sep="/")
+   packages_github_missing_ids <- which(!(packages_github_names %in% rownames(installed.packages())))
+
+   remotes::install_github(packages_github_full[packages_github_missing_ids])
    
    
    message("\n\n====                                     ====\n==== All packages installed succesfully! ====\n====                                     ====")

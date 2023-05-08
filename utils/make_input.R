@@ -8,7 +8,7 @@
 ###################################################################################################
 
 suppressPackageStartupMessages(library(lwgeom))
-suppressPackageStartupMessages(library(insol))
+suppressPackageStartupMessages(library(insol2))
 suppressPackageStartupMessages(library(shinyFiles))
 suppressPackageStartupMessages(library(shinyjs))
 suppressPackageStartupMessages(library(terra))
