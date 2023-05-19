@@ -18,6 +18,79 @@ suppressPackageStartupMessages(library(tools))
 debug_verbose <- TRUE
 
 #### Functions called by the app ####
+# This function does its best to match a malformed UTM coordinate system
+# (i.e. one which is not automatically recognized as a UTM) with the corresponding known one.
+# wkt_malformed is the output of st_crs(object)$wkt.
+# To find a suitable candidate, we look at the first line of the WKT.
+# If the first line contains:
+# "UTM" and <NN>( ){0,2}[N,S] or various combinations thereof,
+# then we interpret the projection as UTM.
+# Else we return NA and we will throw an error.
+func_recover_utm_crs <- function(wkt_malformed) {
+  
+  # Remove extra whitespaces.
+  wkt_malformed_v2 <- gsub("( ){2,}", " ", wkt_malformed)
+  
+  wkt_split <- strsplit(wkt_malformed_v2, "\n")[[1]]
+  wkt_line_first <- wkt_split[[1]]
+  
+  # This regexp tenaciously creates 5 capture groups:
+  # U(...)
+  # T(...)
+  # M(...)
+  # <zone number>
+  # N or S
+  regexp_utm <- "((?:universal)|U){1}[ _-]{0,2}((?:transverse)|T){1}[ _-]{0,2}((?:mercator)|M){1}(?:[^0-9])*([0-9]{1,2})[ _-]*([NS]{1})"
+  
+  utm_match <- regmatches(wkt_line_first,regexec(regexp_utm, wkt_line_first))
+  if (length(utm_match) == 1) {
+    utm_match <- utm_match[[1]][2:length(utm_match[[1]])]
+    utm_zone <- as.integer(utm_match[4])
+    utm_ns <- utm_match[5]
+    utm_code <- 32600 + utm_zone + c(0,100)[2 - (utm_ns == "N")]
+    return(utm_code)
+  } else {
+    return(NA_integer_)
+  }
+  
+}
+
+# This function checks whether the CRS of a raster is recognized or not.
+# If not, it calls a UTM repair function to try to deduce the CRS.
+func_repair_rast_crs <- function(rast_cur) {
+  if (is.na(terra::crs(rast_cur, describe = T)$code)) {
+    dem_crs_tentative_code <- func_recover_utm_crs(st_crs(rast_cur)$wkt)
+    if (!is.na(dem_crs_tentative_code)) {
+      dem_crs_epsg <- paste0("EPSG:", dem_crs_tentative_code)
+      terra::crs(rast_cur) <- terra::crs(dem_crs_epsg)
+      message("WARNING! Coordinates system of a grid was malformed, but I was able to fix it as ", dem_crs_epsg, ". I will continue.")
+    } else {
+      stop(NULL)
+    }
+  } else {
+    return(rast_cur)
+  }
+}
+
+# This function checks whether the CRS of a vector is recognized or not.
+# If not, it calls a UTM repair function to try to deduce the CRS.
+func_repair_vect_crs <- function(vect_cur) {
+  if (is.na(terra::crs(vect_cur, describe = T)$code)) {
+    outl_crs_tentative_code <- func_recover_utm_crs(st_crs(vect_cur)$wkt)
+    if (!is.na(outl_crs_tentative_code)) {
+      outl_crs_epsg <- paste0("EPSG:", outl_crs_tentative_code)
+      st_crs(vect_cur) <- st_crs(outl_crs_tentative_code)
+      message("WARNING! Coordinates system of the outline was malformed, but I was able to fix it as ", outl_crs_epsg, ". I will continue.")
+      return(vect_cur)
+    } else {
+      return(NULL)
+    }
+  } else {
+    return(vect_cur)
+  }
+}
+
+
 # This function computes gridded total potential incoming solar radiation for one specific day.
 # norm_mat: matrix with surface normals
 # lat, lon: DEM center, as reference to compute day length
@@ -186,6 +259,38 @@ func_do_processing <- function(dem_filepath,
   
   
   #### Fix coordinate systems ####
+  # First of all, repair any malformed (not-recognized) CRS.
+  # We support repairing UTM CRS whose WKT definition includes
+  # (in the first line) the zone number and N/S.
+  dem_l1 <- func_repair_rast_crs(dem_l1)
+  if (is.null(dem_l1)) {
+    err_msg <- "Coordinates system of the DEM is not recognized. Please FIX IT MANUALLY and run the program again."
+    cat("\n*** ERROR:", err_msg, "***\n")
+    return(err_msg)
+  }
+  outline_l1 <- func_repair_vect_crs(outline_l1)
+  if (is.null(outline_l1)) {
+    err_msg <- "Coordinates system of the outline shapefile is not recognized. Please FIX IT MANUALLY and run the program again."
+    cat("\n*** ERROR:", err_msg, "***\n")
+    return(err_msg)
+  }
+  if (has_firn) {
+    firn_l1 <- func_repair_vect_crs(firn_l1)
+    if (is.null(firn_l1)) {
+      err_msg <- "Coordinates system of the firn shapefile is not recognized. Please FIX IT MANUALLY and run the program again."
+      cat("\n*** ERROR:", err_msg, "***\n")
+      return(err_msg)
+    }
+  }
+  if (has_debris) {
+    debris_l1 <- func_repair_vect_crs(debris_l1)
+    if (is.null(debris_l1)) {
+      err_msg <- "Coordinates system of the debris shapefile is not recognized. Please FIX IT MANUALLY and run the program again."
+      cat("\n*** ERROR:", err_msg, "***\n")
+      return(err_msg)
+    }
+  }
+  
   # If reference grid is given: use its CRS.
   # Else check CRS of both DEM and outline.
   # If both have same CRS and it is not 4326: leave as is and proceed.
@@ -197,6 +302,7 @@ func_do_processing <- function(dem_filepath,
   dem_crs            <- terra::crs(dem_l1, proj = TRUE)
   outline_crs        <- terra::crs(outline_l1, proj = TRUE)
   wgs84_crs          <- terra::crs("EPSG:4326", proj = TRUE)
+  
   
   # Flags which are set according to the following logic routine.
   reproj_dem         <- FALSE
@@ -213,7 +319,10 @@ func_do_processing <- function(dem_filepath,
     outline_centroid   <- suppressWarnings(st_coordinates(st_centroid(outline_wgs84)))
   }
   utm_crs_number       <- func_long2utmzonenumber(outline_centroid[1])
-  utm_crs              <- terra::crs(paste0("EPSG:", 32600 + utm_crs_number), proj = TRUE)
+  utm_ns_id            <- 2 - as.integer(outline_centroid[2] > 0) # 1 for North, 2 for South.
+  utm_offset           <- c(0,100)[utm_ns_id] # Zones below the Equator start at 32700.
+  utm_ns               <- c("N", "S")[utm_ns_id]
+  utm_crs              <- terra::crs(paste0("EPSG:", 32600 + utm_crs_number + utm_offset), proj = TRUE)
   
   if (has_reference) {
     cat("Reference grid is available. I am reprojecting as needed...\n")
@@ -227,6 +336,13 @@ func_do_processing <- function(dem_filepath,
     # of our choice.
     if (reference_crs == "") {
       crs(reference_l1) <- utm_crs
+    } else {
+      reference_l1 <- func_repair_rast_crs(reference_l1)
+      if (is.null(reference_l1)) {
+        err_msg <- "Coordinates system of the reference grid is not recognized. Please FIX IT MANUALLY and run the program again."
+        cat("\n*** ERROR:", err_msg, "***\n")
+        return(err_msg)
+      }
     }
     
     target_crs    <- reference_crs
@@ -253,7 +369,7 @@ func_do_processing <- function(dem_filepath,
       
     } else if ((dem_crs == outline_crs) && (dem_crs == wgs84_crs)) {
       
-      message(paste0("DEM and shapefile are both in WGS84 (EPSG:4326). I am reprojecting them to UTM (zone ", utm_crs_number, "N) before proceeding."))
+      message(paste0("DEM and shapefile are both in WGS84 (EPSG:4326). I am reprojecting them to UTM (zone ", utm_crs_number, utm_ns, ") before proceeding."))
       # message("This can take some minutes if the DEM is big.\n")
       
       reproj_dem       <- TRUE
@@ -263,7 +379,7 @@ func_do_processing <- function(dem_filepath,
     } else if (dem_crs != outline_crs) {
       
       message("DEM and shapefile do not have the same coordinate system.")
-      utm_crs_allowed  <- sapply(paste0("EPSG:", 32600 + utm_crs_number + -1:1), function(x) terra::crs(x, proj = TRUE)) # Allow a 1-zone tolerance, for glaciers near the UTM zone borders.
+      utm_crs_allowed  <- sapply(paste0("EPSG:", 32600 + utm_crs_number + utm_offset + -1:1), function(x) terra::crs(x, proj = TRUE)) # Allow a 1-zone tolerance, for glaciers near the UTM zone borders.
       
       if (dem_crs %in% utm_crs_allowed) { # Reproject outline.
         message("DEM coordinate system is good, I am reprojecting the shapefile.")
@@ -284,7 +400,7 @@ func_do_processing <- function(dem_filepath,
         
       } else { # Reproject both.
         
-        message(paste0("I am reprojecting both DEM and shapefile to UTM (zone ", utm_crs_number, "N)."))# This can take some minutes if the DEM is big."))
+        message(paste0("I am reprojecting both DEM and shapefile to UTM (zone ", utm_crs_number, utm_ns, ")."))# This can take some minutes if the DEM is big."))
         reproj_dem     <- TRUE
         reproj_outline <- TRUE
         target_crs     <- utm_crs
@@ -381,7 +497,7 @@ func_do_processing <- function(dem_filepath,
   # Instead, if we give a reference DEM we may have to resample (bilinear filter) ours, because
   # resolution/origin/extent could be different (even after adjusting projection, which we have done above).
   cat("\nPreparing output...\n")
-
+  
   dem_out <- mask(dhm_out, outline_l2)
   surftype_out <- 4*is.na(dem_out) # This is the base rock/ice mask.
   if (has_firn)   surftype_out <- mask(surftype_out, firn_l2, inverse = TRUE, updatevalue = 1)   # Add firn if we have it.
@@ -409,12 +525,14 @@ func_do_processing <- function(dem_filepath,
   
   # Errors? Show them!
   if (any(is.na(values(dhm_out)))) {
-    cat("\n*** ERROR: there are NA values in the ouput DHM. Please check that the input DEMs cover the entire area of interest. ***\n")
-    return(1)
+    err_msg <- "There are NA values in the ouput DEM. Please check that the input DEMs cover the full area of interest. Also check the parameter \"margin size\"."
+    cat("\n*** ERROR:", err_msg, "***\n")
+    return(err_msg)
   }
   if (any(is.na(values(surftype_out)))) {
-    cat("\n*** ERROR: there are NA values in the ouput surface type grid. Please check the input outline shapefile. ***\n")
-    return(1)
+    err_msg <- "There are NA values in the ouput surface type grid. Please check the input shapefiles."
+    cat("\n*** ERROR:", err_msg, "***\n")
+    return(err_msg)
   }
   
   
@@ -422,10 +540,10 @@ func_do_processing <- function(dem_filepath,
   cat("Program finished succesfully!\n")
   message("Your new files are located here:")
   cat(normalizePath(file.path(getwd())), "\n")
-  cat("Before you run the mass balance model, remember to move them to the correct place.\n")
-  message("You can now close the program.")
+  cat("Before you run the mass balance model, move them to the right place (input folder).\n")
+  message("Now you can close the program.")
   
-  return(0)
+  return("0")
   
 } # End of function definition.
 
@@ -617,7 +735,7 @@ server <- function(input, output, session) {
     referencefilepath_sel <- ifelse(isTruthy(referencefilepath()), referencefilepath(), NA)
     showModal(modalDialog(h3("Processing... See RStudio console for progress."), footer=NULL))
     processing_output <- func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$cellsize, input$checkbox_compute_radiation, file.path(glaciername()))
-    if (processing_output == 0) {
+    if (processing_output == "0") {
       file.rename(file.path(getwd(), glaciername(), "dhm", "dhm_glacier.tif"), file.path(getwd(), glaciername(), "dhm", paste0("dhm_", glaciername(), "_", modelyear(), ".tif")))
       file.rename(file.path(getwd(), glaciername(), "surftype", "surface_type_glacier.tif"), file.path(getwd(), glaciername(), "surftype", paste0("surface_type_", glaciername(), "_", modelyear(), ".tif")))
       file.rename(file.path(getwd(), glaciername(), "outline", "outline_glacier.shp"), file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear(), ".shp")))
@@ -625,10 +743,17 @@ server <- function(input, output, session) {
       file.rename(file.path(getwd(), glaciername(), "outline", "outline_glacier.prj"), file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear(), ".prj")))
       file.rename(file.path(getwd(), glaciername(), "outline", "outline_glacier.dbf"), file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear(), ".dbf")))
       removeModal()
-      showModal(modalDialog(h3("Processing finished. See RStudio console for details. You can now close the program."), footer=NULL))
+      showModal(modalDialog(h3("Processing finished -", strong(style="color: #00C000", "SUCCESS!")),
+                            h3("Your new files are located here:"),
+                            h5(em(normalizePath(file.path(getwd())))),
+                            h3("Before you run the mass balance model, move them to the right place (", em("input"), "folder)."),
+                            h3("Now you can close this program."), footer = NULL))
+      
     } else {
       unlink(file.path(getwd(), glaciername()), recursive = TRUE)
-      showModal(modalDialog(h3("Processing ERROR! See RStudio console for details. Please CORRECT THE ERROR and run the program again."), footer=NULL))
+      showModal(modalDialog(h3("Processing ", strong(style="color: #FF0000", "FAILED!"), " Information about the error:"),
+                            h4(processing_output),
+                            h3("Please CORRECT THE ERROR and run the program again."), footer=NULL))
     }
     if (debug_verbose == TRUE) {
       sink()
