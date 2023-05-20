@@ -42,7 +42,7 @@ func_recover_utm_crs <- function(wkt_malformed) {
   # N or S
   regexp_utm <- "((?:universal)|U){1}[ _-]{0,2}((?:transverse)|T){1}[ _-]{0,2}((?:mercator)|M){1}(?:[^0-9])*([0-9]{1,2})[ _-]*([NS]{1})"
   
-  utm_match <- regmatches(wkt_line_first,regexec(regexp_utm, wkt_line_first))
+  utm_match <- regmatches(wkt_line_first,regexec(regexp_utm, wkt_line_first, ignore.case = TRUE))
   if (length(utm_match) == 1) {
     utm_match <- utm_match[[1]][2:length(utm_match[[1]])]
     utm_zone <- as.integer(utm_match[4])
