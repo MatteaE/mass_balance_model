@@ -490,6 +490,13 @@ func_do_processing <- function(dem_filepath,
     dhm_out <- dem_l2
   }
   
+  na_cells_n <- length(which(values(is.na(dhm_out))[,1]))
+  if (na_cells_n > 0) {
+    err_msg <- "There are NA values in the DEM file! Please FIX THEM MANUALLY and run the program again."
+    cat("\n*** ERROR:", err_msg, "***\n")
+    return(err_msg)
+  }
+  
   
   
   #### Extract grids with buffer ####
