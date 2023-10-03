@@ -81,22 +81,23 @@ We will proceed like this:
 
 \clearpage
 \section{Installation}
-We install the required programs in this order: first \textbf{R}, then \textbf{RStudio}, finally the \textbf{R packages} which are used by the model. If you have already installed some of the programs, you can skip the corresponding sections.
+We install the required programs in this order: first \textbf{R}, then \textbf{RStudio}, then \textbf{RTools} (only if you use the Windows operating system), finally the \textbf{R packages} which are used by the model. If you have already installed some of the programs, you can skip the corresponding sections.
 To install everything, you need an internet connection and at least 2 GB of free disk space. \textbf{All steps below are required}, if any one of them goes wrong you should correct it or the model will not work properly.
 
 \begin{itemize}
-    \item \textbf{Download and install R.} For the Windows operating system, download the installer from \href{https://cran.rstudio.com/bin/windows/base/}{this page.} For other operating systems, see \href{https://cran.rstudio.com/}{the landing page.} After download, open the installer and follow the instructions until installation is complete.
+    \item \textbf{Download and install R.} For the Windows operating system, download the installer of the most recent version from \href{https://cran.rstudio.com/bin/windows/base/}{this page.} For other operating systems, see \href{https://cran.rstudio.com/}{the landing page.} After download, open the installer and follow the instructions until installation is complete.
     \item \textbf{Download and install RStudio.} Go to \href{https://www.rstudio.com/products/rstudio/download/#download}{this page} and download the installer which corresponds to your operating system (usually Windows 10). Again, open the installer and proceed until RStudio is installed.
+    \item (Only if you use the Windows operating system) \textbf{Download and install RTools.} Go to \href{https://cran.r-project.org/bin/windows/Rtools/rtools43/rtools.html}{this page} and download the Rtools43 installer. Open the installer and proceed until RTools is installed.
     \item To install the \textbf{required R packages} we use the program \textit{install\_packages.R}, which you can find inside \textit{utils\textbackslash} in the model folder. Open file \textit{install\_packages.R} in RStudio and click on the \textit{Source} button (Fig. \ref{fig:f1_rstudio_source}) to run the program.
-    
+
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{f1_rstudio_source}
     \caption{The Source button in RStudio.}
     \label{fig:f1_rstudio_source}
 \end{figure}
-    
-    \item The program will download and install several packages \textbf{automatically}. After some time it will open a new window to install "Rtools": simply click "Next" and "Install" to proceed.
+
+    \item The program will download and install several packages \textbf{automatically}.
     \item When \textit{install\_packages.R} has finished (message \textbf{"All packages installed succesfully!"}), you should \textbf{close RStudio.}
 \end{itemize}
 
@@ -154,14 +155,14 @@ The glacier outline is a polygon which delimits the glacier surface (Fig. \ref{f
     \item Now go to the portal: \href{https://earthexplorer.usgs.gov/}{https://earthexplorer.usgs.gov/}.
     \item On the map, we move to the glacier (38° 59' North, 68° 34' East).
     \item We click three points to draw a triangle over the glacier (Fig. \ref{fig:f4_earthexplorer_points}).
-    
+
     \begin{figure}[h!]
     \centering
     \includegraphics[width=0.8\textwidth]{f4_earthexplorer_points}
     \caption{The EarthExplorer portal at Yakarcha glacier.}
     \label{fig:f4_earthexplorer_points}
     \end{figure}
-    
+
     \item In the left column, we select \textbf{Data Sets $\rightarrow$ Sentinel $\rightarrow$ Sentinel-2}, then we click \textbf{Results} (Fig. \ref{fig:f5_earthexplorer_datasets}).
     \item In the left column a list of images appears, on many pages. We choose the one called\\ \textit{L1C\_T42SVJ\_A027301\_20200913T060752}, with "Acquisition Date" 2020/09/13, and we download the "L1C Tile in JPEG2000 format".
     \item We extract the zip file and we open in QGIS the file located under GRANULE \textit{$\rightarrow$ \\ L1C\_T42SVJ\_A027301\_20200913T060752 $\rightarrow$ IMG\_DATA $\rightarrow$ T42SVJ\_20200913T060641\_B04.jp2}.
@@ -241,11 +242,11 @@ The model parameters are set in a file called \textit{set\_params.R}, in the mod
 \caption{model parameters which we change in this tutorial}
 \label{table:t1_parameters}
 \centering
-\begin{tabularx}{\textwidth}{|l l X|} 
+\begin{tabularx}{\textwidth}{|l l X|}
  \hline
- \textbf{Parameter name} & \textbf{Value} & \textbf{Explanation} \\ [0.5ex] 
+ \textbf{Parameter name} & \textbf{Value} & \textbf{Explanation} \\ [0.5ex]
  \hline
- name\_glacier & "yakarcha" & Glacier name, it is the \textbf{same as the folder} under \textit{input\textbackslash} \\ 
+ name\_glacier & "yakarcha" & Glacier name, it is the \textbf{same as the folder} under \textit{input\textbackslash} \\
  \hline
  filename\_weather & "weather\_yakarcha.dat" & Name of the meteo file, which we set in section \ref{sect:input_meteo} \\
  \hline
