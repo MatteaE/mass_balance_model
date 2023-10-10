@@ -34,6 +34,7 @@ func_install_all <- function() {
                       "qpdf",
                       "Rcpp",
                       "readxl",
+                      "remotes",
                       "reshape2",
                       "Rfast",
                       "scales",
