@@ -40,7 +40,7 @@ func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) 
     dhm_smooth <- raster.gaussian.smooth(data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]],
                                          run_params$curvature_dhm_smooth,
                                          run_params$dhm_smooth_windowsize,
-                                         type = mean)
+                                         type = "mean")
     dhm_na_border <- which(is.na(values(dhm_smooth)))
     dhm_valid     <- setdiff(1:run_params$grid_ncells, dhm_na_border)
     dhm_smooth <- cover(dhm_smooth, data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]], values = NA) # Fill NA edges of smoothed raster with original values.
