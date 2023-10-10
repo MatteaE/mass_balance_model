@@ -83,7 +83,7 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
     for (i in 1:ids_bad_n) {
       stake_coords_fixed <- func_fix_stake_coordinates(c(data_massbalance$x[ids_df_bad[i]], data_massbalance$y[ids_df_bad[i]]),
                                                        ext_limits,
-                                                       run_params$grids_crs + c(-2, -1, 1, 2),
+                                                       c(run_params$grids_crs + c(-2, -1, 1, 2), 4326),
                                                        run_params$grids_crs)
       # Rescued the current pair by changing coordinates system!
       if (all(!is.na(stake_coords_fixed))) {
