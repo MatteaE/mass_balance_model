@@ -37,6 +37,7 @@ func_install_all <- function() {
                       "remotes",
                       "reshape2",
                       "Rfast",
+                      "rstudioapi",
                       "scales",
                       "shadowtext",
                       "shiny",
