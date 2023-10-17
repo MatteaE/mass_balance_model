@@ -2,7 +2,7 @@
 # This program takes two files (temperature and precipitation) with sub-daily resolution and      #
 # produces daily aggregates suitable for use with the glacier mass balance model DMBSim v1.0.     #
 # Author: Enrico Mattea (University of Fribourg)                                                  #
-# Latest change: 2022/08/24                                                                       #
+# Latest change: 2023/10/17                                                                       #
 ###################################################################################################
 
 # Algorithm:
