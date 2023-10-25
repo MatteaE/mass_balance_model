@@ -754,14 +754,18 @@ server <- function(input, output, session) {
                             h3("Your new files are located here:"),
                             h5(em(normalizePath(file.path(getwd())))),
                             h3("Before you run the mass balance model, move them to the right place (", em("input", .noWS = "before"), "folder)."),
-                            h3("Now you can close this program."), footer = NULL))
+                            h3("Now you can ", strong("close this program"), " or ", strong("run it again"), " to generate another input for the mass balance model."),
+                            div(style="margin:auto;margin-top:7%;width:20%;", modalButton(strong("Ok"))),
+                            footer = NULL))
       
     } else {
       unlink(file.path(getwd(), glaciername()), recursive = TRUE)
       showModal(modalDialog(h3("Processing ", strong(style="color: #FF0000", "FAILED!")),
                             h3("Information about the error:"),
                             h4(processing_output),
-                            h3("Please CORRECT THE ERROR and run the program again."), footer=NULL))
+                            h3("Please CORRECT THE ERROR and run the program again."),
+                            div(style="margin:auto;margin-top:7%;width:20%;", modalButton(strong("Ok, I try again"))),
+                            footer=NULL))
     }
     if (debug_verbose == TRUE) {
       sink()

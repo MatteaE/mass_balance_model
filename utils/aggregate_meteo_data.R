@@ -305,7 +305,7 @@ fileread_xls <- function(filepath,
       # Vectorized (always returns a 3-column matrix).
       frac2hms <- function(x) {cbind(x %/% 3600, (x%%3600) %/% 60, x%%60)}
       
-        
+      
       am_pm_n <- length(grep(" am *$| pm *$| AM *$| PM *$",
                              x = dat_raw_ts_time_pasted$ts))
       
@@ -345,12 +345,12 @@ fileread_xls <- function(filepath,
       dat_datetime_out <- data.frame(ts = paste(dat_ts_date$ts, time_hms[,1], time_hms[,2], time_hms[,3], sep = " "))
       ts_datetime <- as.POSIXct(dat_datetime_out$ts, tz = "UTC", format = "%Y-%m-%d %H %M %S")
       cat("** Succesfully repaired time format.\n")
-        
+      
       # Else: not many NAs when converting time column using given format.
     } else {
       cat("** Date-time format is correct.\n")
     }
-      
+    
     dat_ts_out <- data.frame(ts = ts_datetime)
     
     
@@ -966,7 +966,8 @@ server <- function(input, output, session) {
                              h3("Output file was NOT generated."),
                              h3("Check the RStudio console for more information."),
                              h3("Please CORRECT THE ERROR and try again."))
-      showModal(modalDialog(h3(message_finish),div(style="margin:auto;margin-top:7%;width:20%;",modalButton(strong("Ok, I try again"))),
+      showModal(modalDialog(h3(message_finish),
+                            div(style="margin:auto;margin-top:7%;width:20%;", modalButton(strong("Ok, I try again"))),
                             footer = NULL))
     } else {
       message_finish <- list(h3("Processing finished -", strong(style="color: #00C000", "SUCCESS!")),
