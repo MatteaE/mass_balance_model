@@ -80,11 +80,15 @@ func_load_radiation_grids <- function(run_params, raster_blueprint) {
     # If first grid from boot file and from grid files
     # is the same, then skip loading the other grids
     # and keep the ones we have from the boot file.
-    if (all(abs(grid_day1_val - grids_out[[1]]) < 1e-5)) {
-      cat("    First grid matches! We can use the boot file.\n")
-      skip_loading_logi <- TRUE
+    if (length(grid_day1_val) == length(grids_out[[1]])) {
+      if (all(abs(grid_day1_val - grids_out[[1]]) < 1e-5)) {
+        cat("    First grid matches! We can use the boot file.\n")
+        skip_loading_logi <- TRUE
+      } else {
+        cat("    First grid has the same number of cells but values do NOT match. I am reloading the individual files.\n")
+      }
     } else {
-      cat("    First grid does NOT match. I am reloading the individual files.\n")
+        cat("    First grid does NOT match, it even has a different number of cells. I am reloading the individual files.\n")
     }
   }
   
