@@ -168,6 +168,7 @@ func_run_model <- function(run_params) {
   cat("\n** All simulation loops have finished. **\n")
   
   #### Plot and write overview ####
+  overview_annual$data_weather <- data_all$data_weather
   func_plot_write_overview(overview_annual,
                            run_params)
   

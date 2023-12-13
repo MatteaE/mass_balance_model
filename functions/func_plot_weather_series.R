@@ -4,7 +4,7 @@
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
 #                 This file contains the routine producing plots of air temperature and           #
-#                 daily/monthly precipitation.                                                    #
+#                 daily/monthly precipitation within each annual result file.                     #
 ################################################################################################### 
 
 

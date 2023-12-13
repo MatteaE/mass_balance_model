@@ -272,6 +272,9 @@ func_plot_overview <- function(overview_annual,
   mb_first_year_hydro_start <- overview_annual$daily_data_list$mb_series_all_raw[[1]][first_year_hydro_start_id]
   mb_series_all <- overview_annual$daily_data_list$mb_series_all_raw
   mb_series_all[[1]] <- mb_series_all[[1]] - mb_first_year_hydro_start
+  date_breaks_cur <- seq.Date(from = as.Date(paste0(run_params$first_year - 1, "/01/01")),
+                              to   = as.Date(paste0(run_params$last_year, "/12/31")),
+                              by = "3 months")
   date_labels_cur <- "%Y/%m"
   if (run_params$n_years > 1) {
     for (year_id in 2:run_params$n_years) {
@@ -283,10 +286,16 @@ func_plot_overview <- function(overview_annual,
       year_cur_mb <- mb_series_all[[year_id]][year_cur_hydro_start_id]
       mb_series_all[[year_id]] <- mb_series_all[[year_id]] + year_prev_mb - year_cur_mb
     }
-    if (run_params$n_years > 2) {
-      date_labels_cur <- "%Y"
-    }
-  }  
+    date_breaks_cur <- seq.Date(from = as.Date(paste0(run_params$first_year - 1, "/01/01")),
+                                to   = as.Date(paste0(run_params$last_year, "/12/31")),
+                                by = "6 months")
+  }
+  if (run_params$n_years > 2) {
+    date_labels_cur <- "%Y"
+    date_breaks_cur <- seq.Date(from = as.Date(paste0(run_params$first_year - 1, "/01/01")),
+                                to   = as.Date(paste0(run_params$last_year, "/12/31")),
+                                by = "1 year")
+  }
   mb_all_lengths <- sapply(mb_series_all, FUN = length) # Length of each annual simulation [days].
   mb_all_df <- data.frame(day = as.Date(unlist(overview_annual$daily_data_list$mb_series_all_dates), origin = as.Date("1970/1/1")),
                           mb = unlist(mb_series_all)/1e3,
@@ -303,10 +312,96 @@ func_plot_overview <- function(overview_annual,
     geom_line(data = mb_cumul_df,  aes(x = year, y = mb_cumul), color = "#FF0000", linewidth = 1) +
     geom_point(data = mb_cumul_df, aes(x = year, y = mb_cumul), color = "#FF0000", shape = 2, size = point_size, stroke = point_size/2.5) +
     scale_y_continuous(breaks = pretty(c(0, max(mb_all_df$mb), overview_annual$summary_df$mb_cumul))) +
-    scale_x_date(date_labels = date_labels_cur) +
+    scale_x_date(breaks = date_breaks_cur,
+                 date_labels = date_labels_cur) +
     ylab(paste0("Cumulative mass balance [", run_params$output_unit, " w.e.]")) +
     ggtitle("Cumulative mass balance (hydrological years)") +
     theme_overview_plots
+  
+  
+  
+  
+  
+  
+  
+  # Full weather series of daily mean air temperature at
+  # the AWS, using the same time bounds as previous plot.
+  # Compute numbers for the air temperature red/blue ribbon.
+  # We linearly estimate the time of crossing of the 0 °C threshold.
+  dat_Tair <- overview_annual$data_weather[,c(1,6)]
+  dat_Tair$timestamp_posixct <- as.POSIXct(dat_Tair$timestamp, tz = "UTC")
+  i <- 2
+  while (i <= nrow(dat_Tair)) {
+    
+    if (dat_Tair$t2m_mean[i-1] * dat_Tair$t2m_mean[i] < 0) {
+      
+      crossing_point <- abs(dat_Tair$t2m_mean[i-1]) / (abs(dat_Tair$t2m_mean[i-1]) + abs(dat_Tair$t2m_mean[i]))
+      dat_Tair <- rbind(dat_Tair[1:(i-1),],
+                        data.frame(timestamp = dat_Tair$timestamp[i-1] + (dat_Tair$timestamp[i] - dat_Tair$timestamp[i-1]) * crossing_point,
+                                   timestamp_posixct = dat_Tair$timestamp_posixct[i-1] + (dat_Tair$timestamp_posixct[i] - dat_Tair$timestamp_posixct[i-1]) * crossing_point,
+                                   t2m_mean = 0),
+                        dat_Tair[i:nrow(dat_Tair),])
+      
+    }
+    i <- i + 1
+  }
+  
+  dat_Tair$Tair_pos <- pmax(dat_Tair$t2m_mean,0)
+  dat_Tair$Tair_neg <- pmin(dat_Tair$t2m_mean,0)
+  
+  pl_limits <- range(do.call(c, overview_annual$daily_data_list$mb_series_all_dates))
+  pl_limits_posixct <- as.POSIXct(pl_limits, tz = "UTC")
+  
+  # Extract from data frame before plotting, this is useful to get the ylim right
+  # in case we have a long weather series but only simulate using part of it.
+  dat_Tair_crop <- dat_Tair[(dat_Tair$timestamp_posixct >= pl_limits_posixct[1]) & ((dat_Tair$timestamp_posixct <= pl_limits_posixct[2])),]
+  
+  plots[[length(plots)+1]] <- ggplot(dat_Tair_crop) +
+    geom_ribbon(aes(x = timestamp_posixct, ymin = 0, ymax = Tair_pos), fill = "#FF0000") +
+    geom_ribbon(aes(x = timestamp_posixct, ymin = Tair_neg, ymax = 0), fill = "#0000FF") +
+    scale_x_datetime(limits = pl_limits_posixct,
+                     date_labels = date_labels_cur,
+                     breaks = as.POSIXct(date_breaks_cur)) +
+    ylab("Temperature [\u00B0C]") +
+    ggtitle("AWS daily mean air temperature") +
+    theme_overview_plots
+  
+  
+  
+  
+  
+  # Full weather series of daily and monthly precipitation at
+  # the AWS, using the same time bounds as previous plot.
+  dat_precip <- overview_annual$data_weather[,c(1,7)]
+  
+  dat_precip_crop <- dat_precip[(dat_precip$timestamp >= pl_limits[1]) & (dat_precip$timestamp <= pl_limits[2]),]
+  
+  months_cur_rle_new <- rle(as.integer(format(dat_precip_crop$timestamp, "%m")))
+  dat_precip_monthly <- data.frame(month      = months_cur_rle_new$values,
+                                   date_start = dat_precip_crop$timestamp[1], # Initialize already with Date object, to have correct time.
+                                   date_end   = dat_precip_crop$timestamp[1],
+                                   precip_sum = NA,
+                                   id_end     = cumsum(months_cur_rle_new$lengths))
+  dat_precip_monthly$id_start                 <- c(1, (dat_precip_monthly$id_end + 1)[1:(nrow(dat_precip_monthly)-1)])
+  for (month_id in 1:nrow(dat_precip_monthly)) {
+    dat_precip_monthly$date_start[month_id] <- dat_precip_crop$timestamp[dat_precip_monthly$id_start[month_id]]
+    dat_precip_monthly$date_end[month_id]   <- dat_precip_crop$timestamp[dat_precip_monthly$id_end[month_id]] + 1 # +1 to have touching rectangles.
+    dat_precip_monthly$precip_sum[month_id] <- sum(dat_precip_crop$precip[dat_precip_monthly$id_start[month_id]:dat_precip_monthly$id_end[month_id]])
+  }
+  
+  plots[[length(plots)+1]] <- ggplot(dat_precip_crop) +
+    geom_rect(data = dat_precip_monthly, aes(xmin = date_start, xmax = date_end, ymin = 0, ymax = precip_sum),
+              fill = "#A4CBE0", color = "#00000000") +
+    geom_col(aes(x = timestamp, y = precip), fill = "#000088", color = "#00004400") +
+    scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05))) +
+    scale_x_date(limits = pl_limits,
+                 date_labels = date_labels_cur,
+                 breaks = date_breaks_cur) +
+    ylab("Precipitation [mm]") +
+    ggtitle("AWS daily and monthly precipitation") +
+    theme_overview_plots
+  
+  
   
   overview_plots <- suppressWarnings(suppressMessages(ggarrange(plotlist = plots, ncol = 1, nrow = 3, align = "hv")))
   
