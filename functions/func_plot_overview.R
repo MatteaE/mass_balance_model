@@ -272,9 +272,9 @@ func_plot_overview <- function(overview_annual,
   mb_first_year_hydro_start <- overview_annual$daily_data_list$mb_series_all_raw[[1]][first_year_hydro_start_id]
   mb_series_all <- overview_annual$daily_data_list$mb_series_all_raw
   mb_series_all[[1]] <- mb_series_all[[1]] - mb_first_year_hydro_start
-  date_breaks_cur <- seq.Date(from = as.Date(paste0(run_params$first_year - 1, "/01/01")),
-                              to   = as.Date(paste0(run_params$last_year, "/12/31")),
-                              by = "3 months")
+
+  date_breaks_by <- "3 months" # Used only in case there is a single year, else we change this below.
+  date_breaks_extend_before <- 1 # In case we label all years, we extend breaks by 1 to get enough labels.
   date_labels_cur <- "%Y/%m"
   if (run_params$n_years > 1) {
     for (year_id in 2:run_params$n_years) {
@@ -286,16 +286,21 @@ func_plot_overview <- function(overview_annual,
       year_cur_mb <- mb_series_all[[year_id]][year_cur_hydro_start_id]
       mb_series_all[[year_id]] <- mb_series_all[[year_id]] + year_prev_mb - year_cur_mb
     }
-    date_breaks_cur <- seq.Date(from = as.Date(paste0(run_params$first_year - 1, "/01/01")),
-                                to   = as.Date(paste0(run_params$last_year, "/12/31")),
-                                by = "6 months")
+    date_breaks_by <- "6 months"
   }
   if (run_params$n_years > 2) {
     date_labels_cur <- "%Y"
-    date_breaks_cur <- seq.Date(from = as.Date(paste0(run_params$first_year - 1, "/01/01")),
-                                to   = as.Date(paste0(run_params$last_year, "/12/31")),
-                                by = "1 year")
+    date_breaks_by <- "1 year"
   }
+  if (run_params$n_years > 10) {
+    date_breaks_extend_before <- 0
+    date_breaks_by <- paste0(run_params$n_years %/% 6, " years")
+  }
+  
+  date_breaks_cur <- seq.Date(from = as.Date(paste0(run_params$first_year - date_breaks_extend_before, "/01/01")),
+                              to   = as.Date(paste0(run_params$last_year + 1, "/12/31")),
+                              by = date_breaks_by)
+  
   mb_all_lengths <- sapply(mb_series_all, FUN = length) # Length of each annual simulation [days].
   mb_all_df <- data.frame(day = as.Date(unlist(overview_annual$daily_data_list$mb_series_all_dates), origin = as.Date("1970/1/1")),
                           mb = unlist(mb_series_all)/1e3,
