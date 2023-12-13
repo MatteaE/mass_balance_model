@@ -1,3 +1,13 @@
+###################################################################################################
+# Author:         Enrico Mattea (@unifr.ch)                                                       #
+# Description:    this program models the distributed mass balance of a glacier at daily          #
+#                 resolution, optimizing model parameters towards the best fit with point         #
+#                 mass balance measurements.                                                      #
+#                 This file contains the routine producing plots of air temperature and           #
+#                 daily/monthly precipitation.                                                    #
+################################################################################################### 
+
+
 func_plot_weather_series <- function(year_data,
                                      run_params) {
   
@@ -16,6 +26,7 @@ func_plot_weather_series <- function(year_data,
   date_df <- data.frame(date  = seq.Date(year_data$model_time_bounds[1]-1, year_data$model_time_bounds[2], by = "1 day"))
   day_id_offset <- (length(date_df$date) - as.integer(format(date_df$date[length(date_df$date)], "%j"))) + 1
   date_df$day_id <- seq_along(date_df$date) - day_id_offset # So that day_id = 0 is Jan 1.
+  date_df$date_posixct <- as.POSIXct(date_df$date)
   
   # Setup month labels.
   months_labels_all <- format(date_df$date, "%b")
@@ -32,14 +43,28 @@ func_plot_weather_series <- function(year_data,
     months_labels_df <- months_labels_df[-nrow(months_labels_df),]
   }
   months_labels_df$date <- date_df$date[match(months_labels_df$day_id, date_df$day_id)]
+  months_labels_df$date_posixct <- as.POSIXct(months_labels_df$date)
   
   # Air temperature red/blue ribbon.
+  # We linearly estimate the time of crossing of the 0 °C threshold.
   dat_Tair <- year_data$weather_series_annual_cur[,c(1,6)]
-  for (i in 2:nrow(dat_Tair)) {
+  dat_Tair$timestamp_posixct <- as.POSIXct(dat_Tair$timestamp, tz = "UTC")
+  i <- 2
+  while (i <= nrow(dat_Tair)) {
+    
     if (dat_Tair$t2m_mean[i-1] * dat_Tair$t2m_mean[i] < 0) {
-      dat_Tair <- rbind(dat_Tair[1:(i-1),], data.frame(timestamp = dat_Tair$timestamp[i-1] + (dat_Tair$timestamp[i] - dat_Tair$timestamp[i-1])/2, t2m_mean = 0), dat_Tair[i:nrow(dat_Tair),])
+     
+      crossing_point <- abs(dat_Tair$t2m_mean[i-1]) / (abs(dat_Tair$t2m_mean[i-1]) + abs(dat_Tair$t2m_mean[i]))
+      dat_Tair <- rbind(dat_Tair[1:(i-1),],
+                        data.frame(timestamp = dat_Tair$timestamp[i-1] + (dat_Tair$timestamp[i] - dat_Tair$timestamp[i-1]) * crossing_point,
+                                   timestamp_posixct = dat_Tair$timestamp_posixct[i-1] + (dat_Tair$timestamp_posixct[i] - dat_Tair$timestamp_posixct[i-1]) * crossing_point,
+                                   t2m_mean = 0),
+                        dat_Tair[i:nrow(dat_Tair),])
+       
     }
+    i <- i + 1
   }
+  
   dat_Tair$Tair_pos <- pmax(dat_Tair$t2m_mean,0)
   dat_Tair$Tair_neg <- pmin(dat_Tair$t2m_mean,0)
   
@@ -48,15 +73,23 @@ func_plot_weather_series <- function(year_data,
                                     seq.Date(from = as.Date(paste0(format(year_data$model_time_bounds[1], "%Y/%m"), "/01")),
                                              to   = as.Date(paste0(format(year_data$model_time_bounds[2], "%Y/%m"), "/01")),
                                              by   = "1 month")),
-                          as.Date(paste0(format(year_data$model_time_bounds[2], "%Y"), "/01/01")))                          
+                          as.Date(paste0(format(year_data$model_time_bounds[2], "%Y"), "/01/01")))
+  
+  month_starts_posixct <- as.POSIXct(setdiff(intersect(dat_Tair$timestamp_posixct,
+                                            seq.POSIXt(from = as.POSIXct(paste0(format(year_data$model_time_bounds[1], "%Y/%m"), "/01"), tz = "UTC"),
+                                                       to   = as.POSIXct(paste0(format(year_data$model_time_bounds[2], "%Y/%m"), "/01"),  tz = "UTC"),
+                                                     by   = "1 month")),
+                                  as.POSIXct(paste0(format(year_data$model_time_bounds[2], "%Y"), "/01/01"), tz = "UTC")),
+                                  tz = "UTC",
+                                  origin = "1970-01-01 00:00.00 UTC")
   
   plots[[1]] <- ggplot(dat_Tair) +
-    geom_ribbon(aes(x = timestamp, ymin = 0, ymax = Tair_pos), fill = "#FF0000") +
-    geom_ribbon(aes(x = timestamp, ymin = Tair_neg, ymax = 0), fill = "#0000FF") +
-    geom_vline(xintercept = date_df$date[date_df$day_id == 0], linetype = "dashed", linewidth = 0.5) +
-    {if (run_params$show_month_lines) geom_vline(xintercept = month_starts, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
-    annotate("text", x = months_labels_df$date, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
-    scale_x_date(expand = expansion(0,0)) +
+    geom_ribbon(aes(x = timestamp_posixct, ymin = 0, ymax = Tair_pos), fill = "#FF0000") +
+    geom_ribbon(aes(x = timestamp_posixct, ymin = Tair_neg, ymax = 0), fill = "#0000FF") +
+    geom_vline(xintercept = date_df$date_posixct[date_df$day_id == 0], linetype = "dashed", linewidth = 0.5) +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_starts_posixct, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
+    annotate("text", x = months_labels_df$date_posixct, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
+    scale_x_datetime(expand = expansion(0,0)) +
     ylab("AWS daily mean air temperature [\u00B0C]") +
     theme_weather_plot
   
