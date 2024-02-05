@@ -42,10 +42,6 @@ func_correct_massbal_elebands <- function(year_data,
     # If a correction band contains no stakes, we linearly interpolate its bias from the two surrounding bands.
     band_biases <- as.numeric(na.omit(timeSeries(band_biases), interp = "linear", method = "iz"))
     
-    print("\n\n\n\n************")
-    print(year_cur_params$mb_corr_ele_bands)
-    print(band_biases)
-    
     # Linear interpolation of bias over elevation, between the two
     # band midpoints surrounding each glaciated grid point.
     # We select the cells between two band midpoints

@@ -33,7 +33,7 @@ func_extract_modeled_stakes <- function(run_params,
     # 1 2
     # 3 4
     # with the stake somewhere in the middle.
-    # This means that within the raster cell 2 has
+    # This means that (within the raster) cell 2 has
     # index ((cell 1) + 1), and cell 3 has index
     # ((cell 2) + (ncol - 1)), because raster cells
     # start at 1 from top-left and go row by row.
@@ -50,7 +50,9 @@ func_extract_modeled_stakes <- function(run_params,
     # dx1 = x distance from the two cells to the left (i.e. with lower X coordinate than the stake),
     # dy1 = y distance from the two cells below (i.e. with lower Y coordinate),
     # dy2 = y distance from the two cells above (i.e. with higher Y coordinate).
-    # TODO: if one of cells 1-4 is outside the glacier, use nearest glacier cell instead of bilinear filtering.
+    # NOTE: remember that if a stake is at the edge of the glacier,
+    # the four cells selected can in fact be just a same cell (the
+    # one nearest to the stake).
     stakes_series_mod_all[, stake_id] <- (cell_series1 * dx2[stake_id] * dy1[stake_id] +
                                           cell_series2 * dx1[stake_id] * dy1[stake_id] +
                                           cell_series3 * dx2[stake_id] * dy2[stake_id] +

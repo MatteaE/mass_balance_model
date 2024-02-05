@@ -48,7 +48,12 @@ func_plot_year <- function(year_data,
                                                    run_params,
                                                    data_dems)
   plots_mb_vs_ele   <- mb_vs_ele_list[["plots_mb_vs_ele_out"]]
-  plots_year        <- append(plots_year, list(plots_mb_vs_ele))
+  if (length(plots_mb_vs_ele) == 1) {
+    plots_year        <- append(plots_year, plots_mb_vs_ele)
+  } else {
+    plots_year        <- append(append(plots_year, plots_mb_vs_ele[1]),
+                                plots_mb_vs_ele[2])
+  }
   
   # This data frame is used later to save some overview values.
   ele_bands_plot_df <- mb_vs_ele_list[["ele_bands_plot_df"]]
