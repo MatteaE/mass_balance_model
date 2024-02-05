@@ -35,8 +35,16 @@ func_correct_massbal_elebands <- function(year_data,
       band_stake_ids          <- which((year_data$massbal_annual_meas_cur$z_dem > band_lower[band_id]) & (year_data$massbal_annual_meas_cur$z_dem <= band_upper[band_id]))
       band_biases[band_id]    <- mean(year_data$mod_output_annual_cur$stakes_bias[band_stake_ids])
     }
-    band_biases <- as.numeric(interpNA(timeSeries(band_biases), method = "linear")) # If a correction bands contains no stakes, we linearly interpolate its bias from the two surrounding bands.
-    band_biases <- c(0, band_biases, 0) # The two virtual bands have 0 bias. 
+
+    # The two virtual bands have 0 bias.
+    band_biases <- c(0, band_biases, 0)
+    
+    # If a correction band contains no stakes, we linearly interpolate its bias from the two surrounding bands.
+    band_biases <- as.numeric(na.omit(timeSeries(band_biases), interp = "linear", method = "iz"))
+    
+    print("\n\n\n\n************")
+    print(year_cur_params$mb_corr_ele_bands)
+    print(band_biases)
     
     # Linear interpolation of bias over elevation, between the two
     # band midpoints surrounding each glaciated grid point.

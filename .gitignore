@@ -2,8 +2,9 @@
 *.RData
 *.Rhistory
 
-# Parameter files for Barkrak, Zulmart and Yakarcha #
+# Spurious parameter files #
 set_params_*.R
+set_params.R.old
 
 # Other files #
 innovations
