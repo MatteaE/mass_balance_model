@@ -39,8 +39,8 @@ func_setup_initial_snow_cover <- function(year_data,
     year_data$snowdist_init_annual <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], year_data_prev$mod_output_annual_cur$vec_swe_all[(swe_prev_annual_day_id - 1) * run_params$grid_ncells + 1:run_params$grid_ncells])
     
     if (year_data$process_winter) {
-      swe_prev_winter_day_id         <- which.min(abs(year_data_prev$weather_series_annual_cur$timestamp - model_time_bounds[3]))
-      year_data$snowdist_init_winter <- setValues(data_dhms$elevation[[dhm_grid_id]], year_data_prev$mod_output_annual_cur$vec_swe_all[(swe_prev_winter_day_id - 1) * run_params$grid_ncells + 1:run_params$grid_ncells])
+      swe_prev_winter_day_id         <- which.min(abs(year_data_prev$weather_series_annual_cur$timestamp - year_data$model_time_bounds[3]))
+      year_data$snowdist_init_winter <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], year_data_prev$mod_output_annual_cur$vec_swe_all[(swe_prev_winter_day_id - 1) * run_params$grid_ncells + 1:run_params$grid_ncells])
     }
     
     # Here instead estimate the initial snow cover from snow line elevation,

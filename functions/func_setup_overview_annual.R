@@ -23,21 +23,21 @@ func_setup_overview_annual <- function(run_params) {
   # such as whether the year has data and whether we already
   # computed the starting SWE (from the previous year's modeling).
   overview_annual$summary_df <- data.frame(year                        = run_params$years,
-                                           mb_annual_meas_corr         = NA,
-                                           mb_annual_meas              = NA,
-                                           mb_annual_hydro             = NA,
-                                           # mb_annual_hydro_corr        = NA,
-                                           # mb_annual_fixed             = NA,
-                                           mb_winter_meas              = NA, # This stays NA unless winter measurements are available.
-                                           mb_winter_fixed             = NA,
-                                           ela                         = NA,
-                                           aar                         = NA,
-                                           rmse                        = NA,
-                                           melt_factor                 = NA,
-                                           rad_fact_ice                = NA,
-                                           rad_fact_snow               = NA,
-                                           prec_corr                   = NA,
-                                           mb_cumul                    = NA,
+                                           mb_annual_meas_corr         = NA_real_,
+                                           mb_annual_meas              = NA_real_,
+                                           mb_annual_hydro             = NA_real_,
+                                           # mb_annual_hydro_corr        = NA_real_,
+                                           # mb_annual_fixed             = NA_real_,
+                                           mb_winter_meas              = NA_real_, # This stays NA unless winter measurements are available.
+                                           mb_winter_fixed             = NA_real_,
+                                           ela                         = NA_real_,
+                                           aar                         = NA_real_,
+                                           rmse                        = NA_real_,
+                                           melt_factor                 = NA_real_,
+                                           rad_fact_ice                = NA_real_,
+                                           rad_fact_snow               = NA_real_,
+                                           prec_corr                   = NA_real_,
+                                           mb_cumul                    = NA_real_,
                                            year_has_data               = FALSE,
                                            year_starting_swe_available = FALSE) # This is used to optionally enable re-using of the modeled SWE as starting condition for a modeled year. If swe_prev_available[year_id] is TRUE, then year_id can use as starting condition the model output of (year_id-1).
   

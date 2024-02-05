@@ -52,7 +52,7 @@ func_process_year <- function(year_data,
                                              data_all$data_dhms,
                                              data_all$data_dems,
                                              grids_snowdist_topographic,
-                                             overview_annual$year_starting_swe_available,
+                                             overview_annual$summary_df$year_starting_swe_available,
                                              run_params)
   
   #### .  Simulate winter mass balance (only if measurements available) ####
