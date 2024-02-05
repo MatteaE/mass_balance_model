@@ -89,16 +89,16 @@ func_compute_avalanche_static_grids <- function(run_params, data_dhms) {
     # Same indexing as above.
     avalanche$dz[[grid_id]][[1]] <- avalanche$elevation_proc[[grid_id]] - focal(avalanche$elevation_proc[[grid_id]], w = rbind(c(0,1,0),
                                                                                                                                c(0,0,0),
-                                                                                                                               c(0,0,0)), expand = FALSE, fillvalue = NA)
+                                                                                                                               c(0,0,0)), expand = FALSE, fillvalue = NA_real_)
     avalanche$dz[[grid_id]][[2]] <- avalanche$elevation_proc[[grid_id]] - focal(avalanche$elevation_proc[[grid_id]], w = rbind(c(0,0,0),
                                                                                                                                c(1,0,0),
-                                                                                                                               c(0,0,0)), expand = FALSE, fillvalue = NA)
+                                                                                                                               c(0,0,0)), expand = FALSE, fillvalue = NA_real_)
     avalanche$dz[[grid_id]][[3]] <- avalanche$elevation_proc[[grid_id]] - focal(avalanche$elevation_proc[[grid_id]], w = rbind(c(0,0,0),
                                                                                                                                c(0,0,1),
-                                                                                                                               c(0,0,0)), expand = FALSE, fillvalue = NA)
+                                                                                                                               c(0,0,0)), expand = FALSE, fillvalue = NA_real_)
     avalanche$dz[[grid_id]][[4]] <- avalanche$elevation_proc[[grid_id]] - focal(avalanche$elevation_proc[[grid_id]], w = rbind(c(0,0,0),
                                                                                                                                c(0,0,0),
-                                                                                                                               c(0,1,0)), expand = FALSE, fillvalue = NA)
+                                                                                                                               c(0,1,0)), expand = FALSE, fillvalue = NA_real_)
     
     
     # Compute draining coefficient to 4-neighbors (Eq. 7 in Gruber, 2007).

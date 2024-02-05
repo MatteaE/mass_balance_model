@@ -100,7 +100,7 @@ func_plot_weather_series <- function(year_data,
   dat_precip_monthly <- data.frame(month      = months_cur_rle_new$values,
                                    date_start = dat_precip$timestamp[1], # Initialize already with Date object, to have correct time.
                                    date_end   = dat_precip$timestamp[1],
-                                   precip_sum = NA,
+                                   precip_sum = NA_real_,
                                    id_end     = cumsum(months_cur_rle_new$lengths))
   dat_precip_monthly$id_start                 <- c(1, (dat_precip_monthly$id_end + 1)[1:(nrow(dat_precip_monthly)-1)])
   for (month_id in 1:nrow(dat_precip_monthly)) {

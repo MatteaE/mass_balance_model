@@ -123,16 +123,16 @@ func_process_year <- function(year_data,
   
   # Commented code below: if a stake is at the very edge of the
   # glacier, bilinear extraction of the modeled series is impossible
-  # (one or more cells of the 4 neighbors are outside the glaciated area).
+  # (one or more cells of the 4 neighbors are outside the glacierized area).
   # In this case, the series extracted by our vectorized bilinear filtering
   # is different from the one extracted by the raster::extract() function,
   # because that one uses some magic to replace missing values (NOT true
   # bilinear filtering at those edges), while we use a rigorous formula
   # (which would take the mass balance from the outside cell, i.e.
-  # from a non-glaciated surface, which should NOT contribute to the stake!).
+  # from a non-glacierized surface, which should NOT contribute to the stake!).
   # In that case the code below would find and print the discrepancy.
   # It is no longer very useful since we now switch automatically
-  # to nearest glaciated neighbor for cells on the edge.
+  # to nearest glacierized neighbor for cells on the edge.
   # if (year_data$nstakes_annual > 0) {
     # stake_errors <- abs((extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear")[,1] - year_data$massbal_annual_meas_cur$massbal_standardized) - (year_data$mod_output_annual_cur$stakes_mb_mod - year_data$mod_output_annual_cur$stakes_mb_meas))
     # max_error <- max(stake_errors)

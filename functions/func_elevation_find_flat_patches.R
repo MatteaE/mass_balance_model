@@ -16,16 +16,16 @@ func_find_flat_patches <- function(elevation, run_params) {
   # We do this with focal() and a 3x3 matrix getting the proper neighbor.
   dz1 <- elevation - focal(elevation, w = rbind(c(0,1,0),
                                                 c(0,0,0),
-                                                c(0,0,0)), expand = FALSE, fillvalue = NA)
+                                                c(0,0,0)), expand = FALSE, fillvalue = NA_real_)
   dz2 <- elevation - focal(elevation, w = rbind(c(0,0,0),
                                                 c(0,0,1),
-                                                c(0,0,0)), expand = FALSE, fillvalue = NA)
+                                                c(0,0,0)), expand = FALSE, fillvalue = NA_real_)
   dz3 <- elevation - focal(elevation, w = rbind(c(0,0,0),
                                                 c(1,0,0),
-                                                c(0,0,0)), expand = FALSE, fillvalue = NA)
+                                                c(0,0,0)), expand = FALSE, fillvalue = NA_real_)
   dz4 <- elevation - focal(elevation, w = rbind(c(0,0,0),
                                                 c(0,0,0),
-                                                c(0,1,0)), expand = FALSE, fillvalue = NA)
+                                                c(0,1,0)), expand = FALSE, fillvalue = NA_real_)
   
   ids_patch_flat <- which((abs(values(dz1)) < run_params$elevation_equal_threshold) |
                           (abs(values(dz2)) < run_params$elevation_equal_threshold) |

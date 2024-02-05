@@ -35,7 +35,7 @@ func_dhm_to_dem <- function(run_params,
   #     save the DEM to the DEM grids list
   #     find the years the combination applies to
   #     set the combination index to the years
-  #     pre-compute valid glaciated cells and elevation bands.
+  #     pre-compute valid glacierized cells and elevation bands.
   # NOTE: this case is general (i.e. it also accounts for the previous ones)
   # so we can implement just this one.
   dhm_outline_combinations        <- paste(data_dhms$grid_year_id, data_outlines$outline_year_id)
@@ -58,12 +58,12 @@ func_dhm_to_dem <- function(run_params,
     # So we find the DHM associated to each DEM.
     data_dems$dhm_id[dem_id] <- dhm_id
     
-    # We also pre-compute the glaciated/non-glaciated cells,
+    # We also pre-compute the glacierized/non-glacierized cells,
     # and also a re-classified raster with elevation
     # classified in user-defined elevation bands (useful for
     # the calculation of the equilibrium line altitude).
       
-    # Glaciated and non-glaciated cells.
+    # Glacierized and non-glacierized cells.
     glacier_ids_logi                        <- is.na(dem_cur_values)
     data_dems$glacier_cell_ids[[dem_id]]    <- which(!glacier_ids_logi)
     data_dems$no_glacier_cell_ids[[dem_id]] <- which(glacier_ids_logi)

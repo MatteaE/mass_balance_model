@@ -29,7 +29,7 @@ func_correct_massbal_elebands <- function(year_data,
     band_lower     <- year_cur_params$mb_corr_ele_bands[1:nbands]
     band_upper     <- year_cur_params$mb_corr_ele_bands[2:(nbands+1)]
     band_midpoints <- c(year_cur_params$mb_corr_ele_bands[1], (band_lower + band_upper) / 2, year_cur_params$mb_corr_ele_bands[nbands + 1])
-    band_biases    <- numeric(nbands)
+    band_biases    <- rep(NA_real_, nbands)
     
     for (band_id in 1:nbands) {
       band_stake_ids          <- which((year_data$massbal_annual_meas_cur$z_dem > band_lower[band_id]) & (year_data$massbal_annual_meas_cur$z_dem <= band_upper[band_id]))
@@ -43,7 +43,7 @@ func_correct_massbal_elebands <- function(year_data,
     band_biases <- as.numeric(na.omit(timeSeries(band_biases), interp = "linear", method = "iz"))
     
     # Linear interpolation of bias over elevation, between the two
-    # band midpoints surrounding each glaciated grid point.
+    # band midpoints surrounding each glacierized grid point.
     # We select the cells between two band midpoints
     # (not equal to all cells within a single band!).
     meas_period_corr  <- year_data$massbal_annual_maps$meas_period

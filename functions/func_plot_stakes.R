@@ -24,7 +24,7 @@ func_plot_stakes <- function(year_data,
   # We need this to make all plotting regions
   # equal, since we need the largest extent
   # of all stake series.
-  stake_offset <- numeric(year_data$nstakes_annual)
+  stake_offset <- rep(NA_real_, year_data$nstakes_annual)
   for (annual_stake_id in 1:year_data$nstakes_annual) {
     stake_offset[annual_stake_id] <- (year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id],annual_stake_id]) * run_params$output_mult
   }

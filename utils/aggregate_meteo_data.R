@@ -550,7 +550,7 @@ process_ts <- function(df,
   ts_diff_u <- unique(ts_diff)
   ts_diff_u_n <- length(ts_diff_u)
   if (ts_diff_u_n > 1) {
-    ts_diff_count <- integer(ts_diff_u_n)
+    ts_diff_count <- rep(NA_integer_, ts_diff_u_n)
     for (d_id in 1:length(ts_diff_u)) {
       ts_diff_count[d_id] <- length(which(ts_diff == ts_diff_u[d_id]))
     }

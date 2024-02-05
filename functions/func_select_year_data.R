@@ -34,7 +34,7 @@ func_select_year_data <- function(data_all,
   year_data$outline_id                      <- data_all$data_outlines$outline_year_id[year_id]
   
   # Glacier area, used to convert the daily melt from mm w.e. to m3.
-  # We compute this as cell size in m2 times number of glaciated cells.
+  # We compute this as cell size in m2 times number of glacierized cells.
   year_data$glacier_area                    <- length(data_all$data_dems$glacier_cell_ids[[year_data$dem_grid_id]]) * prod(res(data_all$data_dems$elevation[[year_data$dem_grid_id]]))
   
   # Extract avalanche grids for this year
@@ -56,7 +56,7 @@ func_select_year_data <- function(data_all,
   year_data$massbal_winter_meas_cur         <- data_all$data_massbalance_winter[massbal_winter_ids,] # Empty if we have no winter stakes for the year.
   
   
-  # If a stake falls outside the DEM (glaciated)
+  # If a stake falls outside the DEM (glacierized)
   # cells, discard it with a warning.
   stakes_annual_cells_ids <- cellFromXY(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]))
   stakes_annual_dem_values <- data_all$data_dems$elevation[[year_data$dem_grid_id]][stakes_annual_cells_ids]

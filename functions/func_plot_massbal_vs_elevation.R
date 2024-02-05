@@ -26,14 +26,14 @@ func_plot_massbal_vs_elevation <- function(year_data,
   ele_bands_plot_min    <- min(ele_bands_plot_values, na.rm = T)
   ele_bands_plot_max    <- max(ele_bands_plot_values, na.rm = T)
   ele_bands_plot_df     <- data.frame(ele                 = seq(ele_bands_plot_min, ele_bands_plot_max, run_params$ele_bands_plot_size),
-                                      ncells              = NA,
-                                      area_km2            = NA,
-                                      mb_annual_meas_corr = NA,
-                                      mb_annual_meas      = NA,
-                                      mb_annual_hydro     = NA,
-                                      # mb_annual_fixed     = NA,
-                                      mb_winter_fixed     = NA,
-                                      mb_winter_meas      = NA)
+                                      ncells              = NA_integer_,
+                                      area_km2            = NA_real_,
+                                      mb_annual_meas_corr = NA_real_,
+                                      mb_annual_meas      = NA_real_,
+                                      mb_annual_hydro     = NA_real_,
+                                      # mb_annual_fixed     = NA_real_,
+                                      mb_winter_fixed     = NA_real_,
+                                      mb_winter_meas      = NA_real_)
   for (band_id in 1:nrow(ele_bands_plot_df)) {
     band_cell_ids                                  <- which(ele_bands_plot_values == ele_bands_plot_df$ele[band_id])
     ele_bands_plot_df$ncells[band_id]              <- length(band_cell_ids)
@@ -120,7 +120,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
     
     stakes_mod_massbal_meas_period <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[2],] - year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[1],]
     
-    # This data.frame contains only the mass balance values on glaciated cells.
+    # This data.frame contains only the mass balance values on glacierized cells.
     df_scatterplot <- data.frame(ele = data_dems$elevation[[year_data$dem_grid_id]][data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1],
                                  mb = values(year_data$massbal_annual_maps$meas_period)[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]] * run_params$output_mult)
     
@@ -166,7 +166,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
     # Computed within func_massbal_postprocess().
     stakes_mod_massbal_meas_period <- year_data$mod_output_annual_cur$stakes_winter_measperiod_mb
     
-    # This data.frame contains only the mass balance values on glaciated cells.
+    # This data.frame contains only the mass balance values on glacierized cells.
     df_scatterplot <- data.frame(ele = data_dems$elevation[[year_data$dem_grid_id]][data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1],
                                  mb  = values(year_data$massbal_winter_maps$meas_period)[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]] * run_params$output_mult)
     
