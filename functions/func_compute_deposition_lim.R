@@ -33,7 +33,7 @@ func_compute_deposition_lim <- function(run_params,
   # we use a dummy 1000 value, the model will anyway always
   # stop and complain of missing data with an informative message.
   if (any(!is.na(prec_solid_annual_max))) {
-    run_params$deposition_mass_lim <- 8 * as.numeric(quantile(prec_solid_annual_max, 0.9, na.rm = T)) / 1e3
+    run_params$deposition_mass_lim <- 8 * as.numeric(quantile(prec_solid_annual_max, 0.9, na.rm = T))
   } else {
     run_params$deposition_mass_lim <- 1000
   }
