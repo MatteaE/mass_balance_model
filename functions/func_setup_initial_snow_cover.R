@@ -56,7 +56,7 @@ func_setup_initial_snow_cover <- function(year_data,
                                                                       year_data$dem_grid_id,
                                                                       year_data$massbal_winter_meas_cur)
     year_data$snowdist_init_winter <- year_data$snowdist_init_annual
-  } 
+  }
   
   return(year_data)
   

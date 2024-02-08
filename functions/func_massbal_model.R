@@ -116,7 +116,7 @@ func_massbal_model <- function(run_params,
     offset_prev <- (day_id - 1) * run_params$grid_ncells
     cells_cur  <- offset_cur + 1:run_params$grid_ncells # Indices of all the grid cells with values at the end of the current day.
     cells_prev <- cells_cur - run_params$grid_ncells    # Indices of all the grid cells with values at the beginning of the current day.
-
+    
     
     #### .  AVALANCHE ROUTINE ####
     avalanche_condition <- FALSE
@@ -126,11 +126,11 @@ func_massbal_model <- function(run_params,
     # If we are to have an avalanche today, make it so
     # (first thing of the day, before melt and accumulation).
     # Algorithm:
-      # compute grid of swe contributing to avalanche, as difference between current swe and last post-avalanche swe, clamped to positives
-      # run avalanche on it
-      # compute the new swe (sum of avalanche deposit and previous non-avalanched mass)
-      # update cumulative mass balance, swe, surface type
-      # NOTE: to update the vectors we use the cells_prev indices, since those are used as input to the melt model just below. This means that the mass balance change due to the avalanche is assigned to the day BEFORE the avalanche.
+    # compute grid of swe contributing to avalanche, as difference between current swe and last post-avalanche swe, clamped to positives
+    # run avalanche on it
+    # compute the new swe (sum of avalanche deposit and previous non-avalanched mass)
+    # update cumulative mass balance, swe, surface type
+    # NOTE: to update the vectors we use the cells_prev indices, since those are used as input to the melt model just below. This means that the mass balance change due to the avalanche is assigned to the day BEFORE the avalanche.
     if (avalanche_condition) {
       
       # cat("Avalanche!\n")
@@ -141,7 +141,7 @@ func_massbal_model <- function(run_params,
                                                       avalanche_input_values,
                                                       deposition_max_multiplier = 1.0,
                                                       preserve_edges = TRUE)
-
+      
       # writeRaster(setValues(data_dhms$elevation[[1]], avalanche_output), "avalanche_output.tif", overwrite = T)
       
       # Update to current avalanche result.
@@ -156,7 +156,7 @@ func_massbal_model <- function(run_params,
       vec_surf_type[cells_prev][ids_snow_logi]  <- 2
       vec_surf_type[cells_prev][!ids_snow_logi] <- surftype_init_values[!ids_snow_logi]
     }
-
+    
     
     #### .  MELT MODEL ####
     # Set the entire melt_cur to NA before computing,
@@ -206,8 +206,59 @@ func_massbal_model <- function(run_params,
     gl_accum_daily[day_id] <- gl_accum_daily[day_id] + mean(accumulation_cur[glacier_cell_ids]) # We use the sum because we may already have a non-zero value here in case there has been an avalanche.
     gl_rainfall_daily[day_id] <- mean(rainfall_cur[glacier_cell_ids])
     
-  }
+    
+    
+    
+    #### .  REMOVE OLD SNOW FROM SWE (JUST ONCE PER YEAR) -----------------------------------------
+    # This is relevant especially for multi-year simulations when the 
+    # initial snow distribution is taken from the model of the previous year.
+    # In that case, snow from previous years must be removed from the SWE,
+    # else in accumulation areas we will form a thick multiannual snowpack which later will
+    # never be depleted even in more negative years, leading to wrong surface type and SCAF.
+    # In reality, that snow becomes firn and eventually ice.
+    # Thus, at peak SWE in the accumulation area (15 May) we remove
+    # from SWE the initial SWE of the simulation.
+    # We do this at peak accumulation because we don't want this to have
+    # any impact on the surface type (snow becoming firn happens below the snowpack!).
+    # We still check for the unlikely case that there is less SWE on 15 May than in late summer,
+    # and we update the surface type in that case, issuing a warning.
+    # Obviously, this removal does not directly count towards mass balance (but affects it a bit
+    # through albedo feedback, as the removed SWE means surface type will change sooner to ice
+    # than if we had just left snow everywhere).
+    # For consistency, we remove initial SWE in any case, not only when
+    # the initial snow distribution is taken from the previous year's model.
+    # In single-year simulations, the initial snow distribution (the one of ~September YYYY-1)
+    # becomes firn (or anyway should not count anymore as snow) by the time it is uncovered again
+    # (~September YYYY).
+    # NOTE: this SWE removal does NOT modify the base grid of surface type, which is static.
+    # Thus, SWE lost to firn does not actually become "firn" in the model. For that, we would
+    # need to keep track of annual firn thickness, well beyond the scope of our simulation.
+    # NOTE2: this means that total SWE (and specifically SWE in the accumulation area) has
+    # a jump on 15 May. We have to live with it.
+    if (format(weather_series_cur$timestamp[day_id], "%m/%d") == "05/15") {
+      
+      ids_swe_depleted_to_firn            <- which((vec_snow_swe[cells_cur] > 0) &
+                                                     (vec_snow_swe[cells_cur] <= snowdist_init_values))
+      ids_swe_depleted_to_firn_on_glacier <- intersect(ids_swe_depleted_to_firn, glacier_cell_ids)
+      swe_depleted_to_firn_n              <- length(ids_swe_depleted_to_firn)
+      swe_depleted_to_firn_on_glacier_n   <- length(ids_swe_depleted_to_firn_on_glacier)
+      if (swe_depleted_to_firn_n > 0) {
+        message("Warning, firnification on ",
+                format(weather_series_cur$timestamp[day_id], "%Y/%m/%d"),
+                " has just removed all snow on ",
+                swe_depleted_to_firn_n, " cells, ",
+                swe_depleted_to_firn_on_glacier_n, " of them on glacier!")
+        vec_surf_type[cells_cur][ids_swe_depleted_to_firn] <- surftype_init_values[ids_swe_depleted_to_firn]
+      }
+      vec_snow_swe[cells_cur] <- pmax(0, vec_snow_swe[cells_cur] - snowdist_init_values)
+      
+    }
+    
+    
+    
+  } # End of daily loop.
   
+  # Collect output.
   mb_model_output <- list(vec_swe_all       = vec_snow_swe,
                           vec_surftype_all  = vec_surf_type,
                           vec_massbal_cumul = vec_massbal_cumul,

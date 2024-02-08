@@ -121,6 +121,18 @@ func_process_year <- function(year_data,
                                                             overview_annual$daily_data_list)
   
   
+  
+  #### . Plot daily maps of SWE and surface type ####
+  if (run_params$plot_daily_maps) {
+    func_plot_daily_maps(year_data,
+                         run_params,
+                         data_all$data_surftype,
+                         data_all$data_dems,
+                         data_all$data_outlines)
+  }
+  
+  
+  
   # Commented code below: if a stake is at the very edge of the
   # glacier, bilinear extraction of the modeled series is impossible
   # (one or more cells of the 4 neighbors are outside the glacierized area).
@@ -134,14 +146,14 @@ func_process_year <- function(year_data,
   # It is no longer very useful since we now switch automatically
   # to nearest glacierized neighbor for cells on the edge.
   # if (year_data$nstakes_annual > 0) {
-    # stake_errors <- abs((extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear")[,1] - year_data$massbal_annual_meas_cur$massbal_standardized) - (year_data$mod_output_annual_cur$stakes_mb_mod - year_data$mod_output_annual_cur$stakes_mb_meas))
-    # max_error <- max(stake_errors)
-    # max_error_id <- which.max(stake_errors)
-    # if (max_error > 1) {
-      # cat("* SERIOUS WARNING: the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear extraction of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.\n")
-      # cat(paste0("The max error is at stake ", max_error_id, ", with value ", round(max_error, 1), " mm w.e.\n"))
-      # cat("Stake data:", paste(year_data$massbal_annual_meas_cur[max_error_id,]), sep = "  |  ", "\n")
-    # }
+  # stake_errors <- abs((extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear")[,1] - year_data$massbal_annual_meas_cur$massbal_standardized) - (year_data$mod_output_annual_cur$stakes_mb_mod - year_data$mod_output_annual_cur$stakes_mb_meas))
+  # max_error <- max(stake_errors)
+  # max_error_id <- which.max(stake_errors)
+  # if (max_error > 1) {
+  # cat("* SERIOUS WARNING: the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear extraction of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.\n")
+  # cat(paste0("The max error is at stake ", max_error_id, ", with value ", round(max_error, 1), " mm w.e.\n"))
+  # cat("Stake data:", paste(year_data$massbal_annual_meas_cur[max_error_id,]), sep = "  |  ", "\n")
+  # }
   # }
   
   cat("============  FINISHED simulation of year", year_data$year_cur, "  ============\n")
