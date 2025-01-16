@@ -24,9 +24,11 @@ func_fix_stake_coordinates <- function(stake_xy,
     point_cur_sfc <- st_sfc(point_cur, crs = crs_try[crs_id])
     point_cur_transf <- st_transform(point_cur_sfc, crs_target)
     point_transf_coords <- as.numeric(st_coordinates(point_cur_transf))
-    if ((dhm_extent[1] <= point_transf_coords[1]) && (dhm_extent[2] >= point_transf_coords[1]) && (dhm_extent[3] <= point_transf_coords[2]) && (dhm_extent[4] >= point_transf_coords[2])) {
-      cat(paste0("      Just rescued a pair of coordinates! They were likely in the EPSG:", crs_try[crs_id], " coordinate system.\n"))
-      return(point_transf_coords)
+    if (all(!is.na(point_transf_coords))) {
+      if ((dhm_extent[1] <= point_transf_coords[1]) && (dhm_extent[2] >= point_transf_coords[1]) && (dhm_extent[3] <= point_transf_coords[2]) && (dhm_extent[4] >= point_transf_coords[2])) {
+        cat(paste0("      Just rescued a pair of coordinates! They were likely in the EPSG:", crs_try[crs_id], " coordinate system.\n"))
+        return(point_transf_coords)
+      }
     }
   }
   

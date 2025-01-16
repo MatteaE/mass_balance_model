@@ -98,7 +98,7 @@ func_load_elevation_grids <- function(run_params) {
       for (grid_id in 1:length(grids_out$elevation)) {
         if (!compareGeom(grids_out$elevation[[grid_id]], raster_blueprint, stopOnError = FALSE)) {
           
-          cat("* WARNING: func_load_elevation_grids.R: I am resampling DHM grid ", grid_id, " to enable DHM interpolation!\n")
+          cat("* WARNING: func_load_elevation_grids: I am resampling DHM grid ", grid_id, " to enable DHM interpolation!\n")
           grids_out$elevation[[grid_id]] <- resample(grids_out$elevation[[grid_id]], raster_blueprint, method = "bilinear")
           crs(grids_out$elevation[[grid_id]]) <- run_params$grids_crs_epsg
           
