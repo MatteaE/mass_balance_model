@@ -46,15 +46,16 @@ func_install_all <- function() {
                       "stringr",
                       "sf",
                       "sp",
+                      "spatialEco",
                       "terra",
                       "topmodel",
                       "timeSeries")
    
    install.packages(setdiff(packages_cran, rownames(installed.packages())))
    
-   # spatialEco now (2023.10) needs to be installed from the archived version.
-   if (!("spatialEco" %in% rownames(installed.packages()))) {
-     install.packages("https://cran.r-project.org/src/contrib/Archive/spatialEco/spatialEco_2.0-1.tar.gz")
+   # topmodel now (2025.02) needs to be installed from the archived version.
+   if (!("topmodel" %in% rownames(installed.packages()))) {
+     install.packages("https://cran.r-project.org/src/contrib/Archive/topmodel/topmodel_0.7.5.tar.gz")
    }
 
    packages_github_repos <- c("MatteaE")
