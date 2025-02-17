@@ -8,20 +8,20 @@
 
 run_params <- list(
   
-  name_glacier                =    "yakarcha",                    # Glacier name, used for output directory naming.
+  name_glacier                =    "alai",                    # Glacier name, used for output directory naming.
   
   #### INPUT-related parameters ####
   dir_data_recursive           =   TRUE,                         # [TRUE/FALSE]: should we look recursively for the input files in the specified directories?
   
   # Set FILE NAMES and input file properties.
-  filename_weather             =   "barkrak_barkrak_d.dat",       # File name of the weather series
-  file_weather_nskip           =   4,                            # [-]: number of lines to skip in the weather file
+  filename_weather             =   "weather_abramov.dat",       # File name of the weather series
+  file_weather_nskip           =   2,                            # [-]: number of lines to skip in the weather file
   
   grids_crs                    =   32642,                        # Reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
   
   dhm_interpolate              =   FALSE,                        # [TRUE/FALSE]: should we use linear interpolation to compute each year's DHM?
   
-  filename_massbalance_annual  =   "mb_yakarcha.dat",       # File name of the annual mass balance observations
+  filename_massbalance_annual  =   "",       # File name of the annual mass balance observations
   filename_massbalance_winter  =   "",                           # File name of the winter mass balance observations
   
   filename_params_prefix       =   "param_",
@@ -82,13 +82,15 @@ run_params <- list(
   #### PLOTTING parameters ####
   mb_colorscale_multiplier     =   1,                            # NA for automatic colorscale limits, or a number to multiply the colorscale limits. 1 = colorscale between -2 and +2 m w.e.
   output_unit                  =   "m",                          # Either "m" for meters water-equivalent, or "mm" for millimeters water-equivalent.
+  show_contours                =   FALSE,                        # In the mass balance maps, show the contour lines (TRUE) or not (FALSE).
   show_contour_labels          =   TRUE,                         # In the mass balance maps, show the labels of contour lines (TRUE) or not (FALSE).
   show_stake_labels            =   TRUE,                         # In the mass balance maps, show the labels of stake measurements (TRUE) or not (FALSE).
   show_month_lines             =   TRUE,                         # In the time series plots (mass balance and meteo series), show vertical lines to divide the months (TRUE) or not (FALSE).
+  outlines_linesize_mult       =   0.01,                          # Multiplier for the thickness of the glacier outlines in maps.
   
   
   #### MODELED YEARS choice ####
-  first_year                   =   2018,                         # First modeled year (usually from October of the previous year to September of this year)
-  last_year                    =   2019                          # Last modeled year (same as previous comment)
+  first_year                   =   1970,                         # First modeled year (usually from October of the previous year to September of this year)
+  last_year                    =   1971                          # Last modeled year (same as previous comment)
   
 )

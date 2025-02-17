@@ -47,6 +47,19 @@ func_process_run_params <- function(run_params) {
     run_params$output_fmt4 <- "%.1f"
   }
   
+  
+  # Thickness of outlines on mass balance maps.
+  if (is.null(run_params$outlines_linesize_mult)) {
+    run_params$outlines_linesize_mult <- 1
+  }
+  
+  # Show contour lines or not? In the mass balance maps.
+  if (is.null(run_params$show_contours)) {
+    run_params$show_contours <- TRUE
+  }
+  
+  
+  
   # Set input data paths. We force the user to use these, which are tidy and easy to understand.
   run_params$dir_data_weather            <-   file.path(run_params$dir_data_base, "weather")     # The weather series goes here
   run_params$dir_data_dhm                <-   file.path(run_params$dir_data_base, "dhm")         # Path to the DHM(s) = elevation grids(s) (rectangular, to compute slopes and curvatures)
