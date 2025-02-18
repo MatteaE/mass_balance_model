@@ -203,6 +203,66 @@ func_long2utmzonenumber <- function(long) { # long is longitude in decimal degre
 }
 
 
+# We re-implement shinyFiles' function with the addition of useBytes = TRUE
+# in the processing of sub(), otherwise it can fail on R >= 4.3.
+func_getvolumes <- function(exclude = NULL) {
+  osSystem <- Sys.info()["sysname"]
+  if (osSystem == "Darwin") {
+    volumes <- fs::dir_ls("/Volumes")
+    names(volumes) <- basename(volumes)
+  }
+  else if (osSystem == "Linux") {
+    volumes <- c(Computer = "/")
+    if (isTRUE(fs::dir_exists("/media"))) {
+      media <- fs::dir_ls("/media")
+      names(media) <- basename(media)
+      volumes <- c(volumes, media)
+    }
+  }
+  else if (osSystem == "Windows") {
+    wmic <- paste0(Sys.getenv("SystemRoot"), "\\System32\\Wbem\\WMIC.exe")
+    if (!file.exists(wmic)) {
+      volumes_info <- system2("powershell", "$dvr=[System.IO.DriveInfo]::GetDrives();Write-Output $dvr.length $dvr.name $dvr.VolumeLabel;",
+                              stdout = TRUE)
+      num = as.integer(volumes_info[1])
+      if (num == 0)
+        return(NULL)
+      mat <- matrix(volumes_info[-1], nrow = num, ncol = 2)
+      mat[, 1] <- gsub(":\\\\$", ":/", mat[, 1])
+      sel <- mat[, 2] == ""
+      mat[sel, 2] <- mat[sel, 1]
+      volumes <- mat[, 1]
+      volNames <- mat[, 2]
+      volNames <- paste0(volNames, " (", gsub(":/$", ":",
+                                              volumes), ")")
+    } else {
+      volumes <- system(paste(wmic, "logicaldisk get Caption"),
+                        intern = TRUE, ignore.stderr = TRUE)
+      volumes <- sub(" *\\r$", "", volumes)
+      keep <- !tolower(volumes) %in% c("caption", "")
+      volumes <- volumes[keep]
+      volNames <- system(paste(wmic, "/FAILFAST:1000 logicaldisk get VolumeName"),
+                         intern = TRUE, ignore.stderr = TRUE)
+      volNames <- sub(" *\\r$", "", volNames, useBytes = TRUE)
+      volNames <- volNames[keep]
+      volNames <- paste0(volNames, ifelse(volNames == "",
+                                          "", " "))
+      volNames <- paste0(volNames, "(", volumes, ")")
+    }
+    names(volumes) <- volNames
+    volumes <- gsub(":$", ":/", volumes)
+  }
+  else {
+    stop("unsupported OS")
+  }
+  if (!is.null(exclude)) {
+    volumes <- volumes[!names(volumes) %in% exclude]
+  }
+  volumes
+}
+
+
+
 # This function does the entire app processing when the user presses the button.
 func_do_processing <- function(dem_filepath,
                                outline_filepath,
@@ -665,7 +725,7 @@ ui <- fluidPage(useShinyjs(),
 # Define server logic to read selected file ----
 server <- function(input, output, session) {
   
-  volumes <- c(getVolumes()(), setNames(dirname(getwd()), basename(dirname(getwd()))), setNames(dirname(dirname(getwd())), basename(dirname(dirname(getwd())))))
+  volumes <- c(func_getvolumes(), setNames(dirname(getwd()), basename(dirname(getwd()))), setNames(dirname(dirname(getwd())), basename(dirname(dirname(getwd())))))
   shinyFileChoose(input, "choose_dem_file", roots=volumes, session=session)
   shinyFileChoose(input, "choose_shp_file", roots=volumes, session=session)
   shinyFileChoose(input, "choose_firn_file", roots=volumes, session=session)
