@@ -203,8 +203,10 @@ func_long2utmzonenumber <- function(long) { # long is longitude in decimal degre
 }
 
 
-# We re-implement shinyFiles' function with the addition of useBytes = TRUE
-# in the processing of sub(), otherwise it can fail on R >= 4.3.
+# We re-implement shinyFiles' getVolumes() function, because
+# it can fail with Cyrillic names on R >= 4.3.
+# We add a call to a new function which tries to
+# repair the encoding of the strings.
 func_getvolumes <- function(exclude = NULL) {
   osSystem <- Sys.info()["sysname"]
   if (osSystem == "Darwin") {
@@ -243,6 +245,11 @@ func_getvolumes <- function(exclude = NULL) {
       volumes <- volumes[keep]
       volNames <- system(paste(wmic, "/FAILFAST:1000 logicaldisk get VolumeName"),
                          intern = TRUE, ignore.stderr = TRUE)
+      
+      for (vn_id in 1:length(volNames)) {
+        volNames[vn_id] <- func_process_volname(volNames[vn_id])
+      }
+      
       volNames <- sub(" *\\r$", "", volNames, useBytes = TRUE)
       volNames <- volNames[keep]
       volNames <- paste0(volNames, ifelse(volNames == "",
@@ -260,6 +267,57 @@ func_getvolumes <- function(exclude = NULL) {
   }
   volumes
 }
+
+
+
+
+# This function tries to repair the encoding of a volName string, as it
+# could unexpectedly crash on Cyrillic Windows if just taken from wmic.exe.
+func_process_volname <- function(volName) {
+  # A helper function to attempt sub() with fallback iconv()
+  try_sub <- function(volName) {
+    tryCatch({
+      # Try to clean up the string with sub() function
+      sub(" *\\r$", "", volName)
+    }, error = function(e) {
+      # If an error occurs, return NULL to signal a failure
+      return(NULL)
+    })
+  }
+  
+  # Try sub() first
+  volName <- try_sub(volName)
+  
+  # If sub() fails, attempt iconv with different encoding fallbacks
+  if (is.null(volName)) {
+    encodings <- c("CP866", "windows-1251", "ISO-8859-5", "KOI8-R")  # List of Russian-like encodings to try
+    for (enc in encodings) {
+      volName <- tryCatch({
+        # Attempt the conversion with the current encoding in the list
+        iconv(volName, from = enc, to = "UTF-8")
+      }, error = function(e) {
+        # If the iconv fails, return NULL to indicate failure and move to the next encoding
+        return(NULL)
+      })
+      
+      # If iconv succeeds, try to clean up the string after the conversion
+      if (!is.null(volName)) {
+        volName <- try_sub(volName)
+        break  # Stop once we've succeeded
+      }
+    }
+  }
+  
+  # If we could not reconstruct the string, use a dummy value.
+  if (is.null(volName)) {
+    volName <- "NAME_UNKNOWN"
+  }
+  
+  # Return the processed volName
+  return(volName)
+}
+
+
 
 
 
