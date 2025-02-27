@@ -250,7 +250,6 @@ func_getvolumes <- function(exclude = NULL) {
         volNames[vn_id] <- func_process_volname(volNames[vn_id])
       }
       
-      volNames <- sub(" *\\r$", "", volNames, useBytes = TRUE)
       volNames <- volNames[keep]
       volNames <- paste0(volNames, ifelse(volNames == "",
                                           "", " "))
