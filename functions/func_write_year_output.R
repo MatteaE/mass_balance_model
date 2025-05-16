@@ -16,7 +16,7 @@ func_write_year_output <- function(year_data,
   
   cat("\n** Writing year output... **\n")
   
-  # Write mass balance maps (rasters).
+  # Write mass balance maps (rasters) -------------------------------------------------------------
   writeRaster(year_data$massbal_annual_maps$hydro * run_params$output_mult / 1000, file.path(run_params$output_dirname, "annual_results", paste0("mb_annual_hydro_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
   if (year_data$nstakes_annual > 0) {
     writeRaster(year_data$massbal_annual_maps$meas_period * run_params$output_mult / 1000, file.path(run_params$output_dirname, "annual_results", paste0("mb_annual_measperiod_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
@@ -29,12 +29,12 @@ func_write_year_output <- function(year_data,
     writeRaster(year_data$massbal_winter_maps$meas_period * run_params$output_mult / 1000, file.path(run_params$output_dirname, "annual_results", paste0("mb_winter_measperiod_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
   }
   
-  # Write used DEM.
+  # Write used DEM --------------------------------------------------------------------------------
   if (run_params$dem_write) {
     writeRaster(data_dems$elevation[[year_data$dem_grid_id]], file.path(run_params$output_dirname, "annual_results", paste0(run_params$filename_dem_prefix, year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
   }
   
-  # Write modeled glacier-wide daily mass balance series.
+  # Write modeled glacier-wide daily mass balance series ------------------------------------------
   # NOTE: the cumulative values refer to the value *AT THE BEGINNING* of the respective day.
   # the daily values refer to the value added *OVER* the respective day.
   # Thus, the *LAST* daily value is always 0.0 (that day is not actually
@@ -46,42 +46,99 @@ func_write_year_output <- function(year_data,
   df_annual_daily <- data.frame(date                      = model_annual_dates,
                                 day_id                    = seq_along(model_annual_dates) - day_id_offset,
                                 gl_massbal_cumul_bandcorr = NA,
-                                gl_massbal_cumul          = sprintf(run_params$output_fmt4, year_data$mod_output_annual_cur$gl_massbal_cumul * run_params$output_mult / 1000),
-                                gl_accum_cumul            = sprintf(run_params$output_fmt4, year_data$mod_output_annual_cur$gl_accum_cumul * run_params$output_mult / 1000),
-                                gl_melt_cumul             = sprintf(run_params$output_fmt4, year_data$mod_output_annual_cur$gl_melt_cumul * run_params$output_mult / 1000),
+                                gl_massbal_cumul          = year_data$mod_output_annual_cur$gl_massbal_cumul * run_params$output_mult / 1000,
+                                gl_accum_cumul            = year_data$mod_output_annual_cur$gl_accum_cumul * run_params$output_mult / 1000,
+                                gl_melt_cumul             = year_data$mod_output_annual_cur$gl_melt_cumul * run_params$output_mult / 1000,
                                 gl_melt_cumul_bandcorr    = NA,
-                                gl_melt_daily_m3          = sprintf("%.1f", year_data$mod_output_annual_cur$gl_melt_daily * year_data$glacier_area / 1e3),
+                                gl_melt_daily_m3          = year_data$mod_output_annual_cur$gl_melt_daily * year_data$glacier_area / 1e3,
                                 gl_melt_daily_m3_bandcorr = NA,
-                                gl_rainfall_daily_m3      = sprintf("%.1f", year_data$mod_output_annual_cur$gl_rainfall_daily * year_data$glacier_area / 1e3),
-                                gl_scaf                   = sprintf("%.2f", year_data$gl_scaf_daily))
+                                gl_rainfall_daily_m3      = year_data$mod_output_annual_cur$gl_rainfall_daily * year_data$glacier_area / 1e3,
+                                gl_scaf                   = year_data$gl_scaf_daily)
+  
   
   if (year_data$nstakes_annual > 0) {
-    df_annual_daily$gl_massbal_cumul_bandcorr <- sprintf(run_params$output_fmt4, year_data$mod_output_annual_cur$gl_massbal_cumul_bandcorr * run_params$output_mult / 1000)
-    df_annual_daily$gl_melt_cumul_bandcorr    <- sprintf(run_params$output_fmt4, year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr * run_params$output_mult / 1000)
-    df_annual_daily$gl_melt_daily_m3_bandcorr <- sprintf("%.1f", c(diff(year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr * year_data$glacier_area / 1e3), 0.0))
+    df_annual_daily$gl_massbal_cumul_bandcorr <- year_data$mod_output_annual_cur$gl_massbal_cumul_bandcorr * run_params$output_mult / 1000
+    df_annual_daily$gl_melt_cumul_bandcorr    <- year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr * run_params$output_mult / 1000
+    df_annual_daily$gl_melt_daily_m3_bandcorr <- c(diff(year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr * year_data$glacier_area / 1e3), 0.0)
   }
   
   
-  write.csv(df_annual_daily,
+  df_annual_daily_form <- func_format_df_daily(df_annual_daily,
+                                               run_params = run_params)
+  
+  write.csv(df_annual_daily_form,
             file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_glacier_", year_data$year_cur, ".csv")),
             quote = FALSE,
             row.names = FALSE)
   
   
-  # Write modeled daily mass balance series at the stakes.
+  # Write modeled glacier-wide daily mass balance, for hydrological year only ---------------------
+  # This enables comparison of the output files of years with and without measurements
+  # and of years with inconsistent measurement date.
+  # The cumulative time series are reset to 0 on <YYYY-1>-10-01.
+  # If the modeled period is exactly the hydrological year (i.e. year without data or
+  # perfect survey dates), this file is the same as mb_daily_series_glacier_<yyyy>.csv".
+  date_form <- format(df_annual_daily$date, "%Y%m%d")
+  ids_sel <- which(date_form == paste0((year_data$year_cur-1), "1001")):which(date_form == paste0((year_data$year_cur), "1001"))
+  
+  df_annual_daily_hydro <- df_annual_daily[ids_sel,]
+  
+  # Reset cumulative time series, for comparability with years where the modeled period is exactly the hydrological year.
+  df_annual_daily_hydro$gl_massbal_cumul_bandcorr <- df_annual_daily_hydro$gl_massbal_cumul_bandcorr - df_annual_daily_hydro$gl_massbal_cumul_bandcorr[1]
+  df_annual_daily_hydro$gl_massbal_cumul <- df_annual_daily_hydro$gl_massbal_cumul - df_annual_daily_hydro$gl_massbal_cumul[1]
+  df_annual_daily_hydro$gl_accum_cumul <- df_annual_daily_hydro$gl_accum_cumul - df_annual_daily_hydro$gl_accum_cumul[1]
+  df_annual_daily_hydro$gl_melt_cumul <- df_annual_daily_hydro$gl_melt_cumul - df_annual_daily_hydro$gl_melt_cumul[1]
+  df_annual_daily_hydro$gl_melt_cumul_bandcorr <- df_annual_daily_hydro$gl_melt_cumul_bandcorr - df_annual_daily_hydro$gl_melt_cumul_bandcorr[1]
+  
+  df_annual_daily_hydro_form <- func_format_df_daily(df_annual_daily_hydro,
+                                                     run_params = run_params)
+  
+  write.csv(df_annual_daily_hydro_form,
+            file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_glacier_hydro_", year_data$year_cur, ".csv")),
+            quote = FALSE,
+            row.names = FALSE)
+  
+  
+  
+  # Write modeled daily mass balance series at the stakes -----------------------------------------
   if (year_data$nstakes_annual > 0) {
     df_stakes_daily <- data.frame(date   = model_annual_dates,
-                                  stakes = apply(year_data$mod_output_annual_cur$stakes_series_mod_all * run_params$output_mult / 1000, 2, sprintf, fmt=run_params$output_fmt4))
-    
+                                  stakes = year_data$mod_output_annual_cur$stakes_series_mod_all * run_params$output_mult / 1000)
     names(df_stakes_daily) <- c("date", year_data$massbal_annual_meas_cur$id)
-    write.csv(df_stakes_daily,
+    
+    df_stakes_daily_form <- data.frame(date   = model_annual_dates,
+                                       stakes = apply(year_data$mod_output_annual_cur$stakes_series_mod_all * run_params$output_mult / 1000, 2, sprintf, fmt=run_params$output_fmt4))
+    names(df_stakes_daily_form) <- c("date", year_data$massbal_annual_meas_cur$id)
+    
+    write.csv(df_stakes_daily_form,
               file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_stakes_", year_data$year_cur, ".csv")),
               quote = FALSE,
               row.names = FALSE)
   }
   
   
-  # Write mass balance in vertical bands.
+  
+  # Write modeled daily mass balance series at the stakes, for hydrological year only -------------
+  # This enables comparison of the output files of years with and without measurements
+  # and of years with inconsistent measurement date.
+  # The cumulative time series are reset to 0 on <YYYY-1>-10-01.
+  if (year_data$nstakes_annual > 0) {
+    
+    df_stakes_daily_hydro_form <- df_stakes_daily[ids_sel,]
+    for (stake_id in 1:(ncol(df_stakes_daily_hydro_form)-1)) {
+      df_stakes_daily_hydro_form[,stake_id+1] <- sprintf(run_params$output_fmt4, df_stakes_daily_hydro_form[,stake_id+1] - df_stakes_daily_hydro_form[1,stake_id+1])
+    }
+    
+    write.csv(df_stakes_daily_hydro_form,
+              file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_stakes_hydro_", year_data$year_cur, ".csv")),
+              quote = FALSE,
+              row.names = FALSE)
+    
+  }
+  
+  
+  
+  # Write mass balance in vertical bands ----------------------------------------------------------
   # Note: we have disabled the fixed annual period,
   # This has changed the indices below from 4:9 to 4:8.
   # Note: df_ele_bands_out already uses the correct unit (mm or m,
@@ -96,7 +153,8 @@ func_write_year_output <- function(year_data,
             quote = FALSE,
             row.names = FALSE) 
   
-  # Save some values which we will use for the overview plots.
+  
+  # Save some values which we will use for the overview plots -------------------------------------
   overview_daily_data$mb_series_all_dates[[year_data$year_id]]              <- model_annual_dates
   if(year_data$nstakes_annual > 0) {
     overview_daily_data$mb_series_all_measperiod_dates[[year_data$year_id]] <- year_data$massbal_annual_meas_period

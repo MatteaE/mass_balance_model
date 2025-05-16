@@ -64,6 +64,25 @@ func_load_year_params_from_file <- function(year_data,
         year_cur_params[[param_id_year_cur]] <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
         
         
+      } else if (params_names_all[param_id_year_cur] == "prec_summer_fact") {
+        if (typeof(params_raw[param_id_raw,1]) == "character") {
+          val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+        } else {
+          val_tmp <- as.numeric(params_raw[param_id_raw,1])
+        }
+        # If a single value is provided, we apply it from 1 May to 30 September (default behavior).
+        if (length(val_tmp) == 1) {
+          year_cur_params[[param_id_year_cur]] <- c(rep(1.0, 4),
+                                                    rep(val_tmp, 5),
+                                                    rep(1.0, 3))
+          # Otherwise we use all the provided monthly values.
+        } else if (length(val_tmp) == 12) {
+          year_cur_params[[param_id_year_cur]] <- val_tmp
+        } else {
+          stop(paste0("Year ", year_data$year_cur, ": parameter prec_summer_fact must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = "")))
+        }
+        
+        
       } else if (params_names_all[param_id_year_cur] == "prec_elegrad") {
         if (typeof(params_raw[param_id_raw,1]) == "character") {
           val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))

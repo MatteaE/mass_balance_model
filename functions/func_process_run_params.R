@@ -143,6 +143,20 @@ func_process_run_params <- function(run_params) {
   run_params$massbal_fixed_winter_start <- format(as.Date(run_params$massbal_fixed_winter_start, format = "%m/%d"), format = "%m/%d")
   run_params$massbal_fixed_winter_end <- format(as.Date(run_params$massbal_fixed_winter_end, format = "%m/%d"), format = "%m/%d")
   
+  
+  # If we have just 1 value for the summer precipitation coefficient,
+  # apply it for May to September. Otherwise, use the 12 supplied values.
+  if (!(length(run_params$default_prec_summer_fact) %in% c(1,12))) {
+    stop(paste0("Parameter default_prec_summer_fact in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_prec_summer_fact, collapse = " "), "\n"))
+  } else {
+    if (length(run_params$default_prec_summer_fact) == 1) {
+      run_params$default_prec_summer_fact <- c(rep(1.0, 4),
+                                               rep(run_params$default_prec_summer_fact, 5),
+                                               rep(1.0, 3))
+    }
+  }
+  
+  
   # If we have just 1 value for the default prec_elegrad or temp_elegrad,
   # repeat 12 times (to support month-wise lapse rates while also allowing
   # user input of just 1 annual value - easier and backwards-compatible).
