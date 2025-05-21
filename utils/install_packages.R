@@ -53,9 +53,14 @@ func_install_all <- function() {
    
    install.packages(setdiff(packages_cran, rownames(installed.packages())))
    
-   # topmodel now (2025.02) needs to be installed from the archived version.
+   # From Nov 2024, topmodel needs to be installed from the archived version.
+   # From R 4.5, it needs a specialized version with syntax updates (https://cran.r-project.org/doc/manuals/r-release/NEWS.html)
    if (!("topmodel" %in% rownames(installed.packages()))) {
-     install.packages("https://cran.r-project.org/src/contrib/Archive/topmodel/topmodel_0.7.5.tar.gz")
+     if (getRversion() < '4.5') {
+       install.packages("https://cran.r-project.org/src/contrib/Archive/topmodel/topmodel_0.7.5.tar.gz")
+     } else {
+       install.packages("https://github.com/MatteaE/mass_balance_model/raw/refs/heads/main/functions/topmodel_0.7.5.tar.gz")
+     }
    }
 
    packages_github_repos <- c("MatteaE")
