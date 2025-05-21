@@ -240,7 +240,7 @@ func_massbal_model <- function(run_params,
     # need to keep track of annual firn thickness, well beyond the scope of our simulation.
     # NOTE2: this means that total SWE (and specifically SWE in the accumulation area) has
     # a jump on 15 May. We have to live with it.
-    if (format(weather_series_cur$timestamp[day_id], "%m/%d") == "05/15") {
+    if (format(weather_series_cur$timestamp[day_id], "%m/%d") == run_params$firnification_date) {
       
       ids_swe_depleted_to_firn            <- which((vec_snow_swe[cells_cur] > 0) &
                                                      (vec_snow_swe[cells_cur] <= snowdist_init_values))

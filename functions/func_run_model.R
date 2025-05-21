@@ -46,6 +46,23 @@ func_run_model <- function(run_params) {
   # Load all input data.
   data_all   <- func_load_data_all(run_params)
   
+  
+  # Find out whether we are North or South of the Equator.
+  # This is used in multi-annual runs for the firnification routine,
+  # which is called on May 15 in the Northern hemisphere and on
+  # November 15 in the Southern one.
+  ext_cur     <- ext(data_all$data_dems$elevation[[1]])[1:4]
+  crds_center <- cbind(mean(ext_cur[1:2]), mean(ext_cur[3:4]))
+  lat_center  <- terra::project(crds_center, run_params$grids_crs_epsg, "EPSG:4326")[,2]
+  if (lat_center >= 0) {
+    run_params$north_south <- "North"
+    run_params$firnification_date <- "05/15"
+  } else {
+    run_params$north_south <- "South"
+    run_params$firnification_date <- "11/15"
+  }
+  
+  
   # Below: remove cacheDir option to force recompilation of the C++ code (useful after changing computer or editing the source file).
   if (run_params$avalanche_routine_cpp == TRUE) {
     sourceCpp(file.path("functions", "func_avalanche_gruber.cpp"), cacheDir = "functions")

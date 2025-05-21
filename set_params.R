@@ -70,7 +70,7 @@ run_params <- list(
     
   #### ACCUMULATION and MELT MODEL default year parameters ####
   default_prec_corr            =   700,                          # [%]: default precipitation correction in case no winter data or annual parameters are available.
-  default_prec_summer_fact     =   c(1,0.01,1,0.01,1,0.01,1,0.01,1,0.01,1,0.01),                       # [-]: default multiplicative reduction of precipitation correction in summer. It can be either 1 number (applied from 1 May to 30 September), or 12 numbers (applied month_wise).
+  default_prec_summer_fact     =   0.2,                       # [-]: default multiplicative reduction of precipitation correction in summer. It can be either 1 number (applied from 1 May to 30 September), or 12 numbers (applied month_wise).
   default_prec_elegrad         =   c(10),                        # [% / 100 m]: default altitudinal gradient of precipitation. It can be either 1 number (applied every day of the year), or 12 numbers (applied month-wise). 
   default_temp_elegrad         =   c(-0.6),                      # [°C / 100 m]: default altitudinal gradient of air temperature. It can be either 1 number (applied every day of the year), or 12 numbers (applied month-wise).
   default_melt_factor          =   4.0,                          # [mm w.e. C-1 d-1]: default melt factor for DDF model.
@@ -90,7 +90,7 @@ run_params <- list(
   
   
   #### MODELED YEARS choice ####
-  first_year                   =   2017,                         # First modeled year (usually from October of the previous year to September of this year)
+  first_year                   =   2014,                         # First modeled year (usually from October of the previous year to September of this year)
   last_year                    =   2018                          # Last modeled year (same as previous comment)
   
 )

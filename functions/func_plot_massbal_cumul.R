@@ -146,7 +146,8 @@ func_plot_massbal_cumul <- function(year_data,
     scale_y_continuous(breaks = pretty(c(massbal_daily_df$melt, massbal_daily_df$rain), n = 5), expand = expansion(mult = c(0,0.1))) +
     ylab(plot_ylab) +
     theme_mbcumul_plots +
-    theme(legend.position = c(0.45,0.8),
+    theme(legend.position = "inside",
+          legend.position.inside = c(0.45,0.8),
           legend.justification = 0.5,
           legend.background = element_blank(),
           legend.box.background = element_blank(),

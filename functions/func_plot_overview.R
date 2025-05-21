@@ -230,7 +230,8 @@ func_plot_overview <- function(overview_annual,
     first_point_ypos_rel <- (0.0 - min(df_lines$mb_end)) / (max(c(0, df_lines$mb_end)) - min(c(0,df_lines$mb_end)))
     if (is.nan(first_point_ypos_rel)) first_point_ypos_rel <- 0.6 # Rare but possible case where mass balance is 0.0 in all years.
     legend_ypos <- ifelse(first_point_ypos_rel > 0.5, 0.102, 0.930)
-    theme_mbcumul_legend <- theme(legend.position = c(0.14, legend_ypos),
+    theme_mbcumul_legend <- theme(legend.position = "inside",
+                                  legend.position.inside = c(0.14, legend_ypos),
                                   legend.title = element_blank(),
                                   legend.margin = margin(0,0,0,0),
                                   legend.spacing = unit(0, "pt"),

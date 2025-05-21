@@ -4,7 +4,7 @@
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
 #                 This file contains the loading routine for the glacier vector outlines.         #
-#                 At the moment only XYZN outlines are supported.                                 #
+#                 At the moment only XYZN and SHP outlines are supported.                         #
 #                 Each outline is loaded only once and recycled as needed in the closest years    #
 #                 which don't have their own outline.                                             #
 #                 Vector outlines are used only for the plots, not for the processing.            #
