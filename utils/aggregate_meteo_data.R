@@ -23,7 +23,6 @@
 
 
 suppressPackageStartupMessages(library(readxl))
-suppressPackageStartupMessages(library(timeSeries))
 suppressPackageStartupMessages(library(tools))
 suppressPackageStartupMessages(library(shinyFiles))
 suppressPackageStartupMessages(library(shinyjs))
@@ -658,7 +657,10 @@ generate_daily_series <- function(df,
       cat("** WARNING: found", daily_na_n, "missing value(s) in the daily", datatype, "series.\n")
       if (datatype == "temperature") {
         cat("   I will proceed and linearly interpolate them, but make sure that this is what you want.\n")
-        df_daily$value <- as.numeric(interpNA(timeSeries(df_daily$value), method = "linear"))
+        ids_valid <- which(!is.na(df_daily$value))
+        ids_to_interp <- ids_valid[1]:ids_valid[length(ids_valid)]
+        df_daily$value[ids_to_interp] <- approx(df_daily$value[ids_to_interp], n = length(ids_to_interp))$y
+        # df_daily$value <- as.numeric(interpNA(timeSeries(df_daily$value), method = "linear"))
       } else {
         cat("   I will proceed and replace them with zeroes, but make sure that this is what you want.\n")
         df_daily$value[daily_na] <- 0.0
