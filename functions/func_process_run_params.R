@@ -156,6 +156,18 @@ func_process_run_params <- function(run_params) {
     }
   }
   
+  # How shall the model compute each daily value for the precipitation summer factor?
+  # Options: "constant", "linear".
+  # "constant" keeps the value fixed for each day within the month.
+  # "linear" interpolates every day by assuming that each of the 12 supplied monthly
+  #   values corresponds to the midpoint of each month.
+  if (is.null(run_params$prec_summer_fact_interp)) {
+    run_params$prec_summer_fact_interp <- "linear"
+  }
+  if (!(run_params$prec_summer_fact_interp %in% c("constant", "linear"))) {
+    stop(paste0("Parameter prec_summer_fact_interp in set_params.R must be either \"constant\" or \"linear\""))
+  }
+  
   
   # If we have just 1 value for the default prec_elegrad or temp_elegrad,
   # repeat 12 times (to support month-wise lapse rates while also allowing

@@ -3,7 +3,7 @@
 # Description:    this program models the distributed mass balance of a glacier at daily          #
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
-#                 This file contains the routine to optimize the mass balance (either winter     #
+#                 This file contains the routine to optimize the mass balance (either winter      #
 #                 or annual, with a switch: code is almost the same.                              #
 #                 Optimization is performed by computing the bias derivative w.r.t. the           #
 #                 correction factor, since the bias is actually quasi-linear (weak albedo         #

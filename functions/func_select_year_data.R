@@ -19,7 +19,6 @@ func_select_year_data <- function(data_all,
   
   year_data$year_id                         <- year_id
   year_data$year_cur                        <- run_params$years[year_id]
-  
   cat("\n\nLooking for input data of year", paste0(year_data$year_cur, "...\n"))
   
   # Select grids of the current year from the list of available grids.

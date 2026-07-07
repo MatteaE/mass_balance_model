@@ -110,6 +110,7 @@ func_process_year <- function(year_data,
   # and also adds a plot to the overview
   # plots, which are saved to PDF at the end.
   year_data$ele_bands_plot_df    <- func_plot_year(year_data,
+                                                   year_cur_params,
                                                    run_params,
                                                    data_all$data_dems,
                                                    data_all$data_outlines)

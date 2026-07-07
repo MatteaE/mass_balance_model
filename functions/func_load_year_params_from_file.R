@@ -36,7 +36,8 @@ func_load_year_params_from_file <- function(year_data,
                              sep = ";",
                              comment.char = "*",
                              stringsAsFactors = FALSE,
-                             strip.white = TRUE)
+                             strip.white = TRUE,
+                             col.names = paste0("V", 1:4)) # Specifying col.names enables graceful failure when the params file has no actual contents.
     
     params_available_ids <- pmatch(params_raw[,3], params_names_all)
     # Remove param ids if they don't match parameters which can be set.
@@ -80,7 +81,11 @@ func_load_year_params_from_file <- function(year_data,
           } else {
             val_tmp <- as.numeric(params_raw[param_id_raw,1])
           }
-          # If a single value is provided, we apply it from 1 May to 30 September (default behavior).
+          if (any(is.na(val_tmp))) {
+            stop(paste0("FATAL: file-based parameter prec_summer_fact is malformed. Please fix it. Value(s) provided: ", params_raw[param_id_raw,1]))
+          }
+          
+          # If a single value is provided, we apply it from May to September (default behavior).
           if (length(val_tmp) == 1) {
             year_cur_params[[param_id_year_cur]] <- c(rep(1.0, 4),
                                                       rep(val_tmp, 5),
@@ -89,7 +94,7 @@ func_load_year_params_from_file <- function(year_data,
           } else if (length(val_tmp) == 12) {
             year_cur_params[[param_id_year_cur]] <- val_tmp
           } else {
-            stop(paste0("FATAL: file-based parameter prec_summer_fact must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = " ")))
+            stop(paste0("FATAL: file-based parameter prec_summer_fact must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", params_raw[param_id_raw,1]))
           }
           
         
@@ -100,12 +105,17 @@ func_load_year_params_from_file <- function(year_data,
           } else {
             val_tmp <- as.numeric(params_raw[param_id_raw,1])
           }
+          if (any(is.na(val_tmp))) {
+            stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " is malformed. Please fix it. Value(s) provided: ", params_raw[param_id_raw,1]))
+          }
+          
+          
           if (length(val_tmp) == 1) {
             year_cur_params[[param_id_year_cur]] <- rep(val_tmp, 12)
           } else if (length(val_tmp) == 12) {
             year_cur_params[[param_id_year_cur]] <- val_tmp
           } else {
-            stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = " ")))
+            stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", params_raw[param_id_raw,1]))
           }
           
         
@@ -113,7 +123,7 @@ func_load_year_params_from_file <- function(year_data,
         } else {
           val_tmp <- as.numeric(params_raw[param_id_raw,1])
           if (is.na(val_tmp)) {
-            stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " is malformed, please fix it and run again\n"))
+            stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " is malformed, please fix it and run again. Value(s) provided: ", params_raw[param_id_raw,1]))
           }
           year_cur_params[[param_id_year_cur]] <- val_tmp
         }

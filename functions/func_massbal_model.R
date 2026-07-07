@@ -44,14 +44,15 @@ func_massbal_model <- function(run_params,
   # We have to do it here since the correction factor
   # is subject to optimization!
   # A prec_corr = 100 means no correction (100 % of the original precipitation.)
-  weather_series_cur$precip_corr <- weather_series_cur$precip * (year_cur_params$prec_corr / 100.)
-  # Apply summer precipitation factor (12-vector, actually supports one factor per month, covering the entire year).
-  for (month_id in 1:12) {
-    ids_month_logi <- (as.integer(format(weather_series_cur$timestamp, "%m")) == month_id)
-    if (any(ids_month_logi)) {
-      weather_series_cur$precip_corr[ids_month_logi] <- weather_series_cur$precip_corr[ids_month_logi] * year_cur_params$prec_summer_fact[month_id]
-    }
-  }
+  # We first find the correct extremes of the summer precipitation factor series.
+  id_summer_fact_bounds <- match(weather_series_cur$timestamp[c(1, nrow(weather_series_cur))], year_cur_params$prec_summer_fact_daily_df$date)
+  
+  # Multiplier is the combination of precipitation correction and summer factor.
+  weather_series_cur$precip_mult <- (year_cur_params$prec_corr / 100.) * year_cur_params$prec_summer_fact_daily$fact[id_summer_fact_bounds[1]:id_summer_fact_bounds[2]]
+  
+  # Final precipitation series.
+  weather_series_cur$precip_corr <- weather_series_cur$precip * weather_series_cur$precip_mult
+
   
   
   #### CREATE OUTPUT VECTORS ####
@@ -272,7 +273,8 @@ func_massbal_model <- function(run_params,
                           gl_melt_cumul     = c(0.0, cumsum(gl_melt_daily)[1:model_days_n]),
                           gl_accum_daily    = gl_accum_daily,
                           gl_accum_cumul    = c(0.0, cumsum(gl_accum_daily)[1:model_days_n]),
-                          gl_rainfall_daily = gl_rainfall_daily)
+                          gl_rainfall_daily = gl_rainfall_daily,
+                          weather_series    = weather_series_cur)
   
   # t2 <- Sys.time()
   # print(t2-t1)

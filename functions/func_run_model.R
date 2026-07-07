@@ -41,7 +41,7 @@ func_run_model <- function(run_params) {
       cat("* WARNING: output destination already exists. I am overwriting any files already present!\n")
     }
   }
-    
+  
   
   # Load all input data.
   data_all   <- func_load_data_all(run_params)
@@ -72,8 +72,8 @@ func_run_model <- function(run_params) {
   # which we have taken from the raster package
   # since it is not yet implemented in the terra package.
   sourceCpp(file.path("functions", "func_four_cells_from_xy.cpp"), cacheDir = "functions")
-
-    
+  
+  
   # Compute and apply multiplier for color scale of mass balance maps.
   if (is.na(run_params$mb_colorscale_multiplier)) {
     run_params$mb_colorscale_multiplier <- func_compute_massbal_colorscale_multiplier(data_all$data_massbalance_annual,
@@ -170,7 +170,7 @@ func_run_model <- function(run_params) {
       
       cat("\n\n\n\n============  STARTING simulation of year", year_data$year_cur, " ============\n")
       
-      year_cur_params <- func_set_year_params(year_data, run_params)
+      year_cur_params   <- func_set_year_params(year_data, run_params)
       year_results_list <- func_process_year(year_data,
                                              year_data_prev,
                                              run_params,

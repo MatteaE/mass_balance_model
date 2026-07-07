@@ -9,6 +9,7 @@
 
 
 func_plot_weather_series <- function(year_data,
+                                     year_cur_params,
                                      run_params) {
   
   plots <- list()
@@ -23,10 +24,12 @@ func_plot_weather_series <- function(year_data,
           text = element_text(face = "bold"),
           panel.grid = element_blank())
   
+  # Assemble data frame with common date info to be plotted.
   date_df <- data.frame(date  = seq.Date(year_data$model_time_bounds[1]-1, year_data$model_time_bounds[2], by = "1 day"))
   day_id_offset <- (length(date_df$date) - as.integer(format(date_df$date[length(date_df$date)], "%j"))) + 1
   date_df$day_id <- seq_along(date_df$date) - day_id_offset # So that day_id = 0 is Jan 1.
   date_df$date_posixct <- as.POSIXct(date_df$date)
+  
   
   # Setup month labels.
   months_labels_all <- format(date_df$date, "%b")
@@ -45,9 +48,13 @@ func_plot_weather_series <- function(year_data,
   months_labels_df$date <- date_df$date[match(months_labels_df$day_id, date_df$day_id)]
   months_labels_df$date_posixct <- as.POSIXct(months_labels_df$date)
   
-  # Air temperature red/blue ribbon.
+  #### . Air temperature red/blue ribbon ####
   # We linearly estimate the time of crossing of the 0 °C threshold.
-  dat_Tair <- year_data$weather_series_annual_cur[,c(1,6)]
+  
+  # dat_Tair <- year_data$weather_series_annual_cur[,c(1,6)] # OLD DELETEME
+  
+  dat_Tair <- year_data$mod_output_annual_cur$weather_series[,c("timestamp", "t2m_mean")]
+  
   dat_Tair$timestamp_posixct <- as.POSIXct(dat_Tair$timestamp, tz = "UTC")
   i <- 2
   while (i <= nrow(dat_Tair)) {
@@ -90,13 +97,19 @@ func_plot_weather_series <- function(year_data,
     {if (run_params$show_month_lines) geom_vline(xintercept = month_starts_posixct, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
     annotate("text", x = months_labels_df$date_posixct, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
     scale_x_datetime(expand = expansion(0,0)) +
-    ylab("AWS daily mean air temperature [\u00B0C]") +
+    ylab(bquote(bold("AWS daily mean"~T["air"]~"[\u00B0C]"))) +
     theme_weather_plot
   
   
-  # Daily and monthly precipitation.
+  
+  
+  #### . Daily and monthly precipitation ####
   months_cur_rle_new <- rle(as.integer(format(date_df$date[2:nrow(date_df)], "%m")))
-  dat_precip <- year_data$weather_series_annual_cur[,c(1,7)]
+  
+  # dat_precip <- year_data$weather_series_annual_cur[,c(1,7)] # OLD DELETEME
+  
+  dat_precip <- year_data$mod_output_annual_cur$weather_series[,c("timestamp", "precip")]
+  
   dat_precip_monthly <- data.frame(month      = months_cur_rle_new$values,
                                    date_start = dat_precip$timestamp[1], # Initialize already with Date object, to have correct time.
                                    date_end   = dat_precip$timestamp[1],
@@ -123,11 +136,27 @@ func_plot_weather_series <- function(year_data,
     annotate("text", x = months_labels_df$date, y = Inf, label = months_labels_df$label, vjust = 2, fontface = "bold", size = 5) +
     scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05))) +
     scale_x_date(expand = expansion(0,0)) +
-    ylab("AWS daily and monthly precipitation [mm]") +
+    ylab("AWS precipitation [mm]") +
     theme_weather_plot
   
+  
+  
+  #### . Precipitation multiplier (i.e. correction and summer bias) ####
+  dat_precip_mult <- year_data$mod_output_annual_cur$weather_series[,c("timestamp", "precip_mult")]
+  plots[[3]] <- ggplot(dat_precip_mult) +
+    geom_hline(yintercept = 1, linetype = "dashed", linewidth = 0.5) +
+    geom_vline(xintercept = date_df$date[date_df$day_id == 0], linetype = "dashed", linewidth = 0.5) +
+    {if (run_params$show_month_lines) geom_vline(xintercept = month_starts, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
+    geom_line(aes(x = timestamp, y = precip_mult), linetype = "solid", linewidth = 0.7) +
+    annotate("text", x = months_labels_df$date, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
+    scale_y_continuous(limits = c(0, max(1, max(dat_precip_mult$precip_mult))), expand = expansion(mult = c(0, 0.05))) +
+    scale_x_date(expand = expansion(0,0)) +
+    ylab("Precipitation multiplier [-]") +
+    theme_weather_plot
+  
+  
   # Align panels.
-  plots_out <- plot_grid(plotlist = plots, align = "hv", ncol = 1, nrow = 2)
+  plots_out <- plot_grid(plotlist = plots, align = "hv", ncol = 1, nrow = 3)
   
   return(plots_out)
 } 
