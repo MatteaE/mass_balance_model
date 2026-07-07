@@ -168,7 +168,7 @@ func_run_model <- function(run_params) {
                                          year_id,
                                          run_params)
       
-      cat("\n\n\n\n============  STARTING NEW YEAR:", year_data$year_cur, " ============\n")
+      cat("\n\n\n\n============  STARTING simulation of year", year_data$year_cur, " ============\n")
       
       year_cur_params <- func_set_year_params(year_data, run_params)
       year_results_list <- func_process_year(year_data,

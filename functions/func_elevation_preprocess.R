@@ -86,7 +86,7 @@ func_elevation_preprocess <- function(run_params, elevation) {
   dem_diff <- values(elevation_filled - elevation)
   
   cat("    Altered cells:", length(which(abs(dem_diff) > 1e-9)), "\n")
-  cat("    New DEM bias compared to the original: within [", round(as.numeric(min(dem_diff)), 3), ",", round(as.numeric(max(dem_diff)), 3), "] m\n")
+  cat("    New DEM bias compared to the original: within", paste0("[", round(as.numeric(min(dem_diff)), 3), ", ", round(as.numeric(max(dem_diff)), 3), "]"), "m\n")
 
   # [LEGACY] (Optionally) add tiny jitter (noise) to the DEM to avoid problematic
   # cases where cell patches have a constant (flat) value, which disturbes drainage.

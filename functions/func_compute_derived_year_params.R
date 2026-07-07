@@ -20,7 +20,7 @@ func_compute_derived_year_params <- function(year_data, year_cur_params, run_par
   # The hydrological year starts on 1/10/<Y-1> at 00:00 and ends on 1/10/<Y> at 00:00.
   # Since we use Date objects which don't include the time of day, we can set the
   # hydro end to October 1 (else we would miss the mass balance
-  # between YYYY/9/30 00:00 and YYYY/10/1 00:00).
+  # between YYYY/09/30 00:00 and YYYY/10/01 00:00).
   year_cur_params$hydro_start <- as.Date(paste(year_data$year_cur-1, 10, 1), format="%Y %m %d")
   year_cur_params$hydro_end   <- as.Date(paste(year_data$year_cur, 10, 1), format = "%Y %m %d")
   

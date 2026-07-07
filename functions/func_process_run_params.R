@@ -109,7 +109,7 @@ func_process_run_params <- function(run_params) {
   run_params$mb_colorscale_breaks        <-   run_params$mb_colorscale_breaks * run_params$output_mult
   run_params$ele_bands_plot_size         <-   50          # [m]: plot the annual mass balance profile as function of elevation, using elevation bands with this vertical extent.
   run_params$plot_daily_maps             <-   FALSE       # [TRUE/FALSE]: at the end of each year, produce daily plots of surface type and SWE (slow, but useful for debug or visualization).
-  run_params$daily_maps_frequency        <-   7           # [days]: produce "daily" plots of surface type and SWE only at a given interval, to speed up their generation.
+  run_params$daily_maps_frequency        <-   1           # [days]: produce "daily" plots of surface type and SWE only at a given interval, to speed up their generation.
   
   #### FIXED MASS BALANCE PERIODS choice ####
   # run_params$massbal_fixed_annual_start   <-   "10/31"    # [month/day]: start of the user-defined fixed period for annual mass balance evaluation. This is referred to (<year_cur> - 1).

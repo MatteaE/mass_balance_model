@@ -28,6 +28,8 @@ func_load_year_params_from_file <- function(year_data,
   
   if (file.exists(filepath_params)) {
     
+    cat("Reading year-specific parameters...\n")
+    
     # Read parameter file.
     params_raw <- read.delim(filepath_params,
                              header = FALSE,
@@ -43,80 +45,91 @@ func_load_year_params_from_file <- function(year_data,
     # from the old parameter file format).
     params_available_remove <- which(is.na(params_available_ids))
     if (length(params_available_remove) > 0) {
+      cat(paste0("WARNING: dropping ", length(params_available_remove), " file-based parameter(s) with unknown name, namely: ", paste0(params_raw[params_available_remove,3], collapse = ", "), "\n"))
       params_available_ids <- params_available_ids[-params_available_remove]
       params_raw <- params_raw[-params_available_remove,]
     }
     
     params_available_n   <- length(params_available_ids)
     
-    # Assemble output, already converting to numeric types.
-    for (param_id_raw in 1:params_available_n) {
-      param_id_year_cur <- params_available_ids[param_id_raw]
-      # Parameters are usually numeric, except for:
-        # the temperature and precipitation gradients, which can be either 1 numeric or 12 comma-separated;
+    # Is any parameter available after removing unknown ones?
+    if (params_available_n > 0) {
+      cat("Found", params_available_n, "defined year-specific parameter(s):", paste0(params_raw[params_available_ids,3], sep = ""), "\n")
+      
+      # Assemble output, already converting to numeric types.
+      for (param_id_raw in 1:params_available_n) {
+        param_id_year_cur <- params_available_ids[param_id_raw]
+        # Parameters are usually numeric, except for:
+        # the temperature and precipitation gradients and the summer precipitation multiplier, which can be either 1 numeric or 12 comma-separated;
         # the elevation bands, which are always comma-separated.
-      # So if we are loading the elevation bands we process them as comma-separated.
-      # If we are loading the temperature/precipitation gradients, we process them
-      # as either comma-separated or simple numeric, and if they are a simple numeric
-      # we repeat the value 12 times.
-      # For the other parameters, we simply load them as numeric.
-      if (params_names_all[param_id_year_cur] == "mb_corr_ele_bands") {
-        year_cur_params[[param_id_year_cur]] <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+        # So if we are loading the elevation bands we process them as comma-separated.
+        # If we are loading the temperature/precipitation gradients, we process them
+        # as either comma-separated or simple numeric, and if they are a simple numeric
+        # we repeat the value 12 times.
+        # For the other parameters, we simply load them as numeric.
         
+        # Parameter mb_corr_ele_bands
+        if (params_names_all[param_id_year_cur] == "mb_corr_ele_bands") {
+          year_cur_params[[param_id_year_cur]] <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+          
         
-      } else if (params_names_all[param_id_year_cur] == "prec_summer_fact") {
-        if (typeof(params_raw[param_id_raw,1]) == "character") {
-          val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+        # Parameter prec_summer_fact
+        } else if (params_names_all[param_id_year_cur] == "prec_summer_fact") {
+          if (typeof(params_raw[param_id_raw,1]) == "character") {
+            val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+          } else {
+            val_tmp <- as.numeric(params_raw[param_id_raw,1])
+          }
+          # If a single value is provided, we apply it from 1 May to 30 September (default behavior).
+          if (length(val_tmp) == 1) {
+            year_cur_params[[param_id_year_cur]] <- c(rep(1.0, 4),
+                                                      rep(val_tmp, 5),
+                                                      rep(1.0, 3))
+            # Otherwise we use all the provided monthly values.
+          } else if (length(val_tmp) == 12) {
+            year_cur_params[[param_id_year_cur]] <- val_tmp
+          } else {
+            stop(paste0("FATAL: file-based parameter prec_summer_fact must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = " ")))
+          }
+          
+        
+        # Parameters temp_elegrad and prec_elegrad
+        } else if (params_names_all[param_id_year_cur] %in% c("temp_elegrad", "prec_elegrad")) {
+          if (typeof(params_raw[param_id_raw,1]) == "character") {
+            val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+          } else {
+            val_tmp <- as.numeric(params_raw[param_id_raw,1])
+          }
+          if (length(val_tmp) == 1) {
+            year_cur_params[[param_id_year_cur]] <- rep(val_tmp, 12)
+          } else if (length(val_tmp) == 12) {
+            year_cur_params[[param_id_year_cur]] <- val_tmp
+          } else {
+            stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = " ")))
+          }
+          
+        
+        # All other parameters
         } else {
           val_tmp <- as.numeric(params_raw[param_id_raw,1])
-        }
-        # If a single value is provided, we apply it from 1 May to 30 September (default behavior).
-        if (length(val_tmp) == 1) {
-          year_cur_params[[param_id_year_cur]] <- c(rep(1.0, 4),
-                                                    rep(val_tmp, 5),
-                                                    rep(1.0, 3))
-          # Otherwise we use all the provided monthly values.
-        } else if (length(val_tmp) == 12) {
+          if (is.na(val_tmp)) {
+            stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " is malformed, please fix it and run again\n"))
+          }
           year_cur_params[[param_id_year_cur]] <- val_tmp
-        } else {
-          stop(paste0("Year ", year_data$year_cur, ": parameter prec_summer_fact must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = "")))
         }
-        
-        
-      } else if (params_names_all[param_id_year_cur] == "prec_elegrad") {
-        if (typeof(params_raw[param_id_raw,1]) == "character") {
-          val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
-        } else {
-          val_tmp <- as.numeric(params_raw[param_id_raw,1])
-        }
-        if (length(val_tmp) == 1) {
-          year_cur_params[[param_id_year_cur]] <- rep(val_tmp, 12)
-        } else if (length(val_tmp) == 12) {
-          year_cur_params[[param_id_year_cur]] <- val_tmp
-        } else {
-          stop(paste0("Year ", year_data$year_cur, ": parameter prec_elegrad must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = "")))
-        }
-        
-        
-      } else if (params_names_all[param_id_year_cur] == "temp_elegrad") {
-        if (typeof(params_raw[param_id_raw,1]) == "character") {
-          val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
-        } else {
-          val_tmp <- as.numeric(params_raw[param_id_raw,1])
-        }
-        if (length(val_tmp) == 1) {
-          year_cur_params[[param_id_year_cur]] <- rep(val_tmp, 12)
-        } else if (length(val_tmp) == 12) {
-          year_cur_params[[param_id_year_cur]] <- val_tmp
-        } else {
-          stop(paste0("Year ", year_data$year_cur, ": parameter temp_elegrad must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", paste0(params_raw[param_id_raw,1], collapse = "")))
-        }
-        
-        
-      } else {
-        year_cur_params[[param_id_year_cur]] <- as.numeric(params_raw[param_id_raw,1])
       }
+      
+    # else: params_available_n is not > 0
+    } else {
+      
+      cat("WARNING: params file was specified, but no valid parameter was found within it. Will use default values\n")
+      
     }
+    # No params file found for the current year.
+  } else {
+    
+    cat("No year-specific parameters defined\n")
+    
   }
   
   return(year_cur_params)
