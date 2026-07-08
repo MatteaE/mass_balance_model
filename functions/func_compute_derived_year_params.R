@@ -40,14 +40,18 @@ func_compute_derived_year_params <- function(year_data, year_cur_params, run_par
   days_seq <- seq.Date(as.Date(paste(year_data$year_cur-1, "01", "01", sep = "/")),
                        as.Date(paste(year_data$year_cur, "12", "31", sep = "/")),
                        by = "1 day")
-  year_cur_params$prec_summer_fact_daily_df <- data.frame(date = days_seq,
-                                                          fact = NA_real_)
+  year_cur_params$params_daily_df <- data.frame(date             = days_seq,
+                                                prec_summer_fact = NA_real_,
+                                                prec_elegrad     = NA_real_,
+                                                temp_elegrad     = NA_real_)
   
   # . With constant value within each month.
-  if (run_params$prec_summer_fact_interp == "constant") {
+  if (run_params$params_daily_interp == "constant") {
     for (month_id in 1:12) {
-      ids_month <- which(as.integer(format(year_cur_params$prec_summer_fact_daily_df$date, "%m")) == month_id)
-      year_cur_params$prec_summer_fact_daily_df$fact[ids_month] <- year_cur_params$prec_summer_fact[month_id]
+      ids_month <- which(as.integer(format(year_cur_params$params_daily_df$date, "%m")) == month_id)
+      year_cur_params$params_daily_df$prec_summer_fact[ids_month] <- year_cur_params$prec_summer_fact[month_id]
+      year_cur_params$params_daily_df$prec_elegrad[ids_month]     <- year_cur_params$prec_elegrad[month_id]
+      year_cur_params$params_daily_df$temp_elegrad[ids_month]     <- year_cur_params$temp_elegrad[month_id]
     }
     
     # . With daily linear interpolation from one month midpoint to the next.
@@ -59,16 +63,34 @@ func_compute_derived_year_params <- function(year_data, year_cur_params, run_par
                                       as.Date(paste(year_data$year_cur, sprintf("%02d", 1:12), c(15,14,rep(15,10)), sep = "/"))), "%j")) +
       c(rep(0, 12), rep(as.integer(format(as.Date(paste0(year_data$year_cur-1, "/12/31")), "%j")), 12))
     
-    doy_y <- rep(year_cur_params$prec_summer_fact, 2)
+    # Prepare the series to be interpolated (over the two years that we pick).
+    prec_summer_fact <- rep(year_cur_params$prec_summer_fact, 2)
+    prec_elegrad     <- rep(year_cur_params$prec_elegrad, 2)
+    temp_elegrad     <- rep(year_cur_params$temp_elegrad, 2)
     
-    year_cur_params$prec_summer_fact_daily_df$fact <- approx(x = month_dmid,
-                                                             y = doy_y,
-                                                             method = "linear",
-                                                             xout = 1:nrow(year_cur_params$prec_summer_fact_daily_df),
-                                                             rule = 2)$y
+    
+    # Do the linear interpolation. rule = 2 means the values at the ends
+    # (Jan 1 to Jan 14 and Dec 16 to Dec 31) get extrapolated with constant values.
+    year_cur_params$params_daily_df$prec_summer_fact <- approx(x = month_dmid,
+                                                               y = prec_summer_fact,
+                                                               method = "linear",
+                                                               xout = 1:nrow(year_cur_params$params_daily_df),
+                                                               rule = 2)$y
+    
+    year_cur_params$params_daily_df$prec_elegrad     <- approx(x = month_dmid,
+                                                               y = prec_elegrad,
+                                                               method = "linear",
+                                                               xout = 1:nrow(year_cur_params$params_daily_df),
+                                                               rule = 2)$y
+    
+    year_cur_params$params_daily_df$temp_elegrad     <- approx(x = month_dmid,
+                                                               y = temp_elegrad,
+                                                               method = "linear",
+                                                               xout = 1:nrow(year_cur_params$params_daily_df),
+                                                               rule = 2)$y
     
   }
   
   return(year_cur_params)
   
-} 
+}

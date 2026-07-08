@@ -38,21 +38,25 @@ func_massbal_model <- function(run_params,
   model_days_n <- nrow(weather_series_cur)
   
   
+  # Select the correct date range for the data.frame with the daily-interpolated parameters:
+  # prec_summer_fact, prec_elegrad, and temp_elegrad.
+  # params_daily_df_sel is temporally aligned with weather_series_cur
+  id_summer_fact_bounds <- match(weather_series_cur$timestamp[c(1, nrow(weather_series_cur))], year_cur_params$params_daily_df$date)
+  params_daily_df_sel   <- year_cur_params$params_daily_df[id_summer_fact_bounds[1]:id_summer_fact_bounds[2],]
+  
   #### CORRECT PRECIPITATION UNDERCATCH ####
   # Correct precipitation undercatch with given parameters
   # (lower correction in summer).
   # We have to do it here since the correction factor
   # is subject to optimization!
   # A prec_corr = 100 means no correction (100 % of the original precipitation.)
-  # We first find the correct extremes of the summer precipitation factor series.
-  id_summer_fact_bounds <- match(weather_series_cur$timestamp[c(1, nrow(weather_series_cur))], year_cur_params$prec_summer_fact_daily_df$date)
   
   # Multiplier is the combination of precipitation correction and summer factor.
-  weather_series_cur$precip_mult <- (year_cur_params$prec_corr / 100.) * year_cur_params$prec_summer_fact_daily$fact[id_summer_fact_bounds[1]:id_summer_fact_bounds[2]]
+  weather_series_cur$precip_mult <- (year_cur_params$prec_corr / 100.) * params_daily_df_sel$prec_summer_fact
   
   # Final precipitation series.
   weather_series_cur$precip_corr <- weather_series_cur$precip * weather_series_cur$precip_mult
-
+  
   
   
   #### CREATE OUTPUT VECTORS ####
@@ -101,9 +105,9 @@ func_massbal_model <- function(run_params,
     
     #### .  COMPUTE GRIDDED WEATHER OF THE DAY ####
     # Temperature in °C, snowfall in mm w.e.
-    temp_cur            <- weather_series_cur$t2m_mean[day_id] + year_cur_params$temp_elegrad[weather_series_cur$month[day_id]] * (dhm_values - run_params$weather_aws_elevation) / 100
+    temp_cur            <- weather_series_cur$t2m_mean[day_id] + params_daily_df_sel$temp_elegrad[day_id] * (dhm_values - run_params$weather_aws_elevation) / 100
     solid_prec_frac_cur <- clamp(((1 + run_params$weather_snowfall_temp) - temp_cur) / 2, 0, 1)
-    precip_cur          <- snowdist_probes_norm_values_red * snowdist_topographic_values_red * weather_series_cur$precip_corr[day_id] * (1 + (pmin(run_params$weather_max_precip_ele, dhm_values) - run_params$weather_aws_elevation) * year_cur_params$prec_elegrad[weather_series_cur$month[day_id]] / 1e4 ) # 1e4: gradient is in [% / 100 m], we want [fraction / m].
+    precip_cur          <- snowdist_probes_norm_values_red * snowdist_topographic_values_red * weather_series_cur$precip_corr[day_id] * pmax((1 + (pmin(run_params$weather_max_precip_ele, dhm_values) - run_params$weather_aws_elevation) * params_daily_df_sel$prec_elegrad[day_id] / 1e4 ), 0.0) # 1e4: gradient is in [% / 100 m], we want [fraction / m]. The pmax() is there because precipitation should not be allowed to go below 0 if the AWS is higher than the glacier.
     accumulation_cur    <- precip_cur * solid_prec_frac_cur
     # We assume that the spatial distribution of rainfall
     # is the same as the distribution of snowfall.

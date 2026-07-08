@@ -127,9 +127,16 @@ func_process_year <- function(year_data,
   if (run_params$plot_daily_maps) {
     func_plot_daily_maps(year_data,
                          run_params,
-                         data_all$data_surftype,
                          data_all$data_dems,
                          data_all$data_outlines)
+  }
+  
+  
+  #### . Write daily grids of SWE ####
+  if (run_params$write_daily_grids) {
+    func_write_daily_grids(year_data,
+                           run_params,
+                           data_all$data_dems)
   }
   
   

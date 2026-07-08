@@ -10,30 +10,35 @@
 
 func_plot_daily_maps <- function(year_data,
                                  run_params,
-                                 data_surftype,
                                  data_dems,
                                  data_outlines) {
   
   
-  # dir.create(file.path(run_params$output_dirname, "daily", year_cur, "massbal"), recursive = TRUE)
-  dir.create(file.path(run_params$output_dirname, "daily", year_data$year_cur, "swe"), recursive = TRUE)
-  dir.create(file.path(run_params$output_dirname, "daily", year_data$year_cur, "surftype"), recursive = TRUE)
+  # dir.create(file.path(run_params$output_dirname, "daily", year_cur, "massbal_plots"), recursive = TRUE)
+  dir.create(file.path(run_params$output_dirname, "daily", year_data$year_cur, "swe_plots"), recursive = TRUE)
+  dir.create(file.path(run_params$output_dirname, "daily", year_data$year_cur, "surftype_plots"), recursive = TRUE)
   
   plot_df <- data.frame(crds(data_dems$elevation[[year_data$dem_grid_id]], na.rm = FALSE))
   
+  plot_width <- 800 # px
+  area_width_m <- diff(range(plot_df[,1]))
+  area_height_m <- diff(range(plot_df[,2]))
+  
   # elevation_df is to plot the contours.
   elevation_df <- data.frame(plot_df, z = values(data_dems$elevation[[year_data$dem_grid_id]])[,1])
+  
+  max_swe <- round(quantile(year_data$mod_output_annual_cur$vec_swe_all, 0.98) / 100) * 100
   
   # Daily loop to produce the plots.
   # Optionally reduced frequency (e.g. weekly).
   for (day_id in 1:(year_data$model_annual_days_n + 1)) {
     
     # Plot only one every few days, to speed up.
-    if (!(day_id %% run_params$daily_maps_frequency)) {
+    if (!(day_id %% run_params$plot_daily_maps_frequency)) {
       
       cat("\r** Generating daily plots of SWE and surface type...", day_id, "/", year_data$model_annual_days_n+1, "**")
       cells_cur <- (day_id-1) * run_params$grid_ncells + 1:(run_params$grid_ncells)
-      max_swe <- 10000
+      # max_swe <- 10000
       # plot_df$swe <- clamp(year_data$mod_output_annual_cur$vec_swe_all[cells_cur], -Inf, max_swe, values = TRUE)
       plot_df$swe <- year_data$mod_output_annual_cur$vec_swe_all[cells_cur]
       plot_df$snow <- as.integer(plot_df$swe > 0)
@@ -49,14 +54,16 @@ func_plot_daily_maps <- function(year_data,
         geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = 0.2) +
         geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = 0.15) +
         geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.2, stroke.color = "#FFFFFF", size = 1.6, min.size = 10) +
-        annotate("label", x = Inf, y = Inf, hjust = 1.3, vjust = 1.5, label = date_text) +
+        annotate("label", x = Inf, y = Inf, hjust = 1.3, vjust = 1, label = date_text) +
         scale_fill_fermenter(name = "SWE [mm]", palette = "RdPu",
                              direction = 1, limits = c(0,max_swe),
-                             breaks = c(100,200,500,1000,1500,2000,3000,4000)) +
+                             breaks = c(0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe,
+                             oob = scales::oob_squish) +
         guides(alpha = "none") +
         theme_void() +
         theme(plot.background = element_rect(fill = "#DDDDDD", linetype = "blank"))
-      suppressWarnings(ggsave(file.path(run_params$output_dirname, "daily", year_data$year_cur, "swe", paste0(sprintf("%03d", day_id), ".png")), width = 5, height = 3))
+      suppressWarnings(ggsave(file.path(run_params$output_dirname, "daily", year_data$year_cur, "swe_plots", paste0(sprintf("%03d", day_id), ".jpg")),
+                              width = plot_width, height = plot_width * area_height_m / area_width_m, units = "px"))
       
       
       
@@ -66,7 +73,7 @@ func_plot_daily_maps <- function(year_data,
         geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = 0.2) +
         geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = 0.15) +
         geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.2, stroke.color = "#FFFFFF", size = 1.6, min.size = 10) +
-        annotate("label", x = Inf, y = Inf, hjust = 1.3, vjust = 1.5, label = date_text) +
+        annotate("label", x = Inf, y = Inf, hjust = 1.3, vjust = 1, label = date_text) +
         scale_fill_manual(name = "Surface type",
                           values = c("0" = "#EEEEEE",
                                      "1" = "#6992D5",
@@ -81,7 +88,8 @@ func_plot_daily_maps <- function(year_data,
                           drop = FALSE) +
         theme_void() +
         theme(plot.background = element_rect(fill = "#FFFFFF", linetype = "blank"))
-      suppressWarnings(ggsave(file.path(run_params$output_dirname, "daily", year_data$year_cur, "surftype", paste0(sprintf("%03d", day_id), ".png")), width = 5, height = 3))
+      suppressWarnings(ggsave(file.path(run_params$output_dirname, "daily", year_data$year_cur, "surftype_plots", paste0(sprintf("%03d", day_id), ".jpg")),
+                              width = plot_width, height = plot_width * area_height_m / area_width_m, units = "px"))
       
     } # End selection on day_id to plot only one day every few.
     
@@ -103,12 +111,13 @@ func_plot_daily_maps <- function(year_data,
   #     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = 0.2) +
   #     geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = 0.15) +
   #     geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.2, stroke.color = "#FFFFFF", size = 1.6, min.size = 10) +
-  #     annotate("label", x = Inf, y = Inf, hjust = 1.3, vjust = 1.5, label = date_text) +
+  #     annotate("label", x = Inf, y = Inf, hjust = 1.3, vjust = 1, label = date_text) +
   #     scale_fill_fermenter(name = "Cumulative\nSMB [mm w.e.]", palette = "RdBu",
   #                          direction = 1, limits = c(-max_mb,max_mb),
   #                          breaks = c(-3000,-1600,-800,-300,0,300,800,1600,3000)) +
   #     theme_void()
-  #   suppressWarnings(ggsave(file.path(run_params$output_dirname, "daily", year_cur, "massbal", paste0(sprintf("%03d", day_id), ".png")), width = 5, height = 3))
+  #   suppressWarnings(ggsave(file.path(run_params$output_dirname, "daily", year_cur, "massbal_plots", paste0(sprintf("%03d", day_id), ".jpg")),
+  #     width = plot_width, height = plot_width * area_height_m / area_width_m, units = "px"))
   # }
   
   cat("\n")

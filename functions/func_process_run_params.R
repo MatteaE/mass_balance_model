@@ -108,9 +108,13 @@ func_process_run_params <- function(run_params) {
   run_params$mb_colorscale_breaks        <-   c(-2,-1.5,-1,-0.5,-0.2,0,0.2,0.5,1,1.5,2) # [m w.e.]: use these breaks in the color scale for mass balance maps. NOTE: these have to be exactly 11 at the moment.
   run_params$mb_colorscale_breaks        <-   run_params$mb_colorscale_breaks * run_params$output_mult
   run_params$ele_bands_plot_size         <-   50          # [m]: plot the annual mass balance profile as function of elevation, using elevation bands with this vertical extent.
-  run_params$plot_daily_maps             <-   FALSE       # [TRUE/FALSE]: at the end of each year, produce daily plots of surface type and SWE (slow, but useful for debug or visualization).
-  run_params$daily_maps_frequency        <-   1           # [days]: produce "daily" plots of surface type and SWE only at a given interval, to speed up their generation.
   
+  #### DAILY OUTPUT parameters ####
+  run_params$plot_daily_maps             <-   FALSE       # [TRUE/FALSE]: at the end of each year, produce daily plots of surface type and SWE (slow, but useful for debug or visualization).
+  run_params$plot_daily_maps_frequency   <-   1           # [days]: produce "daily" plots of surface type and SWE only at a given interval, to speed up their generation.
+  run_params$write_daily_grids           <-   FALSE         # [TRUE/FALSE]: at the end of each year, write daily geotiff grids of SWE (useful for debugging)
+  run_params$write_daily_grids_frequency <-   1            # [days]: write "daily" grids of SWE only at a given interval, to speed up processing
+    
   #### FIXED MASS BALANCE PERIODS choice ####
   # run_params$massbal_fixed_annual_start   <-   "10/31"    # [month/day]: start of the user-defined fixed period for annual mass balance evaluation. This is referred to (<year_cur> - 1).
   # run_params$massbal_fixed_annual_end     <-   "8/31"     # [month/day]: end of the user-defined fixed period for annual mass balance evaluation. This is referred to <year_cur>.
@@ -156,16 +160,16 @@ func_process_run_params <- function(run_params) {
     }
   }
   
-  # How shall the model compute each daily value for the precipitation summer factor?
+  # How shall the model compute each daily value for the precipitation summer factor,
+  # the precipitation gradient, and the elevation gradient, when they are provided as 12 monthly values?
   # Options: "constant", "linear".
   # "constant" keeps the value fixed for each day within the month.
-  # "linear" interpolates every day by assuming that each of the 12 supplied monthly
-  #   values corresponds to the midpoint of each month.
-  if (is.null(run_params$prec_summer_fact_interp)) {
-    run_params$prec_summer_fact_interp <- "linear"
+  # "linear" interpolates through the midpoint of each month.
+  if (is.null(run_params$params_daily_interp)) {
+    run_params$params_daily_interp <- "linear"
   }
-  if (!(run_params$prec_summer_fact_interp %in% c("constant", "linear"))) {
-    stop(paste0("Parameter prec_summer_fact_interp in set_params.R must be either \"constant\" or \"linear\""))
+  if (!(run_params$params_daily_interp %in% c("constant", "linear"))) {
+    stop(paste0("Parameter params_daily_interp in set_params.R must be either \"constant\" or \"linear\" (value provided: ", run_params$params_daily_interp, ")"))
   }
   
   
