@@ -3,7 +3,7 @@
 # Description:    this program models the distributed mass balance of a glacier at daily          #
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
-#                 This file contains the generation of the final overview plots.                  #
+#                 This file contains the generation of the final overview plots (time series).    #
 ###################################################################################################  
 
 func_plot_overview <- function(overview_annual,
@@ -24,8 +24,8 @@ func_plot_overview <- function(overview_annual,
   # Do we have a single year to show?
   single_year <- nrow(overview_annual$summary_df) == 1
   
-  # Time series of annual mass balance over the measurement
-  # period, corrected within elevation bands.
+  
+  # Corrected measurement-period annual MB -----------------------------------------
   # Also horizontal line with mean over the period.
   # If we model just one year, add point plot so that something is visible.
   # We do this only if all years have mass balance measurements, else it is confusing.
@@ -45,7 +45,7 @@ func_plot_overview <- function(overview_annual,
   }
   
   
-  # Time series of other annual mass balances:
+  # Other annual MBs (uncorrected and hydrological) --------------------------------
   # over the measurement period with no correction,
   # over the hydrological year,
   # [DISABLED] over a fixed (user-defined) period.
@@ -84,7 +84,7 @@ func_plot_overview <- function(overview_annual,
     theme_overview_plots
   
   
-  # Time series of winter mass balances:
+  # Winter MBs ---------------------------------------------------------------------
   # over a fixed (user-defined) winter period,
   # over the measurement period (only if winter measurements are available).
   # If we model just one year, add point plot so that something is visible.
@@ -112,7 +112,7 @@ func_plot_overview <- function(overview_annual,
     theme_overview_plots
   
   
-  # Time series of ELA.
+  # ELA ----------------------------------------------------------------------------
   # If we model just one year, add point plot so that something is visible.
   single_year_point <- NULL
   if (single_year) {single_year_point <- geom_point(aes(x = year, y = ela))}
@@ -126,7 +126,7 @@ func_plot_overview <- function(overview_annual,
     theme_overview_plots
   
   
-  # Time series of AAR.
+  # AAR ----------------------------------------------------------------------------
   # If we model just one year, add point plot so that something is visible.
   single_year_point <- NULL
   if (single_year) {single_year_point <- geom_point(aes(x = year, y = aar))}
@@ -140,7 +140,7 @@ func_plot_overview <- function(overview_annual,
     theme_overview_plots
   
   
-  # Time series of RMSE.
+  # RMSE ---------------------------------------------------------------------------
   # If we model just one year, add point plot so that something is visible.
   # Also in case there are isolated years with mass balance measurements,
   # else they are not visible (geom_line of a single point).
@@ -161,7 +161,7 @@ func_plot_overview <- function(overview_annual,
   }
   
   
-  # Time series of the melt parameters.
+  # Melt parameters ------------------------------------------------------------
   # If we model just one year, add point plot so that something is visible.
   single_year_point1 <- NULL
   single_year_point2 <- NULL
@@ -191,7 +191,7 @@ func_plot_overview <- function(overview_annual,
     theme_overview_plots
   
   
-  # Time series of the precipitation correction.
+  # Precipitation correction ---------------------------------------------------
   # We use a slightly more complex formula for the
   # y-axis limits so that when we have a single value
   # the limits still make sense.
@@ -209,7 +209,7 @@ func_plot_overview <- function(overview_annual,
   
   
   
-  # Time series of cumulative hydrological year mass balance.
+  # Hydrological year mass balance --------------------------------------
   x_breaks_cumul <- seq(overview_annual$summary_df$year[1]-1, overview_annual$summary_df$year[length(overview_annual$summary_df$year)], by = max(1, floor((length(overview_annual$summary_df$year)+1) / 4)))
   df_lines <- data.frame(year_start = overview_annual$summary_df$year - 1,
                          year_end   = overview_annual$summary_df$year,
@@ -264,8 +264,8 @@ func_plot_overview <- function(overview_annual,
     theme_mbcumul_legend
   
   
-  # Time series of cumulative hydrological year mass balance,
-  # with also daily mass balance and modeling period boundaries.
+  # Cumulative hydrological year mass balance with also daily line -----------------
+  # We also add modeling period boundaries.
   # Vertical blue lines: hydrological year boundaries.
   # Vertical dashed purple lines: measurement period start.
   # Vertical dotted purple lines: measurement period end.
@@ -311,8 +311,8 @@ func_plot_overview <- function(overview_annual,
                             mb_cumul = c(0, overview_annual$summary_df$mb_cumul))
   plots[[length(plots)+1]] <- ggplot() +
     geom_vline(xintercept = as.Date(paste0(c(run_params$years[1]-1,run_params$years), "/10/1")), color = "#0000FF", linewidth = point_size/6) +
-    geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 1), color = "#FF00FF", linetype = "dashed", linewidth = point_size/6) +
-    geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 2), color = "#FF00FF", linetype = "dotted", linewidth = point_size/6) +
+    {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 1), color = "#FF00FF", linetype = "dashed", linewidth = point_size/6)} +
+    {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 2), color = "#FF00FF", linetype = "dotted", linewidth = point_size/6)} +
     geom_line(data = mb_all_df, aes(x = day, y = mb, group = year_id), linewidth = point_size/6) +
     geom_hline(yintercept = 0, linetype = "dashed", linewidth = 1) +
     geom_line(data = mb_cumul_df,  aes(x = year, y = mb_cumul), color = "#FF0000", linewidth = 1) +
@@ -329,7 +329,7 @@ func_plot_overview <- function(overview_annual,
   
   
   
-  
+  # AWS daily air temperature ------------------------------------------------------
   # Full weather series of daily mean air temperature at
   # the AWS, using the same time bounds as previous plot.
   # Compute numbers for the air temperature red/blue ribbon.
@@ -375,7 +375,7 @@ func_plot_overview <- function(overview_annual,
   
   
   
-  
+  # AWS daily and monthly precipitation --------------------------------------------
   # Full weather series of daily and monthly precipitation at
   # the AWS, using the same time bounds as previous plot.
   dat_precip <- overview_annual$data_weather[,c(1,7)]
@@ -406,7 +406,6 @@ func_plot_overview <- function(overview_annual,
     ylab("Precipitation [mm]") +
     ggtitle("AWS daily and monthly precipitation") +
     theme_overview_plots
-  
   
   
   overview_plots <- suppressWarnings(suppressMessages(ggarrange(plotlist = plots, ncol = 1, nrow = 3, align = "hv")))

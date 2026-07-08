@@ -39,7 +39,13 @@ func_load_year_params_from_file <- function(year_data,
                              strip.white = TRUE,
                              col.names = paste0("V", 1:4)) # Specifying col.names enables graceful failure when the params file has no actual contents.
     
-    params_available_ids <- pmatch(params_raw[,3], params_names_all)
+    if (any(duplicated(params_raw[,3]))) {
+      stop("FATAL: found duplicated parameter names in the params file. Please fix.")
+    }
+    
+    params_available_ids <- match(params_raw[,3], params_names_all)
+    
+    
     # Remove param ids if they don't match parameters which can be set.
     # This prevents an unhandled error in case the user supplies some
     # additional parameters which cannot be set (e.g. evaluate_snowdist
@@ -55,7 +61,7 @@ func_load_year_params_from_file <- function(year_data,
     
     # Is any parameter available after removing unknown ones?
     if (params_available_n > 0) {
-      cat("Found", params_available_n, "defined year-specific parameter(s):", paste0(params_raw[params_available_ids,3], sep = ""), "\n")
+      cat("Found", params_available_n, "defined year-specific parameter(s):", paste0(params_names_all[params_available_ids], sep = ""), "\n")
       
       # Assemble output, already converting to numeric types.
       for (param_id_raw in 1:params_available_n) {
@@ -69,12 +75,17 @@ func_load_year_params_from_file <- function(year_data,
         # we repeat the value 12 times.
         # For the other parameters, we simply load them as numeric.
         
-        # Parameter mb_corr_ele_bands
+        # Parameter mb_corr_ele_bands - must be comma-separated numbers.
         if (params_names_all[param_id_year_cur] == "mb_corr_ele_bands") {
-          year_cur_params[[param_id_year_cur]] <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+          val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
+          if (any(is.na(val_tmp)) || (length(val_tmp) < 2)) {
+            stop(paste0("FATAL: file-based parameter mb_corr_ele_bands is malformed. Please fix it. Value(s) provided: ", params_raw[param_id_raw,1]))
+          }
+          year_cur_params[[param_id_year_cur]] <- val_tmp
           
-        
-        # Parameter prec_summer_fact
+          
+          # Parameter prec_summer_fact - can be numeric or character (12 comma-separated numbers),
+          # if numeric it has a special processing.
         } else if (params_names_all[param_id_year_cur] == "prec_summer_fact") {
           if (typeof(params_raw[param_id_raw,1]) == "character") {
             val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
@@ -97,8 +108,8 @@ func_load_year_params_from_file <- function(year_data,
             stop(paste0("FATAL: file-based parameter prec_summer_fact must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", params_raw[param_id_raw,1]))
           }
           
-        
-        # Parameters temp_elegrad and prec_elegrad
+          
+          # Parameters temp_elegrad and prec_elegrad - can be numeric or character (12 comma-separated).
         } else if (params_names_all[param_id_year_cur] %in% c("temp_elegrad", "prec_elegrad")) {
           if (typeof(params_raw[param_id_raw,1]) == "character") {
             val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
@@ -109,7 +120,6 @@ func_load_year_params_from_file <- function(year_data,
             stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " is malformed. Please fix it. Value(s) provided: ", params_raw[param_id_raw,1]))
           }
           
-          
           if (length(val_tmp) == 1) {
             year_cur_params[[param_id_year_cur]] <- rep(val_tmp, 12)
           } else if (length(val_tmp) == 12) {
@@ -118,8 +128,8 @@ func_load_year_params_from_file <- function(year_data,
             stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", params_raw[param_id_raw,1]))
           }
           
-        
-        # All other parameters
+          
+          # All other parameters - must be a single numeric.
         } else {
           val_tmp <- as.numeric(params_raw[param_id_raw,1])
           if (is.na(val_tmp)) {
@@ -129,7 +139,7 @@ func_load_year_params_from_file <- function(year_data,
         }
       }
       
-    # else: params_available_n is not > 0
+      # else: params_available_n is not > 0
     } else {
       
       cat("WARNING: params file was specified, but no valid parameter was found within it. Will use default values\n")
