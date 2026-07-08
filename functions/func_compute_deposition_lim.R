@@ -23,17 +23,20 @@ func_compute_deposition_lim <- function(run_params,
     # we will have an NA here. The model will anyway stop with an
     # informative message when we try to simulate mass balance.
     if (length(ids_year) > 0) {
-      prec_solid_annual_max[year_id] <- sum(data_weather_sim$precip[intersect(ids_year, ids_cold)] * (1 + (ele_max - run_params$weather_aws_elevation) * (run_params$default_prec_elegrad[data_weather_sim$month[intersect(ids_year, ids_cold)]]) / 1e4))
+      prec_solid_annual_max[year_id] <- sum(data_weather_sim$precip[intersect(ids_year, ids_cold)] * pmax((1 + (ele_max - run_params$weather_aws_elevation) * (run_params$default_prec_elegrad[data_weather_sim$month[intersect(ids_year, ids_cold)]]) / 1e4), 0.0))
     } else {
       prec_solid_annual_max[year_id] <- NA_real_
     }
   }
   
+  # Compute actual value as 8 times the 90th percentile of annual precipitation
+  # (or the actual value of annual precipitation if the model is run for just 1 year).
+  # Force a minimum of 1000 kg m-2.
   # If the weather data does not cover the modeling period,
-  # we use a dummy 1000 value, the model will anyway always
+  # we also use a dummy 1000 value, the model will anyway always
   # stop and complain of missing data with an informative message.
   if (any(!is.na(prec_solid_annual_max))) {
-    run_params$deposition_mass_lim <- 8 * as.numeric(quantile(prec_solid_annual_max, 0.9, na.rm = T))
+    run_params$deposition_mass_lim <- max(8 * as.numeric(quantile(prec_solid_annual_max, 0.9, na.rm = T)), 1000)
   } else {
     run_params$deposition_mass_lim <- 1000
   }

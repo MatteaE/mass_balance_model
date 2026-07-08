@@ -64,7 +64,7 @@ func_find_stake_cells_dx_dy <- function(year_data,
   }
   stakes_annual_edge_n <- length(stakes_annual_edge_ids)
   if (stakes_annual_edge_n > 0) {
-    cat("* WARNING: found", stakes_annual_edge_n, "annual measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n")
+    message("* WARNING: found ", stakes_annual_edge_n, " annual measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n")
     cat("They are: ", paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_edge_ids], collapse = " | "), "\n")
   }
   
@@ -84,7 +84,7 @@ func_find_stake_cells_dx_dy <- function(year_data,
     }
     stakes_winter_edge_n <- length(stakes_winter_edge_ids)
     if (stakes_winter_edge_n > 0) {
-      cat("* WARNING: found", stakes_winter_edge_n, "winter measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n")
+      message("* WARNING: found ", stakes_winter_edge_n, " winter measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n")
       cat("They are: ", paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_edge_ids], collapse = " | "), "\n")
     }
   }

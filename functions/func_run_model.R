@@ -38,7 +38,7 @@ func_run_model <- function(run_params) {
       cat("** FATAL: output destination already exists! Please move, remove or rename it before running the model.\n")
       stop()
     } else {
-      cat("* WARNING: output destination already exists. I am overwriting any files already present!\n")
+      message("* WARNING: output destination already exists. I am overwriting any files already present!\n")
     }
   }
   

@@ -62,7 +62,7 @@ func_select_year_data <- function(data_all,
   stakes_annual_outside_ids <- which(is.na(stakes_annual_dem_values))
   stakes_annual_outside_n   <- length(stakes_annual_outside_ids)
   if (stakes_annual_outside_n > 0) {
-    cat(paste0("* WARNING: found ", stakes_annual_outside_n, " annual measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
+    message(paste0("* WARNING: found ", stakes_annual_outside_n, " annual measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
     cat("They are:\n")
     cat(paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$x[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$y[stakes_annual_outside_ids], "\n"))
     year_data$massbal_annual_meas_cur <- year_data$massbal_annual_meas_cur[-stakes_annual_outside_ids,]
@@ -77,7 +77,7 @@ func_select_year_data <- function(data_all,
   stakes_winter_outside_ids <- which(is.na(stakes_winter_dem_values))
   stakes_winter_outside_n   <- length(stakes_winter_outside_ids)
   if (stakes_winter_outside_n > 0) {
-    cat(paste0("* WARNING: found ", stakes_winter_outside_n, " winter measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
+    message(paste0("* WARNING: found ", stakes_winter_outside_n, " winter measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
     cat("They are:\n")
     cat(paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$x[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$y[stakes_winter_outside_ids], "\n"))
     year_data$massbal_winter_meas_cur <- year_data$massbal_winter_meas_cur[-stakes_winter_outside_ids,]

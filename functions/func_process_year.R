@@ -158,7 +158,7 @@ func_process_year <- function(year_data,
   # max_error <- max(stake_errors)
   # max_error_id <- which.max(stake_errors)
   # if (max_error > 1) {
-  # cat("* SERIOUS WARNING: the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear extraction of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.\n")
+  # message("* SERIOUS WARNING: the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear extraction of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.\n")
   # cat(paste0("The max error is at stake ", max_error_id, ", with value ", round(max_error, 1), " mm w.e.\n"))
   # cat("Stake data:", paste(year_data$massbal_annual_meas_cur[max_error_id,]), sep = "  |  ", "\n")
   # }

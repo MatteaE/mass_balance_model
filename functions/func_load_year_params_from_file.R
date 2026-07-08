@@ -52,7 +52,7 @@ func_load_year_params_from_file <- function(year_data,
     # from the old parameter file format).
     params_available_remove <- which(is.na(params_available_ids))
     if (length(params_available_remove) > 0) {
-      cat(paste0("WARNING: dropping ", length(params_available_remove), " file-based parameter(s) with unknown name, namely: ", paste0(params_raw[params_available_remove,3], collapse = ", "), "\n"))
+      message(paste0("WARNING: dropping ", length(params_available_remove), " file-based parameter(s) with unknown name, namely: ", paste0(params_raw[params_available_remove,3], collapse = ", "), "\n"))
       params_available_ids <- params_available_ids[-params_available_remove]
       params_raw <- params_raw[-params_available_remove,]
     }
@@ -142,7 +142,7 @@ func_load_year_params_from_file <- function(year_data,
       # else: params_available_n is not > 0
     } else {
       
-      cat("WARNING: params file was specified, but no valid parameter was found within it. Will use default values\n")
+      message("WARNING: params file was specified, but no valid parameter was found within it. Will use default values\n")
       
     }
     # No params file found for the current year.

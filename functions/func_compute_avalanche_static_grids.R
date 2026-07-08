@@ -152,9 +152,9 @@ func_compute_avalanche_static_grids <- function(run_params, data_dhms) {
         avalanche$draining_coeff[[grid_id]][[dir_id]][residual_sink_cell_id] <- 1
         avalanche$draining_coeff_sum[[grid_id]][residual_sink_cell_id] <- 1
       }
+      
+      cat("    Residual sinks fixed.\n")
     }
-    
-    cat("    Residual sinks fixed.\n")
     
     # Compute normalized draining fractions for the 4 directions (Eq. 9 in Gruber, 2007).
     for (dir_id in 1:4) {

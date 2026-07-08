@@ -19,7 +19,7 @@ func_check_resample_grids <- function(run_params,
   for (grid_id in 1:length(data_all$data_surftype$grids)) {
     if (!compareGeom(data_all$data_surftype$grids[[grid_id]], data_all$raster_blueprint, stopOnError = FALSE)) {
       
-      cat("* WARNING: func_check_resample_grids: I am resampling surface type grid ", grid_id, "!\n")
+      message("* WARNING: func_check_resample_grids: I am resampling surface type grid ", grid_id, "!\n")
       data_all$data_surftype$grids[[grid_id]]      <- resample(data_all$data_surftype$grids[[grid_id]], data_all$raster_blueprint, method = "near")
       crs(data_all$data_surftype$grids[[grid_id]]) <- run_params$grids_crs_epsg
       
@@ -30,7 +30,7 @@ func_check_resample_grids <- function(run_params,
   for (grid_id in 1:length(data_all$data_dhms$elevation)) {
     if (!compareGeom(data_all$data_dhms$elevation[[grid_id]], data_all$raster_blueprint, stopOnError = FALSE)) {
       
-      cat("* WARNING: func_check_resample_grids: I am resampling DHM grid ", grid_id, "!\n")
+      message("* WARNING: func_check_resample_grids: I am resampling DHM grid ", grid_id, "!\n")
       data_all$data_dhms$elevation[[grid_id]]      <- resample(data_all$data_dhms$elevation[[grid_id]], data_all$raster_blueprint, method = "bilinear")
       crs(data_all$data_dhms$elevation[[grid_id]]) <- run_params$grids_crs_epsg
       
