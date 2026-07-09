@@ -23,8 +23,8 @@ func_run_model <- function(run_params) {
   # Load required R packages.
   packages_loaded <- func_load_packages(run_params)
   if (packages_loaded == FALSE) {
-    cat("** FATAL: please install required packages before proceeding!\n")
-    stop()
+    func_customlog("please install required packages before proceeding!\n", level = 2)
+    func_stop_msg()
   }
   
   #### Setup simulation ####
@@ -35,10 +35,10 @@ func_run_model <- function(run_params) {
   # in which case overwrite with a warning.
   if (file.exists(run_params$output_dirname) == TRUE) {
     if (run_params$overwrite_output == FALSE) {
-      cat("** FATAL: output destination already exists! Please move, remove or rename it before running the model.\n")
-      stop()
+      func_customlog("output destination already exists! Please move, remove or rename it before running the model.\n", level = 2)
+      func_stop_msg()
     } else {
-      message("* WARNING: output destination already exists. I am overwriting any files already present!\n")
+      func_customlog("output destination already exists. I am overwriting any files already present!\n", level = 1)
     }
   }
   
@@ -105,11 +105,13 @@ func_run_model <- function(run_params) {
   # Create output directory.
   dir.create(file.path(run_params$output_dirname, "annual_results"), recursive = TRUE, showWarnings = FALSE)
   
+  func_customlog("Finished initial setup.", level = 3)
+  
   #### Main loop ####
   # Here year_data is a list which is gradually built and
   # modified during one iteration of the main loop.
   year_data <- list()
-  cat("\n\nEntering main loop...\n")
+  cat("\nEntering main loop...")
   for (year_id in 1:run_params$n_years) {
     
     cat("\n\n")
@@ -124,9 +126,13 @@ func_run_model <- function(run_params) {
                                        year_id,
                                        run_params)
     
+    cat("\n")
+    func_customlog("Data loaded successfully", level = 3)
+    
     if (year_data$nstakes_annual > 0) {
       
-      cat("\n============  STARTING simulation of year", year_data$year_cur, " ============\n")
+      cat("\n")
+      func_customlog("============  STARTING simulation of year ", year_data$year_cur, " ============\n")
       
       year_cur_params   <- func_set_year_params(year_data, run_params)
       year_results_list <- func_process_year(year_data,
@@ -144,7 +150,7 @@ func_run_model <- function(run_params) {
     }
   }
   
-  cat("\n** Finished simulation of all years with mass balance measurements. **\n")
+  func_customlog("Finished simulation of all years with mass balance measurements", level = 3)
   
   # Here: compute mean of optimized parameters, to use on nodata years.
   run_params <- func_compute_mean_optimized_params(run_params, overview_annual)
@@ -182,9 +188,11 @@ func_run_model <- function(run_params) {
       overview_annual   <- year_results_list$overview_annual
       
     }
+    
+    func_customlog("Finished simulation of all years without mass balance measurements", level = 3)
   }
   
-  cat("\n** All simulation loops have finished. **\n")
+  func_customlog("All simulation loops have finished", level = 3)
   
   #### Plot and write overview ####
   overview_annual$data_weather <- data_all$data_weather
@@ -197,7 +205,9 @@ func_run_model <- function(run_params) {
     
   }
   
-  cat("\n============  All done! Model has finished succesfully.  ============\n\n")
+  cat("\n\n")
+  func_customlog("Run finished succesfully", level = 3)
+  cat("\n\n")
   
   return(0)
   

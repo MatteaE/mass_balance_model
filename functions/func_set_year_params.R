@@ -56,7 +56,7 @@ func_set_year_params <- function(year_data,
     # Year parameters filling in case the year does have some mass balance measurements.
     if (year_data$nstakes_annual > 0) {
       
-      cat("The current year has annual data, so I am using the global default value for all such parameters.\n")
+      cat("The current year has annual mass balance data, so I am using the global default value for all such parameters. I will optimize the relevant ones based on the data.\n")
       
       for (param_id in year_cur_params_na_ids) {
         if (params_names_all[param_id] != "mb_corr_ele_bands") {

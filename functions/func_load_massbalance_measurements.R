@@ -11,13 +11,15 @@
 #                 for probe/snowpit measurements.                                                 #
 ################################################################################################### 
 
-func_load_massbalance_measurements <- function(run_params, load_what, data_dhms) {
+func_load_massbalance_measurements <- function(run_params,
+                                               load_what,
+                                               data_dhms) {
   
   cat("  Loading", load_what, "mass balance measurements...\n")
   
   if (load_what == "annual") {
     
-    # No winter measurements. Return dummy data frame.
+    # No annual measurements. Return dummy data frame for them.
     if (nchar(run_params$filename_massbalance_annual) == 0) {
       
       data_massbalance_annual_dummy <- data.frame(id = "none",
@@ -36,7 +38,7 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
     
   } else if (load_what == "winter") {
     
-    # No winter measurements. Return dummy data frame.
+    # No winter measurements. Return dummy data frame for them.
     if (nchar(run_params$filename_massbalance_winter) == 0) {
       
       data_massbalance_winter_dummy <- data.frame(id = "none",
@@ -55,8 +57,8 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
   }
   
   if (!file.exists(massbalance_path)) {
-    cat("* FATAL: I could not find the file with mass balance measurements. The specified path is", massbalance_path, "\n")
-    stop()
+    func_customlog("I could not find the file with mass balance measurements. The specified path is", massbalance_path, "\n", level = 2)
+    func_stop_msg()
   }
   
   # Read file, assign column names.
@@ -70,15 +72,19 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
   # Compute mass balance.
   data_massbalance$massbal <- data_massbalance$dh_cm * data_massbalance$density * 10 # 10: cm w.e. to mm w.e.
   
-  # Remove from mass balance df any stakes with coordinates outside the DHM.
-  ext_limits <- ext(data_dhms$elevation[[1]])
+  # Are there any mass balance points with coordinates outside the DHM?
+  # If yes, first try to rescue them by assuming they have a wrong CRS
+  # (test adjacent UTM zones as well as lon/lat).
+  # If that fails, drop them.
+  # We check over the combined extent of all DHMs.
+  ext_limits <- ext(sprc(data_dhms$elevation))
   ids_df_bad <- which((data_massbalance$x < xmin(ext_limits)) |
                         (data_massbalance$x > xmax(ext_limits)) |
                         (data_massbalance$y < ymin(ext_limits)) |
                         (data_massbalance$y > ymax(ext_limits)))
   ids_bad_n <- length(ids_df_bad)
   if (ids_bad_n > 0) {
-    message("* WARNING: the ", load_what, " mass balance file contains ", ids_bad_n, " entries which fall outside the DHM.\n")
+    func_customlog("the ", load_what, " mass balance file contains ", ids_bad_n, " entries which fall outside all provided DHMs.\n", level = 1)
     stake_coords_rescued_ids <- NULL
     for (i in 1:ids_bad_n) {
       stake_coords_fixed <- func_fix_stake_coordinates(c(data_massbalance$x[ids_df_bad[i]], data_massbalance$y[ids_df_bad[i]]),
@@ -93,14 +99,14 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
       }
     }
     stake_coords_rescued_n <- length(stake_coords_rescued_ids)
-    cat("    I could rescue", stake_coords_rescued_n, "entries with a wrong coordinate system.\n")
+    func_customlog("    I could rescue", stake_coords_rescued_n, "entries with a wrong coordinate system.\n")
     ids_df_bad <- setdiff(ids_df_bad, stake_coords_rescued_ids) # Don't remove rescued stakes.
     if (stake_coords_rescued_n < ids_bad_n) {
-      message("* WARNING: I am discarding the ", ids_bad_n - stake_coords_rescued_n, " remaining entries, I could not fix them. You should investigate and correct them manually.\n")
-      cat("    The first problematic entry reports these coordinates:", data_massbalance$x[ids_df_bad[1]], "|", data_massbalance$y[ids_df_bad[1]], "\n")
+      func_customlog("    I am discarding the ", ids_bad_n - stake_coords_rescued_n, " remaining entries, I could not fix them. You should investigate and correct them manually.\n", level = 1)
+      func_customlog("    The first problematic entry reports these coordinates: ", data_massbalance$x[ids_df_bad[1]], " | ", data_massbalance$y[ids_df_bad[1]], "\n")
       data_massbalance <- data_massbalance[-ids_df_bad,]
     } else {
-      cat("    All problematic entries could be rescued by reprojection.\n")
+      func_customlog("    All problematic entries could be rescued by reprojection.\n")
     }
   }
   
@@ -137,7 +143,7 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
     stakes_dist_proc[is.nan(stakes_dist_proc)] <- 1e9 # This in case we have two stakes at the same place but on different years (0*Inf = NaN, we shouldn't merge them).
     
     # Clustering happens here.
-    stakes_clusters <- hclust(stats::as.dist(stakes_dist_proc))
+    stakes_clusters     <- hclust(stats::as.dist(stakes_dist_proc))
     stakes_clusters_cut <- cutree(stakes_clusters, h = run_params$stake_cluster_distance)
     
     # Prepare output data frame. We discard the dh_cm and density columns, we only keep mass balance.
@@ -148,6 +154,7 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
     # first cluster element since they are all the same).
     # Add them to the output data frame.
     clusters_n <- max(stakes_clusters_cut)
+    clusters_multistake_n <- 0
     for (cluster_id in 1:clusters_n) {
       cluster_stakes_id <- as.integer(which(stakes_clusters_cut == cluster_id))
       cluster_name <- ifelse(length(cluster_stakes_id) > 1, paste0("CL", sprintf("%03d", cluster_id)), data_massbalance$id[cluster_stakes_id])
@@ -165,13 +172,21 @@ func_load_massbalance_measurements <- function(run_params, load_what, data_dhms)
                                                                                z = cluster_z,
                                                                                massbal = cluster_massbal,
                                                                                stringsAsFactors = FALSE))
+      if (length(cluster_stakes_id) > 1) {
+        clusters_multistake_n <- clusters_multistake_n + 1
+      }
     }
     
   } else {
     data_massbalance_filtered <- data_massbalance[,c(1:6,9)]
+    clusters_multistake_n <- 0
   }
   
   cat("    Loading complete. I have", nrow(data_massbalance_filtered), load_what, "mass balance values.\n")
+  
+  if (run_params$stake_cluster_distance > 0) {
+    cat("    Of those,", clusters_multistake_n, "are clusters resulting from the aggregation of multiple mass balance points, as controlled by parameter stake_cluster_distance.\n")
+  }
   
   return(data_massbalance_filtered)
   

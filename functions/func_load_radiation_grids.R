@@ -59,8 +59,8 @@ func_load_radiation_grids <- function(run_params, raster_blueprint) {
     }
   }
   if ((!grid_found) && (grid_exts_checked_all)) {
-    cat("** FATAL: no radiation grids found. Please check parameters dir_data_radiation, filename_radiation_prefix and filename_radiation_suffix.\n")
-    stop()
+    func_customlog("no radiation grids found. Please check parameters dir_data_radiation, filename_radiation_prefix and filename_radiation_suffix.\n", level = 2)
+    func_stop_msg()
   }
   
   # Do we have an RData file to speed up loading of radiation grids?
@@ -85,10 +85,10 @@ func_load_radiation_grids <- function(run_params, raster_blueprint) {
         cat("    First grid matches! We can use the boot file.\n")
         skip_loading_logi <- TRUE
       } else {
-        cat("    First grid has the same number of cells but values do NOT match. I am reloading the individual files.\n")
+        func_customlog("    First grid has the same number of cells but values do NOT match. I am reloading the individual files.\n", level = 1)
       }
     } else {
-        cat("    First grid does NOT match, it even has a different number of cells. I am reloading the individual files.\n")
+        func_customlog("    First grid does NOT match, it even has a different number of cells. I am reloading the individual files.\n", level = 1)
     }
   }
   

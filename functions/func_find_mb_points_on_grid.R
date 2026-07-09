@@ -4,11 +4,14 @@
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
 #                 This file contains the code to find the grid cells from which to extract        #
-#                 the modeled stakes series, as well as their distance from the stakes.           #
+#                 the modeled stakes series, as well as their distance from the stakes,           #
+#                 and the same for any user-defined points where the output daily SMB is needed.  #
 ###################################################################################################
 
 # Find (vectorized) the distance of each annual (and then winter) stake from the 4 surrounding cell centers.
-# We will use this later to extract the modeled series for each stake, with bilinear filtering.
+# Also find the distance of each user-defined point of daily output.
+# We will use this info later to extract the modeled series for each point, with bilinear filtering.
+
 # dx1 = x distance from the two cells to the left (i.e. with lower X coordinate than the stake),
 # dy1 = y distance from the two cells below (i.e. with lower Y coordinate),
 # dy2 = y distance from the two cells above (i.e. with higher Y coordinate).
@@ -24,7 +27,7 @@
 # This is important for the bilinear filtering since we use fourCellsFromXY(..., duplicates = FALSE),
 # else the filtering would fail (duplicates = FALSE returns (if needed) additional cells which have higher index,
 # i.e. which are lower in the raster matrix, i.e. which would be the lower row of the 4 neighbors).
-func_find_stake_cells_dx_dy <- function(year_data,
+func_find_mb_points_on_grid <- function(year_data,
                                         data_dhms,
                                         data_dems,
                                         run_params) {
@@ -49,13 +52,13 @@ func_find_stake_cells_dx_dy <- function(year_data,
   # aligned with a cell center, unless we are at the lower raster border (which we should
   # always avoid!) the additional cells returned with duplicates = FALSE (cells which would
   # not be part of the actual adjacent cells) have higher index than the "true" adjacent cells.
-  cells_annual <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), duplicates = FALSE))
+  cells_annual <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,c("x", "y")]), duplicates = FALSE))
   cells_annual_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][as.integer(t(cells_annual))][,1], ncol = 4, byrow = TRUE)
   stakes_annual_edge_ids <- integer(0)
   for (stake_id in 1:year_data$nstakes_annual) {
     stake_na_cells_logi <- is.na(cells_annual_dem_value[stake_id,])
     if (length(which(stake_na_cells_logi)) > 0) {
-      cell_distances <- spDistsN1(xyFromCell(data_dhms$elevation[[year_data$dhm_grid_id]], cells_annual[stake_id,]), as.matrix(year_data$massbal_annual_meas_cur[stake_id,4:5]))
+      cell_distances <- spDistsN1(xyFromCell(data_dhms$elevation[[year_data$dhm_grid_id]], cells_annual[stake_id,]), as.matrix(year_data$massbal_annual_meas_cur[stake_id,c("x", "y")]))
       cell_scores <- cell_distances / (!stake_na_cells_logi)
       cell_selected <- which.min(cell_scores)
       cells_annual[stake_id,] <- cells_annual[stake_id, cell_selected]
@@ -64,18 +67,18 @@ func_find_stake_cells_dx_dy <- function(year_data,
   }
   stakes_annual_edge_n <- length(stakes_annual_edge_ids)
   if (stakes_annual_edge_n > 0) {
-    message("* WARNING: found ", stakes_annual_edge_n, " annual measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n")
-    cat("They are: ", paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_edge_ids], collapse = " | "), "\n")
+    func_customlog("found ", stakes_annual_edge_n, " annual measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n", level = 1)
+    func_customlog("They are: ", paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_edge_ids], collapse = " | "), "\n")
   }
   
   if (year_data$nstakes_winter > 0) {
-    cells_winter <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), duplicates = FALSE))
+    cells_winter <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,c("x", "y")]), duplicates = FALSE))
     cells_winter_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][as.integer(t(cells_winter))][,1], ncol = 4, byrow = TRUE)
     stakes_winter_edge_ids <- integer(0)
     for (stake_id in 1:year_data$nstakes_winter) {
       stake_na_cells_logi <- is.na(cells_winter_dem_value[stake_id,])
       if (length(which(stake_na_cells_logi)) > 0) {
-        cell_distances <- spDistsN1(xyFromCell(data_dhms$elevation[[year_data$dhm_grid_id]], cells_winter[stake_id,]), as.matrix(year_data$massbal_winter_meas_cur[stake_id,4:5]))
+        cell_distances <- spDistsN1(xyFromCell(data_dhms$elevation[[year_data$dhm_grid_id]], cells_winter[stake_id,]), as.matrix(year_data$massbal_winter_meas_cur[stake_id,c("x", "y")]))
         cell_scores <- cell_distances / (!stake_na_cells_logi)
         cell_selected <- which.min(cell_scores)
         cells_winter[stake_id,] <- cells_winter[stake_id, cell_selected]
@@ -84,8 +87,8 @@ func_find_stake_cells_dx_dy <- function(year_data,
     }
     stakes_winter_edge_n <- length(stakes_winter_edge_ids)
     if (stakes_winter_edge_n > 0) {
-      message("* WARNING: found ", stakes_winter_edge_n, " winter measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n")
-      cat("They are: ", paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_edge_ids], collapse = " | "), "\n")
+      func_customlog("found ", stakes_winter_edge_n, " winter measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n", level = 1)
+      func_customlog("They are: ", paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_edge_ids], collapse = " | "), "\n")
     }
   }
   

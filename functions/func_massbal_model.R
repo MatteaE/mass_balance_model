@@ -253,11 +253,11 @@ func_massbal_model <- function(run_params,
       swe_depleted_to_firn_n              <- length(ids_swe_depleted_to_firn)
       swe_depleted_to_firn_on_glacier_n   <- length(ids_swe_depleted_to_firn_on_glacier)
       if (swe_depleted_to_firn_n > 0) {
-        message("Warning, firnification on ",
-                format(weather_series_cur$timestamp[day_id], "%Y/%m/%d"),
-                " has just removed all snow on ",
-                swe_depleted_to_firn_n, " cells, ",
-                swe_depleted_to_firn_on_glacier_n, " of them on glacier!")
+        func_customlog("firnification on ",
+                       format(weather_series_cur$timestamp[day_id], "%Y/%m/%d"),
+                       " has just removed all snow on ",
+                       swe_depleted_to_firn_n, " cells, ",
+                       swe_depleted_to_firn_on_glacier_n, " of them on glacier! This might introduce second-order biases in the mass balance. This can be improved by acting on the initial snow cover (e.g. initial snow line altitude).", level = 1)
         vec_surf_type[cells_cur][ids_swe_depleted_to_firn] <- surftype_init_values[ids_swe_depleted_to_firn]
       }
       vec_snow_swe[cells_cur] <- pmax(0, vec_snow_swe[cells_cur] - snowdist_init_values)

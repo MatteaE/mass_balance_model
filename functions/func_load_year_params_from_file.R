@@ -40,7 +40,8 @@ func_load_year_params_from_file <- function(year_data,
                              col.names = paste0("V", 1:4)) # Specifying col.names enables graceful failure when the params file has no actual contents.
     
     if (any(duplicated(params_raw[,3]))) {
-      stop("FATAL: found duplicated parameter names in the params file. Please fix.")
+      cat("FATAL: found duplicated parameter names in the params file. Please fix.")
+      func_stop_msg()
     }
     
     params_available_ids <- match(params_raw[,3], params_names_all)
@@ -52,7 +53,7 @@ func_load_year_params_from_file <- function(year_data,
     # from the old parameter file format).
     params_available_remove <- which(is.na(params_available_ids))
     if (length(params_available_remove) > 0) {
-      message(paste0("WARNING: dropping ", length(params_available_remove), " file-based parameter(s) with unknown name, namely: ", paste0(params_raw[params_available_remove,3], collapse = ", "), "\n"))
+      func_customlog(paste0("dropping ", length(params_available_remove), " file-based parameter(s) with unknown name, namely: ", paste0(params_raw[params_available_remove,3], collapse = ", "), "\n"), level = 1)
       params_available_ids <- params_available_ids[-params_available_remove]
       params_raw <- params_raw[-params_available_remove,]
     }
@@ -142,7 +143,7 @@ func_load_year_params_from_file <- function(year_data,
       # else: params_available_n is not > 0
     } else {
       
-      message("WARNING: params file was specified, but no valid parameter was found within it. Will use default values\n")
+      func_customlog("params file was specified, but no valid parameter was found within it. Will use default values\n", level = 1)
       
     }
     # No params file found for the current year.

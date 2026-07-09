@@ -36,8 +36,8 @@ func_load_elevation_grids <- function(run_params) {
   dhm_n       <- length(grid_paths)
   
   if (dhm_n == 0) {
-    cat("** FATAL: no DHM files found. Please check parameters dir_data_dhm, filename_dhm_prefix and filename_dhm_suffix.\n")
-    stop()
+    func_customlog("no DHM files found. Please check parameters dir_data_dhm, filename_dhm_prefix and filename_dhm_suffix.\n", level = 2)
+    func_stop_msg()
   } else {
     cat("    Found", dhm_n, "DHM file(s). Available year(s):", run_params$dhm_years, "\n")
   }
@@ -98,7 +98,7 @@ func_load_elevation_grids <- function(run_params) {
       for (grid_id in 1:length(grids_out$elevation)) {
         if (!compareGeom(grids_out$elevation[[grid_id]], raster_blueprint, stopOnError = FALSE)) {
           
-          message("* WARNING: func_load_elevation_grids: I am resampling DHM grid ", grid_id, " to enable DHM interpolation!\n")
+          func_customlog("func_load_elevation_grids: I am resampling DHM grid ", grid_id, " to enable DHM interpolation!\n", level = 1)
           grids_out$elevation[[grid_id]] <- resample(grids_out$elevation[[grid_id]], raster_blueprint, method = "bilinear")
           crs(grids_out$elevation[[grid_id]]) <- run_params$grids_crs_epsg
           

@@ -15,31 +15,30 @@ func_load_weather <- function(run_params) {
   data_raw <- read.table(filepath_weather, header = FALSE, skip = run_params$file_weather_nskip, stringsAsFactors = FALSE)
   names(data_raw) <- c("year", "doy", "hour", "t2m_mean", "precip")
   
-  if (typeof(data_raw$t2m_mean) == "character") {
-    t2m_mean_numeric <- as.numeric(data_raw$t2m_mean)
-    id_wrong_first <- which(is.na(t2m_mean_numeric))[1]
-    cat("* FATAL: there is a problem with the meteo data. One or more temperature values are wrong. Please fix them and run the model again.\n The first bad value is:\n")
-    cat(paste(data_raw[id_wrong_first,], collapse = " "))
-    stop()
+  t2m_bad_ids <- which(is.na(as.numeric(data_raw$t2m_mean)))
+  if (length(t2m_bad_ids) > 0) {
+    id_wrong_first <- t2m_bad_ids[1]
+    func_customlog("there is a problem with the meteo data. ", length(t2m_bad_ids), " temperature value(s) are wrong. Please fix them and run the model again.\n The first bad value is:", level = 2)
+    func_customlog(paste(data_raw[id_wrong_first,], collapse = " "))
+    func_stop_msg()
   }
-  if (typeof(data_raw$precip) == "character") {
-    precip_mean_numeric <- as.numeric(data_raw$precip)
-    id_wrong_first <- which(is.na(precip_mean_numeric))[1]
-    cat("* FATAL: there is a problem with the meteo data. One or more precipitation values are wrong. Please fix them and run the model again.\n The first bad value is:\n")
-    cat(paste(data_raw[id_wrong_first,], collapse = " "))
-    stop()
+  precip_bad_ids <- which(is.na(as.numeric(data_raw$precip)))
+  if (length(precip_bad_ids) > 0) {
+    id_wrong_first <- precip_bad_ids[1]
+    func_customlog("there is a problem with the meteo data. ", length(precip_bad_ids), " precipitation values are wrong. Please fix them and run the model again.\n The first bad value is:", level = 2)
+    func_customlog(paste(data_raw[id_wrong_first,], collapse = " "))
+    func_stop_msg()
   }
   
   # Sometimes we may have negative precipitation artifacts, remove them.
   data_raw$precip[which(data_raw$precip < 0.0)] <- 0.0
-  
   data_raw$timestamp <- as.Date(paste(data_raw$year, data_raw$doy), format = "%Y %j", tz = "UTC")
   daydiff            <- as.numeric(diff(data_raw$timestamp))
   daydiff_unique     <- unique(daydiff)
   if ((length(daydiff_unique) != 1) || (daydiff_unique[1] != 1)) {
-    offending_id1 <- which(daydiff != 1)[1]
-    cat("* FATAL: the meteo data do not follow a daily sequence. Please correct the meteo file!\nFirst offending date:", format(data_raw$timestamp[offending_id1], "year = %Y, day of year = %j.\n"))
-    stop()
+    offending_id1 <- which((is.na(daydiff)) | (daydiff != 1))[1]
+    func_customlog("the meteo data do not follow a daily sequence. Please correct the meteo file! The first offending date is:\n", format(data_raw$timestamp[offending_id1], "year = %Y, day of year = %j"), level = 2)
+    func_stop_msg()
   }
   
   data_raw$month <- as.integer(format(data_raw$timestamp, "%m"))

@@ -14,14 +14,17 @@ func_select_year_data <- function(data_all,
                                   run_params) {
                                   
   # Here we put all this year's data,
-  #and we return this list at the end of the function.
+  # and we return this list at the end of the function.
   year_data                                 <- list()
   
   year_data$year_id                         <- year_id
   year_data$year_cur                        <- run_params$years[year_id]
   cat("\n\nLooking for input data of year", paste0(year_data$year_cur, "...\n"))
   
-  # Select grids of the current year from the list of available grids.
+  
+  
+  # Select grids of the current year --------------------------------------------------------------
+  # Those are selected from the list of available grids.
   # We could be using different ids for DEM and DHM (since DEM = DHM + outline, it depends
   # on the available outlines); and also w.r.t. surface type because the
   # elevation grids can also be interpolated annually (unlike surface type).
@@ -41,14 +44,16 @@ func_select_year_data <- function(data_all,
   year_data$grids_avalanche_cur             <- sapply(grids_static_list$grids_avalanche, `[[`, year_data$dhm_grid_id)
   
   # Compute reduced-intensity base topographic distribution of solid precipitation.
-  dist_topographic_values                   <- values(grids_static_list$grids_snowdist_topographic[[year_data$dem_grid_id]])[,1]
+  dist_topographic_values                   <- values(grids_static_list$grids_snowdist_topographic[[year_data$dem_grid_id]], mat = FALSE)
   dist_topographic_values_mean              <- mean(dist_topographic_values)
   year_data$dist_topographic_values_red     <- dist_topographic_values_mean + run_params$accum_snow_dist_red_fac * (dist_topographic_values - dist_topographic_values_mean)
   
   # Extract ice albedo factor grid for this year.
-  year_data$grid_ice_albedo_fact_cur_values <- values(grids_static_list$grids_ice_albedo_fact[[year_data$dhm_grid_id]])[,1]
+  year_data$grid_ice_albedo_fact_cur_values <- values(grids_static_list$grids_ice_albedo_fact[[year_data$dhm_grid_id]], mat = FALSE)
   
-  # Select mass balance measurements of the current year.
+  
+  
+  # Select mass balance measurements of the current year ------------------------------------------
   massbal_annual_ids                        <- func_select_year_mb_measurements(data_all$data_massbalance_annual, year_data$year_cur)
   massbal_winter_ids                        <- func_select_year_mb_measurements(data_all$data_massbalance_winter, year_data$year_cur)
   year_data$massbal_annual_meas_cur         <- data_all$data_massbalance_annual[massbal_annual_ids,] # Empty if we have no annual stakes for the year.
@@ -57,37 +62,53 @@ func_select_year_data <- function(data_all,
   
   # If a stake falls outside the DEM (glacierized)
   # cells, discard it with a warning.
-  stakes_annual_cells_ids <- cellFromXY(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]))
-  stakes_annual_dem_values <- data_all$data_dems$elevation[[year_data$dem_grid_id]][stakes_annual_cells_ids]
+  stakes_annual_cells_ids   <- cellFromXY(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,c("x", "y")]))
+  stakes_annual_dem_values  <- data_all$data_dems$elevation[[year_data$dem_grid_id]][stakes_annual_cells_ids]
   stakes_annual_outside_ids <- which(is.na(stakes_annual_dem_values))
   stakes_annual_outside_n   <- length(stakes_annual_outside_ids)
   if (stakes_annual_outside_n > 0) {
-    message(paste0("* WARNING: found ", stakes_annual_outside_n, " annual measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
-    cat("They are:\n")
-    cat(paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$x[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$y[stakes_annual_outside_ids], "\n"))
+    func_customlog(paste0("found ", stakes_annual_outside_n, " annual measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"), level = 1)
+    func_customlog("They are:\n")
+    func_customlog(paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$x[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$y[stakes_annual_outside_ids], "\n"))
     year_data$massbal_annual_meas_cur <- year_data$massbal_annual_meas_cur[-stakes_annual_outside_ids,]
   }
   # Add DEM elevation of the stakes, we use it
   # instead of reported stake elevation.
-  year_data$massbal_annual_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,4:5]), method = "bilinear")[,1]
+  year_data$massbal_annual_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,c("x", "y")]), method = "bilinear")[,1]
 
   
-  stakes_winter_cells_ids <- cellFromXY(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]))
+  stakes_winter_cells_ids <- cellFromXY(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,c("x", "y")]))
   stakes_winter_dem_values <- data_all$data_dems$elevation[[year_data$dem_grid_id]][stakes_winter_cells_ids]
   stakes_winter_outside_ids <- which(is.na(stakes_winter_dem_values))
   stakes_winter_outside_n   <- length(stakes_winter_outside_ids)
   if (stakes_winter_outside_n > 0) {
-    message(paste0("* WARNING: found ", stakes_winter_outside_n, " winter measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"))
-    cat("They are:\n")
-    cat(paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$x[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$y[stakes_winter_outside_ids], "\n"))
+    func_customlog(paste0("found ", stakes_winter_outside_n, " winter measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"), level = 1)
+    func_customlog("They are:\n")
+    func_customlog(paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$x[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$y[stakes_winter_outside_ids], "\n"))
     year_data$massbal_winter_meas_cur <- year_data$massbal_winter_meas_cur[-stakes_winter_outside_ids,]
   }
-  year_data$massbal_winter_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), method = "bilinear")[,1]
+  year_data$massbal_winter_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,c("x", "y")]), method = "bilinear")[,1]
   
   year_data$nstakes_annual   <- nrow(year_data$massbal_annual_meas_cur)
   year_data$nstakes_winter   <- nrow(year_data$massbal_winter_meas_cur)
   
   cat("Mass balance measurements available:", year_data$nstakes_annual, "annual,", year_data$nstakes_winter, "winter.\n")
+  
+  
+  
+  # Select output points, discard any which fall outside the glacierized area ---------------------
+  year_data$points_daily_out <- data_all$data_points_daily_out
+  
+  points_daily_cells_ids   <- cellFromXY(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$points_daily_out[,c("x", "y")]))
+  points_daily_dem_values  <- data_all$data_dems$elevation[[year_data$dem_grid_id]][points_daily_cells_ids]
+  points_daily_outside_ids <- which(is.na(points_daily_dem_values))
+  points_daily_outside_n   <- length(points_daily_outside_ids)
+  if (points_daily_outside_n > 0) {
+    func_customlog(paste0("found ", points_daily_outside_n, " defined point(s) of daily output which are outside the glacier outline! I am discarding them, but you should check them to make sure that this is intended behavior!\n"), level = 1)
+    func_customlog("They are:\n")
+    func_customlog(paste0(year_data$points_daily_out$id[points_daily_outside_ids], " | ", year_data$points_daily_out$x[points_daily_outside_ids], " | ", year_data$points_daily_out$y[points_daily_outside_ids], "\n"))
+    year_data$points_daily_out <- year_data$points_daily_out[-points_daily_outside_ids,]
+  }
   
   return(year_data)
 }

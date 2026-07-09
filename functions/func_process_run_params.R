@@ -86,6 +86,13 @@ func_process_run_params <- function(run_params) {
   run_params$years_input_allowed         <-   1500:2500                     # Years over which we should search for input data.
   run_params$years_input_allowed_n       <-   diff(range(run_params$years_input_allowed)) + 1
   
+  # Compatibility with older set_params which did not have filename_points_daily_out.
+  if (is.null(run_params$filename_points_daily_out)) {
+    run_params$filename_points_daily_out <- ""
+  }
+  
+  
+  
   #### MODEL OPTIMIZATION parameters ####
   run_params$optim_max_corr_fact         <-   1           # [-]: maximum allowable positive correction to the melt factor and the radiation factor during optimization, in units of the factors themselves (i.e. by how many times these can be increased). Only positive values make sense. A larger value is safer if a reasonable value for the melt factors is not known, but the optimization will be a bit slower. There is no parameter for the negative correction: it is automatically set to maximum 0.
   run_params$optim_bias_threshold        <-   1           # [mm w.e.]: if abs(bias) is below this threshold then we stop the optimization. This saves us a couple iterations since the optim() function will stop when the value *change* is less than a threshold, not the value itself.
@@ -151,7 +158,8 @@ func_process_run_params <- function(run_params) {
   # If we have just 1 value for the summer precipitation coefficient,
   # apply it for May to September. Otherwise, use the 12 supplied values.
   if (!(length(run_params$default_prec_summer_fact) %in% c(1,12))) {
-    stop(paste0("Parameter default_prec_summer_fact in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_prec_summer_fact, collapse = " "), "\n"))
+    func_customlog("Parameter default_prec_summer_fact in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_prec_summer_fact, collapse = " "), "\n", level = 2)
+    func_stop_msg()
   } else {
     if (length(run_params$default_prec_summer_fact) == 1) {
       run_params$default_prec_summer_fact <- c(rep(1.0, 4),
@@ -169,7 +177,8 @@ func_process_run_params <- function(run_params) {
     run_params$params_daily_interp <- "linear"
   }
   if (!(run_params$params_daily_interp %in% c("constant", "linear"))) {
-    stop(paste0("Parameter params_daily_interp in set_params.R must be either \"constant\" or \"linear\" (value provided: ", run_params$params_daily_interp, ")"))
+    func_customlog("Parameter params_daily_interp in set_params.R must be either \"constant\" or \"linear\" (value provided: ", run_params$params_daily_interp, ")", level = 2)
+    func_stop_msg()
   }
   
   
@@ -177,14 +186,16 @@ func_process_run_params <- function(run_params) {
   # repeat 12 times (to support month-wise lapse rates while also allowing
   # user input of just 1 annual value - easier and backwards-compatible).
   if (!(length(run_params$default_prec_elegrad) %in% c(1,12))) {
-    stop(paste0("Parameter default_prec_elegrad in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_prec_elegrad, collapse = " "), "\n"))
+    func_customlog(paste0("Parameter default_prec_elegrad in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_prec_elegrad, collapse = " "), "\n"), level = 2)
+    func_stop_msg()
   } else {
     if (length(run_params$default_prec_elegrad) == 1) {
       run_params$default_prec_elegrad <- rep(run_params$default_prec_elegrad, 12)
     }
   }
   if (!(length(run_params$default_temp_elegrad) %in% c(1,12))) {
-    stop(paste0("Parameter default_temp_elegrad in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_temp_elegrad, collapse = " "), "\n"))
+    func_customlog(paste0("Parameter default_temp_elegrad in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_temp_elegrad, collapse = " "), "\n"), level = 2)
+    func_stop_msg()
   } else {
     if (length(run_params$default_temp_elegrad) == 1) {
       run_params$default_temp_elegrad <- rep(run_params$default_temp_elegrad, 12)

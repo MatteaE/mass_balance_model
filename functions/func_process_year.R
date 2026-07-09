@@ -17,7 +17,7 @@ func_process_year <- function(year_data,
   
   # Find stake offsets on the grid.
   if (year_data$nstakes_annual > 0) {
-    year_data <- func_find_stake_cells_dx_dy(year_data,
+    year_data <- func_find_mb_points_on_grid(year_data,
                                              data_all$data_dhms,
                                              data_all$data_dems,
                                              run_params)
@@ -40,8 +40,8 @@ func_process_year <- function(year_data,
   if (any(is.na(time_bounds_match))) {
     offending_id1 <- which(is.na(time_bounds_match))[1] # The [1] to handle the case where both simulation start and end don't have meteo data. This index then is either value 1 or 2
     offending_date <- model_time_bounds_range[offending_id1]
-    cat("* FATAL: meteo data for the current year are missing. Please check the meteo file and the first_year/last_year! Offending date:", format(offending_date, "%Y/%m/%d"), "(day-of-year:", format(offending_date, "%j)."), "\n")
-    stop()
+    func_customlog("meteo data for the current year are missing. Please check the meteo file and the first_year/last_year! Offending date:", format(offending_date, "%Y/%m/%d"), "(day-of-year:", format(offending_date, "%j)."), "\n", level = 2)
+    func_stop_msg()
   }
   
   
@@ -158,7 +158,7 @@ func_process_year <- function(year_data,
   # max_error <- max(stake_errors)
   # max_error_id <- which.max(stake_errors)
   # if (max_error > 1) {
-  # message("* SERIOUS WARNING: the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear extraction of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.\n")
+  # func_customlog("the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear extraction of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.\n", level = 1)
   # cat(paste0("The max error is at stake ", max_error_id, ", with value ", round(max_error, 1), " mm w.e.\n"))
   # cat("Stake data:", paste(year_data$massbal_annual_meas_cur[max_error_id,]), sep = "  |  ", "\n")
   # }

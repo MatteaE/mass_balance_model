@@ -35,6 +35,9 @@ func_load_data_all <- function(run_params) {
   data_all$data_massbalance_annual    <-   func_load_massbalance_measurements(run_params, "annual", data_all$data_dhms)
   data_all$data_massbalance_winter    <-   func_load_massbalance_measurements(run_params, "winter", data_all$data_dhms)
   
+  # Load points where daily data is to be output (SWE, daily mass balance, cumulative mass balance).
+  data_all$data_points_daily_out      <-   func_load_points_daily_out(run_params, data_all$data_dhms)
+  
   # Memory cleanup.
   invisible(gc())
   

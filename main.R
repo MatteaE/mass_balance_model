@@ -6,16 +6,29 @@
 #                 This file contains the main loop and instructions.                              #
 ###################################################################################################
 
+
+# Prepare environment -----------------------------------------------------------------------------
 # If in utils folder, move one up.
 if (basename(getwd()) == "utils") {
   setwd("..")
 }
 
-# Start logging console output.
-dir.create("logs", showWarnings = FALSE)
-sink(file = file.path("logs", paste0("mb_model_run_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".log")), split = TRUE)
+# Close any leftover sinks and connections from previous runs.
+while (sink.number() > 0) { sink() }
+while (nrow(showConnections(all = FALSE)) > 0) { close(getConnection(rownames(showConnections(all = FALSE)))) }
 
-#### Set parameters and load function definitions ####
+
+# Start logger ------------------------------------------------------------------------------------
+dir.create("logs", showWarnings = FALSE)
+logfile <- file.path("logs", paste0("mb_model_run_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".log"))
+logcon  <- file(logfile, open = "a")
+
+# Setup sink for split logging (console + logfile).
+sink(logcon, split = TRUE)
+options(warn=1) # Configure immediate printing of warnings.
+
+
+# Set parameters and load function definitions ----------------------------------------------------
 # Set English language for dates (in the plots).
 if (Sys.info()["sysname"] == "Windows") {
   Sys.setlocale(category = "LC_TIME", locale = "English")
@@ -28,8 +41,11 @@ source("set_params.R")
 
 invisible(sapply(file.path("functions", list.files("functions", pattern = "\\.R$")), source))
 
-#### Run model ####
+
+# Run model ---------------------------------------------------------------------------------------
 mod_result <- func_run_model(run_params)
 
-# Stop logging console output.
+
+# Stop logger -------------------------------------------------------------------------------------
 sink()
+close(logcon)
