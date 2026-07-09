@@ -52,7 +52,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
   if (optimization_period == "winter") {
     snowdist_init      <- year_data$snowdist_init_winter
     weather_series_cur <- year_data$weather_series_winter_cur
-    dxdy               <- year_data$stake_dxdy[["winter"]]
+    dxdy               <- year_data$points_dxdy[["winter"]]
     nstakes            <- year_data$nstakes_winter
     model_days_n       <- year_data$model_winter_days_n
     massbal_meas_cur   <- year_data$massbal_winter_meas_cur
@@ -60,7 +60,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
   } else {
     snowdist_init      <- year_data$snowdist_init_annual
     weather_series_cur <- year_data$weather_series_annual_cur
-    dxdy               <- year_data$stake_dxdy[["annual"]]
+    dxdy               <- year_data$points_dxdy[["annual"]]
     nstakes            <- year_data$nstakes_annual
     model_days_n       <- year_data$model_annual_days_n
     massbal_meas_cur   <- year_data$massbal_annual_meas_cur

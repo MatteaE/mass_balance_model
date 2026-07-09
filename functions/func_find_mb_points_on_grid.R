@@ -8,6 +8,9 @@
 #                 and the same for any user-defined points where the output daily SMB is needed.  #
 ###################################################################################################
 
+# Below, suffix _annual is for the annual stakes, _winter for the winter stakes, and _daily for the user-defined points of daily output.
+# Some variables also have prefix stakes_ or points_ - the former is used for annual or winter stakes, the latter for the user-defined points.
+
 # Find (vectorized) the distance of each annual (and then winter) stake from the 4 surrounding cell centers.
 # Also find the distance of each user-defined point of daily output.
 # We will use this info later to extract the modeled series for each point, with bilinear filtering.
@@ -32,21 +35,29 @@ func_find_mb_points_on_grid <- function(year_data,
                                         data_dems,
                                         run_params) {
   
+  # dx/dy of annual stakes
   dx1_annual <- (year_data$massbal_annual_meas_cur$x - (ext(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
   dx2_annual <- run_params$grid_cell_size - dx1_annual
   dy2_annual <- ((ext(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$massbal_annual_meas_cur$y) %% run_params$grid_cell_size
   dy1_annual <- run_params$grid_cell_size - dy2_annual
   
+  # dx/dy of winter stakes
   dx1_winter <- (year_data$massbal_winter_meas_cur$x - (ext(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
   dx2_winter <- run_params$grid_cell_size - dx1_winter
   dy2_winter <- ((ext(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$massbal_winter_meas_cur$y) %% run_params$grid_cell_size
   dy1_winter <- run_params$grid_cell_size - dy2_winter
   
+  # dx/dy of user-defined points for daily output
+  dx1_daily <- (year_data$points_daily_out$x - (ext(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
+  dx2_daily <- run_params$grid_cell_size - dx1_daily
+  dy2_daily <- ((ext(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$points_daily_out$y) %% run_params$grid_cell_size
+  dy1_daily <- run_params$grid_cell_size - dy2_daily
+  
   
   # Now find indices of the cells from which to extract the modeled series.
   # We typically use the 4 neighbors, but if one or more of them are outside
   # the glacier's edge then we use only the nearest valid neighbor.
-  # We ask duplicates = FALSE, else the bilinear filtering in func_extract_modeled_stakes()
+  # We ask duplicates = FALSE, else the bilinear filtering in func_extract_modeled_points()
   # can fail when a stake is exactly at the same (X and/or Y) coordinate as a cell center.
   # duplicates = FALSE returns four different cells. In case we have a stake exactly
   # aligned with a cell center, unless we are at the lower raster border (which we should
@@ -71,6 +82,8 @@ func_find_mb_points_on_grid <- function(year_data,
     func_customlog("They are: ", paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_edge_ids], collapse = " | "), "\n")
   }
   
+  
+  # Same, for winter stakes if present.
   if (year_data$nstakes_winter > 0) {
     cells_winter <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,c("x", "y")]), duplicates = FALSE))
     cells_winter_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][as.integer(t(cells_winter))][,1], ncol = 4, byrow = TRUE)
@@ -92,12 +105,40 @@ func_find_mb_points_on_grid <- function(year_data,
     }
   }
   
-  year_data$stake_dxdy <- list(annual = list(dx1_annual, dx2_annual, dy1_annual, dy2_annual),
-                               winter = list(dx1_winter, dx2_winter, dy1_winter, dy2_winter))
+  browser()
+  # Same, for points of daily output if present.
+  if (year_data$npoints_daily_out > 0) {
+    cells_daily <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$points_daily_out[,c("x", "y")]), duplicates = FALSE))
+    cells_daily_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][as.integer(t(cells_daily))][,1], ncol = 4, byrow = TRUE)
+    points_daily_edge_ids <- integer(0)
+    for (point_id in 1:year_data$npoints_daily_out) {
+      point_na_cells_logi <- is.na(cells_daily_dem_value[point_id,])
+      if (length(which(point_na_cells_logi)) > 0) {
+        cell_distances <- spDistsN1(xyFromCell(data_dhms$elevation[[year_data$dhm_grid_id]], cells_daily[point_id,]), as.matrix(year_data$points_daily_out[point_id,c("x", "y")]))
+        cell_scores <- cell_distances / (!point_na_cells_logi)
+        cell_selected <- which.min(cell_scores)
+        cells_daily[point_id,] <- cells_daily[point_id, cell_selected]
+        points_daily_edge_ids <- append(points_daily_edge_ids, point_id)
+      }
+    }
+    points_daily_edge_n <- length(points_daily_edge_ids)
+    if (points_daily_edge_n > 0) {
+      func_customlog("found ", points_daily_edge_n, " user-defined point(s) of daily output which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n", level = 1)
+      func_customlog("They are: ", paste0(year_data$points_daily_out$id[points_daily_edge_ids], collapse = " | "), "\n")
+    }
+  }
+  
+  
+  year_data$points_dxdy <- list(annual = list(dx1_annual, dx2_annual, dy1_annual, dy2_annual),
+                                winter = list(dx1_winter, dx2_winter, dy1_winter, dy2_winter),
+                                daily = list(dx1_daily, dx2_daily, dy1_daily, dy2_daily))
   
   year_data$annual_stakes_cells <- cells_annual
   if (year_data$nstakes_winter > 0) {
     year_data$winter_stakes_cells <- cells_winter
+  }
+  if (year_data$npoints_daily_out > 0) {
+    year_data$points_daily_cells <- cells_daily
   }
   
   return(year_data)

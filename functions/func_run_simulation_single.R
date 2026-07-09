@@ -55,7 +55,7 @@ func_run_simulation_single <- function(year_param_corrections,
   
   #### . .  COMPARE TO STAKE MEASUREMENTS ####
   # Extract the whole modeled series for all stakes.
-  stakes_series_mod_all <- func_extract_modeled_stakes(run_params,
+  stakes_series_mod_all <- func_extract_modeled_points(run_params,
                                                        dx1, dx2, dy1, dy2,
                                                        mb_model_output$vec_massbal_cumul,
                                                        nstakes,

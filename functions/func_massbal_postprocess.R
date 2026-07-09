@@ -74,8 +74,8 @@ func_massbal_postprocess <- function(year_data,
   if (year_data$nstakes_winter > 0) {
     
     # Extract the modeled series of the winter stakes from the annual simulation.
-    dxdy_winter       <- year_data$stake_dxdy[["winter"]]
-    stakes_winter_mod <- func_extract_modeled_stakes(run_params,
+    dxdy_winter       <- year_data$points_dxdy[["winter"]]
+    stakes_winter_mod <- func_extract_modeled_points(run_params,
                                                      dxdy_winter[[1]], dxdy_winter[[2]], dxdy_winter[[3]], dxdy_winter[[4]],
                                                      year_data$mod_output_annual_cur$vec_massbal_cumul,
                                                      year_data$nstakes_winter,

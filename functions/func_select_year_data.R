@@ -110,5 +110,7 @@ func_select_year_data <- function(data_all,
     year_data$points_daily_out <- year_data$points_daily_out[-points_daily_outside_ids,]
   }
   
+  year_data$npoints_daily_out <- nrow(year_data$points_daily_out)
+  
   return(year_data)
 }

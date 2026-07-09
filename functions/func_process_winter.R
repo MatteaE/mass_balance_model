@@ -26,7 +26,7 @@ func_process_winter <- function(year_data,
   
   if (year_data$process_winter)  {
     
-    # We ask duplicates = FALSE, else the bilinear filtering in func_extract_modeled_stakes()
+    # We ask duplicates = FALSE, else the bilinear filtering in func_extract_modeled_points()
     # can fail when a stake is exactly at the same (X and/or Y) coordinate as a cell center.
     # duplicates = FALSE returns four different cells. In case we have a stake exactly
     # aligned with a cell center, unless we are at the lower raster border (which we should
