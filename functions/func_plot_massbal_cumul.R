@@ -60,13 +60,13 @@ func_plot_massbal_cumul <- function(year_data,
   day_id_hydro2 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == paste0(as.integer(format(massbal_cumul_df$date[1], "%Y")) + 1, "-09-30"))] # day_id of the hydrological year start.
   
   if (year_data$nstakes_annual > 0) {
-    day_id_meas1 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == min(year_data$massbal_annual_meas_cur$start_date, na.rm = T))] # day_id of the first annual stake start.
-    day_id_meas2 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == max(year_data$massbal_annual_meas_cur$end_date, na.rm = T))] # day_id of the last annual stake end.
+    day_id_meas1 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == year_data$massbal_annual_meas_period[1])] # day_id of the first annual stake start.
+    day_id_meas2 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == year_data$massbal_annual_meas_period[2])] # day_id of the last annual stake end.
   }
   
   if (year_data$process_winter) {
-    day_id_meas1_winter <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == min(year_data$massbal_winter_meas_cur$start_date, na.rm = T))] # day_id of the first winter stake start.
-    day_id_meas2_winter <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == max(year_data$massbal_winter_meas_cur$end_date, na.rm = T))] # day_id of the last winter stake end.
+    day_id_meas1_winter <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == year_data$massbal_winter_meas_period[1])] # day_id of the first winter stake start.
+    day_id_meas2_winter <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == year_data$massbal_winter_meas_period[2])] # day_id of the last winter stake end.
   }
   
   base_size <- 16 # For the plots
