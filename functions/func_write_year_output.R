@@ -138,21 +138,23 @@ func_write_year_output <- function(year_data,
   
   
   # Write modeled daily series of cumulative mass balance and SWE at the user-defined points ------
-  df_points_daily_mbcumul <- data.frame(date = model_annual_dates,
-                                        points = apply(year_data$points_daily_massbal_cumul * run_params$output_mult / 1000, 2, sprintf, fmt=run_params$output_fmt4))
-  names(df_points_daily_mbcumul) <- c("date", year_data$points_daily_out$id)
-  write.csv(df_points_daily_mbcumul,
-            file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_points_", year_data$year_cur, ".csv")),
-            quote = FALSE,
-            row.names = FALSE)
-  
-  df_points_daily_swe <- data.frame(date = model_annual_dates,
-                                    points = apply(year_data$points_daily_swe * run_params$output_mult / 1000, 2, sprintf, fmt=run_params$output_fmt4))
-  names(df_points_daily_swe) <- c("date", year_data$points_daily_out$id)
-  write.csv(df_points_daily_swe,
-            file.path(run_params$output_dirname, "annual_results", paste0("swe_daily_series_points_", year_data$year_cur, ".csv")),
-            quote = FALSE,
-            row.names = FALSE)
+  if (year_data$npoints_daily > 0) {
+    df_points_daily_mbcumul <- data.frame(date = model_annual_dates,
+                                          points = apply(year_data$points_daily_massbal_cumul * run_params$output_mult / 1000, 2, sprintf, fmt=run_params$output_fmt4))
+    names(df_points_daily_mbcumul) <- c("date", year_data$points_daily_out$id)
+    write.csv(df_points_daily_mbcumul,
+              file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_points_", year_data$year_cur, ".csv")),
+              quote = FALSE,
+              row.names = FALSE)
+    
+    df_points_daily_swe <- data.frame(date = model_annual_dates,
+                                      points = apply(year_data$points_daily_swe * run_params$output_mult / 1000, 2, sprintf, fmt=run_params$output_fmt4))
+    names(df_points_daily_swe) <- c("date", year_data$points_daily_out$id)
+    write.csv(df_points_daily_swe,
+              file.path(run_params$output_dirname, "annual_results", paste0("swe_daily_series_points_", year_data$year_cur, ".csv")),
+              quote = FALSE,
+              row.names = FALSE)
+  }
   
   
   
