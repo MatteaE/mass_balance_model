@@ -12,6 +12,9 @@
 #                 Points can be annual stakes, winter stakes, or user-defined points.             #
 ###################################################################################################
 
+# Note: the passed vec_modeled_full can be either the data in vec_massbal_cumul,
+# to extract cumulative mass balance, or vec_swe_all, to extract current swe.
+# The latter is used to extract SWE at user-defined points.
 
 # We take the dx<i> and dy<i> as input,
 # so that we pre-compute them just once
@@ -19,14 +22,14 @@
 # during optimization).
 func_extract_modeled_points <- function(run_params,
                                         dx1, dx2, dy1, dy2,
-                                        vec_massbal_cumul,
+                                        vec_modeled_full,
                                         npoints,
                                         model_days_n,
                                         points_cells) {
   
   points_series_mod_all <- matrix(NA, nrow = model_days_n + 1, ncol = npoints) # One row per day, one column per point
   
-  nval <- length(vec_massbal_cumul)
+  nval <- length(vec_modeled_full)
   
   for (point_id in 1:npoints) {
     
@@ -43,10 +46,10 @@ func_extract_modeled_points <- function(run_params,
     # Observed if dy1 is 0: we have just two cells (1 and 2 in the square above),
     # points_cells is sorted; only cell_series3 and cell_series4 contribute due to dy1 = 0,
     # but these are derived from a same cell (weighted with two different weights).
-    cell_series1 <- vec_massbal_cumul[points_cells[point_id, 1] + seq(0,nval-1,run_params$grid_ncells)]
-    cell_series2 <- vec_massbal_cumul[points_cells[point_id, 2] + seq(0,nval-1,run_params$grid_ncells)]
-    cell_series3 <- vec_massbal_cumul[points_cells[point_id, 3] + seq(0,nval-1,run_params$grid_ncells)]
-    cell_series4 <- vec_massbal_cumul[points_cells[point_id, 4] + seq(0,nval-1,run_params$grid_ncells)]
+    cell_series1 <- vec_modeled_full[points_cells[point_id, 1] + seq(0,nval-1,run_params$grid_ncells)]
+    cell_series2 <- vec_modeled_full[points_cells[point_id, 2] + seq(0,nval-1,run_params$grid_ncells)]
+    cell_series3 <- vec_modeled_full[points_cells[point_id, 3] + seq(0,nval-1,run_params$grid_ncells)]
+    cell_series4 <- vec_modeled_full[points_cells[point_id, 4] + seq(0,nval-1,run_params$grid_ncells)]
     
     # dx1 = x distance from the two cells to the left (i.e. with lower X coordinate than the point),
     # dy1 = y distance from the two cells below (i.e. with lower Y coordinate),

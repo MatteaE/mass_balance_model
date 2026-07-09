@@ -12,6 +12,7 @@
 #                     (if we have them)                                                           #
 #                 (5) standardization (to the whole measurement period) of stake measurements     #
 #                     (both annual and - if we have them - winter)                                #
+#                 (6) extraction of the mass balance and SWE time series at user-defined points   #
 ###################################################################################################
 
 
@@ -136,6 +137,26 @@ func_massbal_postprocess <- function(year_data,
                                                                                                         stakes_winter_end_ids_wrt_annual)
   }
   
+  
+  #### Extract daily data at user-defined points ####
+  if (year_data$npoints_daily_out > 0) {
+    
+    dxdy_daily       <- year_data$points_dxdy[["daily"]]
+    year_data$points_daily_massbal_cumul <- func_extract_modeled_points(run_params,
+                                                                        dxdy_daily[[1]], dxdy_daily[[2]], dxdy_daily[[3]], dxdy_daily[[4]],
+                                                                        year_data$mod_output_annual_cur$vec_massbal_cumul,
+                                                                        year_data$npoints_daily_out,
+                                                                        year_data$model_annual_days_n,
+                                                                        year_data$points_daily_cells)
+    
+    year_data$points_daily_swe <- func_extract_modeled_points(run_params,
+                                                              dxdy_daily[[1]], dxdy_daily[[2]], dxdy_daily[[3]], dxdy_daily[[4]],
+                                                              year_data$mod_output_annual_cur$vec_swe_all,
+                                                              year_data$npoints_daily_out,
+                                                              year_data$model_annual_days_n,
+                                                              year_data$points_daily_cells)
+    
+  }
   
   return(year_data)
   

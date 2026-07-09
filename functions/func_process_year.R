@@ -15,13 +15,11 @@ func_process_year <- function(year_data,
                               grids_snowdist_topographic,
                               overview_annual) {
   
-  # Find stake offsets on the grid.
-  if (year_data$nstakes_annual > 0) {
-    year_data <- func_find_mb_points_on_grid(year_data,
-                                             data_all$data_dhms,
-                                             data_all$data_dems,
-                                             run_params)
-  }
+  # Find offsets on the grid of all stakes and user-defined points of daily output.
+  year_data <- func_find_mb_points_on_grid(year_data,
+                                           data_all$data_dhms,
+                                           data_all$data_dems,
+                                           run_params)
   
   # Setup grids from winter snow probes, if available. Also set flag year_data$process_winter to TRUE/FALSE.
   year_data <- func_setup_winter_probes_dist(year_data,

@@ -63,23 +63,25 @@ func_find_mb_points_on_grid <- function(year_data,
   # aligned with a cell center, unless we are at the lower raster border (which we should
   # always avoid!) the additional cells returned with duplicates = FALSE (cells which would
   # not be part of the actual adjacent cells) have higher index than the "true" adjacent cells.
-  cells_annual <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,c("x", "y")]), duplicates = FALSE))
-  cells_annual_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][as.integer(t(cells_annual))][,1], ncol = 4, byrow = TRUE)
-  stakes_annual_edge_ids <- integer(0)
-  for (stake_id in 1:year_data$nstakes_annual) {
-    stake_na_cells_logi <- is.na(cells_annual_dem_value[stake_id,])
-    if (length(which(stake_na_cells_logi)) > 0) {
-      cell_distances <- spDistsN1(xyFromCell(data_dhms$elevation[[year_data$dhm_grid_id]], cells_annual[stake_id,]), as.matrix(year_data$massbal_annual_meas_cur[stake_id,c("x", "y")]))
-      cell_scores <- cell_distances / (!stake_na_cells_logi)
-      cell_selected <- which.min(cell_scores)
-      cells_annual[stake_id,] <- cells_annual[stake_id, cell_selected]
-      stakes_annual_edge_ids <- append(stakes_annual_edge_ids, stake_id)
+  if (year_data$nstakes_annual > 0) {
+    cells_annual <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,c("x", "y")]), duplicates = FALSE))
+    cells_annual_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][as.integer(t(cells_annual))][,1], ncol = 4, byrow = TRUE)
+    stakes_annual_edge_ids <- integer(0)
+    for (stake_id in 1:year_data$nstakes_annual) {
+      stake_na_cells_logi <- is.na(cells_annual_dem_value[stake_id,])
+      if (length(which(stake_na_cells_logi)) > 0) {
+        cell_distances <- spDistsN1(xyFromCell(data_dhms$elevation[[year_data$dhm_grid_id]], cells_annual[stake_id,]), as.matrix(year_data$massbal_annual_meas_cur[stake_id,c("x", "y")]))
+        cell_scores <- cell_distances / (!stake_na_cells_logi)
+        cell_selected <- which.min(cell_scores)
+        cells_annual[stake_id,] <- cells_annual[stake_id, cell_selected]
+        stakes_annual_edge_ids <- append(stakes_annual_edge_ids, stake_id)
+      }
     }
-  }
-  stakes_annual_edge_n <- length(stakes_annual_edge_ids)
-  if (stakes_annual_edge_n > 0) {
-    func_customlog("found ", stakes_annual_edge_n, " annual measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n", level = 1)
-    func_customlog("They are: ", paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_edge_ids], collapse = " | "), "\n")
+    stakes_annual_edge_n <- length(stakes_annual_edge_ids)
+    if (stakes_annual_edge_n > 0) {
+      func_customlog("found ", stakes_annual_edge_n, " annual measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n", level = 1)
+      func_customlog("They are: ", paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_edge_ids], collapse = " | "), "\n")
+    }
   }
   
   
@@ -105,7 +107,7 @@ func_find_mb_points_on_grid <- function(year_data,
     }
   }
   
-  browser()
+  
   # Same, for points of daily output if present.
   if (year_data$npoints_daily_out > 0) {
     cells_daily <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$points_daily_out[,c("x", "y")]), duplicates = FALSE))
@@ -133,7 +135,10 @@ func_find_mb_points_on_grid <- function(year_data,
                                 winter = list(dx1_winter, dx2_winter, dy1_winter, dy2_winter),
                                 daily = list(dx1_daily, dx2_daily, dy1_daily, dy2_daily))
   
-  year_data$annual_stakes_cells <- cells_annual
+  # Need all the ifs because this function is called even if no point is defined.
+  if (year_data$nstakes_annual > 0) {
+    year_data$annual_stakes_cells <- cells_annual
+  }
   if (year_data$nstakes_winter > 0) {
     year_data$winter_stakes_cells <- cells_winter
   }
