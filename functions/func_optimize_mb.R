@@ -44,9 +44,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                              run_params, year_cur_params, year_data,
                              data_dhms, data_dems, data_surftype, data_radiation) {
   
-  cat("\n**", year_data$year_cur, optimization_period, "mass balance optimization **\n")
-  cat("\n* Optimization run # 1\n")
-  corr_fact_prev <- 0
+  func_customlog("\n** ", year_data$year_cur, " ", optimization_period, " mass balance optimization **\n", level = 0)
   
   #### Select winter or annual data from year_data. ####
   if (optimization_period == "winter") {
@@ -66,7 +64,11 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
     massbal_meas_cur   <- year_data$massbal_annual_meas_cur
     stakes_cells       <- year_data$annual_stakes_cells
   }
+
+  cat("Simulation runs", nrow(weather_series_cur), "days, from", format(weather_series_cur$timestamp[1], "%F"), "to", format(weather_series_cur$timestamp[nrow(weather_series_cur)], "%F"), "included\n")
   
+  cat("\n* Optimization run # 1\n")
+  corr_fact_prev <- 0
   
   mod_output_cur <- func_optim_worker(optimization_period, corr_fact_prev, corr_fact_winter,
                                       run_params, year_cur_params,

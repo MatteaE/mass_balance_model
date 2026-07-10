@@ -10,6 +10,9 @@
 
 func_stop_msg <- function() {
   
+  flush(logcon)
+  sink()
+  close(logcon)
   stop("\rRun stopped early due to a fatal error")
   
 }

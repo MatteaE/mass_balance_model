@@ -12,8 +12,6 @@
 #### Load input data ####
 func_load_data_all <- function(run_params) {
   
-  cat("Loading all input data...\n")
-  
   data_all <- list()
   
   data_all$data_weather               <-   func_load_weather(run_params)
@@ -40,8 +38,6 @@ func_load_data_all <- function(run_params) {
   
   # Memory cleanup.
   invisible(gc())
-  
-  cat("  Finished loading all input data.\n\n")
   
   return(data_all)
 }

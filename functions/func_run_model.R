@@ -44,8 +44,14 @@ func_run_model <- function(run_params) {
   
   
   # Load all input data.
+  cat("\n")
+  func_customlog("Loading all input data...", level = 4)
   data_all   <- func_load_data_all(run_params)
+  func_customlog("Finished loading all input data.", level = 4)
+  cat("\n")
   
+  
+  func_customlog("Setting up the model.", level = 4)
   
   # Find out whether we are North or South of the Equator.
   # This is used in multi-annual runs for the firnification routine,
@@ -105,16 +111,21 @@ func_run_model <- function(run_params) {
   # Create output directory.
   dir.create(file.path(run_params$output_dirname, "annual_results"), recursive = TRUE, showWarnings = FALSE)
   
-  func_customlog("Finished initial setup.", level = 3)
+  func_customlog("Finished model setup.", level = 4)
   
   #### Main loop ####
   # Here year_data is a list which is gradually built and
   # modified during one iteration of the main loop.
   year_data <- list()
-  cat("\nEntering main loop...")
+  
+  cat("\n")
+  func_customlog("Entering first loop over the years: processing only years with mass balance data", level = 4)
+  
   for (year_id in 1:run_params$n_years) {
     
     cat("\n\n")
+    func_customlog("Year ", year_id, " out of ", run_params$n_years, ": ", run_params$years[year_id], level = 4)
+    
     
     #### . Select current year, parameters, data ####
     # Select data from the current year.
@@ -126,13 +137,12 @@ func_run_model <- function(run_params) {
                                        year_id,
                                        run_params)
     
-    cat("\n")
-    func_customlog("Data loaded successfully", level = 3)
+    cat("Input data of the current year were loaded successfully.\n")
     
     if (year_data$nstakes_annual > 0) {
       
       cat("\n")
-      func_customlog("============  STARTING simulation of year ", year_data$year_cur, " ============\n")
+      func_customlog("============  STARTING processing of year ", year_data$year_cur, " ============\n", level = 4)
       
       year_cur_params   <- func_set_year_params(year_data, run_params)
       year_results_list <- func_process_year(year_data,
@@ -146,11 +156,13 @@ func_run_model <- function(run_params) {
       overview_annual   <- year_results_list$overview_annual
       
     } else {
-      cat("\n============  DEFERRING simulation of year", paste0(year_data$year_cur, ", which has no mass balance measurements... ============\n"))
+      cat("\n")
+      func_customlog("============  DEFERRING processing of year ", paste0(year_data$year_cur, ", because it has no mass balance measurements. ============\n"), level = 4)
     }
   }
   
-  func_customlog("Finished simulation of all years with mass balance measurements", level = 3)
+  cat("\n")
+  func_customlog("Finished processing of all years with mass balance measurements", level = 4)
   
   # Here: compute mean of optimized parameters, to use on nodata years.
   run_params <- func_compute_mean_optimized_params(run_params, overview_annual)
@@ -161,9 +173,16 @@ func_run_model <- function(run_params) {
   years_todo_n  <- length(year_ids_todo)
   if (length(year_ids_todo) > 0) {
     
-    cat("\n\n\n** Processing", years_todo_n, "year(s) without mass balance measurements... **\n")
+    cat("\n")
+    func_customlog("There are still ", years_todo_n, " year(s) without mass balance measurements. Entering second processing loop\n", level = 4)
+    cat("\n")
     
-    for (year_id in year_ids_todo) {
+    for (year_id_id in 1:length(year_ids_todo)) {
+      
+      year_id <- year_ids_todo[year_id_id]
+      func_customlog("Year ", year_id_id, " out of ", length(year_ids_todo), ": ", run_params$years[year_id], level = 4)
+      
+      
       #### . Select current year, parameters, data ####
       # Select data from the current year.
       # NOTE: list year_data contains the indices of the
@@ -174,7 +193,9 @@ func_run_model <- function(run_params) {
                                          year_id,
                                          run_params)
       
-      cat("\n\n\n\n============  STARTING simulation of year", year_data$year_cur, " ============\n")
+      cat("Input data of the current year were loaded successfully.\n")
+      cat("\n")
+      func_customlog("============  STARTING processing of year ", year_data$year_cur, " ============\n", level = 4)
       
       year_cur_params   <- func_set_year_params(year_data, run_params)
       year_results_list <- func_process_year(year_data,
@@ -189,10 +210,11 @@ func_run_model <- function(run_params) {
       
     }
     
-    func_customlog("Finished simulation of all years without mass balance measurements", level = 3)
+    cat("\n")
+    func_customlog("Finished processing of all years without mass balance measurements", level = 4)
   }
   
-  func_customlog("All simulation loops have finished", level = 3)
+  func_customlog("All processing loops have finished", level = 4)
   
   #### Plot and write overview ####
   overview_annual$data_weather <- data_all$data_weather

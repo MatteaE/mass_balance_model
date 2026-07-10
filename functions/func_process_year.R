@@ -162,7 +162,7 @@ func_process_year <- function(year_data,
   # }
   # }
   
-  cat("============  FINISHED simulation of year", year_data$year_cur, "  ============\n")
+  func_customlog("============  FINISHED processing of year ", year_data$year_cur, "  ============\n", level = 4)
   
   return(list(year_data       = year_data,
               overview_annual = overview_annual))

@@ -16,11 +16,13 @@ func_simulate_mb_without_data <- function(run_params,
                                           data_surftype,
                                           data_radiation) {
   
-  cat("\n**", year_data$year_cur, "annual mass balance simulation **\n")
+  func_customlog("\n** ", year_data$year_cur, " annual mass balance simulation **\n", level = 0)
   
   snowdist_init      <- year_data$snowdist_init_annual
   weather_series_cur <- year_data$weather_series_annual_cur
-  model_days_n       <- year_data$model_annual_days_n
+  # model_days_n       <- year_data$model_annual_days_n
+  
+  cat("Simulation runs", nrow(weather_series_cur), "days, from", format(weather_series_cur$timestamp[1], "%F"), "to", format(weather_series_cur$timestamp[nrow(weather_series_cur)], "%F"), "included\n")
   
   #### RUN MASS BALANCE MODEL ####
   mb_model_output <- func_massbal_model(run_params,

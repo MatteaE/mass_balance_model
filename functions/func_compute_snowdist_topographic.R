@@ -4,7 +4,7 @@
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
 #                 This file contains the computation of a grid of relative (normalized)           #
-#                 snow distribution from elevation, and curvature, used to distribute             #
+#                 snow distribution from elevation and curvature, used to distribute              #
 #                 the snow cover at the beginning of the modelling and after snowfall.            #
 #                 The effect of avalanches is NOT included here since it is not constant          #
 #                 but depends on the snow amounts.                                                #
@@ -43,7 +43,7 @@ func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) 
                                          type = "mean")
     dhm_na_border <- which(is.na(values(dhm_smooth)))
     dhm_valid     <- setdiff(1:run_params$grid_ncells, dhm_na_border)
-    dhm_smooth <- cover(dhm_smooth, data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]], values = NA) # Fill NA edges of smoothed raster with original values.
+    dhm_smooth    <- cover(dhm_smooth, data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]], values = NA) # Fill NA edges of smoothed raster with original values.
     dhm_curvature <- curvature(dhm_smooth, type = "total")
     dhm_curvature <- subst(dhm_curvature, NA, 0.0) # NAs can appear in curvature over flat regions.
     # Rescale curvature along the raster edges,
