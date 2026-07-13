@@ -36,7 +36,7 @@ func_process_winter <- function(year_data,
     
     # Select weather series period.
     year_data$weather_series_winter_cur <- data_weather[which(data_weather$timestamp == year_data$model_time_bounds[3]):(which(data_weather$timestamp == year_data$model_time_bounds[4])),]
-    year_data$model_winter_days_n <- nrow(year_data$weather_series_winter_cur)
+    year_data$model_winter_days_n       <- nrow(year_data$weather_series_winter_cur)
     
     # The NA is for the optimized corr_fact_winter (which we are
     # determining here, so we don't use a previous value: it is ignored).

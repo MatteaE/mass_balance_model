@@ -8,7 +8,7 @@
 ###################################################################################################
 
 func_compute_avalanche_static_grids <- function(run_params, data_dhms) {
-  
+
   cat("Computing avalanche static grids...\n")
   
   conv_deg2rad <- pi / 180

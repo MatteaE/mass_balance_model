@@ -43,10 +43,9 @@ func_select_year_data <- function(data_all,
   # (pre-computed before the start of the loop).
   year_data$grids_avalanche_cur             <- sapply(grids_static_list$grids_avalanche, `[[`, year_data$dhm_grid_id)
   
-  # Compute reduced-intensity base topographic distribution of solid precipitation.
-  dist_topographic_values                   <- values(grids_static_list$grids_snowdist_topographic[[year_data$dem_grid_id]], mat = FALSE)
-  dist_topographic_values_mean              <- mean(dist_topographic_values)
-  year_data$dist_topographic_values_red     <- dist_topographic_values_mean + run_params$accum_snow_dist_red_fac * (dist_topographic_values - dist_topographic_values_mean)
+  # Extract topographic distribution of solid precipitation.
+  # This is already reduced-intensity with parameter topographic_snowdist_fact.
+  year_data$dist_topographic_values_red     <- values(grids_static_list$grids_snowdist_topographic[[year_data$dem_grid_id]], mat = FALSE)
   
   # Extract ice albedo factor grid for this year.
   year_data$grid_ice_albedo_fact_cur_values <- values(grids_static_list$grids_ice_albedo_fact[[year_data$dhm_grid_id]], mat = FALSE)

@@ -82,6 +82,20 @@ func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) 
     snowdist_topographic_cur_raw[run_params$grid_ncells - run_params$grid_ncol + 1] <- snowdist_topographic_cur_raw[run_params$grid_ncells - 2 * run_params$grid_ncol + 2][,1]
     snowdist_topographic_cur_raw[run_params$grid_ncells] <- snowdist_topographic_cur_raw[run_params$grid_ncells - run_params$grid_ncol - 1][,1]
     
+    
+    # Reduce variability as defined by the user.
+    snowdist_mean <- mean(values(snowdist_topographic_cur_raw, mat=F))
+    if (is.na(snowdist_mean)) {
+      func_customlog("There are NA values in the map of topographic snow distribution, please investigate!", level = 2)
+      func_stop_msg()
+    }
+    if ((is.na(run_params$topographic_snowdist_fact)) || (run_params$topographic_snowdist_fact < 0)) {
+      func_customlog("Parameter topographic_snowdist_fact must be >= 0. Provided value: ", run_params$topographic_snowdist_fact, level = 2)
+      func_stop_msg()
+    }
+    snowdist_topographic_cur_raw <- snowdist_mean + run_params$topographic_snowdist_fact * (snowdist_topographic_cur_raw - snowdist_mean)
+    
+    
     # Normalize over the glacier: we assume
     # that curvature and elevation redistribution
     # have no net effect on the total snow amount
