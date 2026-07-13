@@ -22,14 +22,30 @@ func_setup_winter_probes_dist <- function(year_data,
   if (year_data$process_winter) {
     dist_probes_idw                 <- func_snow_probes_idw(run_params, year_data$massbal_winter_meas_cur, data_dhms)$var1.pred
     dist_probes_idw                 <- clamp(dist_probes_idw, lower = 0, upper = Inf, values = TRUE)
-    year_data$dist_probes_idw_norm  <- dist_probes_idw / mean(dist_probes_idw[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
+    dist_probes_idw_norm            <- dist_probes_idw / mean(dist_probes_idw[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
   } else {
     # No winter probes to work with, so uniform distribution for the probes component.
-    year_data$dist_probes_idw_norm  <- setValues(data_dhms$elevation[[1]], 1.0)
+    dist_probes_idw_norm            <- setValues(data_dhms$elevation[[1]], 1.0)
   }
-  dist_probes_norm_values               <- values(year_data$dist_probes_idw_norm)[,1] # For the accumulation model.
-  dist_probes_norm_mean                 <- mean(dist_probes_norm_values, na.rm = TRUE)
-  year_data$dist_probes_norm_values_red <- dist_probes_norm_mean + run_params$accum_probes_red_fac * (dist_probes_norm_values - dist_probes_norm_mean)
+  
+  
+  # Reduce variability of large-scale variability from winter probes
+  # (accum_probes_fact < 1 makes sense if there are probes affected by avalanches).
+  dist_probes_norm_mean <- mean(values(dist_probes_idw_norm, mat = F))
+  if (is.na(dist_probes_norm_mean)) {
+    func_customlog("There are NA values in the interpolated map of snow amounts from winter probes, please investigate!", level = 2)
+    func_stop_msg()
+  }
+  if ((is.na(run_params$accum_probes_fact)) || (run_params$accum_probes_fact < 0)) {
+    func_customlog("Parameter accum_probes_fact must be >= 0. Provided value: ", run_params$accum_probes_fact, level = 2)
+    func_stop_msg()
+  }
+  dist_probes_norm_red <- dist_probes_norm_mean + run_params$accum_probes_fact * (dist_probes_idw_norm - dist_probes_norm_mean)
+  
+  # Normalize to arithmetic average = 1 on glacier.
+  dist_probes_norm_red <- dist_probes_norm_red / mean(dist_probes_norm_red[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
+  
+  year_data$dist_probes_norm_values_red <- values(dist_probes_norm_red, mat = FALSE)
   
   return(year_data)
   

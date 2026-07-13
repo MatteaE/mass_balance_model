@@ -19,7 +19,7 @@ func_compute_initial_snow_cover <- function(run_params,
                                             data_dems,
                                             grids_snowdist_topographic,
                                             grids_avalanche_cur,
-                                            grid_probes_norm,
+                                            grid_probes_norm_values,
                                             dhm_grid_id,
                                             dem_grid_id,
                                             data_massbal_winter) {
@@ -53,12 +53,13 @@ func_compute_initial_snow_cover <- function(run_params,
   
   
   # If we have any winter stakes for the year,
-  # use them to correct the final distribution.
-  # In fact just one of the two conditions in
-  # the if() should be enough.
-  if((nrow(data_massbal_winter) > 0) & (!is.null(grid_probes_norm))) {
+  # use the large-scale variability computed from
+  # them to further enhance the initial snow distribution.
+  if (nrow(data_massbal_winter) > 0) {
     
-    dist_cur <- dist_cur * grid_probes_norm
+    # We put the (normalized, reduced-variability) values from IDW
+    # of probes back onto a raster grid for this multiplication.
+    dist_cur <- dist_cur * setValues(data_dhms$elevation[[dhm_grid_id]], grid_probes_norm_values)
     
     # writeRaster(dist_cur, "4-dist-topo-snl-aval-probes.tif", overwrite = T)
     

@@ -43,7 +43,7 @@ run_params <- list(
   elevation_effect_threshold   =   NA,                         # [m]: elevation above which snow accumulation decreases (wind effect). If NA, it is estimated automatically from the first DEM grid.
   elevation_effect_fact        =   1.0,                          # [-]: strength of snow accumulation decrease at very high altitude. Only values between 0 and 1 make sense. At 0 accumulation does not decrease, at 1 accumulation decreases to 0 at the highest point in the DHM.
   
-  topographic_snowdist_fact    =   1.0,                          # [-] importance of topography in the spatial distribution of snow. 1 = full effect, 0 = no effect (spatially uniform distribution)
+  topographic_snowdist_fact    =   1.0,                          # [-] importance of topography in the spatial distribution of snow. 1 = full effect, 0 = no effect (spatially uniform distribution for this component)
   
   #### AVALANCHE model parameters ####
   avalanche_routine_cpp        =   TRUE,                         # [TRUE/FALSE]: should we use the C++ (TRUE) or R (FALSE) version of the avalanche routine? C++ is much faster but it requires a code compiler.
@@ -63,7 +63,7 @@ run_params <- list(
   
   #### ACCUMULATION and MELT MODEL fixed parameters ####
   debris_red_fac               =   0.6,                          # [-]: reduction factor of melt over debris-covered ice.
-  accum_probes_red_fac         =   0.5,                          # [-]: reduction factor to decrease the importance of the snow probes distribution when distributing snowfall over the grid, in case those are measured also over avalanche deposits (else we would be accounting twice for avalanche redistribution, since we run a process-based avalanche model). 0 means uniform distribution, 1 means no redution in variability.
+  accum_probes_fact            =   1.0,                          # [-]: importance of the snow probes distribution for the accumulation model (both initial SWE condition and snowfall distribution). 1 = full effect, 0 = no effect (spatially uniform distribution for this component). Can be set to < 1 in case some probes are measured over avalanche deposits (otherwise, the avalanche effect would be counted twice, since the model distributes snow also with a process-based avalanche model).
   albedo_ice_decrease_elev     =   0.,                           # [m]: below this altitude, the ice albedo decreases linearly with altitude (darker ice).
   albedo_ice_decrease_fact     =   0.014,                        # [m-1]: rate of increase above 1 (with decreasing altitude) of the ice albedo factor (multiplying ice melt).
   

@@ -52,12 +52,21 @@ func_process_run_params <- function(run_params) {
   #### SNOW DISTRIBUTION parameters ---------------------------------------------------------------
   run_params$snow_probes_idw_exp         <-   0.75        # [-]: exponent for the IDW interpolation of winter snow measurements
   
+  # Set parameters which are specific to the new version of the model (2026/07/13).
   if (is.null(run_params$topographic_snowdist_fact)) {
     run_params$topographic_snowdist_fact <- 1.0
   }
   
   if (is.null(run_params$init_snow_avalanche)) {
     run_params$init_snow_avalanche <- TRUE
+  }
+  
+  if (is.null(run_params$accum_probes_fact)) {
+    if (!is.null(run_params$accum_probes_red_fac)) {
+      run_params$accum_probes_fact <- run_params$accum_probes_red_fac
+    } else {
+      run_params$accum_probes_fact <- 1.0
+    }
   }
   
   

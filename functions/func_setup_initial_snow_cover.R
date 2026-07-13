@@ -51,7 +51,7 @@ func_setup_initial_snow_cover <- function(year_data,
                                                                       data_dems,
                                                                       grids_snowdist_topographic,
                                                                       year_data$grids_avalanche_cur,
-                                                                      year_data$dist_probes_idw_norm,
+                                                                      year_data$dist_probes_norm_values_red,
                                                                       year_data$dhm_grid_id,
                                                                       year_data$dem_grid_id,
                                                                       year_data$massbal_winter_meas_cur)
