@@ -63,7 +63,7 @@ run_params <- list(
   
   #### ACCUMULATION and MELT MODEL fixed parameters ####
   debris_red_fac               =   0.6,                          # [-]: reduction factor of melt over debris-covered ice.
-  accum_probes_fact            =   1.0,                          # [-]: importance of the snow probes distribution for the accumulation model (both initial SWE condition and snowfall distribution). 1 = full effect, 0 = no effect (spatially uniform distribution for this component). Can be set to < 1 in case some probes are measured over avalanche deposits (otherwise, the avalanche effect would be counted twice, since the model distributes snow also with a process-based avalanche model).
+  probes_snowdist_fact         =   1.0,                          # [-]: importance of the snow probes distribution for the accumulation model (both initial SWE condition and snowfall distribution). 1 = full effect, 0 = no effect (spatially uniform distribution for this component). Can be set to < 1 in case some probes are measured over avalanche deposits (otherwise, the avalanche effect would be counted twice, since the model distributes snow also with a process-based avalanche model).
   albedo_ice_decrease_elev     =   0.,                           # [m]: below this altitude, the ice albedo decreases linearly with altitude (darker ice).
   albedo_ice_decrease_fact     =   0.014,                        # [m-1]: rate of increase above 1 (with decreasing altitude) of the ice albedo factor (multiplying ice melt).
   

@@ -3,15 +3,18 @@
 # Description:    this program models the distributed mass balance of a glacier at daily          #
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
-#                 This file contains the code to setup the snow distribution grids                #
-#                 from winter snow probes, if available.                                          #
+#                 This file contains the code to setup the grid of snow distribution for the      #
+#                 current year.                                                                   #
+#                 This grid is loaded from file if instructed to do so, otherwise calculated      #
+#                 from winter measurements, or set to a constant grid if those do not exist.      #
 ###################################################################################################
 
 
 func_setup_winter_probes_dist <- function(year_data,
                                           data_dhms,
                                           data_dems,
-                                          run_params) {
+                                          run_params,
+                                          year_cur_params) {
   
   # Should we make a winter run to optimize the precipitation correction?
   # Only if we have some measurements of winter snow cover, else we can't.
@@ -19,33 +22,77 @@ func_setup_winter_probes_dist <- function(year_data,
   # having winter measurements only.
   year_data$process_winter <- (year_data$nstakes_winter > 0) && ((year_data$nstakes_annual > 0))
   
-  if (year_data$process_winter) {
-    dist_probes_idw                 <- func_snow_probes_idw(run_params, year_data$massbal_winter_meas_cur, data_dhms)$var1.pred
-    dist_probes_idw                 <- clamp(dist_probes_idw, lower = 0, upper = Inf, values = TRUE)
-    dist_probes_idw_norm            <- dist_probes_idw / mean(dist_probes_idw[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
+  # Did the user instruct to use an external map of snow distribution?
+  # If yes, try to load it and project it to the current DHM grid.
+  if (nchar(year_cur_params$probes_snowdist_filename) > 0) {
+    
+    cat("Attempting to load user-defined map of snow distribution for the current year...\n")
+    
+    # Check if file exists and can be opened, fail gracefully if not.
+    probes_fp <- file.path(run_params$dir_data_snowdist, year_cur_params$probes_snowdist_filename)
+    if (!file.exists(probes_fp)) {
+      func_customlog("User-defined map of snow distribution does not exist: ", probes_fp, level = 2)
+      func_stop_msg()
+    }
+    tryCatch({
+      dist_probes_raw_r <- rast(probes_fp)
+    },
+    warning = function(war) {
+      func_customlog("Error reading user-defined map of snow distribution: ", probes_fp, level = 2)
+      func_stop_msg()
+    },
+    error = function(err) {
+      func_customlog("Error reading user-defined map of snow distribution: ", probes_fp, level = 2)
+      func_stop_msg()
+    })
+    
+    dist_probes_r <- project(probes_raw_r,
+                             data_dhms$elevation[[year_data$dhm_grid_id]],
+                             method = "bilinear")
+    
+    if (any(is.na(values(dist_probes_r, mat = F)))) {
+      func_customlog("Resampled map of snow distribution has NA values. They will be replaced with 1, but check carefully the input maps.", level = 1)
+      dist_probes_r <- subst(dist_probes_r, NA, 1.0)
+    }
+    
+    # Else: was not provided an external map of snow distribution.
   } else {
-    # No winter probes to work with, so uniform distribution for the probes component.
-    dist_probes_idw_norm            <- setValues(data_dhms$elevation[[1]], 1.0)
-  }
+    
+    # Do we have winter measurements?
+    # If yes, make a map of snow distribution out of them.
+    if (year_data$nstakes_winter > 0) {
+      
+      dist_probes_r   <- func_snow_probes_idw(year_data, run_params, data_dhms)$var1.pred
+      dist_probes_r   <- clamp(dist_probes_r, lower = 0, upper = Inf, values = TRUE)
+      
+      # If not, apply uniform snow distribution (for large-scale
+      # variability only - then there is still the topographic distribution!)    
+    } else {
+      dist_probes_r <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], 1.0)
+    }
+    
+  } # End else was not provided an external map of snow distribution.
+  
+  # Here we do have a map of snow distribution in dist_probes_r.
   
   
-  # Reduce variability of large-scale variability from winter probes
-  # (accum_probes_fact < 1 makes sense if there are probes affected by avalanches).
-  dist_probes_norm_mean <- mean(values(dist_probes_idw_norm, mat = F))
-  if (is.na(dist_probes_norm_mean)) {
-    func_customlog("There are NA values in the interpolated map of snow amounts from winter probes, please investigate!", level = 2)
+  # Here we possibly reduce variability of large-scale variability from winter probes
+  # (probes_snowdist_fact < 1; it makes sense if there are probes affected by avalanches).
+  dist_probes_mean <- mean(values(dist_probes_r, mat = F))
+  if (is.na(dist_probes_mean)) {
+    func_customlog("There are still NA values in the map of snow distribution, please investigate!", level = 2)
     func_stop_msg()
   }
-  if ((is.na(run_params$accum_probes_fact)) || (run_params$accum_probes_fact < 0)) {
-    func_customlog("Parameter accum_probes_fact must be >= 0. Provided value: ", run_params$accum_probes_fact, level = 2)
+  if ((is.na(run_params$probes_snowdist_fact)) || (run_params$probes_snowdist_fact < 0)) {
+    func_customlog("Parameter probes_snowdist_fact must be >= 0. Provided value: ", run_params$probes_snowdist_fact, level = 2)
     func_stop_msg()
   }
-  dist_probes_norm_red <- dist_probes_norm_mean + run_params$accum_probes_fact * (dist_probes_idw_norm - dist_probes_norm_mean)
+  dist_probes_red_r <- dist_probes_mean + run_params$probes_snowdist_fact * (dist_probes_r - dist_probes_mean)
   
   # Normalize to arithmetic average = 1 on glacier.
-  dist_probes_norm_red <- dist_probes_norm_red / mean(dist_probes_norm_red[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
+  dist_probes_norm_red_r <- dist_probes_red_r / mean(dist_probes_red_r[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
   
-  year_data$dist_probes_norm_values_red <- values(dist_probes_norm_red, mat = FALSE)
+  year_data$dist_probes_norm_values_red <- values(dist_probes_norm_red_r, mat = FALSE)
   
   return(year_data)
   

@@ -25,7 +25,8 @@ func_process_year <- function(year_data,
   year_data <- func_setup_winter_probes_dist(year_data,
                                              data_all$data_dhms,
                                              data_all$data_dems,
-                                             run_params)
+                                             run_params,
+                                             year_cur_params)
   
   #### . Compute annual and winter modeling periods ####
   year_data <- func_compute_modeling_periods(year_data,
@@ -41,7 +42,6 @@ func_process_year <- function(year_data,
     func_customlog("meteo data for the current year are missing. Please check the meteo file and the first_year/last_year! Offending date:", format(offending_date, "%Y/%m/%d"), "(day-of-year:", format(offending_date, "%j)."), "\n", level = 2)
     func_stop_msg()
   }
-  
   
   
   #### .  Setup initial snow cover from previous year or estimation ####

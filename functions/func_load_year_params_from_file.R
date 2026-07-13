@@ -21,7 +21,7 @@ func_load_year_params_from_file <- function(year_data,
                                             run_params) {
   
   # Path to annual parameters file.
-  filepath_params <- file.path(run_params$dir_annual_params,
+  filepath_params <- file.path(run_params$dir_data_params,
                                paste0(run_params$filename_params_prefix,
                                       year_data$year_cur,
                                       run_params$filename_params_suffix))
@@ -76,6 +76,7 @@ func_load_year_params_from_file <- function(year_data,
         # we repeat the value 12 times.
         # For the other parameters, we simply load them as numeric.
         
+        
         # Parameter mb_corr_ele_bands - must be comma-separated numbers.
         if (params_names_all[param_id_year_cur] == "mb_corr_ele_bands") {
           val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
@@ -83,6 +84,7 @@ func_load_year_params_from_file <- function(year_data,
             stop(paste0("FATAL: file-based parameter mb_corr_ele_bands is malformed. Please fix it. Value(s) provided: ", params_raw[param_id_raw,1]))
           }
           year_cur_params[[param_id_year_cur]] <- val_tmp
+          
           
           
           # Parameter prec_summer_fact - can be numeric or character (12 comma-separated numbers),
@@ -110,6 +112,7 @@ func_load_year_params_from_file <- function(year_data,
           }
           
           
+          
           # Parameters temp_elegrad and prec_elegrad - can be numeric or character (12 comma-separated).
         } else if (params_names_all[param_id_year_cur] %in% c("temp_elegrad", "prec_elegrad")) {
           if (typeof(params_raw[param_id_raw,1]) == "character") {
@@ -128,6 +131,13 @@ func_load_year_params_from_file <- function(year_data,
           } else {
             stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", params_raw[param_id_raw,1]))
           }
+          
+          
+          
+          # Parameter probes_snowdist_filename - a character.
+        } else if (params_names_all[param_id_year_cur] == "probes_snowdist_filename") {
+          year_cur_params[[param_id_year_cur]] <- as.character(params_raw[param_id_raw,1])
+          
           
           
           # All other parameters - must be a single numeric.

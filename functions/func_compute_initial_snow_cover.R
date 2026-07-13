@@ -8,7 +8,7 @@
 
 
 # Algorithm:
-# Start with the topographic distribution grid (elevation and curvature), already reduced in variability if the user chose to do so (parameter topographic_snowdist_fact)
+# Start with the topographic distribution grid (elevation and curvature), already reduced in variability if the user chose to do so.
 # Combine with the snow line elevation and snowgrad
 # Compute avalanche on the resulting grid (with appropriate multiplier for max deposition)
 # Multiply the grid with the probes idw if available
@@ -25,7 +25,7 @@ func_compute_initial_snow_cover <- function(run_params,
                                             data_massbal_winter) {
   
   # We start with the elevation/curvature effect.
-  # This is possibly already reduced by parameter topographic_snowdist_fact.
+  # This is possibly already reduced by user-defined parameter.
   dist_cur <- grids_snowdist_topographic[[dem_grid_id]]
   
   # writeRaster(dist_cur, "1-dist-topo.tif", overwrite = T)

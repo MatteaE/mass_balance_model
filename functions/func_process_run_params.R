@@ -17,13 +17,15 @@ func_process_run_params <- function(run_params) {
   run_params$dir_data_base               <-   file.path("input", run_params$name_glacier)
   
   # Set input data paths. We force the user to use these, which are tidy and easy to understand.
-  run_params$dir_data_weather            <-   file.path(run_params$dir_data_base, "weather")     # The weather series goes here
   run_params$dir_data_dhm                <-   file.path(run_params$dir_data_base, "dhm")         # Path to the DHM(s) = elevation grids(s) (rectangular, to compute slopes and curvatures)
-  run_params$dir_data_surftype           <-   file.path(run_params$dir_data_base, "surftype")    # Path to the grids of surface type (snow/ice/firn/rock/debris) go here
-  run_params$dir_data_outline            <-   file.path(run_params$dir_data_base, "outline")     # Path to the outlines
-  run_params$dir_data_radiation          <-   file.path(run_params$dir_data_base, "radiation")   # Path to the grids of potential direct radiation (daily sums)
   run_params$dir_data_massbalance        <-   file.path(run_params$dir_data_base, "massbalance") # The mass balance observations go here
-  run_params$dir_annual_params           <-   file.path(run_params$dir_data_base, "params")      # The annual model parameter files go here
+  run_params$dir_data_outline            <-   file.path(run_params$dir_data_base, "outline")     # Path to the outlines
+  run_params$dir_data_params             <-   file.path(run_params$dir_data_base, "params")      # The annual model parameter files go here
+  run_params$dir_data_radiation          <-   file.path(run_params$dir_data_base, "radiation")   # Path to the grids of potential direct radiation (daily sums)
+  run_params$dir_data_snowdist           <-   file.path(run_params$dir_data_base, "snowdist")    # Path to the external grids of snow distribution
+  run_params$dir_data_surftype           <-   file.path(run_params$dir_data_base, "surftype")    # Path to the grids of surface type (snow/ice/firn/rock/debris) go here
+  run_params$dir_data_weather            <-   file.path(run_params$dir_data_base, "weather")     # The weather series goes here
+  
   
   # File names as created by make_input.
   run_params$filename_dhm_prefix         <-   paste0("dhm_", run_params$name_glacier, "_")
@@ -50,7 +52,7 @@ func_process_run_params <- function(run_params) {
   
   
   #### SNOW DISTRIBUTION parameters ---------------------------------------------------------------
-  run_params$snow_probes_idw_exp         <-   0.75        # [-]: exponent for the IDW interpolation of winter snow measurements
+  run_params$snow_probes_idw_exp         <-   2.0        # [-]: exponent for the IDW interpolation of winter snow measurements
   
   # Set parameters which are specific to the new version of the model (2026/07/13).
   if (is.null(run_params$topographic_snowdist_fact)) {
@@ -61,11 +63,11 @@ func_process_run_params <- function(run_params) {
     run_params$init_snow_avalanche <- TRUE
   }
   
-  if (is.null(run_params$accum_probes_fact)) {
+  if (is.null(run_params$probes_snowdist_fact)) {
     if (!is.null(run_params$accum_probes_red_fac)) {
-      run_params$accum_probes_fact <- run_params$accum_probes_red_fac
+      run_params$probes_snowdist_fact <- run_params$accum_probes_red_fac
     } else {
-      run_params$accum_probes_fact <- 1.0
+      run_params$probes_snowdist_fact <- 1.0
     }
   }
   

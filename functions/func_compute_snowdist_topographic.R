@@ -11,6 +11,10 @@
 ###################################################################################################
 
 
+# NOTE: there is one grid of topographic snow distribution for each DEM grid (NOT DHM).
+# This is because the grid has some processing which is dependent on the glacier outline
+# (e.g., it is normalized to average = 1 within the glacier boundary).
+
 func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) {
   
   cat("Computing topographic snow distribution...\n")

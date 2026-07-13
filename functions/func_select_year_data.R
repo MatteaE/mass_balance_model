@@ -45,6 +45,8 @@ func_select_year_data <- function(data_all,
   
   # Extract topographic distribution of solid precipitation.
   # This is already reduced-intensity with parameter topographic_snowdist_fact.
+  # Grids of topographic snow distribution are indexed with dem_grid_id (not dhm_grid_id)
+  # since there is one for each DEM (not DHM).
   year_data$dist_topographic_values_red     <- values(grids_static_list$grids_snowdist_topographic[[year_data$dem_grid_id]], mat = FALSE)
   
   # Extract ice albedo factor grid for this year.

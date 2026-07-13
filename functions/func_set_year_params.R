@@ -19,7 +19,8 @@ func_set_year_params <- function(year_data,
                         "melt_factor",
                         "rad_fact_ice",
                         "rad_fact_snow",
-                        "mb_corr_ele_bands")
+                        "mb_corr_ele_bands",
+                        "probes_snowdist_filename")
   
   # Year parameters possibly subject to optimization.
   params_names_optim <- c("prec_corr",
@@ -28,7 +29,7 @@ func_set_year_params <- function(year_data,
                           "rad_fact_snow")
   
   # Empty list which we are going to fill with the parameter values.
-  year_cur_params <- setNames(as.list(rep(NA_real_, length(params_names_all))), params_names_all)
+  year_cur_params <- setNames(as.list(rep(NA, length(params_names_all))), params_names_all)
   
   # Try to load parameters from file.
   # This leaves NA for all parameters which we don't manage to set like this.
@@ -39,6 +40,7 @@ func_set_year_params <- function(year_data,
   
   # Now find and fill in any remaining NA parameters.
   # Algorithm:
+  # - For parameter probes_snowdist_filename, if it is still NA, set it to ""
   # - If year has mass balance data, set all missing parameters to run_params defaults.
   # -- If elevation bands are missing, compute them from stakes elevations and glacier highest/lowest points.
   # - Else if year has no mass balance data,
@@ -56,16 +58,26 @@ func_set_year_params <- function(year_data,
     # Year parameters filling in case the year does have some mass balance measurements.
     if (year_data$nstakes_annual > 0) {
       
-      cat("The current year has annual mass balance data, so I am using the global default value for all such parameters. I will optimize the relevant ones based on the data.\n")
+      cat("The current year has annual mass balance data, so I am using global default values for numeric parameters. I will optimize the relevant ones based on the data.\n")
       
       for (param_id in year_cur_params_na_ids) {
-        if (params_names_all[param_id] != "mb_corr_ele_bands") {
-          year_cur_params[[param_id]] <- run_params[[paste0("default_", params_names_all[param_id])]]
-        } else {
+        if (params_names_all[param_id] == "mb_corr_ele_bands") {
+          
           year_cur_params[[param_id]] <- func_compute_ele_bands_from_stakes(year_data$massbal_annual_meas_cur$z_dem, run_params)
           elebands_bounds <- round(year_cur_params[[param_id]])
           elebands_diff <- diff(elebands_bounds)
           cat("Established", length(elebands_bounds)-1, "elevation bands for mass balance correction:", paste0(paste(elebands_bounds[-length(elebands_bounds)], elebands_diff, collapse = ") ", sep = " (+"), ") ", elebands_bounds[length(elebands_bounds)]), "\n")
+          
+          # Parameter probes_snowdist_filename - keep it as "" to signal that we do not take snowdist
+        } else if (params_names_all[param_id] == "probes_snowdist_filename") {
+          
+          cat("No external map of snow distribution was supplied\n")
+          year_cur_params[[param_id]] <- ""
+          
+          # All other parameters
+        } else {
+          year_cur_params[[param_id]] <- run_params[[paste0("default_", params_names_all[param_id])]]
+          
         }
       }
       
@@ -86,6 +98,12 @@ func_set_year_params <- function(year_data,
           
           cat("There is no need for elevation bands for mass balance correction\n")
           year_cur_params[[param_id]] <- NULL
+          
+          
+        } else if (params_names_all[param_id] == "probes_snowdist_fact") {
+          
+          cat("No external map of snow distribution was supplied\n")
+          year_cur_params[[param_id]] <- ""
           
           # Parameters not subject to optimization, take defaults from run_params.
         } else if (!(params_names_all[param_id] %in% params_names_optim)) {
