@@ -8,11 +8,14 @@
 
 
 
-func_stop_msg <- function() {
+func_stop <- function() {
   
   flush(logcon)
   sink()
+  t_end <- Sys.time()
+  writeLines(paste0("Run failed at ", format(t_end), " (", Sys.timezone(), ")", "\n"), con = logcon, sep = "")
+  flush(logcon)
   close(logcon)
-  stop("\rRun stopped early due to a fatal error")
+  stop(paste0("\rRun failed at ", format(t_end), " (", Sys.timezone(), ")", "\n"))
   
 }

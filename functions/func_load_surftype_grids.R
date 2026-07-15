@@ -28,7 +28,7 @@ func_load_surftype_grids <- function(run_params) {
   
   if (surftype_n == 0) {
     func_customlog("no surface type grid files found. Please check parameters dir_data_surftype, filename_surftype_prefix and filename_surftype_suffix.\n", level = 2)
-    func_stop_msg()
+    func_stop()
   } else {
     cat("    Found", surftype_n, "surface type grid file(s). Available year(s):", run_params$surftype_years, "\n")
   }

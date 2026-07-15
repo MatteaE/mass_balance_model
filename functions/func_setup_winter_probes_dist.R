@@ -32,18 +32,18 @@ func_setup_winter_probes_dist <- function(year_data,
     probes_fp <- file.path(run_params$dir_data_snowdist, year_cur_params$probes_snowdist_filename)
     if (!file.exists(probes_fp)) {
       func_customlog("User-defined map of snow distribution does not exist: ", probes_fp, level = 2)
-      func_stop_msg()
+      func_stop()
     }
     tryCatch({
       dist_probes_raw_r <- rast(probes_fp)
     },
     warning = function(war) {
       func_customlog("Error reading user-defined map of snow distribution: ", probes_fp, level = 2)
-      func_stop_msg()
+      func_stop()
     },
     error = function(err) {
       func_customlog("Error reading user-defined map of snow distribution: ", probes_fp, level = 2)
-      func_stop_msg()
+      func_stop()
     })
     
     dist_probes_r <- project(probes_raw_r,
@@ -81,11 +81,11 @@ func_setup_winter_probes_dist <- function(year_data,
   dist_probes_mean <- mean(values(dist_probes_r, mat = F))
   if (is.na(dist_probes_mean)) {
     func_customlog("There are still NA values in the map of snow distribution, please investigate!", level = 2)
-    func_stop_msg()
+    func_stop()
   }
   if ((is.na(run_params$probes_snowdist_fact)) || (run_params$probes_snowdist_fact < 0)) {
     func_customlog("Parameter probes_snowdist_fact must be >= 0. Provided value: ", run_params$probes_snowdist_fact, level = 2)
-    func_stop_msg()
+    func_stop()
   }
   dist_probes_red_r <- dist_probes_mean + run_params$probes_snowdist_fact * (dist_probes_r - dist_probes_mean)
   

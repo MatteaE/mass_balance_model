@@ -20,14 +20,14 @@ func_load_weather <- function(run_params) {
     id_wrong_first <- t2m_bad_ids[1]
     func_customlog("there is a problem with the meteo data. ", length(t2m_bad_ids), " temperature value(s) are wrong. Please fix them and run the model again.\n The first bad value is:", level = 2)
     func_customlog(paste(data_raw[id_wrong_first,], collapse = " "))
-    func_stop_msg()
+    func_stop()
   }
   precip_bad_ids <- which(is.na(as.numeric(data_raw$precip)))
   if (length(precip_bad_ids) > 0) {
     id_wrong_first <- precip_bad_ids[1]
     func_customlog("there is a problem with the meteo data. ", length(precip_bad_ids), " precipitation values are wrong. Please fix them and run the model again.\n The first bad value is:", level = 2)
     func_customlog(paste(data_raw[id_wrong_first,], collapse = " "))
-    func_stop_msg()
+    func_stop()
   }
   
   # Sometimes we may have negative precipitation artifacts, remove them.
@@ -38,7 +38,7 @@ func_load_weather <- function(run_params) {
   if ((length(daydiff_unique) != 1) || (daydiff_unique[1] != 1)) {
     offending_id1 <- which((is.na(daydiff)) | (daydiff != 1))[1]
     func_customlog("the meteo data do not follow a daily sequence. Please correct the meteo file! The first offending date is:\n", format(data_raw$timestamp[offending_id1], "year = %Y, day of year = %j"), level = 2)
-    func_stop_msg()
+    func_stop()
   }
   
   data_raw$month <- as.integer(format(data_raw$timestamp, "%m"))

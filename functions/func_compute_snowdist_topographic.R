@@ -91,11 +91,11 @@ func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) 
     snowdist_mean <- mean(values(snowdist_topographic_cur_raw, mat=F))
     if (is.na(snowdist_mean)) {
       func_customlog("There are NA values in the map of topographic snow distribution, please investigate!", level = 2)
-      func_stop_msg()
+      func_stop()
     }
     if ((is.na(run_params$topographic_snowdist_fact)) || (run_params$topographic_snowdist_fact < 0)) {
       func_customlog("Parameter topographic_snowdist_fact must be >= 0. Provided value: ", run_params$topographic_snowdist_fact, level = 2)
-      func_stop_msg()
+      func_stop()
     }
     snowdist_topographic_cur_raw <- snowdist_mean + run_params$topographic_snowdist_fact * (snowdist_topographic_cur_raw - snowdist_mean)
     

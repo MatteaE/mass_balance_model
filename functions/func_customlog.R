@@ -20,14 +20,14 @@ func_customlog <- function(..., level = c("basic", "warning", "fatal", "success"
   } else {
     if (length(level) != 1) {
       cat("Wrong error level (provided: ", paste0(level, collapse = " "), ")")
-      func_stop_msg()
+      func_stop()
     }
     allowed_levels <- 0:4
     if (level %in% allowed_levels) {
       level <- c("basic", "warning", "fatal", "success", "info")[level[1]+1]
     } else {
       cat("Wrong error level (should be one of: ", paste0(allowed_levels, collapse = " "), "; provided: ", paste0(level, collapse = " "), ")")
-      func_stop_msg()
+      func_stop()
     }
   }
   

@@ -30,7 +30,7 @@ func_load_points_daily_out <- function(run_params,
   
   if (!file.exists(points_daily_path)) {
     func_customlog("I could not find the file with points of daily output. The specified path is", points_daily_path, "\n", level = 2)
-    func_stop_msg()
+    func_stop()
   }
   
   # Read file, assign column names.
@@ -48,7 +48,7 @@ func_load_points_daily_out <- function(run_params,
   ids_bad_n <- length(ids_df_bad)
   if (ids_bad_n > 0) {
     func_customlog("FATAL: the selected points for daily output include ", ids_bad_n, " entries which fall outside all provided DHMs. Please fix them manually and re-run. The first bad entry is: ", data_points_daily_out$id[ids_df_bad[1]], " ", data_points_daily_out$x[ids_df_bad[1]], " ", data_points_daily_out$y[ids_df_bad[1]], "\n", level = 2)
-    func_stop_msg()
+    func_stop()
   }
   
   return(data_points_daily_out)

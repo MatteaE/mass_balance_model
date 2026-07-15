@@ -101,10 +101,7 @@ func_process_run_params <- function(run_params) {
   # Or stop with a warning?
   run_params$overwrite_output            <-   TRUE
   
-  # Main output directory
-  run_params$output_dirname <- file.path("output", run_params$name_glacier)
-  
-  
+
   # If output unit is unspecified or invalid, use meters water equivalent.
   if (is.null(run_params$output_unit)) {
     run_params$output_unit <- "m"
@@ -200,7 +197,7 @@ func_process_run_params <- function(run_params) {
   # apply it for May to September. Otherwise, use the 12 supplied values.
   if (!(length(run_params$default_prec_summer_fact) %in% c(1,12))) {
     func_customlog("Parameter default_prec_summer_fact in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_prec_summer_fact, collapse = " "), "\n", level = 2)
-    func_stop_msg()
+    func_stop()
   } else {
     if (length(run_params$default_prec_summer_fact) == 1) {
       run_params$default_prec_summer_fact <- c(rep(1.0, 4),
@@ -219,7 +216,7 @@ func_process_run_params <- function(run_params) {
   }
   if (!(run_params$params_daily_interp %in% c("constant", "linear"))) {
     func_customlog("Parameter params_daily_interp in set_params.R must be either \"constant\" or \"linear\" (value provided: ", run_params$params_daily_interp, ")", level = 2)
-    func_stop_msg()
+    func_stop()
   }
   
   
@@ -228,7 +225,7 @@ func_process_run_params <- function(run_params) {
   # user input of just 1 annual value - easier and backwards-compatible).
   if (!(length(run_params$default_prec_elegrad) %in% c(1,12))) {
     func_customlog(paste0("Parameter default_prec_elegrad in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_prec_elegrad, collapse = " "), "\n"), level = 2)
-    func_stop_msg()
+    func_stop()
   } else {
     if (length(run_params$default_prec_elegrad) == 1) {
       run_params$default_prec_elegrad <- rep(run_params$default_prec_elegrad, 12)
@@ -236,7 +233,7 @@ func_process_run_params <- function(run_params) {
   }
   if (!(length(run_params$default_temp_elegrad) %in% c(1,12))) {
     func_customlog(paste0("Parameter default_temp_elegrad in set_params.R must be either one single (annual) value, or 12 comma-separated monthly values. Value(s) provided: ", paste0(run_params$default_temp_elegrad, collapse = " "), "\n"), level = 2)
-    func_stop_msg()
+    func_stop()
   } else {
     if (length(run_params$default_temp_elegrad) == 1) {
       run_params$default_temp_elegrad <- rep(run_params$default_temp_elegrad, 12)

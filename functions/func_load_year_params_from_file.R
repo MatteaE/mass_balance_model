@@ -41,7 +41,7 @@ func_load_year_params_from_file <- function(year_data,
     
     if (any(duplicated(params_raw[,3]))) {
       cat("FATAL: found duplicated parameter names in the params file. Please fix.")
-      func_stop_msg()
+      func_stop()
     }
     
     params_available_ids <- match(params_raw[,3], params_names_all)

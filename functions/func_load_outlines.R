@@ -25,7 +25,7 @@ func_load_outlines <- function(run_params) {
   
   if (outline_n == 0) {
     func_customlog("no outline files found. Please check parameters dir_data_outline, filename_outline_prefix and filename_outline_suffix.\n", level = 2)
-    func_stop_msg()
+    func_stop()
   } else {
     cat("    Found", outline_n, "outline file(s). Available year(s):", run_params$outline_years, "\n")
   }

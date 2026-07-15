@@ -8,42 +8,77 @@
 
 func_run_model <- function(run_params) {
   
+  
+  # Close any leftover sinks and connections from previous runs.
+  while (sink.number() > 0) {
+    sink()
+  }
+  while (nrow(showConnections(all = FALSE)) > 0) {
+    close(getConnection(rownames(showConnections(all = FALSE))))
+  }
+
+  
+  # Set main output directory, where the output and logs will be stored.
+  run_params$output_dirname <- file.path("output", run_params$name_glacier)
+  run_params$dir_output_logs <- file.path(run_params$output_dirname, "logs")
+  dir.create(run_params$dir_output_logs, showWarnings = FALSE, recursive = TRUE)
+  
+  
+  # Start logger ------------------------------------------------------------------------------------
+  logfile <- file.path(run_params$dir_output_logs, paste0("mb_model_run_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".log"))
+  logcon  <<- file(logfile, open = "a") # Assigned globally to be available to func_customlog()
+  
+  # Setup sink for split logging (console + logfile).
+  sink(logcon, split = TRUE)
+  options(warn=1) # Configure immediate printing of warnings.
+  
+  
   cat("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n")
   cat("|++++++++++++++++                          ++++++++++++++++|\n")
   cat("|+++++++++               DMBSim v2.0              +++++++++|\n")
   cat("|++++++++++++++++                          ++++++++++++++++|\n")
   cat("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n\n\n")
   
-  cat("Called at", as.character(Sys.time()), paste0("(", Sys.timezone(), ")"), "\n")
+  cat("Run started at", format(Sys.time()), paste0("(", Sys.timezone(), ")"), "\n\n")
   
   cat("System info:")
   print(R.version)
   cat("\n")
   
-  # Load required R packages.
-  packages_loaded <- func_load_packages(run_params)
-  if (packages_loaded == FALSE) {
-    func_customlog("please install required packages before proceeding!\n", level = 2)
-    func_stop_msg()
-  }
-  
-  #### Setup simulation ####
-  run_params <- func_process_run_params(run_params) # Process fixed run parameters, computing derived ones.
   
   # If output directory already exists, stop with an
   # error unless run_params$overwrite_output is TRUE,
   # in which case overwrite with a warning.
   if (file.exists(run_params$output_dirname) == TRUE) {
-    if (run_params$overwrite_output == FALSE) {
+    if (!is.null(run_params$overwrite_output) && (run_params$overwrite_output == FALSE)) {
       func_customlog("output destination already exists! Please move, remove or rename it before running the model.\n", level = 2)
-      func_stop_msg()
+      fsm()
     } else {
       func_customlog("output destination already exists. I am overwriting any files already present!\n", level = 1)
     }
   }
   
   
-  # Load all input data.
+  # Setup simulation ------------------------------------------------------------------------------
+  
+  # Set English language for dates (in the plots).
+  if (Sys.info()["sysname"] == "Windows") {
+    Sys.setlocale(category = "LC_TIME", locale = "English")
+  } else {
+    Sys.setlocale(category = "LC_TIME", locale = "en_US.UTF-8")
+  }
+  
+  
+  # Load required R packages
+  packages_loaded <- func_load_packages(run_params)
+  if (packages_loaded == FALSE) {
+    func_customlog("please install required packages before proceeding!\n", level = 2)
+    func_stop()
+  }
+  
+  run_params <- func_process_run_params(run_params) # Process fixed run parameters, computing derived ones.
+  
+  # Load all input data
   cat("\n")
   func_customlog("Loading all input data...", level = 4)
   data_all   <- func_load_data_all(run_params)
@@ -55,17 +90,17 @@ func_run_model <- function(run_params) {
   
   # Find out whether we are North or South of the Equator.
   # This is used in multi-annual runs for the firnification routine,
-  # which is called on May 15 in the Northern hemisphere and on
-  # November 15 in the Southern one.
+  # which is called on April 1 in the Northern hemisphere and on
+  # October 1 in the Southern one.
   ext_cur     <- ext(data_all$data_dems$elevation[[1]])[1:4]
   crds_center <- cbind(mean(ext_cur[1:2]), mean(ext_cur[3:4]))
   lat_center  <- terra::project(crds_center, run_params$grids_crs_epsg, "EPSG:4326")[,2]
   if (lat_center >= 0) {
     run_params$north_south <- "North"
-    run_params$firnification_date <- "05/15"
+    run_params$firnification_date <- "04/01"
   } else {
     run_params$north_south <- "South"
-    run_params$firnification_date <- "11/15"
+    run_params$firnification_date <- "10/01"
   }
   
   
@@ -108,12 +143,12 @@ func_run_model <- function(run_params) {
   # Setup list with annual values and plots (1 per year).
   overview_annual   <- func_setup_overview_annual(run_params)
   
-  # Create output directory.
+  # Create output directory for annual results.
   dir.create(file.path(run_params$output_dirname, "annual_results"), recursive = TRUE, showWarnings = FALSE)
   
   func_customlog("Finished model setup.", level = 4)
   
-  #### Main loop ####
+  # Main loop -------------------------------------------------------------------------------------
   # Here year_data is a list which is gradually built and
   # modified during one iteration of the main loop.
   year_data <- list()
@@ -127,7 +162,7 @@ func_run_model <- function(run_params) {
     func_customlog("Year ", year_id, " out of ", run_params$n_years, ": ", run_params$years[year_id], level = 4)
     
     
-    #### . Select current year, parameters, data ####
+    # . Select current year, parameters, data -----------------------------------------------------
     # Select data from the current year.
     # NOTE: list year_data contains the indices of the
     # data grids, not copies of the grids themselves.
@@ -177,13 +212,14 @@ func_run_model <- function(run_params) {
     func_customlog("There are still ", years_todo_n, " year(s) without mass balance measurements. Entering second processing loop\n", level = 4)
     cat("\n")
     
+    # Loop over the years without data ------------------------------------------------------------
     for (year_id_id in 1:length(year_ids_todo)) {
       
       year_id <- year_ids_todo[year_id_id]
       func_customlog("Year ", year_id_id, " out of ", length(year_ids_todo), ": ", run_params$years[year_id], level = 4)
       
       
-      #### . Select current year, parameters, data ####
+      # . Select current year, parameters, data ---------------------------------------------------
       # Select data from the current year.
       # NOTE: list year_data contains the indices of the
       # data grids, not copies of the grids themselves.
@@ -216,7 +252,7 @@ func_run_model <- function(run_params) {
   
   func_customlog("All processing loops have finished", level = 4)
   
-  #### Plot and write overview ####
+  # Plot and write overview -----------------------------------------------------------------------
   overview_annual$data_weather <- data_all$data_weather
   func_plot_write_overview(overview_annual,
                            run_params)
@@ -228,8 +264,13 @@ func_run_model <- function(run_params) {
   }
   
   cat("\n\n")
-  func_customlog("Run finished succesfully", level = 3)
+  func_customlog("Run finished succesfully at ", format(Sys.time()), paste0(" (", Sys.timezone(), ")"), level = 3)
   cat("\n\n")
+  
+  
+  # Stop logger -------------------------------------------------------------------------------------
+  sink()
+  close(logcon)
   
   return(0)
   

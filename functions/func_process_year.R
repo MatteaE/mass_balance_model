@@ -40,7 +40,7 @@ func_process_year <- function(year_data,
     offending_id1 <- which(is.na(time_bounds_match))[1] # The [1] to handle the case where both simulation start and end don't have meteo data. This index then is either value 1 or 2
     offending_date <- model_time_bounds_range[offending_id1]
     func_customlog("meteo data for the current year are missing. Please check the meteo file and the first_year/last_year! Offending date:", format(offending_date, "%Y/%m/%d"), "(day-of-year:", format(offending_date, "%j)."), "\n", level = 2)
-    func_stop_msg()
+    func_stop()
   }
   
   
