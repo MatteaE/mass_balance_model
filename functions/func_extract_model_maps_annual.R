@@ -4,15 +4,15 @@
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
 #                 This file contains the routine to extract the maps of cumulative mass balance   #
-#                 at various dates, for the annual period. We also determine and return the       #
-#                 "measurement period".                                                           #
+#                 and SWE at various dates, for the annual period.                                #
+#                 We also determine and return the "measurement period".                          #
 ###################################################################################################
 
-func_extract_massbal_maps_annual <- function(year_data,
-                                             run_params,
-                                             year_cur_params,
-                                             data_dhms,
-                                             data_dems) {
+func_extract_model_maps_annual <- function(year_data,
+                                           run_params,
+                                           year_cur_params,
+                                           data_dhms,
+                                           data_dems) {
   
   # Indices: in the weather series index 1 refers to the whole first day,
   # in the mass balance series index 1 refers to the instant mass balance at the *beginning* of that same first day,
@@ -32,6 +32,12 @@ func_extract_massbal_maps_annual <- function(year_data,
   massbal_hydro_end_values   <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_hydro_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
   massbal_hydro_map <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_hydro_end_values - massbal_hydro_start_values)
   massbal_hydro_map_masked <- mask(massbal_hydro_map, data_dems$elevation[[year_data$dem_grid_id]])
+  
+  swe_hydro_start_values <- year_data$mod_output_annual_cur$vec_swe_all[(id_hydro_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
+  swe_hydro_end_values <- year_data$mod_output_annual_cur$vec_swe_all[(id_hydro_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
+  swe_hydro_start_map <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], swe_hydro_start_values)
+  swe_hydro_end_map <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], swe_hydro_end_values)
+  
   
   
   # measperiod refers to the period
@@ -53,22 +59,25 @@ func_extract_massbal_maps_annual <- function(year_data,
   # massbal_fixed_map <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_fixed_end_values - massbal_fixed_start_values)
   # massbal_fixed_map_masked <- mask(massbal_fixed_map, data_dems$elevation[[year_data$dem_grid_id]])
   
-
+  
   # We can't use ifelse() with rasters!
   massbal_maps <- list(hydro       = massbal_hydro_map_masked)
   if (year_data$nstakes_annual > 0) {
     massbal_maps$meas_period <- massbal_measperiod_map_masked
   }
-
-  massbal_maps_out <- list(massbal_maps    = massbal_maps)
+  swe_maps     <- list(hydro_start = swe_hydro_start_map,
+                       hydro_end   = swe_hydro_end_map)
+  
+  model_maps_out <- list(massbal_maps    = massbal_maps,
+                         swe_maps        = swe_maps)
   if (year_data$nstakes_annual > 0) {
-    massbal_maps_out$meas_period     <- year_data$weather_series_annual_cur$timestamp[c(id_measperiod_start, id_measperiod_end)]
-    massbal_maps_out$meas_period_ids <- c(id_measperiod_start, id_measperiod_end)
+    model_maps_out$meas_period     <- year_data$weather_series_annual_cur$timestamp[c(id_measperiod_start, id_measperiod_end)]
+    model_maps_out$meas_period_ids <- c(id_measperiod_start, id_measperiod_end)
   } else {
-    massbal_maps_out$meas_period     <- c(NA, NA)
-    massbal_maps_out$meas_period_ids <- c(NA, NA)
+    model_maps_out$meas_period     <- c(NA, NA)
+    model_maps_out$meas_period_ids <- c(NA, NA)
   }
-
-  return(massbal_maps_out)
+  
+  return(model_maps_out)
   
 }

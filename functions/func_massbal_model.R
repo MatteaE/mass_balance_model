@@ -218,50 +218,62 @@ func_massbal_model <- function(run_params,
     
     
     
-    
-    #### .  REMOVE OLD SNOW FROM SWE (JUST ONCE PER YEAR) -----------------------------------------
+    #### . TRANSFORM OLD SNOW INTO FIRN (JUST ONCE PER YEAR) -----------------------------------------
     # This is relevant especially for multi-year simulations when the 
     # initial snow distribution is taken from the model of the previous year.
     # In that case, snow from previous years must be removed from the SWE,
-    # else in accumulation areas we will form a thick multiannual snowpack which later will
+    # otherwise in accumulation areas we will form a thick multiannual snowpack which later will
     # never be depleted even in more negative years, leading to wrong surface type and SCAF.
     # In reality, that snow becomes firn and eventually ice.
-    # Thus, at peak SWE in the accumulation area (15 May) we remove
-    # from SWE the initial SWE of the simulation.
-    # We do this at peak accumulation because we don't want this to have
-    # any impact on the surface type (snow becoming firn happens below the snowpack!).
-    # We still check for the unlikely case that there is less SWE on 15 May than in late summer,
-    # and we update the surface type in that case, issuing a warning.
-    # Obviously, this removal does not directly count towards mass balance (but affects it a bit
-    # through albedo feedback, as the removed SWE means surface type will change sooner to ice
-    # than if we had just left snow everywhere).
+    # Thus, when there is (hopefully) enough snow everywhere (1 Apr in the Northern hemisphere)
+    # we subtract from the SWE distribution the old snow which turns into firn.
+    # That snow is just the minimum value of SWE for each cell (minimum between the simulation
+    # start and the firnification date; in general this minimum happens at a different
+    # date for each cell).
+    # Minimum SWE is exactly the leftover snow from the previous winter.
+    # We do this on 1 Apr because we want to have some new (current winter's) snow
+    # everywhere, to not impact the surface type (snow becoming firn happens below the snowpack).
+    # Since we subtract the minimum SWE, there is no risk of sending SWE into the negatives,
+    # but we still check whether we are removing all the SWE of a cell; in this case,
+    # we update the surface type and issue a warning.
+    # This SWE subtraction does not directly count towards mass balance, but affects it a bit
+    # through albedo feedback, as the removed SWE means the surface type will change sooner to ice
+    # than if we had just left snow everywhere. Reality lies in between (firn albedo depends on its
+    # age, but we do not simulate this).
     # For consistency, we remove initial SWE in any case, not only when
     # the initial snow distribution is taken from the previous year's model.
-    # In single-year simulations, the initial snow distribution (the one of ~September YYYY-1)
-    # becomes firn (or anyway should not count anymore as snow) by the time it is uncovered again
-    # (~September YYYY).
     # NOTE: this SWE removal does NOT modify the base grid of surface type, which is static.
     # Thus, SWE lost to firn does not actually become "firn" in the model. For that, we would
-    # need to keep track of annual firn thickness, well beyond the scope of our simulation.
+    # need to keep track of annual firn thickness, which is not done.
     # NOTE2: this means that total SWE (and specifically SWE in the accumulation area) has
-    # a jump on 15 May. We have to live with it.
+    # a jump on the firnification date. We have to live with it.
     if (format(weather_series_cur$timestamp[day_id], "%m/%d") == run_params$firnification_date) {
       
-      ids_swe_depleted_to_firn            <- which((vec_snow_swe[cells_cur] > 0) &
-                                                     (vec_snow_swe[cells_cur] <= snowdist_init_values))
-      ids_swe_depleted_to_firn_on_glacier <- intersect(ids_swe_depleted_to_firn, glacier_cell_ids)
-      swe_depleted_to_firn_n              <- length(ids_swe_depleted_to_firn)
-      swe_depleted_to_firn_on_glacier_n   <- length(ids_swe_depleted_to_firn_on_glacier)
-      if (swe_depleted_to_firn_n > 0) {
-        func_customlog("firnification on ",
-                       format(weather_series_cur$timestamp[day_id], "%Y/%m/%d"),
-                       " has just removed all snow on ",
-                       swe_depleted_to_firn_n, " cells, ",
-                       swe_depleted_to_firn_on_glacier_n, " of them on glacier! This might introduce second-order biases in the mass balance. This can be improved by acting on the initial snow cover (e.g. initial snow line altitude).", level = 1)
-        vec_surf_type[cells_cur][ids_swe_depleted_to_firn] <- surftype_init_values[ids_swe_depleted_to_firn]
+      # This matrix has daily SWE as one column per grid cell and
+      # one row per day from the start to the current day.
+      swe_so_far_mat  <- matrix(vec_snow_swe, ncol = run_params$grid_ncells, byrow = TRUE)
+      swe_min_vec     <- Rfast::colMins(swe_so_far_mat, value = TRUE)
+      ids_swe_nonzero <- which(swe_min_vec > 0)
+      ids_swe_nonzero_n <- length(ids_swe_nonzero)
+      if (ids_swe_nonzero_n > 0) {
+        cat(paste0(format(weather_series_cur$timestamp[day_id], "%Y-%m-%d"), ": transforming leftover snow from previous year into firn on ", ids_swe_nonzero_n, " cells (mean SWE over those: ", round(mean(swe_min_vec[ids_swe_nonzero])), " mm w.e.)\n"))
+        
+        ids_swe_depleted_to_firn            <- which((vec_snow_swe[cells_cur] > 0) &
+                                                       (vec_snow_swe[cells_cur] <= swe_min_vec))
+        ids_swe_depleted_to_firn_on_glacier <- intersect(ids_swe_depleted_to_firn, glacier_cell_ids)
+        swe_depleted_to_firn_n              <- length(ids_swe_depleted_to_firn)
+        swe_depleted_to_firn_on_glacier_n   <- length(ids_swe_depleted_to_firn_on_glacier)
+        if (swe_depleted_to_firn_n > 0) {
+          func_customlog("Firnification has just removed all snow on ",
+                         swe_depleted_to_firn_n, " cells, ",
+                         swe_depleted_to_firn_on_glacier_n, " of them on glacier! This is extremely unlikely (it means that the date of firnification is the date of minimum mass balance for each of those cells). Please check the meteorological series! This total removal might introduce second-order biases in the mass balance.", level = 1)
+          vec_surf_type[cells_cur][ids_swe_depleted_to_firn] <- surftype_init_values[ids_swe_depleted_to_firn]
+        }
+        vec_snow_swe[cells_cur] <- pmax(0, vec_snow_swe[cells_cur] - swe_min_vec)
+        
+      } else {
+        cat("There is no leftover snow from previous year, which would have become firn\n")
       }
-      vec_snow_swe[cells_cur] <- pmax(0, vec_snow_swe[cells_cur] - snowdist_init_values)
-      
     }
     
     

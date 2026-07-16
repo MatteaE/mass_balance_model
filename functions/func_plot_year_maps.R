@@ -17,10 +17,12 @@
 # X or in the Y coordinate).
 # Without geom_sf(), the glacier is distorted
 # until the image is filled.
-func_plot_year_mb_maps <- function(year_data,
+func_plot_year_maps <- function(year_data,
                                    run_params,
                                    data_dems,
                                    data_outlines) {
+  
+  browser()
   
   base_size <- 16 # For the plots.
   grid_extent <- ext(data_dems$elevation[[year_data$dem_grid_id]])

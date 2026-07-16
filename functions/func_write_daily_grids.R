@@ -12,7 +12,7 @@ func_write_daily_grids <- function(year_data,
                                    data_dems) {
   
   
-  dir.create(file.path(run_params$output_dirname, "daily", year_data$year_cur, "swe"), recursive = TRUE)
+  dir.create(file.path(run_params$output_dirname, "daily", year_data$year_cur, "swe"), recursive = TRUE, showWarnings = FALSE)
   
   plot_df <- data.frame(crds(data_dems$elevation[[year_data$dem_grid_id]], na.rm = FALSE))
   
