@@ -41,6 +41,7 @@ func_extract_year_massbalance <- function(year_data,
   
   year_data$massbal_winter_maps            <- model_winter_maps_data$massbal_maps
   year_data$swe_winter_maps                <- model_winter_maps_data$swe_maps
+  year_data$massbal_winter_fixed_period    <- model_winter_maps_data$fixed_period
   year_data$massbal_winter_meas_period     <- model_winter_maps_data$meas_period
   year_data$massbal_winter_meas_period_ids <- model_winter_maps_data$meas_period_ids
   

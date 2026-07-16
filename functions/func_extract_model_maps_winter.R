@@ -74,7 +74,8 @@ func_extract_model_maps_winter <- function(year_data,
   # Combine output maps to return.
   # If there is a winter measurement period, also return its bounds (within the annual simulation).
   model_maps_out <- list(massbal_maps    = massbal_maps,
-                         swe_maps        = swe_maps)
+                         swe_maps        = swe_maps,
+                         fixed_period    = c(year_cur_params$fixed_winter_start, year_cur_params$fixed_winter_end))
   if (year_data$process_winter) {
     # NOTE: meas_period_ids has the indices of the winter
     # measurement period w.r.t. the annual simulation.

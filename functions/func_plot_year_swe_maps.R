@@ -57,7 +57,7 @@ func_plot_year_swe_maps <- function(year_data,
   y_line4 <- 1 + (0.00 / y_line_mult)
   
   # Values exceeding +/- max_swe will be clamped.
-  max_swe <- round(quantile(year_data$mod_output_annual_cur$vec_swe_all, 0.98) / 200) * 200 * run_params$output_mult/1000
+  max_swe <- round(quantile(year_data$mod_output_annual_cur$vec_swe_all, 0.98) / 400) * 400 * run_params$output_mult/1000
   
   plot_df_base <- data.frame(crds(data_dhms$elevation[[year_data$dhm_grid_id]], na.rm = FALSE))
   elevation_df <- data.frame(plot_df_base, z = values(data_dhms$elevation[[year_data$dhm_grid_id]], mat = F))
@@ -121,7 +121,7 @@ func_plot_year_swe_maps <- function(year_data,
   if (year_data$nstakes_annual > 0) {
     
     #### ANNUAL MEASUREMENT PERIOD START ####
-    meas_period_annual_start_lab <- paste(format(year_data$massbal_annual_meas_period[1], "%Y/%m/%d"), collapse = " - ")
+    meas_period_annual_start_lab <- format(year_data$massbal_annual_meas_period[1], "%Y/%m/%d")
     plot_df <- plot_df_base
     plot_df$swe <- values(year_data$swe_annual_maps$meas_period_start, mat = F)
     swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
@@ -147,7 +147,7 @@ func_plot_year_swe_maps <- function(year_data,
     
     
     #### ANNUAL MEASUREMENT PERIOD END ####
-    meas_period_annual_end_lab <- paste(format(year_data$massbal_annual_meas_period[2], "%Y/%m/%d"), collapse = " - ")
+    meas_period_annual_end_lab <- format(year_data$massbal_annual_meas_period[2], "%Y/%m/%d")
     plot_df <- plot_df_base
     plot_df$swe <- values(year_data$swe_annual_maps$meas_period_end, mat = F)
     swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
@@ -174,11 +174,10 @@ func_plot_year_swe_maps <- function(year_data,
   
   
   
-  browser()
   #### WINTER FIXED PERIOD END ####
-  fixed_winter_end_lab <- paste(format(year_data$massbal_annual_meas_period[2], "%Y/%m/%d"), collapse = " - ")
+  fixed_winter_end_lab <- format(year_data$massbal_winter_fixed_period[2], "%Y/%m/%d")
   plot_df <- plot_df_base
-  plot_df$swe <- values(year_data$swe_annual_maps$meas_period_end, mat = F)
+  plot_df$swe <- values(year_data$swe_winter_maps$fixed_end, mat = F)
   swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
   plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
@@ -188,7 +187,7 @@ func_plot_year_swe_maps <- function(year_data,
     {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(paste0("Annual measurement period end: ", meas_period_annual_end_lab),
+    annotation_custom(grobTree(textGrob(paste0("Winter fixed period end: ", fixed_winter_end_lab),
                                         x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(bquote(bold("Mean SWE (full grid)"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                         x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
