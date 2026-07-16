@@ -1,0 +1,207 @@
+###################################################################################################
+# Author:         Enrico Mattea (@unifr.ch)                                                       #
+# Description:    this program models the distributed mass balance of a glacier at daily          #
+#                 resolution, optimizing model parameters towards the best fit with point         #
+#                 mass balance measurements.                                                      #
+#                 This file contains the routine which plots modeled SWE maps at key moments.     #
+################################################################################################### 
+
+
+# NOTE: in ggplot2, the geom_sf() command
+# which plots the glacier outline is forcing
+# the glacier image proportions so that the
+# glacier is not distorted.
+# This means that the output images can get white
+# margins (either above/below or left/right,
+# depending on whether the glacier is larger in the
+# X or in the Y coordinate).
+# Without geom_sf(), the glacier is distorted
+# until the image is filled.
+
+# Compared to func_plot_year_mb_maps, this one plots the full DHM extent,
+# because SWE can be exchanged with the glacier surroundings (avalanches).
+
+func_plot_year_swe_maps <- function(year_data,
+                                    run_params,
+                                    data_dhms,
+                                    data_outlines) {
+  
+  
+  base_size <- 16 # For the plots.
+  grid_extent <- ext(data_dhms$elevation[[year_data$dhm_grid_id]])
+  grid_area   <- (grid_extent[2] - grid_extent[1]) * (grid_extent[4] - grid_extent[3])
+  grid_aspect_ratio <- (grid_extent[4] - grid_extent[3]) / (grid_extent[2] - grid_extent[1])
+  # Empirical multiplier to reduce label and line size when the modeled extent is very big.
+  # Useful for huge glaciers and multi-glacier (e.g. catchment) simulations.
+  extent_size_multiplier <- max(0.1, exp(-(max(0,(grid_area-5e6))^2)/5e17))
+  
+  # Empirical top margin to keep plots inside page borders
+  # when the glacier is tall (aspect ratio > 1.07).
+  margin_top <- min(80, max(0, (grid_aspect_ratio - 1.05) * 1200))
+  theme_map_swe <- theme_void(base_size = base_size) +
+    theme(legend.position = "bottom",
+          legend.key.width = unit(3, "cm"),
+          legend.key.height = unit(0.25, "cm"),
+          legend.box.margin = margin(0,0,5,0),
+          legend.title = element_text(vjust = 1.3, face = "bold", size = 16),
+          legend.text = element_text(face = "bold", size = 12),
+          plot.margin = margin(margin_top,0,0,0, unit = "pt"))
+  
+  contour_label_textsize <- 4
+  contour_linesize <- 0.25
+  outline_linesize <- 0.7 * run_params$outlines_linesize_mult
+  y_line_mult <- min(1.5, max(1, (grid_aspect_ratio + 1.5) / 2))
+  y_line1 <- 1 + (0.21 / y_line_mult)
+  y_line2 <- 1 + (0.12 / y_line_mult)
+  y_line3 <- 1 + (0.06 / y_line_mult)
+  y_line4 <- 1 + (0.00 / y_line_mult)
+  
+  # Values exceeding +/- max_swe will be clamped.
+  max_swe <- round(quantile(year_data$mod_output_annual_cur$vec_swe_all, 0.98) / 200) * 200 * run_params$output_mult/1000
+  
+  plot_df_base <- data.frame(crds(data_dhms$elevation[[year_data$dhm_grid_id]], na.rm = FALSE))
+  elevation_df <- data.frame(plot_df_base, z = values(data_dhms$elevation[[year_data$dhm_grid_id]], mat = F))
+  
+  plots <- list()
+  
+  #### HYDROLOGICAL YEAR START ####
+  plot_df <- plot_df_base
+  plot_df$swe <- values(year_data$swe_annual_maps$hydro_start, mat = F)
+  swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
+  plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
+    geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult/1000)) +
+    geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+    coord_sf(clip = "off") +
+    {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
+    {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
+    annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+                                        x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
+    annotation_custom(grobTree(textGrob(paste0("Hydrological year start: ", year_data$year_cur-1, "/10/01"),
+                                        x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
+    annotation_custom(grobTree(textGrob(bquote(bold("Mean SWE (full grid)"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
+                                        x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
+    labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
+         subtitle = " ") +
+    scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
+                         direction = 1, limits = c(0,max_swe),
+                         breaks = c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe,
+                         oob = scales::oob_squish) +
+    theme_map_swe
+  
+  
+  
+  #### HYDROLOGICAL YEAR END ####
+  plot_df <- plot_df_base
+  plot_df$swe <- values(year_data$swe_annual_maps$hydro_end, mat = F)
+  swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
+  plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
+    geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult/1000)) +
+    geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+    coord_sf(clip = "off") +
+    {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
+    {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
+    annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+                                        x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
+    annotation_custom(grobTree(textGrob(paste0("Hydrological year end: ", year_data$year_cur, "/09/30"),
+                                        x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
+    annotation_custom(grobTree(textGrob(bquote(bold("Mean SWE (full grid)"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
+                                        x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
+    labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
+         subtitle = " ") +
+    scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
+                         direction = 1, limits = c(0,max_swe),
+                         breaks = c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe,
+                         oob = scales::oob_squish) +
+    theme_map_swe
+  
+  
+  
+  
+  
+  if (year_data$nstakes_annual > 0) {
+    
+    #### ANNUAL MEASUREMENT PERIOD START ####
+    meas_period_annual_start_lab <- paste(format(year_data$massbal_annual_meas_period[1], "%Y/%m/%d"), collapse = " - ")
+    plot_df <- plot_df_base
+    plot_df$swe <- values(year_data$swe_annual_maps$meas_period_start, mat = F)
+    swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
+    plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
+      geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
+      geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+      coord_sf(clip = "off") +
+      {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
+      {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
+      annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+                                          x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
+      annotation_custom(grobTree(textGrob(paste0("Annual measurement period start: ", meas_period_annual_start_lab),
+                                          x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
+      annotation_custom(grobTree(textGrob(bquote(bold("Mean SWE (full grid)"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
+                                          x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
+      labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
+           subtitle = " ") +
+      scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
+                           direction = 1, limits = c(0,max_swe),
+                           breaks = c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe,
+                           oob = scales::oob_squish) +
+      theme_map_swe
+    
+    
+    #### ANNUAL MEASUREMENT PERIOD END ####
+    meas_period_annual_end_lab <- paste(format(year_data$massbal_annual_meas_period[2], "%Y/%m/%d"), collapse = " - ")
+    plot_df <- plot_df_base
+    plot_df$swe <- values(year_data$swe_annual_maps$meas_period_end, mat = F)
+    swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
+    plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
+      geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
+      geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+      coord_sf(clip = "off") +
+      {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
+      {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
+      annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+                                          x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
+      annotation_custom(grobTree(textGrob(paste0("Annual measurement period end: ", meas_period_annual_end_lab),
+                                          x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
+      annotation_custom(grobTree(textGrob(bquote(bold("Mean SWE (full grid)"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
+                                          x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
+      labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
+           subtitle = " ") +
+      scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
+                           direction = 1, limits = c(0,max_swe),
+                           breaks = c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe,
+                           oob = scales::oob_squish) +
+      theme_map_swe
+  }
+  
+  
+  
+  browser()
+  #### WINTER FIXED PERIOD END ####
+  fixed_winter_end_lab <- paste(format(year_data$massbal_annual_meas_period[2], "%Y/%m/%d"), collapse = " - ")
+  plot_df <- plot_df_base
+  plot_df$swe <- values(year_data$swe_annual_maps$meas_period_end, mat = F)
+  swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
+  plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
+    geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
+    geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+    coord_sf(clip = "off") +
+    {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
+    {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
+    annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+                                        x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
+    annotation_custom(grobTree(textGrob(paste0("Annual measurement period end: ", meas_period_annual_end_lab),
+                                        x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
+    annotation_custom(grobTree(textGrob(bquote(bold("Mean SWE (full grid)"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
+                                        x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
+    labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
+         subtitle = " ") +
+    scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
+                         direction = 1, limits = c(0,max_swe),
+                         breaks = c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe,
+                         oob = scales::oob_squish) +
+    theme_map_swe
+  
+  
+  
+  return(plots)
+  
+}

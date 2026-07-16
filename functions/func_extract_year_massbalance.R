@@ -32,20 +32,17 @@ func_extract_year_massbalance <- function(year_data,
   # (1) "fixed":       user-defined fixed period, such as Oct 1 to Mar 31.
   # (2) "meas_period": measurement period, defined as (earliest winter stake start - latest winter stake end).
   # If process_winter is FALSE, the list contains only (1).
-  massbal_winter_maps_data <- func_extract_massbal_maps_winter(year_data,
-                                                               run_params,
-                                                               year_cur_params,
-                                                               data_dhms,
-                                                               data_dems)
+  # We also extract the map of SWE at the end of the fixed winter period.
+  model_winter_maps_data <- func_extract_model_maps_winter(year_data,
+                                                           run_params,
+                                                           year_cur_params,
+                                                           data_dhms,
+                                                           data_dems)
   
-  year_data$massbal_winter_maps <- massbal_winter_maps_data$massbal_maps
-  if (year_data$process_winter) {
-    year_data$massbal_winter_meas_period     <- massbal_winter_maps_data$meas_period
-    year_data$massbal_winter_meas_period_ids <- massbal_winter_maps_data$meas_period_ids
-  } else {
-    year_data$massbal_winter_meas_period     <- c(NA, NA)
-    year_data$massbal_winter_meas_period_ids <- c(NA, NA)
-  }
+  year_data$massbal_winter_maps            <- model_winter_maps_data$massbal_maps
+  year_data$swe_winter_maps                <- model_winter_maps_data$swe_maps
+  year_data$massbal_winter_meas_period     <- model_winter_maps_data$meas_period
+  year_data$massbal_winter_meas_period_ids <- model_winter_maps_data$meas_period_ids
   
   return(year_data)
   

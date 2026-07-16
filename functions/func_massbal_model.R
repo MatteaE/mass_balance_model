@@ -256,7 +256,7 @@ func_massbal_model <- function(run_params,
       ids_swe_nonzero <- which(swe_min_vec > 0)
       ids_swe_nonzero_n <- length(ids_swe_nonzero)
       if (ids_swe_nonzero_n > 0) {
-        cat(paste0(format(weather_series_cur$timestamp[day_id], "%Y-%m-%d"), ": transforming leftover snow from previous year into firn on ", ids_swe_nonzero_n, " cells (mean SWE over those: ", round(mean(swe_min_vec[ids_swe_nonzero])), " mm w.e.)\n"))
+        cat(paste0(format(weather_series_cur$timestamp[day_id], "%Y-%m-%d"), ": transforming leftover snow from previous year into firn on ", ids_swe_nonzero_n, " cells (mean SWE subtracted from them: ", round(mean(swe_min_vec[ids_swe_nonzero])), " mm w.e.)\n"))
         
         ids_swe_depleted_to_firn            <- which((vec_snow_swe[cells_cur] > 0) &
                                                        (vec_snow_swe[cells_cur] <= swe_min_vec))

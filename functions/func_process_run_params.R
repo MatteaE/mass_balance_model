@@ -137,7 +137,7 @@ func_process_run_params <- function(run_params) {
   #### . Daily output parameters ------------------------------------------------------------------
   run_params$plot_daily_maps             <-   FALSE       # [TRUE/FALSE]: at the end of each year, produce daily plots of surface type and SWE (slow, but useful for debug or visualization).
   run_params$plot_daily_maps_frequency   <-   1           # [days]: produce "daily" plots of surface type and SWE only at a given interval, to speed up their generation.
-  run_params$write_daily_grids           <-   TRUE         # [TRUE/FALSE]: at the end of each year, write daily geotiff grids of SWE (useful for debugging)
+  run_params$write_daily_grids           <-   FALSE         # [TRUE/FALSE]: at the end of each year, write daily geotiff grids of SWE (useful for debugging)
   run_params$write_daily_grids_frequency <-   1            # [days]: write "daily" grids of SWE only at a given interval, to speed up processing
   
   # Compatibility with older set_params which did not have filename_points_daily_out.

@@ -17,12 +17,11 @@
 # X or in the Y coordinate).
 # Without geom_sf(), the glacier is distorted
 # until the image is filled.
-func_plot_year_maps <- function(year_data,
-                                   run_params,
-                                   data_dems,
-                                   data_outlines) {
+func_plot_year_mb_maps <- function(year_data,
+                                run_params,
+                                data_dems,
+                                data_outlines) {
   
-  browser()
   
   base_size <- 16 # For the plots.
   grid_extent <- ext(data_dems$elevation[[year_data$dem_grid_id]])
@@ -35,13 +34,13 @@ func_plot_year_maps <- function(year_data,
   # when the glacier is tall (aspect ratio > 1.07).
   margin_top <- min(80, max(0, (data_outlines$aspect_ratio[[year_data$outline_id]] - 1.05) * 1200))
   theme_map_massbal <- theme_void(base_size = base_size) +
-                       theme(legend.position = "bottom",
-                             legend.key.width = unit(3, "cm"),
-                             legend.key.height = unit(0.25, "cm"),
-                             legend.box.margin = margin(0,0,5,0),
-                             legend.title = element_text(vjust = 1, face = "bold", size = 16),
-                             legend.text = element_text(face = "bold", size = 12),
-                             plot.margin = margin(margin_top,0,0,0, unit = "pt"))
+    theme(legend.position = "bottom",
+          legend.key.width = unit(3, "cm"),
+          legend.key.height = unit(0.25, "cm"),
+          legend.box.margin = margin(0,0,5,0),
+          legend.title = element_text(vjust = 1, face = "bold", size = 16),
+          legend.text = element_text(face = "bold", size = 12),
+          plot.margin = margin(margin_top,0,0,0, unit = "pt"))
   
   contour_label_textsize <- 4
   contour_linesize <- 0.4
@@ -59,14 +58,14 @@ func_plot_year_maps <- function(year_data,
   max_mb <- abs(2*run_params$mb_colorscale_breaks[1] - run_params$mb_colorscale_breaks[2])
   
   plot_df_base <- data.frame(crds(data_dems$elevation[[year_data$dem_grid_id]], na.rm = FALSE))
-  elevation_df <- data.frame(plot_df_base, z = values(data_dems$elevation[[year_data$dem_grid_id]])[,1])
+  elevation_df <- data.frame(plot_df_base, z = values(data_dems$elevation[[year_data$dem_grid_id]], mat = F))
   
   plots <- list()
   
   #### HYDROLOGICAL YEAR ####
   mb_hydro_lab <- sprintf(run_params$output_fmt1, year_data$massbal_annual_values[["hydro.mean"]] * run_params$output_mult / 1000.)
   plot_df <- plot_df_base
-  plot_df$massbal <- values(year_data$massbal_annual_maps$hydro)[,1]
+  plot_df$massbal <- values(year_data$massbal_annual_maps$hydro, mat = F)
   plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
     geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult/1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -85,7 +84,7 @@ func_plot_year_maps <- function(year_data,
                       limits = max_mb*c(-1,1),
                       breaks = run_params$mb_colorscale_breaks) +
     theme_map_massbal
-
+  
   
   
   #### MEASUREMENT PERIOD - ANNUAL ####
@@ -94,7 +93,7 @@ func_plot_year_maps <- function(year_data,
     mb_meas_period_annual_lab <- paste(format(year_data$massbal_annual_meas_period, "%m/%d"), collapse = " - ")
     mb_meas_annual_lab <- sprintf(run_params$output_fmt1,year_data$massbal_annual_values[["meas_period.mean"]] * run_params$output_mult / 1000.)
     plot_df <- plot_df_base
-    plot_df$massbal <- values(year_data$massbal_annual_maps$meas_period)[,1]
+    plot_df$massbal <- values(year_data$massbal_annual_maps$meas_period, mat = F)
     plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult / 1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -147,7 +146,7 @@ func_plot_year_maps <- function(year_data,
     #### MEASUREMENT PERIOD - ANNUAL, CORRECTED WITH CONTOUR LINE METHOD ####
     mb_meas_corr_annual_lab <- sprintf(run_params$output_fmt1,year_data$massbal_annual_values[["meas_period_corr.mean"]] * run_params$output_mult / 1000.)
     plot_df <- plot_df_base
-    plot_df$massbal <- values(year_data$massbal_annual_maps$meas_period_corr)[,1]
+    plot_df$massbal <- values(year_data$massbal_annual_maps$meas_period_corr, mat = F)
     plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult / 1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -200,7 +199,7 @@ func_plot_year_maps <- function(year_data,
   # mb_fixed_period_annual_lab <- paste(run_params$massbal_fixed_annual_start, run_params$massbal_fixed_annual_end, sep = " - ")
   # mb_fixed_annual_lab <- sprintf(run_params$output_fmt1,year_data$massbal_annual_values[["fixed.mean"]] * run_params$output_mult / 1000.)
   # plot_df <- plot_df_base
-  # plot_df$massbal <- values(year_data$massbal_annual_maps$fixed)[,1]
+  # plot_df$massbal <- values(year_data$massbal_annual_maps$fixed, mat = F)
   # plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
   #   geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult/1000)) +
   #   geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -219,14 +218,14 @@ func_plot_year_maps <- function(year_data,
   #                     limits = max_mb*c(-1,1),
   #                     breaks = run_params$mb_colorscale_breaks) +
   #   theme_map_massbal
-
+  
   
   
   #### USER-DEFINED FIXED PERIOD - WINTER ####
   mb_fixed_period_winter_lab <- paste(run_params$massbal_fixed_winter_start, run_params$massbal_fixed_winter_end, sep = " - ")
   mb_fixed_winter_lab <- sprintf(run_params$output_fmt1,year_data$massbal_winter_values[["fixed.mean"]] * run_params$output_mult / 1000.)
   plot_df <- plot_df_base
-  plot_df$massbal <- values(year_data$massbal_winter_maps$fixed)[,1]
+  plot_df$massbal <- values(year_data$massbal_winter_maps$fixed, mat = F)
   plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
     geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult/1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -245,14 +244,14 @@ func_plot_year_maps <- function(year_data,
                       limits = max_mb*c(-1,1),
                       breaks = run_params$mb_colorscale_breaks) +
     theme_map_massbal
-
+  
   
   if (year_data$process_winter) {
     #### MEASUREMENT PERIOD - WINTER ####
     mb_meas_period_winter_lab <- paste(format(year_data$massbal_winter_meas_period, "%m/%d"), collapse = " - ")
     mb_meas_winter_lab <- sprintf(run_params$output_fmt1,year_data$massbal_winter_values[["meas_period.mean"]] * run_params$output_mult / 1000.)
     plot_df <- plot_df_base
-    plot_df$massbal <- values(year_data$massbal_winter_maps$meas_period)[,1]
+    plot_df$massbal <- values(year_data$massbal_winter_maps$meas_period, mat = F)
     plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult/1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +

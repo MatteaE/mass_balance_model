@@ -4,16 +4,16 @@
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
 #                 This file contains the routine to extract the maps of cumulative mass balance   #
-#                 at various dates, for the winter period (still extracted from the annual        #
-#                 (i.e. fully optimized) simulation). We also determine and return the            #
+#                 and SWE at various dates, for the winter period (still extracted from the       #
+#                 annual (i.e. fully optimized) simulation). We also determine and return the     #
 #                 "measurement period".                                                           #
 ################################################################################################### 
 
-func_extract_massbal_maps_winter <- function(year_data,
-                                             run_params,
-                                             year_cur_params,
-                                             data_dhms,
-                                             data_dems) {
+func_extract_model_maps_winter <- function(year_data,
+                                           run_params,
+                                           year_cur_params,
+                                           data_dhms,
+                                           data_dems) {
   
   # Indices: in the weather series index 1 refers to the whole first day,
   # in the mass balance series index 1 refers to the instant mass balance at the *beginning* of that same first day,
@@ -60,20 +60,32 @@ func_extract_massbal_maps_winter <- function(year_data,
   massbal_fixed_map          <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_fixed_end_values - massbal_fixed_start_values)
   massbal_fixed_map_masked   <- mask(massbal_fixed_map, data_dems$elevation[[year_data$dem_grid_id]])
   
+  swe_fixed_end_values <- year_data$mod_output_annual_cur$vec_swe_all[(id_fixed_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
+  swe_fixed_end_map    <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], swe_fixed_end_values)
+  
+  
+  
+  massbal_maps  <- list(fixed        = massbal_fixed_map_masked)
+  swe_maps      <- list(fixed_end    = swe_fixed_end_map)
   if (year_data$process_winter) {
-    massbal_maps     <- list(fixed       = massbal_fixed_map_masked,
-                             meas_period = massbal_measperiod_map_masked)
-    
-    # NOTE: meas_period_ids has the indices of the winter
-    # measurement period w.r.t. the annual simulation.
-    massbal_maps_out <- list(massbal_maps    = massbal_maps,
-                             meas_period     = year_data$weather_series_winter_cur$timestamp[c(id_winter_measperiod_start_wrt_winter, id_winter_measperiod_end_wrt_winter)],
-                             meas_period_ids = c(id_winter_measperiod_start_wrt_annual, id_winter_measperiod_end_wrt_annual))
-  } else {
-    massbal_maps     <- list(fixed        = massbal_fixed_map_masked)
-    massbal_maps_out <- list(massbal_maps = massbal_maps)
+    massbal_maps$meas_period <- massbal_measperiod_map_masked
   }
   
-  return(massbal_maps_out)
+  # Combine output maps to return.
+  # If there is a winter measurement period, also return its bounds (within the annual simulation).
+  model_maps_out <- list(massbal_maps    = massbal_maps,
+                         swe_maps        = swe_maps)
+  if (year_data$process_winter) {
+    # NOTE: meas_period_ids has the indices of the winter
+    # measurement period w.r.t. the annual simulation.
+    model_maps_out$meas_period  <- year_data$weather_series_winter_cur$timestamp[c(id_winter_measperiod_start_wrt_winter, id_winter_measperiod_end_wrt_winter)]
+    model_maps_out$meas_period_ids = c(id_winter_measperiod_start_wrt_annual, id_winter_measperiod_end_wrt_annual)
+    
+  } else {
+    model_maps_out$meas_period  <- c(NA, NA)
+    model_maps_out$meas_period_ids <- c(NA, NA)
+  }
+  
+  return(model_maps_out)
   
 }

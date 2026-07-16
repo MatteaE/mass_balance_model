@@ -97,10 +97,10 @@ func_set_year_params <- function(year_data,
         if (params_names_all[param_id] == "mb_corr_ele_bands") {
           
           cat("There is no need for elevation bands for mass balance correction\n")
-          year_cur_params[[param_id]] <- NULL
+          year_cur_params[[param_id]] <- NA
           
           
-        } else if (params_names_all[param_id] == "probes_snowdist_fact") {
+        } else if (params_names_all[param_id] == "probes_snowdist_filename") {
           
           cat("No external map of snow distribution was supplied\n")
           year_cur_params[[param_id]] <- ""

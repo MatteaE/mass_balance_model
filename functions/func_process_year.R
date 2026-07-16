@@ -111,6 +111,7 @@ func_process_year <- function(year_data,
                                                    year_cur_params,
                                                    run_params,
                                                    data_all$data_dems,
+                                                   data_all$data_dhms,
                                                    data_all$data_outlines)
   
   #### . Write annual model output to files ####

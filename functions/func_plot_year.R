@@ -12,21 +12,31 @@ func_plot_year <- function(year_data,
                            year_cur_params,
                            run_params,
                            data_dems,
+                           data_dhms,
                            data_outlines) {
   
   cat("\n** Producing year plots... **\n")
   
-  #### . PLOT THE MAPS OF MASS BALANCE AND SWE ####
+  #### . PLOT THE MASS BALANCE MAPS ####
   # This returns a list with the (5 or 6, depending on whether we have winter measurements)
   # mass balance maps for the current year.
   # Then we will append to this list also the
   # other plots of the year (time series,
   # vertical distributions and so on).
   cat("  Mass balance maps...\n")
-  plots_year <- func_plot_year_maps(year_data,
-                                    run_params,
-                                    data_dems,
-                                    data_outlines)
+  plots_year <- func_plot_year_mb_maps(year_data,
+                                       run_params,
+                                       data_dems,
+                                       data_outlines)
+  
+  
+  #### . PLOT THE SWE MAPS ####
+  cat("  SWE maps...\n")
+  plots_swe <- func_plot_year_swe_maps(year_data,
+                                       run_params,
+                                       data_dhms,
+                                       data_outlines)
+  plots_year <- append(plots_year, plots_swe)
   
   
   #### . PLOT THE DAILY METEOROLOGICAL SERIES ####
