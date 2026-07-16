@@ -43,7 +43,7 @@ func_plot_year_swe_maps <- function(year_data,
           legend.key.width = unit(3, "cm"),
           legend.key.height = unit(0.25, "cm"),
           legend.box.margin = margin(0,0,5,0),
-          legend.title = element_text(vjust = 1.3, face = "bold", size = 16),
+          legend.title = element_text(vjust = 1.1, face = "bold", size = 16, margin = margin(0,20,0,0,unit = "pt")),
           legend.text = element_text(face = "bold", size = 12),
           plot.margin = margin(margin_top,0,0,0, unit = "pt"))
   
@@ -55,9 +55,13 @@ func_plot_year_swe_maps <- function(year_data,
   y_line2 <- 1 + (0.12 / y_line_mult)
   y_line3 <- 1 + (0.06 / y_line_mult)
   y_line4 <- 1 + (0.00 / y_line_mult)
-  
+
+    
   # Values exceeding +/- max_swe will be clamped.
   max_swe <- round(quantile(year_data$mod_output_annual_cur$vec_swe_all, 0.98) / 400) * 400 * run_params$output_mult/1000
+  swe_breaks <- c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe
+  swe_labels <- sprintf(run_params$output_fmt2, swe_breaks)
+  swe_labels[length(swe_labels)] <- ""
   
   plot_df_base <- data.frame(crds(data_dhms$elevation[[year_data$dhm_grid_id]], na.rm = FALSE))
   elevation_df <- data.frame(plot_df_base, z = values(data_dhms$elevation[[year_data$dhm_grid_id]], mat = F))
@@ -84,7 +88,8 @@ func_plot_year_swe_maps <- function(year_data,
          subtitle = " ") +
     scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
                          direction = 1, limits = c(0,max_swe),
-                         breaks = c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe,
+                         breaks = swe_breaks,
+                         labels = swe_labels,
                          oob = scales::oob_squish) +
     theme_map_swe
   
@@ -110,7 +115,8 @@ func_plot_year_swe_maps <- function(year_data,
          subtitle = " ") +
     scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
                          direction = 1, limits = c(0,max_swe),
-                         breaks = c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe,
+                         breaks = swe_breaks,
+                         labels = swe_labels,
                          oob = scales::oob_squish) +
     theme_map_swe
   
@@ -141,7 +147,8 @@ func_plot_year_swe_maps <- function(year_data,
            subtitle = " ") +
       scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
                            direction = 1, limits = c(0,max_swe),
-                           breaks = c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe,
+                           breaks = swe_breaks,
+                           labels = swe_labels,
                            oob = scales::oob_squish) +
       theme_map_swe
     
@@ -167,7 +174,8 @@ func_plot_year_swe_maps <- function(year_data,
            subtitle = " ") +
       scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
                            direction = 1, limits = c(0,max_swe),
-                           breaks = c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe,
+                           breaks = swe_breaks,
+                           labels = swe_labels,
                            oob = scales::oob_squish) +
       theme_map_swe
   }
@@ -195,7 +203,8 @@ func_plot_year_swe_maps <- function(year_data,
          subtitle = " ") +
     scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
                          direction = 1, limits = c(0,max_swe),
-                         breaks = c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe,
+                         breaks = swe_breaks,
+                         labels = swe_labels,
                          oob = scales::oob_squish) +
     theme_map_swe
   

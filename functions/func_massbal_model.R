@@ -97,6 +97,10 @@ func_massbal_model <- function(run_params,
   # positive values in case of significant melt).
   swe_post_previous_avalanche <- snowdist_init_values
   
+  # This one is a vector to keep track of the total first-order net effect of avalanche redistribution.
+  # It gets updated at every avalanche.
+  avalanche_cumul_effect <- rep(0.0, run_params$grid_ncells)
+  
   
   #### MAIN SIMULATION LOOP ####
   for (day_id in 1:model_days_n) {
@@ -153,6 +157,9 @@ func_massbal_model <- function(run_params,
                                                       preserve_edges = TRUE)
       
       # writeRaster(setValues(data_dhms$elevation[[1]], avalanche_output), "avalanche_output.tif", overwrite = T)
+      
+      # Store net avalanche effect
+      avalanche_cumul_effect <- avalanche_cumul_effect + (avalanche_output - avalanche_input_values)
       
       # Update to current avalanche result.
       swe_post_previous_avalanche   <- avalanche_output + (vec_snow_swe[cells_prev] - avalanche_input_values)
@@ -284,6 +291,7 @@ func_massbal_model <- function(run_params,
   mb_model_output <- list(vec_swe_all       = vec_snow_swe,
                           vec_surftype_all  = vec_surf_type,
                           vec_massbal_cumul = vec_massbal_cumul,
+                          avalanche_net     = avalanche_cumul_effect,
                           gl_massbal_cumul  = gl_massbal_cumul,
                           gl_melt_daily     = gl_melt_daily,
                           gl_melt_cumul     = c(0.0, cumsum(gl_melt_daily)[1:model_days_n]),

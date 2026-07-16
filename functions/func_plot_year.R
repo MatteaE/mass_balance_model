@@ -39,6 +39,16 @@ func_plot_year <- function(year_data,
   plots_year <- append(plots_year, plots_swe)
   
   
+  
+  #### . PLOT THE AVALANCHE EFFECT ####
+  cat("  Avalanche map...\n")
+  plots_avalanche <- func_plot_avalanche_net_effect(year_data,
+                                                    run_params,
+                                                    data_dems,
+                                                    data_outlines)
+  plots_year <- append(plots_year, plots_avalanche)
+  
+  
   #### . PLOT THE DAILY METEOROLOGICAL SERIES ####
   # This also plots the result of prec_corr/100 * prec_summer_fact, that is, the daily correction to the precipitation series.
   cat("  Meteorological series...\n")

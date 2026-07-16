@@ -39,7 +39,8 @@ func_run_model <- function(run_params) {
   cat("|++++++++++++++++                          ++++++++++++++++|\n")
   cat("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n\n\n")
   
-  cat("Run started at", format(Sys.time()), paste0("(", Sys.timezone(), ")"), "\n\n")
+  start_t <- Sys.time()
+  cat("Run started at", format(start_t), paste0("(", Sys.timezone(), ")"), "\n\n")
   
   cat("System info:")
   print(R.version)
@@ -264,7 +265,14 @@ func_run_model <- function(run_params) {
   }
   
   cat("\n\n")
+  gc_res <- gc(verbose = FALSE)
+  end_t <- Sys.time()
   func_customlog("Run finished succesfully at ", format(Sys.time()), paste0(" (", Sys.timezone(), ")"), level = 3)
+  cat("\n")
+  elapsed_t <- as.numeric(difftime(end_t, start_t, units = "secs"))
+  elapsed_str <- sprintf("%02d:%02d:%02d", elapsed_t %/% 3600, elapsed_t %% 3600 %/% 60,  elapsed_t %% 60 %/% 1)
+  func_customlog("Elapsed time = ", elapsed_str, level = 4)
+  func_customlog("Max memory used = ", round(gc_res[1,6] + gc_res[2,6]), " MB", level = 4)
   cat("\n\n")
   
   
