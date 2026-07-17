@@ -117,6 +117,7 @@ func_process_year <- function(year_data,
   #### . Write annual model output to files ####
   overview_annual$daily_data_list <- func_write_year_output(year_data,
                                                             run_params,
+                                                            data_all$data_dhms,
                                                             data_all$data_dems,
                                                             overview_annual$daily_data_list)
   
@@ -126,6 +127,7 @@ func_process_year <- function(year_data,
   if (run_params$plot_daily_maps) {
     func_plot_daily_maps(year_data,
                          run_params,
+                         data_all$data_dhms,
                          data_all$data_dems,
                          data_all$data_outlines)
   }

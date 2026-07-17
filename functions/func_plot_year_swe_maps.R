@@ -72,6 +72,8 @@ func_plot_year_swe_maps <- function(year_data,
   elevation_df <- data.frame(plot_df_base, z = values(data_dhms$elevation[[year_data$dhm_grid_id]], mat = F))
   
   plots <- list()
+  
+  
   #### HYDROLOGICAL YEAR START ####
   plot_df <- plot_df_base
   plot_df$swe <- values(year_data$swe_annual_maps$hydro_start, mat = F)

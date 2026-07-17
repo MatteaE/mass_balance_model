@@ -40,13 +40,24 @@ func_plot_year <- function(year_data,
   
   
   
-  #### . PLOT THE AVALANCHE EFFECT ####
+  #### . PLOT THE MAP OF AVALANCHE EFFECT ####
   cat("  Avalanche map...\n")
   plots_avalanche <- func_plot_avalanche_net_effect(year_data,
                                                     run_params,
                                                     data_dems,
                                                     data_outlines)
   plots_year <- append(plots_year, plots_avalanche)
+  
+  
+  
+  #### . PLOT THE MAP OF SNOWFALL DISTRIBUTION ####
+  cat("  Snowfall distribution map...\n")
+  plots_snowdist <- func_plot_year_snowdist_maps(year_data,
+                                                 run_params,
+                                                 data_dhms,
+                                                 data_outlines)
+  plots_year <- append(plots_year, plots_snowdist)
+  
   
   
   #### . PLOT THE DAILY METEOROLOGICAL SERIES ####

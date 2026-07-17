@@ -11,6 +11,7 @@
 
 func_write_year_output <- function(year_data,
                                    run_params,
+                                   data_dhms,
                                    data_dems,
                                    overview_daily_data) {
   
@@ -37,20 +38,41 @@ func_write_year_output <- function(year_data,
   # overwrite = TRUE)
   
   writeRaster(year_data$massbal_winter_maps$fixed * run_params$output_mult / 1000,
-              file.path(run_params$out_annual_gridded_dirpath, paste0("mb_winter_fixedperiod_", year_data$year_cur, run_params$output_grid_ext)),
+              file.path(run_params$out_annual_gridded_dirpath,
+                        paste0("mb_winter_fixedperiod_", year_data$year_cur, run_params$output_grid_ext)),
               overwrite = TRUE)
   if (year_data$process_winter) {
     writeRaster(year_data$massbal_winter_maps$meas_period * run_params$output_mult / 1000,
-                file.path(run_params$out_annual_gridded_dirpath, paste0("mb_winter_measperiod_", year_data$year_cur, run_params$output_grid_ext)),
+                file.path(run_params$out_annual_gridded_dirpath,
+                          paste0("mb_winter_measperiod_", year_data$year_cur, run_params$output_grid_ext)),
                 overwrite = TRUE)
   }
   
   # Write used DEM --------------------------------------------------------------------------------
   if (run_params$dem_write) {
     writeRaster(data_dems$elevation[[year_data$dem_grid_id]],
-                file.path(run_params$out_annual_gridded_dirpath, paste0(run_params$filename_dem_prefix, year_data$year_cur, run_params$output_grid_ext)),
+                file.path(run_params$out_annual_gridded_dirpath,
+                          paste0(run_params$filename_dem_prefix, year_data$year_cur, run_params$output_grid_ext)),
                 overwrite = TRUE)
   }
+  
+  
+  # Write maps of snow distribution ---------------------------------------------------------------
+  # Small-scale variability (topographic)
+  writeRaster(setValues(data_dhms$elevation[[year_data$dhm_grid_id]],
+                        year_data$dist_topographic_values_red),
+              file.path(run_params$out_annual_gridded_dirpath,
+                        paste0("snowdist_topographic_", year_data$year_cur, run_params$output_grid_ext)),
+              overwrite = TRUE)
+  
+  # Large-scale variability (probes)
+  writeRaster(setValues(data_dhms$elevation[[year_data$dhm_grid_id]],
+                        year_data$dist_probes_norm_values_red),
+              file.path(run_params$out_annual_gridded_dirpath,
+                        paste0("snowdist_probes_", year_data$year_cur, run_params$output_grid_ext)),
+              overwrite = TRUE)
+  
+  
   
   # Write modeled glacier-wide daily mass balance series ------------------------------------------
   # NOTE: the cumulative values refer to the value *AT THE BEGINNING* of the respective day.
