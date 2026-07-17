@@ -14,9 +14,10 @@ func_plot_daily_maps <- function(year_data,
                                  data_outlines) {
   
   
-  # dir.create(file.path(run_params$output_dirname, "daily", year_cur, "massbal_plots"), recursive = TRUE)
-  dir.create(file.path(run_params$output_dirname, "daily", year_data$year_cur, "swe_plots"), recursive = TRUE)
-  dir.create(file.path(run_params$output_dirname, "daily", year_data$year_cur, "surftype_plots"), recursive = TRUE)
+  
+  # dir.create(file.path(run_params$out_daily_dirpath, "gridded", year_data$year_cur, "massbal_plots"), recursive = TRUE)
+  dir.create(file.path(run_params$out_daily_dirpath, "gridded", year_data$year_cur, "swe_plots"), recursive = TRUE)
+  dir.create(file.path(run_params$out_daily_dirpath, "gridded", year_data$year_cur, "surftype_plots"), recursive = TRUE)
   
   plot_df <- data.frame(crds(data_dems$elevation[[year_data$dem_grid_id]], na.rm = FALSE))
   
@@ -62,7 +63,7 @@ func_plot_daily_maps <- function(year_data,
         guides(alpha = "none") +
         theme_void() +
         theme(plot.background = element_rect(fill = "#DDDDDD", linetype = "blank"))
-      suppressWarnings(ggsave(file.path(run_params$output_dirname, "daily", year_data$year_cur, "swe_plots", paste0(sprintf("%03d", day_id), ".jpg")),
+      suppressWarnings(ggsave(file.path(run_params$out_daily_dirpath, "gridded", year_data$year_cur, "swe_plots", paste0(sprintf("%03d", day_id), ".jpg")),
                               width = plot_width, height = plot_width * area_height_m / area_width_m, units = "px"))
       
       
@@ -88,7 +89,7 @@ func_plot_daily_maps <- function(year_data,
                           drop = FALSE) +
         theme_void() +
         theme(plot.background = element_rect(fill = "#FFFFFF", linetype = "blank"))
-      suppressWarnings(ggsave(file.path(run_params$output_dirname, "daily", year_data$year_cur, "surftype_plots", paste0(sprintf("%03d", day_id), ".jpg")),
+      suppressWarnings(ggsave(file.path(run_params$out_daily_dirpath, "gridded", year_data$year_cur, "surftype_plots", paste0(sprintf("%03d", day_id), ".jpg")),
                               width = plot_width, height = plot_width * area_height_m / area_width_m, units = "px"))
       
     } # End selection on day_id to plot only one day every few.
@@ -116,7 +117,7 @@ func_plot_daily_maps <- function(year_data,
   #                          direction = 1, limits = c(-max_mb,max_mb),
   #                          breaks = c(-3000,-1600,-800,-300,0,300,800,1600,3000)) +
   #     theme_void()
-  #   suppressWarnings(ggsave(file.path(run_params$output_dirname, "daily", year_cur, "massbal_plots", paste0(sprintf("%03d", day_id), ".jpg")),
+  #   suppressWarnings(ggsave(file.path(run_params$out_daily_dirpath, "gridded", year_cur, "massbal_plots", paste0(sprintf("%03d", day_id), ".jpg")),
   #     width = plot_width, height = plot_width * area_height_m / area_width_m, units = "px"))
   # }
   

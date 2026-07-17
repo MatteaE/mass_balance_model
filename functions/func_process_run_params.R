@@ -135,10 +135,10 @@ func_process_run_params <- function(run_params) {
   
   
   #### . Daily output parameters ------------------------------------------------------------------
-  run_params$plot_daily_maps             <-   FALSE       # [TRUE/FALSE]: at the end of each year, produce daily plots of surface type and SWE (slow, but useful for debug or visualization).
-  run_params$plot_daily_maps_frequency   <-   1           # [days]: produce "daily" plots of surface type and SWE only at a given interval, to speed up their generation.
-  run_params$write_daily_grids           <-   FALSE         # [TRUE/FALSE]: at the end of each year, write daily geotiff grids of SWE (useful for debugging)
-  run_params$write_daily_grids_frequency <-   1            # [days]: write "daily" grids of SWE only at a given interval, to speed up processing
+  run_params$plot_daily_maps             <-   TRUE       # [TRUE/FALSE]: at the end of each year, produce daily plots of surface type and SWE (slow, but useful for debug or visualization).
+  run_params$plot_daily_maps_frequency   <-   14           # [days]: produce "daily" plots of surface type and SWE only at a given interval, to speed up their generation.
+  run_params$write_daily_grids           <-   TRUE         # [TRUE/FALSE]: at the end of each year, write daily geotiff grids of SWE (useful for debugging)
+  run_params$write_daily_grids_frequency <-   14            # [days]: write "daily" grids of SWE only at a given interval, to speed up processing
   
   # Compatibility with older set_params which did not have filename_points_daily_out.
   if (is.null(run_params$filename_points_daily_out)) {
@@ -189,6 +189,15 @@ func_process_run_params <- function(run_params) {
   # run_params$massbal_fixed_annual_end <- format(as.Date(run_params$massbal_fixed_annual_end, format = "%m/%d"), format = "%m/%d")
   run_params$massbal_fixed_winter_start <- format(as.Date(run_params$massbal_fixed_winter_start, format = "%m/%d"), format = "%m/%d")
   run_params$massbal_fixed_winter_end <- format(as.Date(run_params$massbal_fixed_winter_end, format = "%m/%d"), format = "%m/%d")
+  
+  
+  # Directory with daily outputs
+  run_params$out_daily_dirpath <- file.path(run_params$output_dirname, "daily_results")
+  dir.create(run_params$out_daily_dirpath, showWarnings = F, recursive = T)
+  
+  # Directory with gridded annual outputs
+  run_params$out_annual_gridded_dirpath <- file.path(run_params$output_dirname, "annual_results", "gridded")
+  dir.create(run_params$out_annual_gridded_dirpath, showWarnings = F, recursive = T)
   
   
   

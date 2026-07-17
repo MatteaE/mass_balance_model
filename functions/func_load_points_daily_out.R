@@ -34,7 +34,20 @@ func_load_points_daily_out <- function(run_params,
   }
   
   # Read file, assign column names.
-  data_points_daily_out <- read.table(points_daily_path, header = FALSE, stringsAsFactors = FALSE)
+  tryCatch({data_points_daily_out <- read.table(points_daily_path, header = FALSE, stringsAsFactors = FALSE)},
+           warning = function(war) {
+             func_customlog("Error reading file with points of daily output: ", points_daily_path, level = 2)
+             func_stop()
+           },
+           error = function(err) {
+             func_customlog("Error reading file with points of daily output: ", points_daily_path, level = 2)
+             func_stop()
+           })
+  
+  if (ncol(data_points_daily_out) != 3) {
+    func_customlog("File with points of daily output does not have three columns. Please fix it: ", points_daily_path, level = 2)
+    func_stop()
+  }
   names(data_points_daily_out) <- c("id", "x", "y")
   
   # Check if any point is outside the combined DHM extent.
@@ -54,4 +67,3 @@ func_load_points_daily_out <- function(run_params,
   return(data_points_daily_out)
   
 }
-  

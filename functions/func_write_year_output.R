@@ -17,21 +17,39 @@ func_write_year_output <- function(year_data,
   cat("\n** Writing year output... **\n")
   
   # Write mass balance maps (rasters) -------------------------------------------------------------
-  writeRaster(year_data$massbal_annual_maps$hydro * run_params$output_mult / 1000, file.path(run_params$output_dirname, "annual_results", paste0("mb_annual_hydro_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
+  writeRaster(year_data$massbal_annual_maps$hydro * run_params$output_mult / 1000,
+              file.path(run_params$out_annual_gridded_dirpath,
+                        paste0("mb_annual_hydro_", year_data$year_cur, run_params$output_grid_ext)),
+              overwrite = TRUE)
   if (year_data$nstakes_annual > 0) {
-    writeRaster(year_data$massbal_annual_maps$meas_period * run_params$output_mult / 1000, file.path(run_params$output_dirname, "annual_results", paste0("mb_annual_measperiod_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
-    writeRaster(year_data$massbal_annual_maps$meas_period_corr * run_params$output_mult / 1000, file.path(run_params$output_dirname, "annual_results", paste0("mb_annual_measperiod_corrected_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
+    writeRaster(year_data$massbal_annual_maps$meas_period * run_params$output_mult / 1000,
+                file.path(run_params$out_annual_gridded_dirpath,
+                          paste0("mb_annual_measperiod_", year_data$year_cur, run_params$output_grid_ext)),
+                overwrite = TRUE)
+    writeRaster(year_data$massbal_annual_maps$meas_period_corr * run_params$output_mult / 1000,
+                file.path(run_params$out_annual_gridded_dirpath,
+                          paste0("mb_annual_measperiod_corrected_", year_data$year_cur, run_params$output_grid_ext)),
+                overwrite = TRUE)
   }
-  # writeRaster(year_data$massbal_annual_maps$fixed, file.path(run_params$output_dirname, "annual_results", paste0("mb_annual_fixedperiod_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
+  # writeRaster(year_data$massbal_annual_maps$fixed,
+  # file.path(run_params$out_annual_gridded_dirpath,
+  # paste0("mb_annual_fixedperiod_", year_data$year_cur, run_params$output_grid_ext)),
+  # overwrite = TRUE)
   
-  writeRaster(year_data$massbal_winter_maps$fixed * run_params$output_mult / 1000, file.path(run_params$output_dirname, "annual_results", paste0("mb_winter_fixedperiod_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
+  writeRaster(year_data$massbal_winter_maps$fixed * run_params$output_mult / 1000,
+              file.path(run_params$out_annual_gridded_dirpath, paste0("mb_winter_fixedperiod_", year_data$year_cur, run_params$output_grid_ext)),
+              overwrite = TRUE)
   if (year_data$process_winter) {
-    writeRaster(year_data$massbal_winter_maps$meas_period * run_params$output_mult / 1000, file.path(run_params$output_dirname, "annual_results", paste0("mb_winter_measperiod_", year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
+    writeRaster(year_data$massbal_winter_maps$meas_period * run_params$output_mult / 1000,
+                file.path(run_params$out_annual_gridded_dirpath, paste0("mb_winter_measperiod_", year_data$year_cur, run_params$output_grid_ext)),
+                overwrite = TRUE)
   }
   
   # Write used DEM --------------------------------------------------------------------------------
   if (run_params$dem_write) {
-    writeRaster(data_dems$elevation[[year_data$dem_grid_id]], file.path(run_params$output_dirname, "annual_results", paste0(run_params$filename_dem_prefix, year_data$year_cur, run_params$output_grid_ext)), overwrite = TRUE)
+    writeRaster(data_dems$elevation[[year_data$dem_grid_id]],
+                file.path(run_params$out_annual_gridded_dirpath, paste0(run_params$filename_dem_prefix, year_data$year_cur, run_params$output_grid_ext)),
+                overwrite = TRUE)
   }
   
   # Write modeled glacier-wide daily mass balance series ------------------------------------------
@@ -67,7 +85,7 @@ func_write_year_output <- function(year_data,
                                                run_params = run_params)
   
   write.csv(df_annual_daily_form,
-            file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_glacier_", year_data$year_cur, ".csv")),
+            file.path(run_params$out_daily_dirpath, paste0("mb_daily_series_glacier_", year_data$year_cur, ".csv")),
             quote = FALSE,
             row.names = FALSE)
   
@@ -94,7 +112,7 @@ func_write_year_output <- function(year_data,
                                                      run_params = run_params)
   
   write.csv(df_annual_daily_hydro_form,
-            file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_glacier_hydro_", year_data$year_cur, ".csv")),
+            file.path(run_params$out_daily_dirpath, paste0("mb_daily_series_glacier_hydro_", year_data$year_cur, ".csv")),
             quote = FALSE,
             row.names = FALSE)
   
@@ -111,7 +129,7 @@ func_write_year_output <- function(year_data,
     names(df_stakes_daily_form) <- c("date", year_data$massbal_annual_meas_cur$id)
     
     write.csv(df_stakes_daily_form,
-              file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_stakes_", year_data$year_cur, ".csv")),
+              file.path(run_params$out_daily_dirpath, paste0("mb_daily_series_stakes_", year_data$year_cur, ".csv")),
               quote = FALSE,
               row.names = FALSE)
   }
@@ -130,7 +148,7 @@ func_write_year_output <- function(year_data,
     }
     
     write.csv(df_stakes_daily_hydro_form,
-              file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_stakes_hydro_", year_data$year_cur, ".csv")),
+              file.path(run_params$out_daily_dirpath, paste0("mb_daily_series_stakes_hydro_", year_data$year_cur, ".csv")),
               quote = FALSE,
               row.names = FALSE)
     
@@ -139,11 +157,14 @@ func_write_year_output <- function(year_data,
   
   # Write modeled daily series of cumulative mass balance and SWE at the user-defined points ------
   if (year_data$npoints_daily > 0) {
+    
+    dir.create(file.path(run_params$out_daily_dirpath), recursive = TRUE, showWarnings = FALSE)
+    
     df_points_daily_mbcumul <- data.frame(date = model_annual_dates,
                                           points = apply(year_data$points_daily_massbal_cumul * run_params$output_mult / 1000, 2, sprintf, fmt=run_params$output_fmt4))
     names(df_points_daily_mbcumul) <- c("date", year_data$points_daily_out$id)
     write.csv(df_points_daily_mbcumul,
-              file.path(run_params$output_dirname, "annual_results", paste0("mb_daily_series_points_", year_data$year_cur, ".csv")),
+              file.path(run_params$out_daily_dirpath, paste0("mb_daily_series_points_", year_data$year_cur, ".csv")),
               quote = FALSE,
               row.names = FALSE)
     
@@ -151,7 +172,7 @@ func_write_year_output <- function(year_data,
                                       points = apply(year_data$points_daily_swe * run_params$output_mult / 1000, 2, sprintf, fmt=run_params$output_fmt4))
     names(df_points_daily_swe) <- c("date", year_data$points_daily_out$id)
     write.csv(df_points_daily_swe,
-              file.path(run_params$output_dirname, "annual_results", paste0("swe_daily_series_points_", year_data$year_cur, ".csv")),
+              file.path(run_params$out_daily_dirpath, paste0("swe_daily_series_points_", year_data$year_cur, ".csv")),
               quote = FALSE,
               row.names = FALSE)
   }

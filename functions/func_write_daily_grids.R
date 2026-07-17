@@ -12,7 +12,7 @@ func_write_daily_grids <- function(year_data,
                                    data_dems) {
   
   
-  dir.create(file.path(run_params$output_dirname, "daily", year_data$year_cur, "swe"), recursive = TRUE, showWarnings = FALSE)
+  dir.create(file.path(run_params$out_daily_dirpath, "gridded", year_data$year_cur, "swe_grids"), recursive = TRUE, showWarnings = FALSE)
   
   plot_df <- data.frame(crds(data_dems$elevation[[year_data$dem_grid_id]], na.rm = FALSE))
   
@@ -28,7 +28,7 @@ func_write_daily_grids <- function(year_data,
       swe_cur_r <- setValues(data_dems$elevation[[year_data$dem_grid_id]],
                              year_data$mod_output_annual_cur$vec_swe_all[cells_cur])
       writeRaster(swe_cur_r,
-                  file.path(run_params$output_dirname, "daily", year_data$year_cur, "swe", paste0(sprintf("%03d", day_id), ".tif")),
+                  file.path(run_params$out_daily_dirpath, "gridded", year_data$year_cur, "swe_grids", paste0(sprintf("%03d", day_id), ".tif")),
                   overwrite = TRUE)
       
     } # End selection on day_id to plot only one day every few.

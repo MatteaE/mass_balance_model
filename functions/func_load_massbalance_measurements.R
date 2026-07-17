@@ -57,7 +57,7 @@ func_load_massbalance_measurements <- function(run_params,
   }
   
   if (!file.exists(massbalance_path)) {
-    func_customlog("I could not find the file with mass balance measurements. The specified path is", massbalance_path, "\n", level = 2)
+    func_customlog("I could not find the file with mass balance measurements. The specified path is ", massbalance_path, "\n", level = 2)
     func_stop()
   }
   

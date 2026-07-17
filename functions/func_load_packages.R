@@ -33,7 +33,8 @@ func_load_packages <- function(run_params) {
                     "shadowtext",   # Additional plotting functions (text with white outline)
                     "reshape2",     # melt() data frame
                     "stringr",      # str_split() of the outline filename suffix, to get the extension
-                    "qpdf")         # To extract the annual hydrological mass balance maps and put them into the overview PDF.
+                    "qpdf",         # To extract the annual hydrological mass balance maps and put them into the overview PDF.
+                    "notifier")     # To send a notification when we are done 
   
   # As of 2023/01/12, we need Rcpp for fourCellsFromXY, which is not yet implemented in the terra package.
   # if (run_params$avalanche_routine_cpp == TRUE) {

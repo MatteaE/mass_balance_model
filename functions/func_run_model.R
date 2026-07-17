@@ -46,11 +46,13 @@ func_run_model <- function(run_params) {
   print(R.version)
   cat("\n")
   
-  
-  # If output directory already exists, stop with an
+
+  # Output directory already exists (we are putting the logs in it).
+  # If it already has stuff in it beside logs/, stop with
   # error unless run_params$overwrite_output is TRUE,
   # in which case overwrite with a warning.
-  if (file.exists(run_params$output_dirname) == TRUE) {
+  output_lf <- list.files(run_params$output_dirname)
+  if (length(setdiff(output_lf, "logs")) > 0) {
     if (!is.null(run_params$overwrite_output) && (run_params$overwrite_output == FALSE)) {
       func_customlog("output destination already exists! Please move, remove or rename it before running the model.\n", level = 2)
       fsm()
@@ -279,6 +281,8 @@ func_run_model <- function(run_params) {
   # Stop logger -------------------------------------------------------------------------------------
   sink()
   close(logcon)
+  
+  notify("Run finished successfully", title = "Glacier model DMBSim 3.0", image = normalizePath("logo1.png"))
   
   return(0)
   

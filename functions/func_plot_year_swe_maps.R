@@ -47,6 +47,11 @@ func_plot_year_swe_maps <- function(year_data,
           legend.text = element_text(face = "bold", size = 12),
           plot.margin = margin(margin_top,0,0,0, unit = "pt"))
   
+  # palette_RdPu_adj <- c(RColorBrewer::brewer.pal(9, "RdPu")[c(2:8)], "#310063")
+  palette_swe <- c("#CDFFCC", "#99F1B3", "#53BCA0", "#3296B3", "#0770AE", "#00358F", "#d30688", "#ff00ff")
+  # palette_cur <- palette_RdPu_adj
+  palette_cur <- palette_swe
+  
   contour_label_textsize <- 4
   contour_linesize <- 0.25
   outline_linesize <- 0.7 * run_params$outlines_linesize_mult
@@ -55,8 +60,8 @@ func_plot_year_swe_maps <- function(year_data,
   y_line2 <- 1 + (0.12 / y_line_mult)
   y_line3 <- 1 + (0.06 / y_line_mult)
   y_line4 <- 1 + (0.00 / y_line_mult)
-
-    
+  
+  
   # Values exceeding +/- max_swe will be clamped.
   max_swe <- round(quantile(year_data$mod_output_annual_cur$vec_swe_all, 0.98) / 400) * 400 * run_params$output_mult/1000
   swe_breaks <- c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe
@@ -67,7 +72,6 @@ func_plot_year_swe_maps <- function(year_data,
   elevation_df <- data.frame(plot_df_base, z = values(data_dhms$elevation[[year_data$dhm_grid_id]], mat = F))
   
   plots <- list()
-  
   #### HYDROLOGICAL YEAR START ####
   plot_df <- plot_df_base
   plot_df$swe <- values(year_data$swe_annual_maps$hydro_start, mat = F)
@@ -86,11 +90,13 @@ func_plot_year_swe_maps <- function(year_data,
                                         x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
-    scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
-                         direction = 1, limits = c(0,max_swe),
-                         breaks = swe_breaks,
-                         labels = swe_labels,
-                         oob = scales::oob_squish) +
+    scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]"),
+                      colors = palette_cur,
+                      limits = c(0,max_swe),
+                      breaks = swe_breaks,
+                      labels = swe_labels,
+                      oob = scales::oob_squish,
+                      values = swe_breaks/max(swe_breaks)) +
     theme_map_swe
   
   
@@ -113,11 +119,13 @@ func_plot_year_swe_maps <- function(year_data,
                                         x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
-    scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
-                         direction = 1, limits = c(0,max_swe),
-                         breaks = swe_breaks,
-                         labels = swe_labels,
-                         oob = scales::oob_squish) +
+    scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]"),
+                      colors = palette_cur,
+                      limits = c(0,max_swe),
+                      breaks = swe_breaks,
+                      labels = swe_labels,
+                      oob = scales::oob_squish,
+                      values = swe_breaks/max(swe_breaks)) +
     theme_map_swe
   
   
@@ -145,11 +153,13 @@ func_plot_year_swe_maps <- function(year_data,
                                           x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
       labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
            subtitle = " ") +
-      scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
-                           direction = 1, limits = c(0,max_swe),
-                           breaks = swe_breaks,
-                           labels = swe_labels,
-                           oob = scales::oob_squish) +
+      scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]"),
+                        colors = palette_cur,
+                        limits = c(0,max_swe),
+                        breaks = swe_breaks,
+                        labels = swe_labels,
+                        oob = scales::oob_squish,
+                        values = swe_breaks/max(swe_breaks)) +
       theme_map_swe
     
     
@@ -172,11 +182,13 @@ func_plot_year_swe_maps <- function(year_data,
                                           x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
       labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
            subtitle = " ") +
-      scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
-                           direction = 1, limits = c(0,max_swe),
-                           breaks = swe_breaks,
-                           labels = swe_labels,
-                           oob = scales::oob_squish) +
+      scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]"),
+                        colors = palette_cur,
+                        limits = c(0,max_swe),
+                        breaks = swe_breaks,
+                        labels = swe_labels,
+                        oob = scales::oob_squish,
+                        values = swe_breaks/max(swe_breaks)) +
       theme_map_swe
   }
   
@@ -201,11 +213,13 @@ func_plot_year_swe_maps <- function(year_data,
                                         x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
-    scale_fill_fermenter(name = paste0("SWE [", run_params$output_unit, " w.e.]"), palette = "RdPu",
-                         direction = 1, limits = c(0,max_swe),
-                         breaks = swe_breaks,
-                         labels = swe_labels,
-                         oob = scales::oob_squish) +
+    scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]"),
+                      colors = palette_cur,
+                      limits = c(0,max_swe),
+                      breaks = swe_breaks,
+                      labels = swe_labels,
+                      oob = scales::oob_squish,
+                      values = swe_breaks/max(swe_breaks)) +
     theme_map_swe
   
   

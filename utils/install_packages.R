@@ -33,6 +33,7 @@ func_install_all <- function() {
                       "metR",
                       "qpdf",
                       "Rcpp",
+                      "RColorBrewer",
                       "readxl",
                       "remotes",
                       "reshape2",
@@ -62,7 +63,13 @@ func_install_all <- function() {
        install.packages("https://github.com/MatteaE/mass_balance_model/raw/refs/heads/main/functions/topmodel_0.7.5.tar.gz")
      }
    }
+   
+   # Install archived-only notifier package.
+   if (!"notifier" %in% rownames(installed.packages())) {
+     install.packages("https://cran.r-project.org/src/contrib/Archive/notifier/notifier_1.0.0.tar.gz")
+   }
 
+   
    packages_github_repos <- c("MatteaE")
    packages_github_names <- c("insol2")
    packages_github_full <- paste(packages_github_repos, packages_github_names, sep="/")
