@@ -282,7 +282,7 @@ func_run_model <- function(run_params) {
   sink()
   close(logcon)
   
-  notify("Run finished successfully", title = "Glacier model DMBSim 3.0", image = normalizePath("logo1.png"))
+  notify("Run finished successfully ✅", title = "Glacier model DMBSim 3.0", image = normalizePath("icons/icon1_small.png"))
   
   return(0)
   
