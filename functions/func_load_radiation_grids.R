@@ -94,7 +94,7 @@ func_load_radiation_grids <- function(run_params,
       
       ext1 <- ext(grid_day1)
       ext2 <- ext(raster_blueprint)
-      func_customlog("Resampling radiation grid 1 to common extent, to check the boot file:", level = 1)
+      func_customlog("Resampling first radiation grid to common extent, to check the boot file:", level = 1)
       func_customlog("Left        ", sprintf("%11.3f", ext1[1]), " --> ", sprintf("%11.3f", ext2[1]), " (", sprintf("%+.3f", ext2[1] - ext1[1]), ")", level = 0)
       func_customlog("Right       ", sprintf("%11.3f", ext1[2]), " --> ", sprintf("%11.3f", ext2[2]), " (", sprintf("%+.3f", ext2[2] - ext1[2]), ")", level = 0)
       func_customlog("Bottom      ", sprintf("%11.3f", ext1[3]), " --> ", sprintf("%11.3f", ext2[3]), " (", sprintf("%+.3f", ext2[3] - ext1[3]), ")", level = 0)
