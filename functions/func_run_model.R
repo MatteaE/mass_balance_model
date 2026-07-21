@@ -9,7 +9,7 @@
 func_run_model <- function(run_params) {
   
   # Model version
-  run_params$dmbsim_version <- "3.0"
+  run_params$dmbsim_version <<- "3.0"
   
   # Close any leftover sinks and connections from previous runs.
   while (sink.number() > 0) {
@@ -283,7 +283,9 @@ func_run_model <- function(run_params) {
   sink()
   close(logcon)
   
-  notify("Run finished successfully ✅", title = "Glacier model DMBSim 3.0", image = normalizePath("icons/icon128.png"))
+  notify("Run finished successfully ✅",
+         title = paste0("Glacier model DMBSim ", run_params$dmbsim_version),
+         image = normalizePath("icons/icon128.png"))
   
   return(0)
   

@@ -12,6 +12,12 @@
 #### Load input data ####
 func_load_data_all <- function(run_params) {
   
+  if (!dir.exists(run_params$dir_data_base)) {
+    func_customlog("Input folder does not exist: ", file.path(normalizePath(dirname(run_params$dir_data_base)),
+                                                              basename(run_params$dir_data_base)), level = 2)
+    func_stop()
+  }
+  
   data_all <- list()
   
   data_all$data_weather               <-   func_load_weather(run_params)
