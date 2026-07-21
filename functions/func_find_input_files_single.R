@@ -12,18 +12,27 @@
 # If input file is dhm or surface type, prefer .tif input, then .grid, then .asc.
 # Second criterion: in case of files (in subdirs) with same name and extension,
 # prefer files which are closer to the directory tree root.
-# If input file is outline, then prefer .shp (second choice: .xyzn).
+# If input file is outline, then prefer .shp, then .gpkg, then .xyzn.
 func_find_input_files_single <- function(run_params,
                                          input_type) {
   
-  dirpath         <- run_params[[paste0("dir_data_", input_type)]]
+  # Retrieve absolute path, to print more informative error in case of missing input
+  # (normalizePath does nothing on non-existing paths).
+  dirpath         <- file.path(normalizePath(dirname(run_params[[paste0("dir_data_", input_type)]])),
+                               basename(run_params[[paste0("dir_data_", input_type)]]))
+  
+  if (!dir.exists(dirpath)) {
+    func_customlog("Folder ", dirpath, " does not exist. Please check the input data.", level = 2)
+    func_stop()
+  }
+  
   filename_prefix <- run_params[[paste0("filename_", input_type, "_prefix")]]
   filename_suffix <- run_params[[paste0("filename_", input_type, "_suffix")]]
   
   if (input_type %in% c("dhm", "surftype")) {
     filename_extensions <- c(".tif", ".grid", ".asc")
   } else {
-    filename_extensions <- c(".shp", ".xyzn")
+    filename_extensions <- c(".shp", ".gpkg", ".xyzn")
   }
   n_ext <- length(filename_extensions)
   
@@ -31,7 +40,7 @@ func_find_input_files_single <- function(run_params,
   
   dir_files_all_with_subdir_path <- list.files(dirpath, recursive = run_params$dir_data_recursive)
   dir_files_all_names_only       <- basename(dir_files_all_with_subdir_path) # Needed in case we find files in subdirs.
-  dir_files_n <- length(dir_files_all_names_only)
+  dir_files_n                    <- length(dir_files_all_names_only)
   
   # Matrix 1 row per year, 1 column per extension (currently 3 allowed
   # extensions: .tif, .grid and .asc, in order of preference).
@@ -44,7 +53,7 @@ func_find_input_files_single <- function(run_params,
   filepaths_pmatch <- matrix(NA_integer_, nrow = dir_files_n, ncol = n_ext)
   filepaths_nchar <- nchar(dir_files_all_with_subdir_path)
   
-  for (ext_id in 1:length(filename_extensions)) {
+  for (ext_id in 1:n_ext) {
     ext_cur <- filename_extensions[ext_id]
     pmatch_res <- pmatch(dir_files_all_names_only, paste0(filenames_allowed_no_ext, ext_cur), duplicates.ok = TRUE)
     filenames_found_exts[as.integer(na.omit(pmatch_res)), ext_id] <- TRUE
@@ -62,7 +71,7 @@ func_find_input_files_single <- function(run_params,
     }
   }
   years_available <- run_params$years_input_allowed[which(rowSums(filenames_found_exts) > 0)]
-
+  
   # Handle the very rare case in which there is
   # a valid file name in the input dir and also (same
   # name and extension) in a subdir: we always pick the

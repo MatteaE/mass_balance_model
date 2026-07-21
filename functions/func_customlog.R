@@ -8,7 +8,8 @@
 #                 the default sink() behavior which does not capture the output of message().     #
 ################################################################################################### 
 
-# Note: this function does not automatically add a whitespace between multiple arguments.
+# Note: this function (1) does not automatically add a whitespace between multiple arguments,
+#                     (2) does automatically add a new line at the end.
 
 # 0 or "b(asic)" calls message() with no formatting
 # 1 or "w(arning)" calls message() prepending a bold, yellow-shaded "WARNING" to the text

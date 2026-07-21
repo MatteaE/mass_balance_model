@@ -33,7 +33,7 @@ func_load_massbalance_measurements <- function(run_params,
       return(data_massbalance_annual_dummy)
     }
     
-    massbalance_path <- file.path(run_params$dir_data_massbalance,
+    massbalance_path <- file.path(normalizePath(run_params$dir_data_massbalance),
                                   run_params$filename_massbalance_annual)
     
   } else if (load_what == "winter") {
@@ -52,18 +52,34 @@ func_load_massbalance_measurements <- function(run_params,
       return(data_massbalance_winter_dummy)
     }
     
-    massbalance_path <- file.path(run_params$dir_data_massbalance,
+    massbalance_path <- file.path(normalizePath(run_params$dir_data_massbalance),
                                   run_params$filename_massbalance_winter)
   }
   
   if (!file.exists(massbalance_path)) {
-    func_customlog("I could not find the file with mass balance measurements. The specified path is ", massbalance_path, "\n", level = 2)
+    func_customlog("The ", load_what, " mass balance file does not exist: ", massbalance_path, "\n", level = 2)
     func_stop()
   }
   
+  
   # Read file, assign column names.
-  data_massbalance <- read.table(massbalance_path, header = FALSE, stringsAsFactors = FALSE)
-  names(data_massbalance) <- c("id", "start_date", "end_date", "x", "y", "z", "dh_cm", "density")
+  tryCatch({data_massbalance <- read.table(massbalance_path,
+                                           header = FALSE,
+                                           stringsAsFactors = FALSE)},
+           error = function(err) {
+             func_customlog("Error reading the ", load_what, " mass balance file: ", massbalance_path, level = 2)
+             func_stop()
+           })
+  
+  
+  massbal_cols <- c("id", "start_date", "end_date", "x", "y", "z", "dh_cm", "density")
+  if (ncol(data_massbalance) != 8) {
+    func_customlog("The ", load_what, " mass balance file does not have eight columns. Please fix it: ", massbalance_path, level = 2)
+    func_customlog("Expected columns (no titles): ", paste0(massbal_cols, collapse = " | "), level = 0)
+    func_stop()
+  }
+  names(data_massbalance) <- massbal_cols
+  
   
   # Convert timestamps to Date objects.
   data_massbalance$start_date <- as.Date(data_massbalance$start_date, format = "%d.%m.%Y")
@@ -84,7 +100,7 @@ func_load_massbalance_measurements <- function(run_params,
                         (data_massbalance$y > ymax(ext_limits)))
   ids_bad_n <- length(ids_df_bad)
   if (ids_bad_n > 0) {
-    func_customlog("the ", load_what, " mass balance file contains ", ids_bad_n, " entries which fall outside all provided DHMs.\n", level = 1)
+    func_customlog("The ", load_what, " mass balance file contains ", ids_bad_n, " entries which fall outside all provided DHMs.\n", level = 1)
     stake_coords_rescued_ids <- NULL
     for (i in 1:ids_bad_n) {
       stake_coords_fixed <- func_fix_stake_coordinates(c(data_massbalance$x[ids_df_bad[i]], data_massbalance$y[ids_df_bad[i]]),
@@ -99,14 +115,14 @@ func_load_massbalance_measurements <- function(run_params,
       }
     }
     stake_coords_rescued_n <- length(stake_coords_rescued_ids)
-    func_customlog("    I could rescue", stake_coords_rescued_n, "entries with a wrong coordinate system.\n")
+    func_customlog("    Successfully rescued", stake_coords_rescued_n, "entries with a wrong coordinate system.\n")
     ids_df_bad <- setdiff(ids_df_bad, stake_coords_rescued_ids) # Don't remove rescued stakes.
     if (stake_coords_rescued_n < ids_bad_n) {
-      func_customlog("    I am discarding the ", ids_bad_n - stake_coords_rescued_n, " remaining entries, I could not fix them. You should investigate and correct them manually.\n", level = 1)
+      func_customlog("    Discarding the ", ids_bad_n - stake_coords_rescued_n, " remaining entries, which could not be fixed. Please investigate and correct them manually.\n", level = 1)
       func_customlog("    The first problematic entry reports these coordinates: ", data_massbalance$x[ids_df_bad[1]], " | ", data_massbalance$y[ids_df_bad[1]], "\n")
       data_massbalance <- data_massbalance[-ids_df_bad,]
     } else {
-      func_customlog("    All problematic entries could be rescued by reprojection.\n")
+      func_customlog("    All problematic entries were successfully rescued by reprojection.\n")
     }
   }
   
@@ -182,7 +198,7 @@ func_load_massbalance_measurements <- function(run_params,
     clusters_multistake_n <- 0
   }
   
-  cat("    Loading complete. I have", nrow(data_massbalance_filtered), load_what, "mass balance values.\n")
+  cat("    Loading complete. There are", nrow(data_massbalance_filtered), load_what, "mass balance values.\n")
   
   if (run_params$stake_cluster_distance > 0) {
     cat("    Of those,", clusters_multistake_n, "are clusters resulting from the aggregation of multiple mass balance points, as controlled by parameter stake_cluster_distance.\n")

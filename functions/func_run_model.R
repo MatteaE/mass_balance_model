@@ -8,6 +8,8 @@
 
 func_run_model <- function(run_params) {
   
+  # Model version
+  run_params$dmbsim_version <- "3.0"
   
   # Close any leftover sinks and connections from previous runs.
   while (sink.number() > 0) {
@@ -32,12 +34,11 @@ func_run_model <- function(run_params) {
   sink(logcon, split = TRUE)
   options(warn=1) # Configure immediate printing of warnings.
   
-  
-  cat("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n")
-  cat("|++++++++++++++++                          ++++++++++++++++|\n")
-  cat("|+++++++++               DMBSim v2.0              +++++++++|\n")
-  cat("|++++++++++++++++                          ++++++++++++++++|\n")
-  cat("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n\n\n")
+  func_customlog("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|")
+  func_customlog("|++++++++++++++++                          ++++++++++++++++|")
+  func_customlog("|+++++++++               DMBSim v", run_params$dmbsim_version, "              +++++++++|")
+  func_customlog("|++++++++++++++++                          ++++++++++++++++|")
+  func_customlog("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n\n")
   
   start_t <- Sys.time()
   cat("Run started at", format(start_t), paste0("(", Sys.timezone(), ")"), "\n\n")

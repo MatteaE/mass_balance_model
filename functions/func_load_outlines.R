@@ -35,18 +35,25 @@ func_load_outlines <- function(run_params) {
     outline_path_split <- strsplit(outline_paths[outline_id], ".", fixed = TRUE)
     outline_filetype <- outline_path_split[[1]][length(outline_path_split[[1]])]
     
-    if (outline_filetype == "xyzn") {
-      outlines_out$outlines[[outline_id]] <- func_load_xyzn(outline_paths[outline_id], CRS(run_params$grids_crs_epsg))
-    } else if (outline_filetype == "shp") {
-      invisible(capture.output(outlines_out$outlines[[outline_id]] <- as(as_Spatial(st_zm(st_read(outline_paths[outline_id]))), "SpatialPolygons")))
-    }
+    tryCatch({
+      if (outline_filetype == "xyzn") {
+        outlines_out$outlines[[outline_id]] <- func_load_xyzn(outline_paths[outline_id], CRS(run_params$grids_crs_epsg))
+      } else {
+        invisible(capture.output(outlines_out$outlines[[outline_id]] <- as(as_Spatial(st_zm(st_read(outline_paths[outline_id]))), "SpatialPolygons")))
+      }
+    },
+    error = function(err) {
+      func_customlog("Error loading outline: ", outline_paths[outline_id], level = 2)
+      func_stop()
+    })
+    
     # Aspect ratio: > 1 if tall glacier, < 1 if wide glacier. Used to add margins to the area plots,
     # in order to keep the plot titles within the page margins.
     outline_ext <- ext(outlines_out$outlines[[outline_id]])
     outlines_out$aspect_ratio[[outline_id]] <- (outline_ext[4] - outline_ext[3]) / (outline_ext[2] - outline_ext[1])
   }
   
-  # For each modeled year find the closest grid year and use its grid.
+  # For each modeled year find the closest outline year and use its outline.
   for (year_cur_id in 1:run_params$n_years) {
     year_cur <- run_params$years[year_cur_id]
     outline_year_closest_id <- which.min(abs(run_params$outline_years - year_cur))

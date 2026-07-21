@@ -25,8 +25,8 @@ func_load_points_daily_out <- function(run_params,
   
   cat("  Loading selected points of daily output...\n")  
   
-  points_daily_path <- file.path(run_params$dir_data_massbalance,
-                                 run_params$filename_points_daily_out)
+  points_daily_path <- normalizePath(file.path(run_params$dir_data_massbalance,
+                                               run_params$filename_points_daily_out))
   
   if (!file.exists(points_daily_path)) {
     func_customlog("I could not find the file with points of daily output. The specified path is", points_daily_path, "\n", level = 2)
@@ -35,20 +35,19 @@ func_load_points_daily_out <- function(run_params,
   
   # Read file, assign column names.
   tryCatch({data_points_daily_out <- read.table(points_daily_path, header = FALSE, stringsAsFactors = FALSE)},
-           warning = function(war) {
-             func_customlog("Error reading file with points of daily output: ", points_daily_path, level = 2)
-             func_stop()
-           },
            error = function(err) {
              func_customlog("Error reading file with points of daily output: ", points_daily_path, level = 2)
              func_stop()
            })
   
+  
+  points_cols <- c("id", "x", "y")
   if (ncol(data_points_daily_out) != 3) {
-    func_customlog("File with points of daily output does not have three columns. Please fix it: ", points_daily_path, level = 2)
+    func_customlog("The file with points of daily output does not have three columns. Please fix it: ", points_daily_path, level = 2)
+    func_customlog("Expected columns (no titles): ", paste0(points_cols, collapse = " | "), level = 0)
     func_stop()
   }
-  names(data_points_daily_out) <- c("id", "x", "y")
+  names(data_points_daily_out) <- points_cols
   
   # Check if any point is outside the combined DHM extent.
   # If yes, hard stop since these are user-defined points and

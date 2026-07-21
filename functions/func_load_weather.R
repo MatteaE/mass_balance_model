@@ -8,12 +8,35 @@
 
 func_load_weather <- function(run_params) {
   
-  cat("  Loading weather...\n")
+  cat("  Loading daily weather...\n")
   
-  filepath_weather <- file.path(run_params$dir_data_weather, run_params$filename_weather)
+  filepath_weather <- file.path(normalizePath(run_params$dir_data_weather),
+                                run_params$filename_weather)
   
-  data_raw <- read.table(filepath_weather, header = FALSE, skip = run_params$file_weather_nskip, stringsAsFactors = FALSE)
-  names(data_raw) <- c("year", "doy", "hour", "t2m_mean", "precip")
+  if (!file.exists(filepath_weather)) {
+    func_customlog("File does not exist: ", filepath_weather, level = 2)
+    func_stop()
+  }
+  
+  
+  tryCatch({data_raw <- read.table(filepath_weather,
+                                   header = FALSE,
+                                   skip = run_params$file_weather_nskip,
+                                   stringsAsFactors = FALSE)},
+           error = function(err) {
+             func_customlog("Error reading file with daily weather: ", filepath_weather, level = 2)
+             func_stop()
+           })
+  
+  
+  weather_cols <- c("year", "doy", "hour", "t2m_mean", "precip")
+  if (ncol(data_raw) != 5) {
+    func_customlog("File with daily weather does not have five columns. Please fix it: ", filepath_weather, level = 2)
+    func_customlog("Expected columns (no titles): ", paste0(weather_cols, collapse = " | "), level = 0)
+    func_stop()
+  }
+  names(data_raw) <- weather_cols
+  
   
   t2m_bad_ids <- which(is.na(as.numeric(data_raw$t2m_mean)))
   if (length(t2m_bad_ids) > 0) {

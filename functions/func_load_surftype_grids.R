@@ -27,16 +27,35 @@ func_load_surftype_grids <- function(run_params) {
   surftype_n <- length(grid_paths)
   
   if (surftype_n == 0) {
-    func_customlog("no surface type grid files found. Please check parameters dir_data_surftype, filename_surftype_prefix and filename_surftype_suffix.\n", level = 2)
+    func_customlog("no surface type grid files found. Please check input folder and parameters dir_data_surftype, filename_surftype_prefix, and filename_surftype_suffix.\n", level = 2)
     func_stop()
   } else {
     cat("    Found", surftype_n, "surface type grid file(s). Available year(s):", run_params$surftype_years, "\n")
   }
-  
+
   # Load grids.
-  for (grid_id in 1:length(grid_paths)) {
-    grids_out$grids[[grid_id]] <- rast(grid_paths[grid_id])
-    crs(grids_out$grids[[grid_id]]) <- run_params$grids_crs_epsg
+  # We only handle errors (not warnings) because rast() will
+  # raise both, and we want to call the handler only once.
+  for (grid_id in 1:surftype_n) {
+    tryCatch({grids_out$grids[[grid_id]] <- rast(grid_paths[grid_id])},
+             error = function(err) {
+               func_customlog("Error reading surface type grid: ", grid_paths[grid_id], level = 2)
+               func_stop()
+             })
+    
+    # If the grid is .asc or .grid, it does not have a CRS,
+    # then we set it from the provided global parameter.
+    # Otherwise (GeoTiff), check if the two CRS match
+    # and stop if they don't.
+    if (nchar(crs(grids_out$grids[[grid_id]])) == 0) {
+      crs(grids_out$grids[[grid_id]]) <- run_params$grids_crs_epsg
+    } else {
+      if (!same.crs(crs(grids_out$grids[[grid_id]]),
+                    run_params$grids_crs_epsg)) {
+        func_customlog("The CRS of surface type grid ", grid_paths[grid_id], " does not match the provided global CRS parameter. Please check.", level = 2)
+        func_stop()
+      }
+    }
   }
   
   # For each modeled year find the closest grid year and use its grid.

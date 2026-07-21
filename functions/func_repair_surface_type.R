@@ -7,9 +7,12 @@
 #                 conflict with the DEM (i.e. some rock cells inside glacier outline, and/or      #
 #                 some glacier cells outside).                                                    #
 ###################################################################################################
+
 func_repair_surface_type <- function(run_params,
                                      data_dems,
                                      data_surftype) {
+  
+  cat("  Checking consistency of surface type and outline...\n")
   
   ids_surftype_processed <- integer(0)
   
@@ -36,7 +39,7 @@ func_repair_surface_type <- function(run_params,
       # these cells and we extract() the value at these positions.
       if (ncells_bad > 0) {
         
-        func_customlog(paste0("found ", ncells_bad, " rock cells inside glacier outline, in surface type grid #", surftype_id, ". I am fixing them right now.\n"), level = 1)
+        func_customlog(paste0("Found ", ncells_bad, " rock cells inside glacier outline, in surface type grid #", surftype_id, ". Fixing them..."), level = 1)
         
         data_surftype$grids[[surftype_id]][surftype_rock_ids] <- NA
         dist_ras <- distance(data_surftype$grids[[surftype_id]])
