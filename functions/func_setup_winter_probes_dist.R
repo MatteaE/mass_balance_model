@@ -18,9 +18,11 @@ func_setup_winter_probes_dist <- function(year_data,
   
   # Should we make a winter run to optimize the precipitation correction?
   # Only if we have some measurements of winter snow cover, else we can't.
-  # We also disable this when we don't have annual stakes, we don't support
-  # having winter measurements only.
-  year_data$process_winter <- (year_data$nstakes_winter > 0) && ((year_data$nstakes_annual > 0))
+  # NOTE: the winter period will be run (optimizing precipitation correction)
+  #       even if there are no corresponding annual measurements. This is ok
+  #       but a bit strange (melt model will be uncalibrated except if there are
+  #       other years with data and nodata_years_automatic is set to TRUE).
+  year_data$process_winter <- (year_data$nstakes_winter > 0)
   
   # Did the user instruct to use an external map of snow distribution?
   # If yes, try to load it and project it to the current DHM grid.

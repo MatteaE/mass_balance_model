@@ -15,6 +15,7 @@ func_process_year <- function(year_data,
                               grids_snowdist_topographic,
                               overview_annual) {
   
+  
   # Find offsets on the grid of all stakes and user-defined points of daily output.
   year_data <- func_find_mb_points_on_grid(year_data,
                                            data_all$data_dhms,

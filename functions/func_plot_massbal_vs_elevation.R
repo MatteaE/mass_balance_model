@@ -154,7 +154,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
   #### Plot #3: scatterplot of winter mass balance ------------------------------------------------
   # We plot the not-band-corrected model over the winter measurement period, and the stakes standardized over the same period.
   # Do this only if we have stake measurements, else it's useless.
-  if (year_data$nstakes_winter > 0) {
+  if (year_data$process_winter > 0) {
     # We plot the stake measurements, in black, **standardized over the winter measurement period**.
     # The reported RMS and BIAS (computed within func_massbal_postprocess())
     # are from the annual modeling (thus referred to the not-standardized

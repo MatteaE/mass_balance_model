@@ -72,7 +72,7 @@ func_massbal_postprocess <- function(year_data,
   
   #### Compute BIAS and RMS of winter measurements within the annual simulation ####
   # This is used in the vertical scatterplot of winter measurements.
-  if (year_data$nstakes_winter > 0) {
+  if (year_data$process_winter > 0) {
     
     # Extract the modeled series of the winter stakes from the annual simulation.
     dxdy_winter       <- year_data$points_dxdy[["winter"]]
@@ -130,7 +130,7 @@ func_massbal_postprocess <- function(year_data,
   # See comment above for short explanation.
   # NOTE: this call reuses some of the data/ids computed above for
   # the computation of BIAS and RMS of winter measurements.
-  if (year_data$nstakes_winter > 0) {
+  if (year_data$process_winter > 0) {
     year_data$massbal_winter_meas_cur$massbal_standardized <- func_compute_stake_mb_standardized_winter(year_data,
                                                                                                         stakes_winter_mod,
                                                                                                         stakes_winter_start_ids_wrt_annual,
