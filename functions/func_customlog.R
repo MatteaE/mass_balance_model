@@ -37,7 +37,7 @@ func_customlog <- function(..., level = c("basic", "warning", "fatal", "success"
   
   
   # Concatenate input into a single character.
-  txt <- paste(lapply(list(...), as.character), collapse = "")
+  txt <- paste(sapply(list(...), as.character), collapse = "")
   
   # Select OS-specific function to write to console.
   # RStudio on Windows uses an ugly red text for message(),

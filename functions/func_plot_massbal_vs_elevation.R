@@ -148,8 +148,9 @@ func_plot_massbal_vs_elevation <- function(year_data,
       ylab(paste0("Annual mass balance [", run_params$output_unit, " w.e.]")) +
       theme_scatterplot_ele
   }
+
   
-  
+    
   #### Plot #3: scatterplot of winter mass balance ------------------------------------------------
   # We plot the not-band-corrected model over the winter measurement period, and the stakes standardized over the same period.
   # Do this only if we have stake measurements, else it's useless.
@@ -189,7 +190,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
       geom_segment(data = df_stakes, aes(x = z, xend = z, y = meas/1e3, yend = mod/1e3)) +
       coord_flip() +
       scale_x_continuous(breaks = pretty(df_scatterplot$ele), expand = expansion(mult = 0.05)) +
-      scale_y_continuous(limits = c(min(0.0, df_scatterplot$mb, df_stakes$meas), NA_real_),
+      scale_y_continuous(limits = c(min(0.0, df_scatterplot$mb, df_stakes$meas)/1e3, NA_real_),
                          expand = expansion(mult = 0.05)) +
       xlab("Elevation [m a.s.l.]") +
       ylab(paste0("Winter mass balance [", run_params$output_unit, " w.e.]")) +
