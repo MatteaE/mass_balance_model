@@ -285,7 +285,7 @@ func_run_model <- function(run_params) {
   
   notify("Run finished successfully ✅",
          title = paste0("Glacier model DMBSim ", run_params$dmbsim_version),
-         image = normalizePath("icons/icon128.png"))
+         image = normalizePath("icons/icon64.png"))
   
   return(0)
   

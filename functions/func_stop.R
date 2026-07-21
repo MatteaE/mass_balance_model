@@ -18,7 +18,7 @@ func_stop <- function() {
   close(logcon)
   notify("Run failed ❌", 
          title = paste0("Glacier model DMBSim ", run_params$dmbsim_version),
-         image = normalizePath("icons/icon128.png"))
+         image = normalizePath("icons/icon64.png"))
   stop(paste0("\rRun failed at ", format(t_end), " (", Sys.timezone(), ")", "\n"))
   
 }
