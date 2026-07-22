@@ -20,5 +20,7 @@ func_snow_probes_idw_global <- function(snow_probes_df,
                                      gs,
                                      debug.level = 0)$var1.pred
   
+  cat("  Global IDW interpolation finished.\n")
+  
   return(snowdist_idw)
 }

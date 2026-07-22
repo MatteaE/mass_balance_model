@@ -78,7 +78,12 @@ func_process_run_params <- function(run_params) {
   
   # For both types of IDW interpolation: IDW exponent to use
   if (is.null(run_params$probes_snowdist_idw_exp)) {
-    run_params$probes_snowdist_idw_exp <-   2.0        # [-]: exponent for the IDW interpolation of winter snow measurements
+    run_params$probes_snowdist_idw_exp <-   0.75        # [-]: exponent for the IDW interpolation of winter snow measurements
+  }
+  
+  # Smoothing radius (in m) for the result of the IDW interpolation
+  if (is.null(run_params$probes_snowdist_smooth_dist)) {
+    run_params$probes_snowdist_smooth_dist <- 25
   }
   
   # Importance of topographic snow distribution

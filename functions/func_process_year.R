@@ -26,6 +26,7 @@ func_process_year <- function(year_data,
   year_data <- func_setup_winter_probes_dist(year_data,
                                              data_all$data_dhms,
                                              data_all$data_dems,
+                                             data_all$data_outlines,
                                              run_params,
                                              year_cur_params)
   

@@ -13,7 +13,7 @@ func_snow_probes_idw_adaptive <- function(snow_probes_df,
                                           ref_grid,
                                           run_params) {
   
-  crds_m <- crds(ref_grid)
+  crds_m <- crds(ref_grid, na.rm = FALSE)
   x_grid <- setValues(ref_grid, crds_m[,1])
   y_grid <- setValues(ref_grid, crds_m[,2])
   
@@ -32,7 +32,8 @@ func_snow_probes_idw_adaptive <- function(snow_probes_df,
   idw_results_all   <- list(idw_result_cur)
   iter_max_n <- 100
   iter_id <- 1
-  while ((anyNA(values(idw_results_all[[iter_id]], mat = F))) && (iter_id <= iter_max_n)) {
+  cat("  Starting adaptive IDW interpolation...\n")
+  while ((anyNA(values(idw_results_all[[iter_id]], mat = F))) && (iter_id < iter_max_n)) {
     
     iter_id <- iter_id + 1
     
@@ -75,6 +76,8 @@ func_snow_probes_idw_adaptive <- function(snow_probes_df,
     func_customlog("Adaptive IDW interpolation of winter snow probes failed. Please check manually.", level = 2)
     func_stop()
   }
+  
+  cat("  Adaptive IDW interpolation finished after", iter_id, "iterations.\n")
   
   return(snowdist_idw)
 }

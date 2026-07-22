@@ -110,7 +110,7 @@ func_load_radiation_grids <- function(run_params,
     # is the same, then skip loading the other grids
     # and keep the ones we have from the boot file.
     if (length(grid_day1_val) == length(grids_out[[1]])) {
-      if (all(abs(grid_day1_val - grids_out[[1]]) < 1e-5)) {
+      if (all(abs(grid_day1_val - grids_out[[1]]) < 1e-3)) {
         cat("    First grid matches! We can use the boot file.\n")
         skip_loading_logi <- TRUE
       } else {

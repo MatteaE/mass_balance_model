@@ -31,6 +31,7 @@ func_snowdist_from_probes <- function(year_data,
   }
   
   # Global, traditional IDW via gstat, with prescribed distance exponent.
+  # Note: the result is NOT normalized yet.
   if (idw_sel == "global") {
     
     snowdist_idw <- func_snow_probes_idw_global(snow_probes_df,
@@ -44,12 +45,29 @@ func_snowdist_from_probes <- function(year_data,
                                                   run_params)
   }
   
-  
   # writeRaster(snowdist_idw, "snowdist_idw.tif", overwrite = T)
   
-  # Smooth as in the original IDL implementation.
-  snowdist_idw_smooth <- focal(snowdist_idw, w = matrix(1, 3, 3), fun = mean, na.rm = TRUE, expand = FALSE, fillvalue = NA)
   
+  # We enforce a complete map of snow distribution.
+  if (anyNA(values(snowdist_idw, mat = F))) {
+    func_customlog("There are NA values in the calculated map of snow distribution, please investigate!", level = 2)
+    func_stop()
+  }
+  
+  
+  # Smooth with Gaussian matrix (better than square window).
+  # If the matrix has just one element (too little smoothing),
+  # don't do it (otherwise, focal() fails).
+  fw_mat <- focalMat(snowdist_idw,
+                     d = run_params$probes_snowdist_smooth_dist,
+                     type = "Gauss")
+  if ((nrow(fw_mat) > 1) && (ncol(fw_mat) > 1)) {
+    cat("  Smoothing with", ncol(fw_mat), "x", nrow(fw_mat), "Gaussian matrix...\n")
+    snowdist_idw_smooth <- focal(snowdist_idw,
+                                 w = fw_mat, fun = mean, na.rm = TRUE, expand = FALSE, fillvalue = NA)
+  } else {
+    snowdist_idw_smooth <- snowdist_idw
+  }
   # writeRaster(snowdist_idw_smooth, "snowdist_idw_smooth.tif", overwrite = T)
   
   snowdist_idw_smooth_clamp <- clamp(snowdist_idw_smooth, lower = 0, upper = Inf, values = TRUE)
