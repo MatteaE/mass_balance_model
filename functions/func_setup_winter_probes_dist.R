@@ -39,10 +39,6 @@ func_setup_winter_probes_dist <- function(year_data,
     tryCatch({
       dist_probes_raw_r <- rast(probes_fp)
     },
-    warning = function(war) {
-      func_customlog("Error reading user-defined map of snow distribution: ", probes_fp, level = 2)
-      func_stop()
-    },
     error = function(err) {
       func_customlog("Error reading user-defined map of snow distribution: ", probes_fp, level = 2)
       func_stop()
@@ -64,12 +60,12 @@ func_setup_winter_probes_dist <- function(year_data,
     # If yes, make a map of snow distribution out of them.
     if (year_data$nstakes_winter > 0) {
       
-      dist_probes_r   <- func_snow_probes_idw(year_data, run_params, data_dhms)$var1.pred
-      dist_probes_r   <- clamp(dist_probes_r, lower = 0, upper = Inf, values = TRUE)
+      dist_probes_r <- func_snowdist_from_probes(year_data, run_params, data_dhms)
       
       # If not, apply uniform snow distribution (for large-scale
       # variability only - then there is still the topographic distribution!)    
     } else {
+      
       dist_probes_r <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], 1.0)
     }
     

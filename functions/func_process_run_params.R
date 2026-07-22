@@ -52,17 +52,42 @@ func_process_run_params <- function(run_params) {
   
   
   #### SNOW DISTRIBUTION parameters ---------------------------------------------------------------
-  run_params$snow_probes_idw_exp         <-   2.0        # [-]: exponent for the IDW interpolation of winter snow measurements
   
   # Set parameters which are specific to the new version of the model (2026/07/13).
+  
+  # Type of IDW interpolation: "global" (standard IDW)
+  # or "adaptive" (as in IDL)
+  if (is.null(run_params$probes_snowdist_idw_type)) {
+    run_params$probes_snowdist_idw_type <- "adaptive"
+  }
+  
+  # For the "adaptive" interpolation: initial search radius
+  if (is.null(run_params$probes_snowdist_search_radius_init)) {
+    run_params$probes_snowdist_search_radius_init <- 300
+  }
+  
+  # For the "adaptive" interpolation: minimum distance to avoid excessive weighting
+  if (is.null(run_params$probes_snowdist_dist_min)) {
+    run_params$probes_snowdist_dist_min <- 25 
+  }
+  
+  # For the "adaptive" interpolation: minimum number of points to use (otherwise, grow search radius)
+  if (is.null(run_params$probes_snowdist_search_npoints_min)) {
+    run_params$probes_snowdist_search_npoints_min <- 4
+  }
+  
+  # For both types of IDW interpolation: IDW exponent to use
+  if (is.null(run_params$probes_snowdist_idw_exp)) {
+    run_params$probes_snowdist_idw_exp <-   2.0        # [-]: exponent for the IDW interpolation of winter snow measurements
+  }
+  
+  # Importance of topographic snow distribution
   if (is.null(run_params$topographic_snowdist_fact)) {
     run_params$topographic_snowdist_fact <- 1.0
   }
   
-  if (is.null(run_params$init_snow_avalanche)) {
-    run_params$init_snow_avalanche <- TRUE
-  }
-  
+  # Importance of probes snow distribution
+  # Used to be called accum_probes_red_fac in an old version
   if (is.null(run_params$probes_snowdist_fact)) {
     if (!is.null(run_params$accum_probes_red_fac)) {
       run_params$probes_snowdist_fact <- run_params$accum_probes_red_fac
@@ -70,6 +95,15 @@ func_process_run_params <- function(run_params) {
       run_params$probes_snowdist_fact <- 1.0
     }
   }
+  
+  # Shall we process the map of initial snow distribution via avalanche,
+  # to unload the slopes? This is done at the end of the calculations
+  # (i.e., on the map which already includes small-scale and large-scale
+  # variability).
+  if (is.null(run_params$initial_snow_avalanche)) {
+    run_params$initial_snow_avalanche <- TRUE
+  }
+  
   
   
   

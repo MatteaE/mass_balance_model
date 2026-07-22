@@ -39,18 +39,7 @@ func_compute_initial_snow_cover <- function(run_params,
   
   # writeRaster(dist_cur, "2-dist-topo-snl.tif", overwrite = T)
   
-  # Redistribute mass with an avalanche.
-  # For this, use the actual values of maximum deposition,
-  # do not alter them with a multiplier.
-  if (run_params$initial_snow_avalanche) {
-    values(dist_cur) <- func_avalanche(run_params,
-                                       grids_avalanche_cur,
-                                       as.numeric(values(dist_cur)),
-                                       1.0,
-                                       TRUE)
-    # writeRaster(dist_cur, "3-dist-topo-snl-aval.tif", overwrite = T)
-  }
-  
+
   
   # If we have any winter stakes for the year,
   # use the large-scale variability computed from
@@ -61,9 +50,23 @@ func_compute_initial_snow_cover <- function(run_params,
     # of probes back onto a raster grid for this multiplication.
     dist_cur <- dist_cur * setValues(data_dhms$elevation[[dhm_grid_id]], grid_probes_norm_values)
     
-    # writeRaster(dist_cur, "4-dist-topo-snl-aval-probes.tif", overwrite = T)
+    # writeRaster(dist_cur, "3-dist-topo-snl-probes.tif", overwrite = T)
     
   }
+  
+  
+  # If asked to do so, redistribute mass with an avalanche.
+  # For this, use the actual values of maximum deposition,
+  # do not alter them with a multiplier.
+  if (run_params$initial_snow_avalanche) {
+    values(dist_cur) <- func_avalanche(run_params,
+                                       grids_avalanche_cur,
+                                       as.numeric(values(dist_cur)),
+                                       1.0,
+                                       TRUE)
+    # writeRaster(dist_cur, "4-dist-topo-snl-probes-avalanche.tif", overwrite = T)
+  }
+  
   
   dist_cur <- subst(dist_cur, NA, 0.0) # Possible residual NA values in the current distribution, along the border.
   
