@@ -1,6 +1,22 @@
 <img src="icons/icon128.png" width="128">
 
-# DMBSim 3.0
+
+# Contents
+
+1. [DMBSim 3.0](#intro)
+
+2. [Quick start](#quickstart)
+
+    2.1. [Minimal installation instructions](#installation)
+
+    2.2. [Minimal usage instructions](#usage)
+
+3. [Additional features](#features)
+
+4. [References](#references)
+
+
+# <a name="intro"></a>DMBSim 3.0
 
 DMBSim is a tool to calculate and homogenize glacier surface mass balance from point measurements. It works by running a gridded model of daily accumulation and melt, based on topographical and meteorological data. The main parameters are optimized to match the mass balance from the provided point measurements [[1]](#ref1).
 
@@ -21,11 +37,11 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
 <img src="cover_image.png" width="500">
 
 
-# Quick start
+# <a name="quickstart"></a>Quick start
 
 [Tutorial 1](/doc/tutorial1_singleyear/DMBSim_tutorial_1.pdf) will guide you through system setup and simple mass balance calculations.
 
-## Minimal installation instructions
+## <a name="installation"></a>Minimal installation instructions
 
 1. Setup R via [the official installer](https://cran.r-project.org/) or from your package manager.
 
@@ -39,7 +55,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
 
 That's it!
 
-## Minimal usage instructions
+## <a name="usage"></a>Minimal usage instructions
 
 1. Procure a Digital Elevation Model (DEM) of your area of interest, for example from [OpenTopography](https://portal.opentopography.org/dataCatalog). The DEM should have no gaps (missing data) over that area. The reference system (CRS) does not matter as long as it is defined (for example, in the GeoTiff format).
 
@@ -66,7 +82,7 @@ That's it!
 
 
 
-# Additional features
+# <a name="features"></a>Additional features
 
 * **Simple usage, suitable as a teaching tool:**
 
@@ -136,7 +152,7 @@ That's it!
 
 
 
-# References
+# <a name="references"></a>References
 
 [1]<a id="ref1"></a> Huss M., Bauder A., Funk M. (2009). Homogenization of long-term mass-balance time series. Annals of Glaciology 50(50):198-206. [doi:10.3189/172756409787769627](https://doi.org/10.3189/172756409787769627)
 
