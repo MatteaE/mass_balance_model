@@ -74,7 +74,7 @@ func_setup_winter_probes_dist <- function(year_data,
     
     dist_probes_na_n <- length(which(is.na(dist_probes_val)))
     if (dist_probes_na_n > 0) {
-      func_customlog("Year ", year_data$year_cur, ": the resampled map of snow distribution has ", dist_probes_na_n, " NA values", level = 1)
+      func_customlog("Year ", year_data$year_cur, ": the provided map of snow distribution has ", dist_probes_na_n, " NA value(s) within the current grid.", level = 1)
       func_customlog("They will be replaced with 1.0, but check carefully the input maps.", level = 0)
       dist_probes_r <- subst(dist_probes_r, NA, 1.0)
     }
@@ -121,6 +121,7 @@ func_setup_winter_probes_dist <- function(year_data,
     }
     
   } # End else was not provided an external map of snow distribution.
+  
   
   # Here we do have a map of snow distribution in dist_probes_r.
   
