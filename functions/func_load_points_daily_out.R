@@ -29,7 +29,7 @@ func_load_points_daily_out <- function(run_params,
                                                run_params$filename_points_daily_out))
   
   if (!file.exists(points_daily_path)) {
-    func_customlog("I could not find the file with points of daily output. The specified path is", points_daily_path, "\n", level = 2)
+    func_customlog("The file with points of daily output does not exist. The specified path is: ", points_daily_path, level = 2)
     func_stop()
   }
   

@@ -36,7 +36,7 @@ func_load_elevation_grids <- function(run_params) {
   dhm_n       <- length(grid_paths)
   
   if (dhm_n == 0) {
-    func_customlog("no DHM files found. Please check parameters dir_data_dhm, filename_dhm_prefix and filename_dhm_suffix.\n", level = 2)
+    func_customlog("No DHM files found. Please check parameters dir_data_dhm, filename_dhm_prefix and filename_dhm_suffix.", level = 2)
     func_stop()
   } else {
     cat("    Found", dhm_n, "DHM file(s). Available year(s):", run_params$dhm_years, "\n")
@@ -136,7 +136,7 @@ func_load_elevation_grids <- function(run_params) {
           
           ext1 <- ext(grids_out$elevation[[grid_id]])
           ext2 <- ext(raster_blueprint)
-          func_customlog("Resampling DHM grid ", grid_id, " to enable DHM interpolation:", level = 1)
+          func_customlog("Resampling DHM grid ", grid_id, " to enable DHM interpolation.", level = 1)
           func_customlog("Left        ", sprintf("%11.3f", ext1[1]), " --> ", sprintf("%11.3f", ext2[1]), " (", sprintf("%+.3f", ext2[1] - ext1[1]), ")", level = 0)
           func_customlog("Right       ", sprintf("%11.3f", ext1[2]), " --> ", sprintf("%11.3f", ext2[2]), " (", sprintf("%+.3f", ext2[2] - ext1[2]), ")", level = 0)
           func_customlog("Bottom      ", sprintf("%11.3f", ext1[3]), " --> ", sprintf("%11.3f", ext2[3]), " (", sprintf("%+.3f", ext2[3] - ext1[3]), ")", level = 0)

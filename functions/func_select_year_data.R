@@ -68,7 +68,7 @@ func_select_year_data <- function(data_all,
   stakes_annual_outside_ids <- which(is.na(stakes_annual_dem_values))
   stakes_annual_outside_n   <- length(stakes_annual_outside_ids)
   if (stakes_annual_outside_n > 0) {
-    func_customlog(paste0("found ", stakes_annual_outside_n, " annual measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"), level = 1)
+    func_customlog(paste0("Found ", stakes_annual_outside_n, " annual measurement(s) which are outside the glacier outline. They will be discarded, but you should investigate."), level = 1)
     func_customlog("They are:")
     func_customlog(paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$x[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$y[stakes_annual_outside_ids], "\n"))
     year_data$massbal_annual_meas_cur <- year_data$massbal_annual_meas_cur[-stakes_annual_outside_ids,]
@@ -83,7 +83,7 @@ func_select_year_data <- function(data_all,
   stakes_winter_outside_ids <- which(is.na(stakes_winter_dem_values))
   stakes_winter_outside_n   <- length(stakes_winter_outside_ids)
   if (stakes_winter_outside_n > 0) {
-    func_customlog(paste0("found ", stakes_winter_outside_n, " winter measurement(s) which are outside the glacier outline! I am discarding them, but you should investigate!\n"), level = 1)
+    func_customlog(paste0("Found ", stakes_winter_outside_n, " winter measurement(s) which are outside the glacier outline. They will be discarded, but you should investigate."), level = 1)
     func_customlog("They are:")
     func_customlog(paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$x[stakes_winter_outside_ids], " | ", year_data$massbal_winter_meas_cur$y[stakes_winter_outside_ids], "\n"))
     year_data$massbal_winter_meas_cur <- year_data$massbal_winter_meas_cur[-stakes_winter_outside_ids,]
@@ -105,7 +105,7 @@ func_select_year_data <- function(data_all,
   points_daily_outside_ids <- which(is.na(points_daily_dem_values))
   points_daily_outside_n   <- length(points_daily_outside_ids)
   if (points_daily_outside_n > 0) {
-    func_customlog(paste0("found ", points_daily_outside_n, " defined point(s) of daily output which are outside the glacier outline! I am discarding them, but you should check them to make sure that this is intended behavior!\n"), level = 1)
+    func_customlog(paste0("Found ", points_daily_outside_n, " defined point(s) of daily output which are outside the glacier outline. They will be discarded, but you should check them to make sure that this is intended behavior."), level = 1)
     func_customlog("They are:\n")
     func_customlog(paste0(year_data$points_daily_out$id[points_daily_outside_ids], " | ", year_data$points_daily_out$x[points_daily_outside_ids], " | ", year_data$points_daily_out$y[points_daily_outside_ids], "\n"))
     year_data$points_daily_out <- year_data$points_daily_out[-points_daily_outside_ids,]

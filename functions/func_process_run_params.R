@@ -146,7 +146,7 @@ func_process_run_params <- function(run_params) {
     run_params$output_unit <- "m"
   } else {
     if (!(run_params$output_unit %in% c("mm", "m"))) {
-      func_customlog("Output unit specification is malformed, I will default to meters water equivalent", level = 1)
+      func_customlog("Output unit specification is malformed, defaulting to meters water equivalent", level = 1)
       run_params$output_unit <- "m"
     }
   }

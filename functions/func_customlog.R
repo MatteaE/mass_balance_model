@@ -73,11 +73,13 @@ func_customlog <- function(..., level = c("basic", "warning", "fatal", "success"
     
     func_consolewrite("\033[1;48;5;226;38;5;16m WARNING \033[0m ", txt) # WARNING in bold black text on yellow background
     writeLines(paste0("* WARNING: ", txt, "\n"), con = logcon, sep = "")
+    warnings_char <<- append(warnings_char, txt)
     
   } else if (level == "fatal") {
     
     func_consolewrite("\033[1;48;5;196;38;5;231m FATAL \033[0m ", txt) # FATAL in bold white text on red background
     writeLines(paste0("** FATAL: ", txt, "\n"), con = logcon, sep = "")
+    fatal_char <<- append(fatal_char, txt)
     
   } else if (level == "success") {
     

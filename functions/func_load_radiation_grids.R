@@ -94,7 +94,7 @@ func_load_radiation_grids <- function(run_params,
       
       ext1 <- ext(grid_day1)
       ext2 <- ext(raster_blueprint)
-      func_customlog("Resampling first radiation grid to common extent, to check the boot file:", level = 1)
+      func_customlog("Resampling the first radiation grid to common extent, to check the boot file.", level = 1)
       func_customlog("Left        ", sprintf("%11.3f", ext1[1]), " --> ", sprintf("%11.3f", ext2[1]), " (", sprintf("%+.3f", ext2[1] - ext1[1]), ")", level = 0)
       func_customlog("Right       ", sprintf("%11.3f", ext1[2]), " --> ", sprintf("%11.3f", ext2[2]), " (", sprintf("%+.3f", ext2[2] - ext1[2]), ")", level = 0)
       func_customlog("Bottom      ", sprintf("%11.3f", ext1[3]), " --> ", sprintf("%11.3f", ext2[3]), " (", sprintf("%+.3f", ext2[3] - ext1[3]), ")", level = 0)
@@ -111,13 +111,13 @@ func_load_radiation_grids <- function(run_params,
     # and keep the ones we have from the boot file.
     if (length(grid_day1_val) == length(grids_out[[1]])) {
       if (all(abs(grid_day1_val - grids_out[[1]]) < 1e-3)) {
-        cat("    First grid matches! We can use the boot file.\n")
+        cat("    The first grid matches! We can use the boot file.\n")
         skip_loading_logi <- TRUE
       } else {
-        func_customlog("    First grid has the same number of cells but values do NOT match. I am reloading the individual files.\n", level = 1)
+        func_customlog("    The first grid has the same number of cells but the values do NOT match. Reloading the individual files.", level = 1)
       }
     } else {
-      func_customlog("    First grid does NOT match, it even has a different number of cells. I am reloading the individual files.\n", level = 1)
+      func_customlog("    The first grid does not match, it even has a different number of cells. Reloading the individual files.", level = 1)
     }
   }
   

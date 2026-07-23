@@ -34,7 +34,7 @@ func_optim_worker <- function(optimization_period, corr_fact_cur, corr_fact_wint
     
   } else {
     
-    func_customlog("wrong optimization_period!\n", level = 2)
+    func_customlog("Wrong optimization_period!", level = 2)
     func_stop()
     
   }

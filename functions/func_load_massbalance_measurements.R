@@ -57,7 +57,7 @@ func_load_massbalance_measurements <- function(run_params,
   }
   
   if (!file.exists(massbalance_path)) {
-    func_customlog("The ", load_what, " mass balance file does not exist: ", massbalance_path, "\n", level = 2)
+    func_customlog("The ", load_what, " mass balance file does not exist: ", massbalance_path, level = 2)
     func_stop()
   }
   
@@ -100,10 +100,12 @@ func_load_massbalance_measurements <- function(run_params,
                         (data_massbalance$y > ymax(ext_limits)))
   ids_bad_n <- length(ids_df_bad)
   if (ids_bad_n > 0) {
-    func_customlog("The ", load_what, " mass balance file contains ", ids_bad_n, " entries which fall outside all provided DHMs.\n", level = 1)
+    func_customlog("The ", load_what, " mass balance file contains ", ids_bad_n, " entries which fall outside all the elevation grids.", level = 1)
+    func_customlog("          Checking whether they have the wrong reference system (wrong UTM zone or lon/lat)...", level = 0)
     stake_coords_rescued_ids <- NULL
     for (i in 1:ids_bad_n) {
-      stake_coords_fixed <- func_fix_stake_coordinates(c(data_massbalance$x[ids_df_bad[i]], data_massbalance$y[ids_df_bad[i]]),
+      stake_coords_fixed <- func_fix_stake_coordinates(data_massbalance$id[ids_df_bad[i]],
+                                                       c(data_massbalance$x[ids_df_bad[i]], data_massbalance$y[ids_df_bad[i]]),
                                                        ext_limits,
                                                        c(run_params$grids_crs + c(-2, -1, 1, 2), 4326),
                                                        run_params$grids_crs)
@@ -115,14 +117,24 @@ func_load_massbalance_measurements <- function(run_params,
       }
     }
     stake_coords_rescued_n <- length(stake_coords_rescued_ids)
-    func_customlog("    Successfully rescued", stake_coords_rescued_n, "entries with a wrong coordinate system.\n")
+    if (stake_coords_rescued_n > 0) {
+      func_customlog("          Successfully recovered ", stake_coords_rescued_n, " entries with a wrong coordinate system.", level = 0)
+    } else {
+      func_customlog("          No entries could be recovered. Please check them manually.", level = 0)
+    }
     ids_df_bad <- setdiff(ids_df_bad, stake_coords_rescued_ids) # Don't remove rescued stakes.
     if (stake_coords_rescued_n < ids_bad_n) {
-      func_customlog("    Discarding the ", ids_bad_n - stake_coords_rescued_n, " remaining entries, which could not be fixed. Please investigate and correct them manually.\n", level = 1)
-      func_customlog("    The first problematic entry reports these coordinates: ", data_massbalance$x[ids_df_bad[1]], " | ", data_massbalance$y[ids_df_bad[1]], "\n")
+      cat("\n")
+      func_customlog("Discarding ", ids_bad_n - stake_coords_rescued_n, " mass balance entries with wrong coordinates, which could not be recovered.", level = 1)
+      func_customlog("          Please investigate and correct these manually. Maybe X and Y are swapped?", level = 0)
+      stake_bad_first <- data_massbalance[ids_df_bad[1],]
+      stake_bad_first$start_date <- format(stake_bad_first$start_date, "%d.%m.%Y")
+      stake_bad_first$end_date <- format(stake_bad_first$end_date, "%d.%m.%Y")
+      func_customlog("          The first problematic entry is:", level = 0)
+      func_customlog("          ", paste0(stake_bad_first[,1:(ncol(stake_bad_first)-1)], collapse = " | "), level = 0)
       data_massbalance <- data_massbalance[-ids_df_bad,]
     } else {
-      func_customlog("    All problematic entries were successfully rescued by reprojection.\n")
+      func_customlog("          All problematic entries were successfully recovered by reprojection.", level = 0)
     }
   }
   

@@ -8,8 +8,14 @@
 
 func_run_model <- function(run_params) {
   
-  # Model version
+  # Model version.
   run_params$dmbsim_version <<- "3.0"
+  
+  # Character vectors with all emitted warnings.
+  # They are updated by func_customlog() and used
+  # by func_end_dialog() to show relevant information.
+  warnings_char <<- NULL
+  fatal_char    <<- NULL
   
   # Close any leftover sinks and connections from previous runs.
   while (sink.number() > 0) {
@@ -27,7 +33,7 @@ func_run_model <- function(run_params) {
   
   
   # Start logger ------------------------------------------------------------------------------------
-  logfile <- file.path(run_params$dir_output_logs, paste0("mb_model_run_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".log"))
+  logfile <<- file.path(run_params$dir_output_logs, paste0("mb_model_run_", format(Sys.time(), "%Y%m%d_%H%M%S"), ".log"))
   logcon  <<- file(logfile, open = "a") # Assigned globally to be available to func_customlog()
   
   # Setup sink for split logging (console + logfile).
@@ -55,10 +61,10 @@ func_run_model <- function(run_params) {
   output_lf <- list.files(run_params$output_dirname)
   if (length(setdiff(output_lf, "logs")) > 0) {
     if (!is.null(run_params$overwrite_output) && (run_params$overwrite_output == FALSE)) {
-      func_customlog("output destination already exists! Please move, remove or rename it before running the model.\n", level = 2)
+      func_customlog("Output destination already exists. Please move, remove or rename it before running the model.", level = 2)
       fsm()
     } else {
-      func_customlog("output destination already exists. I am overwriting any files already present!\n", level = 1)
+      func_customlog("Output destination already exists. Old files will be overwritten.", level = 1)
     }
   }
   
@@ -76,7 +82,6 @@ func_run_model <- function(run_params) {
   # Load required R packages
   packages_loaded <- func_load_packages(run_params)
   if (packages_loaded == FALSE) {
-    func_customlog("please install required packages before proceeding!\n", level = 2)
     func_stop()
   }
   
@@ -286,6 +291,15 @@ func_run_model <- function(run_params) {
   notify("Run finished successfully ✅",
          title = paste0("Glacier model DMBSim ", run_params$dmbsim_version),
          image = normalizePath("icons/icon64.png"))
+  
+  
+  
+  # Show modal dialog -----------------------------------------------------------------------------
+  if (rstudioapi::isAvailable()) {
+    func_end_dialog(run_params,
+                    logfile,
+                    exit_state = "success")
+  }
   
   return(0)
   

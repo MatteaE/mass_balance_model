@@ -41,7 +41,8 @@ func_process_year <- function(year_data,
   if (any(is.na(time_bounds_match))) {
     offending_id1 <- which(is.na(time_bounds_match))[1] # The [1] to handle the case where both simulation start and end don't have meteo data. This index then is either value 1 or 2
     offending_date <- model_time_bounds_range[offending_id1]
-    func_customlog("meteo data for the current year are missing. Please check the meteo file and the first_year/last_year! Offending date:", format(offending_date, "%Y/%m/%d"), "(day-of-year:", format(offending_date, "%j)."), "\n", level = 2)
+    func_customlog("Meteo data for the current year are missing. Please check the meteo file and the first_year/last_year!", level = 2)
+    func_customlog("Offending date:", format(offending_date, "%Y/%m/%d"), "(day-of-year:", format(offending_date, "%j)."), "\n", level = 0)
     func_stop()
   }
   
@@ -161,7 +162,7 @@ func_process_year <- function(year_data,
   # max_error <- max(stake_errors)
   # max_error_id <- which.max(stake_errors)
   # if (max_error > 1) {
-  # func_customlog("the recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear extraction of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.\n", level = 1)
+  # func_customlog("The recomputed stake mass balance biases over the stake period and over the single \"measurement period\" do not match. This is likely an issue with the bilinear extraction of the stakes series. Check if there are stakes coordinates exactly aligned with cell centers or too close to the glacier edges, they are likely the cause.\n", level = 1)
   # cat(paste0("The max error is at stake ", max_error_id, ", with value ", round(max_error, 1), " mm w.e.\n"))
   # cat("Stake data:", paste(year_data$massbal_annual_meas_cur[max_error_id,]), sep = "  |  ", "\n")
   # }

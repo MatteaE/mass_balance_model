@@ -79,7 +79,7 @@ func_find_mb_points_on_grid <- function(year_data,
     }
     stakes_annual_edge_n <- length(stakes_annual_edge_ids)
     if (stakes_annual_edge_n > 0) {
-      func_customlog("found ", stakes_annual_edge_n, " annual measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n", level = 1)
+      func_customlog("Year ", year_data$year_cur, ": found ", stakes_annual_edge_n, " annual measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, using nearest neighbor instead.", level = 1)
       func_customlog("They are: ", paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_edge_ids], collapse = " | "), "\n")
     }
   }
@@ -102,7 +102,7 @@ func_find_mb_points_on_grid <- function(year_data,
     }
     stakes_winter_edge_n <- length(stakes_winter_edge_ids)
     if (stakes_winter_edge_n > 0) {
-      func_customlog("found ", stakes_winter_edge_n, " winter measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n", level = 1)
+      func_customlog("Year ", year_data$year_cur, ": found ", stakes_winter_edge_n, " winter measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, using nearest neighbor instead.", level = 1)
       func_customlog("They are: ", paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_edge_ids], collapse = " | "), "\n")
     }
   }
@@ -125,7 +125,7 @@ func_find_mb_points_on_grid <- function(year_data,
     }
     points_daily_edge_n <- length(points_daily_edge_ids)
     if (points_daily_edge_n > 0) {
-      func_customlog("found ", points_daily_edge_n, " user-defined point(s) of daily output which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, I will use nearest neighbor.\n", level = 1)
+      func_customlog("Year ", year_data$year_cur, ": found ", points_daily_edge_n, " user-defined point(s) of daily output which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, using nearest neighbor instead.", level = 1)
       func_customlog("They are: ", paste0(year_data$points_daily_out$id[points_daily_edge_ids], collapse = " | "), "\n")
     }
   }

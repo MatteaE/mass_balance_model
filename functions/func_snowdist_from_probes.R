@@ -25,7 +25,7 @@ func_snowdist_from_probes <- function(year_data,
   idw_sel <- run_params$probes_snowdist_idw_type
   if (nrow(snow_probes_df) < run_params$probes_snowdist_search_npoints_min) {
     idw_sel <- "global"
-    func_customlog("There are fewer than the required ",
+    func_customlog("Year ", year_data$year_cur, ": there are fewer than the required ",
                    run_params$probes_snowdist_search_npoints_min,
                    " winter measurements for the interpolation of snow distribution -- must use global IDW", level = 1)
   }
@@ -50,7 +50,7 @@ func_snowdist_from_probes <- function(year_data,
   
   # We enforce a complete map of snow distribution.
   if (anyNA(values(snowdist_idw, mat = F))) {
-    func_customlog("There are NA values in the calculated map of snow distribution, please investigate!", level = 2)
+    func_customlog("Year ", year_data$year_cur, ": there are NA values in the calculated map of snow distribution, please investigate!", level = 2)
     func_stop()
   }
   

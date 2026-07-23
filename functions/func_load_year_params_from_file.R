@@ -40,7 +40,7 @@ func_load_year_params_from_file <- function(year_data,
                              col.names = paste0("V", 1:4)) # Specifying col.names enables graceful failure when the params file has no actual contents.
     
     if (any(duplicated(params_raw[,3]))) {
-      cat("FATAL: found duplicated parameter names in the params file. Please fix.")
+      func_customlog("Year ", year_data$year_cur, ": found duplicated parameter names in the params file. Please fix.", level = 2)
       func_stop()
     }
     
@@ -53,7 +53,9 @@ func_load_year_params_from_file <- function(year_data,
     # from the old parameter file format).
     params_available_remove <- which(is.na(params_available_ids))
     if (length(params_available_remove) > 0) {
-      func_customlog(paste0("dropping ", length(params_available_remove), " file-based parameter(s) with unknown name, namely: ", paste0(params_raw[params_available_remove,3], collapse = ", "), "\n"), level = 1)
+      func_customlog("Year ", year_data$year_cur, ": dropping ", length(params_available_remove), " file-based parameter(s) with unknown name.", level = 1)
+      func_customlog("They are: ", paste0(params_raw[params_available_remove,3], collapse = ", "), level = 0)
+      cat("\n")
       params_available_ids <- params_available_ids[-params_available_remove]
       params_raw <- params_raw[-params_available_remove,]
     }
@@ -62,7 +64,7 @@ func_load_year_params_from_file <- function(year_data,
     
     # Is any parameter available after removing unknown ones?
     if (params_available_n > 0) {
-      cat("Found", params_available_n, "defined year-specific parameter(s):", paste0(params_names_all[params_available_ids], sep = ""), "\n")
+      cat("Year ", year_data$year_cur, ": found", params_available_n, "defined year-specific parameter(s):", paste0(params_names_all[params_available_ids], sep = ""), "\n")
       
       # Assemble output, already converting to numeric types.
       for (param_id_raw in 1:params_available_n) {
@@ -79,10 +81,31 @@ func_load_year_params_from_file <- function(year_data,
         
         # Parameter mb_corr_ele_bands - must be comma-separated numbers.
         if (params_names_all[param_id_year_cur] == "mb_corr_ele_bands") {
+          
+          if (typeof(params_raw[param_id_raw,1]) != "character") {
+            func_customlog("Year ", year_data$year_cur, ": file-based parameter mb_corr_ele_bands is malformed. Please fix it.", level = 2)
+            func_customlog(paste0("Value(s) provided: ", params_raw[param_id_raw,1]), level = 0)
+            func_stop()
+          }
+            
           val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
           if (any(is.na(val_tmp)) || (length(val_tmp) < 2)) {
-            stop(paste0("FATAL: file-based parameter mb_corr_ele_bands is malformed. Please fix it. Value(s) provided: ", params_raw[param_id_raw,1]))
+            func_customlog("Year ", year_data$year_cur, ": file-based parameter mb_corr_ele_bands is malformed. Please fix it.", level = 2)
+            func_customlog(paste0("Value(s) provided: ", params_raw[param_id_raw,1]), level = 0)
+            func_stop()
           }
+          if (any(diff(val_tmp) < 10)) {
+            func_customlog("Year ", year_data$year_cur, ": file-based parameter mb_corr_ele_bands has inadequate values. Please fix it (expected: ascending order, bands > 10 m wide).", level = 2)
+            func_customlog(paste0("Value(s) provided: ", params_raw[param_id_raw,1]), level = 0)
+            func_stop()
+          }
+          if ((max(val_tmp) < min(year_data$massbal_annual_meas_cur$z_dem)) || (min(val_tmp) > max(year_data$massbal_annual_meas_cur$z_dem))) {
+            func_customlog("Year ", year_data$year_cur, ": file-based parameter mb_corr_ele_bands has inadequate values. All correction bands are outside the altitudinal range of the annual mass balance measurements. Please fix.", level = 2)
+            func_customlog(paste0("Value(s) provided: ", params_raw[param_id_raw,1]), level = 0)
+            func_stop()
+          }
+          
+          # If we have made it to here, we have meaningful correction bands.
           year_cur_params[[param_id_year_cur]] <- val_tmp
           
           
@@ -96,7 +119,9 @@ func_load_year_params_from_file <- function(year_data,
             val_tmp <- as.numeric(params_raw[param_id_raw,1])
           }
           if (any(is.na(val_tmp))) {
-            stop(paste0("FATAL: file-based parameter prec_summer_fact is malformed. Please fix it. Value(s) provided: ", params_raw[param_id_raw,1]))
+            func_customlog("Year ", year_data$year_cur, ": file-based parameter prec_summer_fact is malformed. Please fix it.", level = 2)
+            func_customlog("Value(s) provided: ", params_raw[param_id_raw,1], level = 0)
+            func_stop()
           }
           
           # If a single value is provided, we apply it from May to September (default behavior).
@@ -108,7 +133,9 @@ func_load_year_params_from_file <- function(year_data,
           } else if (length(val_tmp) == 12) {
             year_cur_params[[param_id_year_cur]] <- val_tmp
           } else {
-            stop(paste0("FATAL: file-based parameter prec_summer_fact must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", params_raw[param_id_raw,1]))
+            func_customlog("Year ", year_data$year_cur, ": file-based parameter prec_summer_fact must have either 1 annual or 12 comma-separated monthly values.", level = 2)
+            func_customlog("Value(s) provided: ", params_raw[param_id_raw,1], level = 0)
+            func_stop()
           }
           
           
@@ -121,7 +148,9 @@ func_load_year_params_from_file <- function(year_data,
             val_tmp <- as.numeric(params_raw[param_id_raw,1])
           }
           if (any(is.na(val_tmp))) {
-            stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " is malformed. Please fix it. Value(s) provided: ", params_raw[param_id_raw,1]))
+            func_customlog("Year ", year_data$year_cur, ": file-based parameter ", params_names_all[param_id_year_cur], " is malformed. Please fix it.", level = 2)
+            func_customlog("Value(s) provided: ", params_raw[param_id_raw,1], level = 0)
+            func_stop()
           }
           
           if (length(val_tmp) == 1) {
@@ -129,7 +158,9 @@ func_load_year_params_from_file <- function(year_data,
           } else if (length(val_tmp) == 12) {
             year_cur_params[[param_id_year_cur]] <- val_tmp
           } else {
-            stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " must have either 1 annual or 12 comma-separated monthly values. Value(s) provided: ", params_raw[param_id_raw,1]))
+            func_customlog("Year ", year_data$year_cur, ": file-based parameter ", params_names_all[param_id_year_cur], " must have either 1 annual or 12 comma-separated monthly values.", level = 2)
+            func_customlog("Value(s) provided: ", params_raw[param_id_raw,1], level = 0)
+            func_stop()
           }
           
           
@@ -144,7 +175,9 @@ func_load_year_params_from_file <- function(year_data,
         } else {
           val_tmp <- as.numeric(params_raw[param_id_raw,1])
           if (is.na(val_tmp)) {
-            stop(paste0("FATAL: file-based parameter ", params_names_all[param_id_year_cur], " is malformed, please fix it and run again. Value(s) provided: ", params_raw[param_id_raw,1]))
+            func_customlog("Year ", year_data$year_cur, ": file-based parameter ", params_names_all[param_id_year_cur], " is malformed, please fix it and run again.", level = 2)
+            func_customlog("Value(s) provided: ", params_raw[param_id_raw,1], level = 0)
+            func_stop()
           }
           year_cur_params[[param_id_year_cur]] <- val_tmp
         }
@@ -153,13 +186,13 @@ func_load_year_params_from_file <- function(year_data,
       # else: params_available_n is not > 0
     } else {
       
-      func_customlog("params file was specified, but no valid parameter was found within it. Will use default values\n", level = 1)
+      func_customlog("Year ", year_data$year_cur, ": params file was specified, but no valid parameter was found within it. Will use default values.", level = 1)
       
     }
     # No params file found for the current year.
   } else {
     
-    cat("No year-specific parameters defined\n")
+    cat("Year ", year_data$year_cur, ": no year-specific parameters defined\n")
     
   }
   

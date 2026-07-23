@@ -46,7 +46,10 @@ func_load_packages <- function(run_params) {
   
   if (!exit_status_all) {
     pkg_missing_ids <- which(!exit_status)
-    func_customlog(paste0("some required packages are missing. They are: ", paste(package_list[pkg_missing_ids], collapse = ", ")), "\n", level = 1)
+    func_customlog("Some required packages are missing", level = 2)
+    func_customlog(paste0("They are: ", paste(package_list[pkg_missing_ids], collapse = ", ")), level = 0)
+    func_customlog("Please install required packages before proceeding.", level = 0)
+    func_stop()
   }
   
   return(exit_status_all)

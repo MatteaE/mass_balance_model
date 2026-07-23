@@ -58,7 +58,7 @@ func_set_year_params <- function(year_data,
     # Year parameters filling in case the year does have some mass balance measurements.
     if (year_data$nstakes_annual > 0) {
       
-      cat("The current year has annual mass balance data, so I am using global default values for numeric parameters. I will optimize the relevant ones based on the data.\n")
+      cat("The current year has annual mass balance data, so the global default values are used for numeric parameters. The relevant ones will be optimized based on the provided mass balance data.\n")
       
       for (param_id in year_cur_params_na_ids) {
         if (params_names_all[param_id] == "mb_corr_ele_bands") {
@@ -85,9 +85,9 @@ func_set_year_params <- function(year_data,
     } else {
       
       if (run_params$nodata_years_automatic == TRUE) {
-        cat("I will use mean optimized values from the years with measurements, if needed and available\n")
+        cat("Parameter nodata_years_automatic is TRUE - using mean optimized values from the years with measurements, if needed and available\n")
       } else {
-        cat("I will NOT use mean optimized values from the years with measurements\n")
+        cat("Parameter nodata_years_automatic is FALSE - not using mean optimized values from the years with measurements; global default values will be used instead\n")
       }
       
       # Iterate on the parameters which still need to be filled.

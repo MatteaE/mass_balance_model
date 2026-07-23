@@ -13,7 +13,8 @@
 # - check if any of the transformed points fall within the dhm extent
 # - if yes, return the transformed coordinates; if not, return c(NA, NA).
 
-func_fix_stake_coordinates <- function(stake_xy,
+func_fix_stake_coordinates <- function(stake_id,
+                                       stake_xy,
                                        dhm_extent,
                                        crs_try,
                                        crs_target) {
@@ -26,7 +27,7 @@ func_fix_stake_coordinates <- function(stake_xy,
     point_transf_coords <- as.numeric(st_coordinates(point_cur_transf))
     if (all(!is.na(point_transf_coords))) {
       if ((dhm_extent[1] <= point_transf_coords[1]) && (dhm_extent[2] >= point_transf_coords[1]) && (dhm_extent[3] <= point_transf_coords[2]) && (dhm_extent[4] >= point_transf_coords[2])) {
-        cat(paste0("      Just rescued a pair of coordinates! They were likely in the EPSG:", crs_try[crs_id], " coordinate system.\n"))
+        func_customlog("            Point id ", stake_id, ": recovered by using the EPSG:", crs_try[crs_id], " coordinate system.", level = 0)
         return(point_transf_coords)
       }
     }

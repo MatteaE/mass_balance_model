@@ -10,15 +10,28 @@
 
 func_stop <- function() {
   
+  # Write end time to log file --------------------------------------------------------------------
   flush(logcon)
   sink()
   t_end <- Sys.time()
   writeLines(paste0("Run failed at ", format(t_end), " (", Sys.timezone(), ")", "\n"), con = logcon, sep = "")
   flush(logcon)
   close(logcon)
+  
+  
+  # Send notification -----------------------------------------------------------------------------
   notify("Run failed ❌", 
          title = paste0("Glacier model DMBSim ", run_params$dmbsim_version),
          image = normalizePath("icons/icon64.png"))
+  
+  
+  # Show modal dialog -----------------------------------------------------------------------------
+  if (rstudioapi::isAvailable()) {
+    func_end_dialog(run_params,
+                    logfile,
+                    exit_state = "failure")
+  }
+  
   stop(paste0("\rRun failed at ", format(t_end), " (", Sys.timezone(), ")", "\n"))
   
 }
