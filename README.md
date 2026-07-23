@@ -140,7 +140,7 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
     
     * A daily time series of air temperature and total precipitation. A tool is provided to assemble the series from AWS measurements
     
-    * A set of point measurements of mass balance. There is no constraint on the spatio-temporal distribution of those measurements. The tool will run (uncalibrated) even if the measurements are missing.
+    * A set of point measurements of mass balance. There is no constraint on the spatio-temporal distribution of those measurements. The tool will run (uncalibrated) even if the measurements are missing
     
 * **Optional input data:**
 
