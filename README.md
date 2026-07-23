@@ -47,7 +47,7 @@ That's it!
 
 3. Open file `utils/make_input.R` within RStudio, run it by clicking on the <em>Run App</em> button, and follow the instructions there.
 
-4. Place the folder created by `make_input` (with the glacier name) inside the `input` folder.
+4. Place the folder created by `make_input.R` (with the glacier name) inside the `input` folder.
 
 5. Prepare the text file with the meteorological time series and place it in folder `weather` inside the `input` folder. The tools under `utils/aggregate_meteo_data.R` and `utils/meteo_concatenate.R` can help preparing the data in the correct file format.
 
