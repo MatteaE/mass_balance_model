@@ -106,7 +106,7 @@ That's it!
     
 * For developers:
 
-    * Modular, extensible, cross-platform codebase
+    * Modular, well-commented, cross-platform codebase
     
     * Custom multi-level logging engine
         
