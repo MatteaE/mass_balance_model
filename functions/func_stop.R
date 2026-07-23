@@ -21,7 +21,7 @@ func_stop <- function() {
   
   # Send notification -----------------------------------------------------------------------------
   notify("Run failed ❌", 
-         title = paste0("Glacier model DMBSim ", run_params$dmbsim_version),
+         title = paste0("DMBSim ", run_params$dmbsim_version),
          image = normalizePath("icons/icon64.png"))
   
   

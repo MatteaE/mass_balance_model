@@ -32,28 +32,50 @@ func_setup_winter_probes_dist <- function(year_data,
   # If yes, try to load it and project it to the current DHM grid.
   if (nchar(year_cur_params$probes_snowdist_filename) > 0) {
     
-    cat("Attempting to load user-defined map of snow distribution for the current year...\n")
+    cat("Attempting to load the user-defined map of snow distribution for the current year...\n")
     
     # Check if file exists and can be opened, fail gracefully if not.
-    probes_fp <- file.path(normalizePath(dirname(run_params$dir_data_snowdist)), basename(run_params$dir_data_snowdist), year_cur_params$probes_snowdist_filename)
+    probes_fp <- file.path(normalizePath(dirname(run_params$dir_data_snowdist)),
+                           basename(run_params$dir_data_snowdist),
+                           year_cur_params$probes_snowdist_filename)
     if (!file.exists(probes_fp)) {
-      func_customlog("User-defined map of snow distribution does not exist: ", probes_fp, level = 2)
+      func_customlog("Year ", year_data$year_cur, ": the user-defined map of snow distribution does not exist: ", probes_fp, level = 2)
       func_stop()
     }
     tryCatch({
       dist_probes_raw_r <- rast(probes_fp)
     },
     error = function(err) {
-      func_customlog("Error reading user-defined map of snow distribution: ", probes_fp, level = 2)
+      func_customlog("Year ", year_data$year_cur, ": error reading the user-defined map of snow distribution: ", probes_fp, level = 2)
       func_stop()
     })
     
-    dist_probes_r <- project(dist_probes_raw_r,
+    
+    
+    cat("Resampling snow distribution map to the current grid...\n")
+    tryCatch({
+      dist_probes_r <- project(dist_probes_raw_r,
                              data_dhms$elevation[[year_data$dhm_grid_id]],
                              method = "bilinear")
+      },
+      error = function(err) {
+        func_customlog("Year ", year_data$year_cur, ": error resampling the user-defined map of snow distribution: ", probes_fp, level = 2)
+        func_stop()
+      })
+             
     
-    if (any(is.na(values(dist_probes_r, mat = F)))) {
-      func_customlog("Resampled map of snow distribution has NA values. They will be replaced with 1, but check carefully the input maps.", level = 1)
+    
+    dist_probes_val <- values(dist_probes_r, mat = F)
+    if (all(is.na(dist_probes_val))) {
+      func_customlog("Year ", year_data$year_cur, ": the provided map of snow distribution has only NA values within the current grid. Please check the map carefully.", level = 2)
+      func_stop()
+    }
+    
+    
+    dist_probes_na_n <- length(which(is.na(dist_probes_val)))
+    if (dist_probes_na_n > 0) {
+      func_customlog("Year ", year_data$year_cur, ": the resampled map of snow distribution has ", dist_probes_na_n, " NA values", level = 1)
+      func_customlog("They will be replaced with 1.0, but check carefully the input maps.", level = 0)
       dist_probes_r <- subst(dist_probes_r, NA, 1.0)
     }
     
@@ -107,7 +129,7 @@ func_setup_winter_probes_dist <- function(year_data,
   # (probes_snowdist_fact < 1; it makes sense if there are probes affected by avalanches).
   dist_probes_mean <- mean(values(dist_probes_r, mat = F))
   if (is.na(dist_probes_mean)) {
-    func_customlog("There are still NA values in the map of snow distribution, please investigate!", level = 2)
+    func_customlog("There are still NA values in the map of snow distribution, please investigate.", level = 2)
     func_stop()
   }
   if ((is.na(run_params$probes_snowdist_fact)) || (run_params$probes_snowdist_fact < 0)) {

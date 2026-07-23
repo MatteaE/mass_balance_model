@@ -11,11 +11,12 @@ func_run_model <- function(run_params) {
   # Model version.
   run_params$dmbsim_version <<- "3.0"
   
-  # Character vectors with all emitted warnings.
+  # Character vectors with all emitted warnings and errors.
   # They are updated by func_customlog() and used
   # by func_end_dialog() to show relevant information.
   warnings_char <<- NULL
   fatal_char    <<- NULL
+  
   
   # Close any leftover sinks and connections from previous runs.
   while (sink.number() > 0) {
@@ -24,7 +25,7 @@ func_run_model <- function(run_params) {
   while (nrow(showConnections(all = FALSE)) > 0) {
     close(getConnection(rownames(showConnections(all = FALSE))))
   }
-
+  
   
   # Set main output directory, where the output and logs will be stored.
   run_params$output_dirname <- file.path("output", run_params$name_glacier)
@@ -53,7 +54,7 @@ func_run_model <- function(run_params) {
   print(R.version)
   cat("\n")
   
-
+  
   # Output directory already exists (we are putting the logs in it).
   # If it already has stuff in it beside logs/, stop with
   # error unless run_params$overwrite_output is TRUE,
@@ -289,7 +290,7 @@ func_run_model <- function(run_params) {
   close(logcon)
   
   notify("Run finished successfully ✅",
-         title = paste0("Glacier model DMBSim ", run_params$dmbsim_version),
+         title = paste0("DMBSim ", run_params$dmbsim_version),
          image = normalizePath("icons/icon64.png"))
   
   
