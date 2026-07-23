@@ -1,4 +1,5 @@
 <img src="icons/icon128.png" width="128">
+
 # Introduction: DMBSim 3.0
 
 DMBSim is a tool to calculate and homogenize glacier surface mass balance from point measurements. It works by running a gridded model of daily accumulation and melt, based on topographical and meteorological data. The main parameters are optimized to match the mass balance from the provided point measurements [[1]](#ref1).
