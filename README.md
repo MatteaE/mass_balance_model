@@ -80,6 +80,8 @@ That's it!
 
 8. In RStudio, open file `main.R` and launch the calculations by clicking on the <em>Source</em> button.
 
+For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim_tutorial_1.pdf) and [Tutorial 2](/doc/tutorial2_multiyear/DMBSim_tutorial_2.pdf).
+
 
 
 # <a name="features"></a>Additional features
