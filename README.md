@@ -26,9 +26,13 @@ Main features:
 
 * Calculations over multiple years (conventional or reference-surface mass balance, cumulative change)
 
-* Processing of multiple glaciers or full catchments
+* Processing of multiple glaciers and full catchments
 
 * Simulation of past conditions, future scenarios, years with no measurements
+
+* Easy, comprehensive customization of parameters
+
+* High-quality output visualizations
 
 
 DMBSim is implemented in R (with some C++ routines for performance), is fully cross-platform (Windows / Mac OS / Linux), and is designed to be run within RStudio. Several graphical tools are provided to easily prepare the input data in a consistent format.
