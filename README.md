@@ -24,13 +24,13 @@ DMBSim is a tool to calculate and homogenize glacier surface mass balance from p
 
 * Calculation of annual glacier-wide mass balance at regular intervals (the hydrological year)
 
+* Leave-one-out validation of the point measurements
+
 * Calculations over multiple years (conventional or reference-surface mass balance, cumulative change)
 
 * Processing of multiple glaciers and full catchments
 
 * Simulation of past conditions, future scenarios, years with no measurements
-
-* Easy, comprehensive customization of parameters
 
 * High-quality output visualizations
 
