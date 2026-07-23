@@ -68,21 +68,23 @@ That's it!
 
 # Additional features
 
-* Simple usage, suitable as a teaching tool:
+* **Simple usage, suitable as a teaching tool:**
 
     * In-depth [documentation](/doc)
     
     * Graphical tools to assist the preparation of input data
 
-    * Comprehensive and informative handling of exceptions, errors, and unexpected inputs
+    * Comprehensive handling of exceptions, errors, and unexpected inputs
+    
+    * Detailed logging in RStudio console, log files, and modal dialogs
 
-* Accumulation routines:
+* **Accumulation routines:**
 
     * Spatial snow distribution based on topographic parameters, winter measurements, user-supplied files, previous model runs, or a combination of them
     
     * Snow redistribution using a process-based avalanche model [[2]](#ref2)
     
-* Ablation routines:
+* **Ablation routines:**
 
     * Melt calculation based on an Enhanced Temperature Index model (air temperature and potential solar radiation) [[3]](#ref3)
     
@@ -90,7 +92,7 @@ That's it!
     
     * Optional spatially variable albedo
     
-* Calibration to reference mass balance:
+* **Calibration to reference mass balance:**
 
     * Support for multiple measurements throughout the year
     
@@ -98,19 +100,19 @@ That's it!
 
     * Support for accumulation measurements with no reference surface (unknown starting date)
     
-* Output:
+* **Output:**
 
     * Publication-ready vector plots (maps, time series, profile distributions)
     
     * GeoTiff maps and CSV files with all calculated results
     
-* For developers:
+* **For developers:**
 
     * Modular, well-commented, cross-platform codebase
     
     * Custom multi-level logging engine
         
-* Minimal input data:
+* **Minimal input data:**
 
     * One or more Digital Elevation Models (DEMs) covering the area of interest
     
@@ -122,7 +124,7 @@ That's it!
     
     * A set of point measurements of mass balance. There is no constraint on the spatio-temporal distribution of those measurements. The tool will run (uncalibrated) even if the measurements are missing.
     
-* Optional input data:
+* **Optional input data:**
 
     * One or more vector outlines of debris-covered regions
     
