@@ -1,6 +1,6 @@
 <img src="icons/icon128.png" width="128">
 
-# Introduction: DMBSim 3.0
+# DMBSim 3.0
 
 DMBSim is a tool to calculate and homogenize glacier surface mass balance from point measurements. It works by running a gridded model of daily accumulation and melt, based on topographical and meteorological data. The main parameters are optimized to match the mass balance from the provided point measurements [[1]](#ref1).
 
@@ -23,7 +23,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
 
 # Quick start
 
-[Tutorial 1](/docs/tutorial1_singleyear/DMBSim_tutorial_1.pdf) will guide you through system setup and simple mass balance calculations.
+[Tutorial 1](/doc/tutorial1_singleyear/DMBSim_tutorial_1.pdf) will guide you through system setup and simple mass balance calculations.
 
 ## Minimal installation instructions
 
@@ -45,7 +45,7 @@ That's it!
 
 2. Procure an outline of your glacier of interest, for example from [the Randolph Glacier Inventory](https://www.glims.org/RGI/). You can also draw one yourself with a GIS program.
 
-3. Open file `utils/make_input.R` within RStudio, run it by clicking on the <em>Run App</em> button, and follow the instructions
+3. Open file `utils/make_input.R` within RStudio, run it by clicking on the <em>Run App</em> button, and follow the instructions there.
 
 4. Place the folder created by `make_input` (with the glacier name) inside the `input` folder.
 
@@ -68,9 +68,9 @@ That's it!
 
 # Additional features
 
-* Usage:
+* Simple usage, suitable as a teaching tool:
 
-    * In-depth [documentation](/docs/)
+    * In-depth [documentation](/doc)
     
     * Graphical tools to assist the preparation of input data
 
