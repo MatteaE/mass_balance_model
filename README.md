@@ -15,12 +15,14 @@
 
 4. [Published works with DMBSim applications](#publications)
 
-5. [References](#references)
+5. [Acknowledgments](#acknowledgments)
+
+6. [References](#references)
 
 
 # <a name="intro"></a>DMBSim 3.0
 
-DMBSim is a tool to calculate and homogenize glacier surface mass balance from point measurements. It works by running a gridded model of daily accumulation and melt, based on topographical and meteorological data. The main parameters are optimized to match the mass balance from the provided point measurements [[1]](#ref1). DMBSim is suitable for research, teaching, and operational mass balance monitoring. It is currently used to support the glaciological programs of countries in Central Asia: Kazakhstan, Kyrgyzstan, Tajikistan, and Uzbekistan.
+DMBSim is a tool to calculate and homogenize glacier surface mass balance from point measurements. It works by running a gridded model of daily accumulation and melt, based on topographical and meteorological data. The main parameters are optimized to match the average mass balance of the provided point measurements [[1]](#ref1). DMBSim is suitable for research, teaching, and operational mass balance monitoring. It is currently used to support the glaciological programs of countries in Central Asia: Kazakhstan, Kyrgyzstan, Tajikistan, and Uzbekistan.
 
 **Main features:**
 
@@ -45,7 +47,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
 
 # <a name="quickstart"></a>Quick start
 
-[Tutorial 1](/doc/tutorial1_singleyear/DMBSim_tutorial_1.pdf) will guide you through system setup and simple mass balance calculations.
+[Tutorial 1](/doc/tutorial1_singleyear/DMBSim_tutorial_1.pdf) will guide you through system setup and simple mass balance calculations. Alternatively, follow the steps below.
 
 ## <a name="installation"></a>Minimal installation instructions
 
@@ -59,7 +61,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
 
 5. Open file `utils/install_packages.R` within RStudio and run it by clicking on the <em>Source</em> button.
 
-That's it!
+Everything is ready!
 
 ## <a name="usage"></a>Minimal usage instructions
 
@@ -172,15 +174,47 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
 
 5. Kenzhebaev R., Barandun M., Mattea E., Azisov E., Esenaman Uulu M., Satarov S., Pohl E., Saks T., Hoelzle M., and Usubaliev R. (2025). Changes in glacier area and the glacial component of runoff in the upper reaches of the Naryn River. International Mountain Conference 2025, Innsbruck, Austria.
 
-6. Navruzshoev H., Kayumov A., Kabutov K., Saks T., Barandun M., Mattea E., Smirnov A., and Hoelzle M. (2023). Basic research on glacier No. 457 of the Gunt river basin. Conference «Impact of climate change on the state of glaciers of the Republic of Tajikistan and protection of glaciers», Dushanbe, Tajikistan.
+6. Kmetyko S. (2026). Quantifying Ice Loss and Related Processes of Vanishing Glaciers – Goldbergkees and Kleinfleißkees, Austrian Alps. Master’s thesis, University of Graz.
 
-7. Navruzshoev H., Kayumov A., Saks T., Barandun M., Kabutov K., Mattea E., Smirnov A., and Hoelzle M. (2023). Glacier mass balance in the Gunt river basin, Pamir, Tajikistan. 21st Swiss Geoscience Meeting, Mendrisio, Switzerland.
+7. Navruzshoev H., Kayumov A., Kabutov K., Saks T., Barandun M., Mattea E., Smirnov A., and Hoelzle M. (2023). Basic research on glacier No. 457 of the Gunt river basin. Conference «Impact of climate change on the state of glaciers of the Republic of Tajikistan and protection of glaciers», Dushanbe, Tajikistan.
 
-8. Navruzshoev H., Saks T., Sheralizoda N., Kabutov K., Barandun M., Mattea E., and Hoelzle M. (2025). Glacier mass balance in the Gunt river basin, Pamir, Tajikistan. International Mountain Conference 2025, Innsbruck, Austria.
+8. Navruzshoev H., Kayumov A., Saks T., Barandun M., Kabutov K., Mattea E., Smirnov A., and Hoelzle M. (2023). Glacier mass balance in the Gunt river basin, Pamir, Tajikistan. 21st Swiss Geoscience Meeting, Mendrisio, Switzerland.
 
-9. Severskiy I., Kapitsa V., Kassatkin N., Usmanova Z., Saks T., Mattea E., and Kissebayev D. (2025). Comparison of the modelled and measured mass balance of the Central Tuyuksu glacier, northern slope of Ili-Alatau, Journal of Geography and Environmental Management, 75, 4, 16–31, doi: 10.26577/JGEM.2024.v75.i4.2.
+9. Navruzshoev H., Saks T., Sheralizoda N., Kabutov K., Barandun M., Mattea E., and Hoelzle M. (2025). Glacier mass balance in the Gunt river basin, Pamir, Tajikistan. International Mountain Conference 2025, Innsbruck, Austria.
 
-10. Umirzakov G., Kholtojiyeva O., Eshmuratov D., Gulmurzayeva B., Mattea E., and Barandun M. (2025). Mass balance modeling of the Barkrak glacier. (pp. 130–135). International Scientific and Practical Conference «Innovative methods for monitoring mountain glaciers under climate change and current challenges in glaciology». Tashkent, Uzbekistan.
+10. Severskiy I., Kapitsa V., Kassatkin N., Usmanova Z., Saks T., Mattea E., and Kissebayev D. (2025). Comparison of the modelled and measured mass balance of the Central Tuyuksu glacier, northern slope of Ili-Alatau, Journal of Geography and Environmental Management, 75, 4, 16–31, doi: 10.26577/JGEM.2024.v75.i4.2.
+
+11. Umirzakov G., Kholtojiyeva O., Eshmuratov D., Gulmurzayeva B., Mattea E., and Barandun M. (2025). Mass balance modeling of the Barkrak glacier. (pp. 130–135). International Scientific and Practical Conference «Innovative methods for monitoring mountain glaciers under climate change and current challenges in glaciology». Tashkent, Uzbekistan.
+
+
+
+# <a name="acknowledgments"></a>Acknowledgments
+Special thanks to the following people for their precious assistance with testing and improving the program: Erlan Azisov, Martina Barandun, Sultanbek Belekov, Ardamehr Halimov, Khusrav Kabutov, Ruslan Kenzhebaev, Silvio Kmetyko, Hofiz Navruzshoev, Tomas Saks, Gulomjon Umirzakov.
+
+## R packages used
+
+DMBSim 3.0 uses the following R packages:
+
+
+| Package | Version | Citation |
+|---|---|---|
+| base | 4.5.2 | [R Core Team. 2025a. *R: A Language and Environment for Statistical Computing*. R Foundation for Statistical Computing.](https://www.R-project.org/) |
+| cowplot | 1.2.0 | [Wilke, Claus O. 2025. *cowplot: Streamlined Plot Theme and Plot Annotations for "ggplot2"*.](https://doi.org/10.32614/CRAN.package.cowplot) |
+| fs | 1.6.7 | [Hester, Jim, Hadley Wickham, and Gábor Csárdi. 2026. *fs: Cross-Platform File System Operations Based on "libuv"*.](https://doi.org/10.32614/CRAN.package.fs) |
+| insol2 | 1.0.0 | [Corripio, Javier G., and Enrico Mattea. 2023. *Insol2: Solar Radiation*.](https://github.com/MatteaE/insol2) |
+| lwgeom | 0.2.15 | [Pebesma, Edzer. 2026. *lwgeom: Bindings to Selected "liblwgeom" Functions for Simple Features*.](https://doi.org/10.32614/CRAN.package.lwgeom) |
+| RColorBrewer | 1.1.3 | [Neuwirth, Erich. 2022. *RColorBrewer: ColorBrewer Palettes*.](https://doi.org/10.32614/CRAN.package.RColorBrewer) |
+| remotes | 2.5.0 | [Csárdi, Gábor, Jim Hester, Hadley Wickham, Winston Chang, Martin Morgan, and Dan Tenenbaum. 2024. *remotes: R Package Installation from Remote Repositories, Including "GitHub"*.](https://doi.org/10.32614/CRAN.package.remotes) |
+| Rfast | 2.1.5.2 | [Manos Papadakis, Michail Tsagris, Marios Dimitriadis, et al. 2025. *Rfast: A Collection of Efficient and Extremely Fast r Functions*.](https://doi.org/10.32614/CRAN.package.Rfast) |
+| scales | 1.4.0 | [Wickham, Hadley, Thomas Lin Pedersen, and Dana Seidel. 2025. *scales: Scale Functions for Visualization*.](https://doi.org/10.32614/CRAN.package.scales) |
+| sf | 1.0.24 | [Pebesma, Edzer. 2018. "Simple Features for R: Standardized Support for Spatial Vector Data." *The R Journal* 10 (1): 439–46.](https://doi.org/10.32614/RJ-2018-009)<br>[Pebesma, Edzer, and Roger Bivand. 2023. *Spatial Data Science: With applications in R*. Chapman and Hall/CRC.](https://doi.org/10.1201/9780429459016) |
+| shinyFiles | 0.9.3 | [Pedersen, Thomas Lin, Vincent Nijs, Thomas Schaffner, and Eric Nantz. 2022. *shinyFiles: A Server-Side File System Viewer for Shiny*.](https://doi.org/10.32614/CRAN.package.shinyFiles) |
+| shinyjs | 2.1.0 | [Attali, Dean. 2021. *shinyjs: Easily Improve the User Experience of Your Shiny Apps in Seconds*.](https://doi.org/10.32614/CRAN.package.shinyjs) |
+| terra | 1.9.11 | [Hijmans, Robert J., Andrew Brown, and Márcia Barbosa. 2026. *terra: Spatial Data Analysis*.](https://doi.org/10.32614/CRAN.package.terra) |
+| tidyverse | 2.0.0 | [Wickham, Hadley, Mara Averick, Jennifer Bryan, et al. 2019. "Welcome to the tidyverse." *Journal of Open Source Software* 4 (43): 1686.](https://doi.org/10.21105/joss.01686) |
+| tools | 4.5.2 | [R Core Team. 2025b. *R: A Language and Environment for Statistical Computing*. R Foundation for Statistical Computing.](https://www.R-project.org/) |
+| topmodel | 0.7.5 | [Buytaert, Wouter. 2022. *topmodel: Implementation of the Hydrological Model TOPMODEL in r*.](https://doi.org/10.32614/CRAN.package.topmodel) |
+
 
 
 
