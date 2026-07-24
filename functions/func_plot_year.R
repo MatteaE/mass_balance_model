@@ -35,6 +35,7 @@ func_plot_year <- function(year_data,
   plots_swe <- func_plot_year_swe_maps(year_data,
                                        run_params,
                                        data_dhms,
+                                       data_dems,
                                        data_outlines)
   plots_year <- append(plots_year, plots_swe)
   

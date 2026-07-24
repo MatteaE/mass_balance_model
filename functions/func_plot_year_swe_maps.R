@@ -24,6 +24,7 @@
 func_plot_year_swe_maps <- function(year_data,
                                     run_params,
                                     data_dhms,
+                                    data_dems,
                                     data_outlines) {
   
   
@@ -72,12 +73,12 @@ func_plot_year_swe_maps <- function(year_data,
   elevation_df <- data.frame(plot_df_base, z = values(data_dhms$elevation[[year_data$dhm_grid_id]], mat = F))
   
   plots <- list()
-  
-  
+
+    
   #### HYDROLOGICAL YEAR START ####
   plot_df <- plot_df_base
   plot_df$swe <- values(year_data$swe_annual_maps$hydro_start, mat = F)
-  swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
+  swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
   plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult/1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -88,7 +89,7 @@ func_plot_year_swe_maps <- function(year_data,
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(paste0("Hydrological year start: ", year_data$year_cur-1, "/10/01"),
                                         x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(bquote(bold("Mean SWE (full grid)"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
+    annotation_custom(grobTree(textGrob(bquote(bold("Mean on-glacier SWE"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                         x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
@@ -106,7 +107,7 @@ func_plot_year_swe_maps <- function(year_data,
   #### HYDROLOGICAL YEAR END ####
   plot_df <- plot_df_base
   plot_df$swe <- values(year_data$swe_annual_maps$hydro_end, mat = F)
-  swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
+  swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
   plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult/1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -117,7 +118,7 @@ func_plot_year_swe_maps <- function(year_data,
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(paste0("Hydrological year end: ", year_data$year_cur, "/09/30"),
                                         x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(bquote(bold("Mean SWE (full grid)"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
+    annotation_custom(grobTree(textGrob(bquote(bold("Mean on-glacier SWE"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                         x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
@@ -140,7 +141,7 @@ func_plot_year_swe_maps <- function(year_data,
     meas_period_annual_start_lab <- format(year_data$massbal_annual_meas_period[1], "%Y/%m/%d")
     plot_df <- plot_df_base
     plot_df$swe <- values(year_data$swe_annual_maps$meas_period_start, mat = F)
-    swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
+    swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
     plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
       geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -151,7 +152,7 @@ func_plot_year_swe_maps <- function(year_data,
                                           x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
       annotation_custom(grobTree(textGrob(paste0("Annual measurement period start: ", meas_period_annual_start_lab),
                                           x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(bquote(bold("Mean SWE (full grid)"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
+      annotation_custom(grobTree(textGrob(bquote(bold("Mean on-glacier SWE"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                           x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
       labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
            subtitle = " ") +
@@ -169,7 +170,7 @@ func_plot_year_swe_maps <- function(year_data,
     meas_period_annual_end_lab <- format(year_data$massbal_annual_meas_period[2], "%Y/%m/%d")
     plot_df <- plot_df_base
     plot_df$swe <- values(year_data$swe_annual_maps$meas_period_end, mat = F)
-    swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
+    swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
     plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
       geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -180,7 +181,7 @@ func_plot_year_swe_maps <- function(year_data,
                                           x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
       annotation_custom(grobTree(textGrob(paste0("Annual measurement period end: ", meas_period_annual_end_lab),
                                           x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(bquote(bold("Mean SWE (full grid)"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
+      annotation_custom(grobTree(textGrob(bquote(bold("Mean on-glacier SWE"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                           x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
       labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
            subtitle = " ") +
@@ -200,7 +201,7 @@ func_plot_year_swe_maps <- function(year_data,
   fixed_winter_end_lab <- format(year_data$massbal_winter_fixed_period[2], "%Y/%m/%d")
   plot_df <- plot_df_base
   plot_df$swe <- values(year_data$swe_winter_maps$fixed_end, mat = F)
-  swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
+  swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
   plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -211,7 +212,7 @@ func_plot_year_swe_maps <- function(year_data,
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(paste0("Winter fixed period end: ", fixed_winter_end_lab),
                                         x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(bquote(bold("Mean SWE (full grid)"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
+    annotation_custom(grobTree(textGrob(bquote(bold("Mean on-glacier SWE"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                         x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
