@@ -13,12 +13,14 @@
 
 3. [Additional features](#features)
 
-4. [References](#references)
+4. [Published works with DMBSim applications](#publications)
+
+5. [References](#references)
 
 
 # <a name="intro"></a>DMBSim 3.0
 
-DMBSim is a tool to calculate and homogenize glacier surface mass balance from point measurements. It works by running a gridded model of daily accumulation and melt, based on topographical and meteorological data. The main parameters are optimized to match the mass balance from the provided point measurements [[1]](#ref1).
+DMBSim is a tool to calculate and homogenize glacier surface mass balance from point measurements. It works by running a gridded model of daily accumulation and melt, based on topographical and meteorological data. The main parameters are optimized to match the mass balance from the provided point measurements [[1]](#ref1). DMBSim is suitable for research, teaching, and operational mass balance monitoring. It is currently used to support the glaciological programs of countries in Central Asia: Kazakhstan, Kyrgyzstan, Tajikistan, and Uzbekistan.
 
 **Main features:**
 
@@ -156,12 +158,36 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
     
     * A set of points where daily mass balance should be written to CSV files
 
+    
+    
+# <a name="publications"></a>Published works with DMBSim applications
+
+1. Azisov E., Barandun M., Saks T., Mattea E., Hoelzle M., Kim D., Bakirov K., Usubaliev R., and Kenzhebaev R. (2025). Reconstruction of the mass balance and dynamics of glaciers in the Orto-Koy-Suu basin (Northern Tien Shan). International Mountain Conference 2025, Innsbruck, Austria.
+
+2. Belekov S., Hyvarinen A., Barandun M., Mattea E., Akmatov R., Warley J., Manninen H., Svensson J., and Kenzhebaev R. (2025). Dynamics of Mass Balance and Area Change of the Turgen-Aksuu Glacier (1970-2024). International Mountain Conference 2025, Innsbruck, Austria
+
+3. Kabutov K., Amirzoda O. H., Sheralizoda N. S., Mattea E., Saks T., and Abdulloeva P. N. (2024). Modeling the mass balance of glacier №139 of the Eastern Pamir lake Karakul basin using the SMB model. Water Resources, Energy and Ecology, 4, 41–53.
+
+4. Kenzhebaev R., Barandun M., Mattea E., Usubaliev R., Azisov E., Saks T., Mandychev A., and Hoelzle M. (2022). Mass balance and area change of glacier No. 354 and Batysh Sook (№419) of the Inner Tien Shan, Kyrgyzstan. Conference «Cryosphere and related hazards in High Mountain Asia in a changing climate», Almaty, Kazakhstan.
+
+5. Kenzhebaev R., Barandun M., Mattea E., Azisov E., Esenaman Uulu M., Satarov S., Pohl E., Saks T., Hoelzle M., and Usubaliev R. (2025). Changes in glacier area and the glacial component of runoff in the upper reaches of the Naryn River. International Mountain Conference 2025, Innsbruck, Austria.
+
+6. Navruzshoev H., Kayumov A., Kabutov K., Saks T., Barandun M., Mattea E., Smirnov A., and Hoelzle M. (2023). Basic research on glacier No. 457 of the Gunt river basin. Conference «Impact of climate change on the state of glaciers of the Republic of Tajikistan and protection of glaciers», Dushanbe, Tajikistan.
+
+7. Navruzshoev H., Kayumov A., Saks T., Barandun M., Kabutov K., Mattea E., Smirnov A., and Hoelzle M. (2023). Glacier mass balance in the Gunt river basin, Pamir, Tajikistan. 21st Swiss Geoscience Meeting, Mendrisio, Switzerland.
+
+8. Navruzshoev H., Saks T., Sheralizoda N., Kabutov K., Barandun M., Mattea E., and Hoelzle M. (2025). Glacier mass balance in the Gunt river basin, Pamir, Tajikistan. International Mountain Conference 2025, Innsbruck, Austria.
+
+9. Severskiy I., Kapitsa V., Kassatkin N., Usmanova Z., Saks T., Mattea E., and Kissebayev D. (2025). Comparison of the modelled and measured mass balance of the Central Tuyuksu glacier, northern slope of Ili-Alatau, Journal of Geography and Environmental Management, 75, 4, 16–31, doi: 10.26577/JGEM.2024.v75.i4.2.
+
+10. Umirzakov G., Kholtojiyeva O., Eshmuratov D., Gulmurzayeva B., Mattea E., and Barandun M. (2025). Mass balance modeling of the Barkrak glacier. (pp. 130–135). International Scientific and Practical Conference «Innovative methods for monitoring mountain glaciers under climate change and current challenges in glaciology». Tashkent, Uzbekistan.
+
 
 
 # <a name="references"></a>References
 
-[1]<a id="ref1"></a> Huss M., Bauder A., Funk M. (2009). Homogenization of long-term mass-balance time series. Annals of Glaciology 50(50):198-206. [doi:10.3189/172756409787769627](https://doi.org/10.3189/172756409787769627)
+1. <a id="ref1"></a> Huss M., Bauder A., and Funk M. (2009). Homogenization of long-term mass-balance time series. Annals of Glaciology 50(50):198-206. [doi:10.3189/172756409787769627](https://doi.org/10.3189/172756409787769627)
 
-[2]<a id="ref2"></a> Gruber S. (2007). A mass-conserving fast algorithm to parameterize gravitational transport and deposition using digital elevation models. Water Resources Research 43, W06412. [doi:10.1029/2006WR004868](https://doi.org/10.1029/2006WR004868)
+2. <a id="ref2"></a> Gruber S. (2007). A mass-conserving fast algorithm to parameterize gravitational transport and deposition using digital elevation models. Water Resources Research 43, W06412. [doi:10.1029/2006WR004868](https://doi.org/10.1029/2006WR004868)
 
-[3]<a id="ref3"></a> Hock, R. (2003). Temperature index melt modelling in mountain areas. Journal of Hydrology 282, 104–115. [doi:10.1016/S0022-1694(03)00257-9](https://doi.org/10.1016/S0022-1694\(03\)00257-9)
+3. <a id="ref3"></a> Hock, R. (2003). Temperature index melt modelling in mountain areas. Journal of Hydrology 282, 104–115. [doi:10.1016/S0022-1694(03)00257-9](https://doi.org/10.1016/S0022-1694\(03\)00257-9)
