@@ -195,7 +195,7 @@ DMBSim 3.0 uses the following R packages:
 
 | Package | Version | Citation |
 |---|---|---|
-| base | 4.5.2 | R Core Team. 2025a. [*R: A Language and Environment for Statistical Computing*](https://www.R-project.org/). R Foundation for Statistical Computing. |
+| base | 4.5.2 | R Core Team. 2025. [*R: A Language and Environment for Statistical Computing*](https://www.R-project.org/). R Foundation for Statistical Computing. |
 | cowplot | 1.2.0 | Wilke, Claus O. 2025. [*cowplot: Streamlined Plot Theme and Plot Annotations for "ggplot2"*](https://doi.org/10.32614/CRAN.package.cowplot). |
 | fs | 1.6.7 | Hester, Jim, Hadley Wickham, and Gábor Csárdi. 2026. [*fs: Cross-Platform File System Operations Based on "libuv"*](https://doi.org/10.32614/CRAN.package.fs). |
 | insol2 | 1.0.0 | Corripio, Javier G., and Enrico Mattea. 2023. [*Insol2: Solar Radiation*](https://github.com/MatteaE/insol2). |
@@ -204,12 +204,12 @@ DMBSim 3.0 uses the following R packages:
 | remotes | 2.5.0 | Csárdi, Gábor, Jim Hester, Hadley Wickham, Winston Chang, Martin Morgan, and Dan Tenenbaum. 2024. [*remotes: R Package Installation from Remote Repositories, Including "GitHub"*](https://doi.org/10.32614/CRAN.package.remotes). |
 | Rfast | 2.1.5.2 | Manos Papadakis, Michail Tsagris, Marios Dimitriadis, et al. 2025. [*Rfast: A Collection of Efficient and Extremely Fast r Functions*](https://doi.org/10.32614/CRAN.package.Rfast). |
 | scales | 1.4.0 | Wickham, Hadley, Thomas Lin Pedersen, and Dana Seidel. 2025. [*scales: Scale Functions for Visualization*](https://doi.org/10.32614/CRAN.package.scales). |
-| sf | 1.0.24 | Pebesma, Edzer. 2018. "Simple Features for R: Standardized Support for Spatial Vector Data." [*The R Journal*](https://doi.org/10.32614/RJ-2018-009) 10 (1): 439–46.<br>Pebesma, Edzer, and Roger Bivand. 2023. [*Spatial Data Science: With applications in R*](https://doi.org/10.1201/9780429459016). Chapman and Hall/CRC. |
+| sf | 1.0.24 | Pebesma, Edzer. 2018. [*Simple Features for R: Standardized Support for Spatial Vector Data.*](https://doi.org/10.32614/RJ-2018-009) The R Journal 10 (1): 439–46.<br>Pebesma, Edzer, and Roger Bivand. 2023. [*Spatial Data Science: With applications in R*](https://doi.org/10.1201/9780429459016). Chapman and Hall/CRC. |
 | shinyFiles | 0.9.3 | Pedersen, Thomas Lin, Vincent Nijs, Thomas Schaffner, and Eric Nantz. 2022. [*shinyFiles: A Server-Side File System Viewer for Shiny*](https://doi.org/10.32614/CRAN.package.shinyFiles). |
 | shinyjs | 2.1.0 | Attali, Dean. 2021. [*shinyjs: Easily Improve the User Experience of Your Shiny Apps in Seconds*](https://doi.org/10.32614/CRAN.package.shinyjs). |
 | terra | 1.9.11 | Hijmans, Robert J., Andrew Brown, and Márcia Barbosa. 2026. [*terra: Spatial Data Analysis*](https://doi.org/10.32614/CRAN.package.terra). |
-| tidyverse | 2.0.0 | Wickham, Hadley, Mara Averick, Jennifer Bryan, et al. 2019. "Welcome to the tidyverse." [*Journal of Open Source Software*](https://doi.org/10.21105/joss.01686) 4 (43): 1686. |
-| tools | 4.5.2 | R Core Team. 2025b. [*R: A Language and Environment for Statistical Computing*](https://www.R-project.org/). R Foundation for Statistical Computing. |
+| tidyverse | 2.0.0 | Wickham, Hadley, Mara Averick, Jennifer Bryan, et al. 2019. [*Welcome to the tidyverse.*](https://doi.org/10.21105/joss.01686) Journal of Open Source Software 4 (43): 1686. |
+| tools | 4.5.2 | R Core Team. 2025. [*R: A Language and Environment for Statistical Computing*](https://www.R-project.org/). R Foundation for Statistical Computing. |
 | topmodel | 0.7.5 | Buytaert, Wouter. 2022. [*topmodel: Implementation of the Hydrological Model TOPMODEL in r*](https://doi.org/10.32614/CRAN.package.topmodel). |
 
 
