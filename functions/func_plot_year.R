@@ -45,6 +45,7 @@ func_plot_year <- function(year_data,
   cat("  Avalanche map...\n")
   plots_avalanche <- func_plot_avalanche_net_effect(year_data,
                                                     run_params,
+                                                    data_dhms,
                                                     data_dems,
                                                     data_outlines)
   plots_year <- append(plots_year, plots_avalanche)
