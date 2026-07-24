@@ -55,15 +55,15 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
 
 ## <a name="installation"></a>Minimal installation instructions
 
-1. Setup R via [the official installer](https://cran.r-project.org/) or from your package manager.
+1. Setup R via [the official installer](https://cran.r-project.org/) or from your package manager. It is recommended to upgrade to the latest version: DMBSim was developed using R version 4.2.x and newer, but the full functionality is currently maintained for version 4.5.x.
 
-2. Setup RStudio via [the official installer](https://docs.posit.co/ide/user/#rstudio-ide-oss-downloads).
+2. Setup RStudio via [the official installer](https://docs.posit.co/ide/user/#rstudio-ide-oss-downloads) or from your package manager.
 
-3. If on Windows, setup RTools via [the official installer](https://cran.r-project.org/bin/windows/Rtools/rtools45/rtools.html).
+3. If on Windows, setup RTools via [the official installer](https://cran.r-project.org/bin/windows/Rtools/).
 
 4. Download and extract [the DMBSim repository](https://github.com/MatteaE/mass_balance_model/archive/refs/heads/main.zip).
 
-5. Open file `utils/install_packages.R` within RStudio and run it by clicking on the <em>Source</em> button.
+5. Install the required R packages: within RStudio, open file `utils/install_packages.R` and run it by clicking on the <em>Source</em> button.
 
 Everything is ready!
 
