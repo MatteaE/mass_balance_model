@@ -21,6 +21,7 @@
 
 
 <br>
+
 # <a name="intro"></a>DMBSim 3.0
 
 DMBSim is a tool to calculate and homogenize glacier surface mass balance from point measurements. It works by running a gridded model of daily accumulation and melt, based on topographical and meteorological data. The main parameters are optimized to match the average mass balance of the provided point measurements [[1]](#ref1). DMBSim is suitable for research, teaching, and operational mass balance monitoring. It is currently used to support the glaciological programs of countries in Central Asia: Kazakhstan, Kyrgyzstan, Tajikistan, and Uzbekistan.
@@ -47,6 +48,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
 
 
 <br>
+
 # <a name="quickstart"></a>Quick start
 
 [Tutorial 1](/doc/tutorial1_singleyear/DMBSim_tutorial_1.pdf) will guide you through system setup and simple mass balance calculations. Alternatively, follow the steps below.
@@ -94,6 +96,7 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
 
 
 <br>
+
 # <a name="features"></a>Additional features
 
 * **Simple usage, suitable as a teaching tool:**
@@ -165,6 +168,7 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
     
 
 <br>
+
 # <a name="publications"></a>Published works with DMBSim applications
 
 1. Azisov E., Barandun M., Saks T., Mattea E., Hoelzle M., Kim D., Bakirov K., Usubaliev R., and Kenzhebaev R. (2025). Reconstruction of the mass balance and dynamics of glaciers in the Orto-Koy-Suu basin (Northern Tien Shan). International Mountain Conference 2025, Innsbruck, Austria.
@@ -192,6 +196,7 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
 
 
 <br>
+
 # <a name="acknowledgments"></a>Acknowledgments
 Special thanks to the following people for their precious assistance with testing and improving the program: Erlan Azisov, Martina Barandun, Sultanbek Belekov, Ardamehr Halimov, Khusrav Kabutov, Ruslan Kenzhebaev, Silvio Kmetyko, Hofiz Navruzshoev, Tomas Saks, Gulomjon Umirzakov.
 
@@ -238,6 +243,7 @@ DMBSim 3.0 uses the following R packages:
 
 
 <br>
+
 # <a name="references"></a>References
 
 1. <a id="ref1"></a> Huss M., Bauder A., and Funk M. (2009). Homogenization of long-term mass-balance time series. Annals of Glaciology 50(50):198-206. [doi:10.3189/172756409787769627](https://doi.org/10.3189/172756409787769627)
