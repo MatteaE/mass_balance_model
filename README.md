@@ -55,7 +55,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
 
 ## <a name="installation"></a>Minimal installation instructions
 
-1. Setup R via [the official installer](https://cran.r-project.org/) or from your package manager. It is recommended to upgrade to the latest version: DMBSim was developed using R version 4.2.x and newer, but the full functionality is currently maintained for version 4.5.x.
+1. Setup R via [the official installer](https://cran.r-project.org/) or from your package manager. It is recommended to use the latest version: DMBSim was developed using R version 4.2.x and newer, but the full functionality is currently maintained for version 4.5.x.
 
 2. Setup RStudio via [the official installer](https://docs.posit.co/ide/user/#rstudio-ide-oss-downloads) or from your package manager.
 
