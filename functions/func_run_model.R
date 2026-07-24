@@ -86,7 +86,9 @@ func_run_model <- function(run_params) {
     func_stop()
   }
   
-  run_params <- func_process_run_params(run_params) # Process fixed run parameters, computing derived ones.
+  # Process fixed run parameters, setting values which the user
+  # has not supplied and computing derived parameters.
+  run_params <- func_process_run_params(run_params)
   
   # Load all input data
   cat("\n")

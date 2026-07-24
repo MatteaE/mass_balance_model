@@ -20,7 +20,7 @@ func_load_packages <- function(run_params) {
                     "topmodel",     # sinkfill()
                     "gstat",        # IDW of snow probing data
                     "Rfast",        # rowSort() of the stake cells indices
-                    "timeSeries",   # interpNA() of the band biases.
+                    "timeSeries",   # na.omit() of the band biases.
                     "stats",        # uniroot()
                     "sf",           # st_read(), to load shapefile outlines.
                     "metR",         # geom_text_contour()
