@@ -207,7 +207,7 @@ DMBSim 3.0 uses the following R packages:
 | insol2 | 1.0.0 | Corripio, Javier G., and Enrico Mattea. 2023. [*Insol2: Solar Radiation*](https://github.com/MatteaE/insol2).<br>Corripio, Javier G. 2020. [*Insol: Solar Radiation*](https://www.meteoexploration.com/R/insol/). |
 | lwgeom | 0.2.15 | Pebesma, Edzer. 2026. [*lwgeom: Bindings to Selected "liblwgeom" Functions for Simple Features*](https://doi.org/10.32614/CRAN.package.lwgeom). |
 | metR | 0.18.3 | Campitelli, Elio. 2025. [*metR: Tools for Easier Analysis of Meteorological Fields*](https://doi.org/10.32614/CRAN.package.metR). |
-| notifier | 1.0.0 | Csárdi G (2017). [*notifier: Cross Platform Desktop Notifications*](https://doi.org/10.32614/CRAN.package.notifier). |
+| notifier | 1.0.0 | Csárdi G (2017). [*notifier: Cross Platform Desktop Notifications*](https://cran.r-project.org/package=notifier). |
 | qpdf | 1.3.4 | Ooms J (2024). [*qpdf: Split, Combine and Compress PDF Files*](https://doi.org/10.32614/CRAN.package.qpdf). |
 | RColorBrewer | 1.1.3 | Neuwirth, Erich. 2022. [*RColorBrewer: ColorBrewer Palettes*](https://doi.org/10.32614/CRAN.package.RColorBrewer). |
 | Rcpp | 1.1.1-1.1 | Eddelbuettel D, Francois R, Allaire J, Ushey K, Kou Q, Russell N, Ucar I, Bates D, Chambers J (2026). [*Rcpp: Seamless R and C++ Integration*](https://doi.org/10.32614/CRAN.package.Rcpp).<br>Eddelbuettel D, François R (2011). [*Rcpp: Seamless R and C++ Integration*](https://doi.org/10.18637/jss.v040.i08). Journal of Statistical Software 40(8), 1-18.<br>Eddelbuettel D (2013). [*Seamless R and C++ Integration with Rcpp*](https://doi.org/10.1007/978-1-4614-6868-4). Springer, New York, ISBN 978-1-4614-6867-7.<br>Eddelbuettel D, Balamuta J (2018). [*Extending R with C++: A Brief Introduction to Rcpp.*](https://doi.org/10.1080/00031305.2017.1375990) The American Statistician 72(1), 28-36. |
@@ -218,6 +218,8 @@ DMBSim 3.0 uses the following R packages:
 | scales | 1.4.0 | Wickham, Hadley, Thomas Lin Pedersen, and Dana Seidel. 2025. [*scales: Scale Functions for Visualization*](https://doi.org/10.32614/CRAN.package.scales). |
 | sf | 1.0.24 | Pebesma, Edzer. 2018. [*Simple Features for R: Standardized Support for Spatial Vector Data.*](https://doi.org/10.32614/RJ-2018-009) The R Journal 10 (1): 439–46.<br>Pebesma, Edzer, and Roger Bivand. 2023. [*Spatial Data Science: With applications in R*](https://doi.org/10.1201/9780429459016). Chapman and Hall/CRC. |
 | shadowtext | 0.1.6 | Yu G (2025). [*shadowtext: Shadow Text Grob and Layer*](https://doi.org/10.32614/CRAN.package.shadowtext). |
+| shiny | 1.10.0 | Chang W, Cheng J, Allaire J, Sievert C, Schloerke B, Xie Y, Allen J, McPherson J, Dipert A, Borges B (2024). [*shiny: Web
+  Application Framework for R*](https://doi.org/10.32614/CRAN.package.shiny). |
 | shinyFiles | 0.9.3 | Pedersen, Thomas Lin, Vincent Nijs, Thomas Schaffner, and Eric Nantz. 2022. [*shinyFiles: A Server-Side File System Viewer for Shiny*](https://doi.org/10.32614/CRAN.package.shinyFiles). |
 | shinyjs | 2.1.0 | Attali, Dean. 2021. [*shinyjs: Easily Improve the User Experience of Your Shiny Apps in Seconds*](https://doi.org/10.32614/CRAN.package.shinyjs). |
 | sp | 2.2-1 | Pebesma E, Bivand R (2005). [*Classes and methods for spatial data in R*](https://journal.r-project.org/articles/RN-2005-014/RN-2005-014.pdf). R News, 5(2), 9-13.<br>Bivand R, Pebesma E, Gomez-Rubio V (2013). [*Applied spatial data analysis with R*](https://asdar-book.org/), Second edition. Springer, NY. |
