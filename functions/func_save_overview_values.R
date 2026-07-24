@@ -25,6 +25,7 @@ func_save_overview_values <- function(year_data,
   df_overview$rad_fact_ice[year_data$year_id]         <- year_cur_params$rad_fact_ice + year_data$optim_corr_annual$rad_fact_ice
   df_overview$rad_fact_snow[year_data$year_id]        <- year_cur_params$rad_fact_snow + year_data$optim_corr_annual$rad_fact_ice * year_cur_params$rad_fact_ratio_snow_ice
   df_overview$prec_corr[year_data$year_id]            <- year_cur_params$prec_corr + year_data$optim_corr_annual$prec_corr
+  df_overview$pdd_sum_hydro_aws[year_data$year_id]    <- year_data$pdd_sum_hydro
 
   # Below: additional output values in case the year has measured mass balance data.
   if (year_data$nstakes_annual > 0) {

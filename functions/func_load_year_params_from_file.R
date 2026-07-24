@@ -192,7 +192,7 @@ func_load_year_params_from_file <- function(year_data,
     # No params file found for the current year.
   } else {
     
-    cat("Year ", year_data$year_cur, ": no year-specific parameters defined\n")
+    cat(paste0("Year ", year_data$year_cur, ": no year-specific parameters defined\n"))
     
   }
   

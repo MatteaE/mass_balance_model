@@ -408,6 +408,22 @@ func_plot_overview <- function(overview_annual,
     theme_overview_plots
   
   
+  
+  # AWS PDD sum --------------------------------------------
+  # If we model just one year, add point plot so that something is visible.
+  single_year_point <- NULL
+  if (single_year) {single_year_point <- geom_point(aes(x = year, y = pdd_sum_hydro_aws))}
+  plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
+    geom_line(aes(x = year, y = pdd_sum_hydro_aws), linewidth = 1) +
+    single_year_point +
+    ylab("PDD sum [\u00B0C d]") +
+    scale_y_continuous(expand = expansion(0.5, 0)) +
+    scale_x_continuous(breaks = x_breaks) +
+    ggtitle("PDD sum at the AWS (hydrological year)") +
+    theme_overview_plots
+  
+  
+  
   overview_plots <- suppressWarnings(suppressMessages(ggarrange(plotlist = plots, ncol = 1, nrow = 3, align = "hv")))
   
   return(overview_plots)

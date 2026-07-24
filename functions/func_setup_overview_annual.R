@@ -23,11 +23,11 @@ func_setup_overview_annual <- function(run_params) {
   # such as whether the year has data and whether we already
   # computed the starting SWE (from the previous year's modeling).
   overview_annual$summary_df <- data.frame(year                        = run_params$years,
+                                           pdd_sum_hydro_aws           = NA_real_, # PDD sum at the AWS over the hydrological year
                                            mb_annual_meas_corr         = NA_real_,
                                            mb_annual_meas              = NA_real_,
                                            mb_annual_hydro             = NA_real_,
                                            # mb_annual_hydro_corr        = NA_real_,
-                                           # mb_annual_fixed             = NA_real_,
                                            mb_winter_meas              = NA_real_, # This stays NA unless winter measurements are available.
                                            mb_winter_fixed             = NA_real_,
                                            ela                         = NA_real_,

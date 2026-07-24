@@ -23,38 +23,22 @@ func_plot_write_overview <- function(overview_annual,
                             width = 21 * run_params$size_mult,
                             height = 29.7 * run_params$size_mult))
   
-  # Different treatment if we have a single modeled year, else the data.frame is built wrong.
-  if (nrow(overview_annual$summary_df) > 1) {
-    # Note: we have disabled the fixed annual period
-    # (confusing, not useful). This has changed the indices
-    # below (only in the case where there is more than one
-    # year, otherwise we use the column names which are
-    # always right.)
-    overview_annual$summary_df_out <- data.frame(year = overview_annual$summary_df$year,
-                                                 apply(overview_annual$summary_df[,2:6], 2, sprintf, fmt=run_params$output_fmt1),
-                                                 overview_annual$summary_df[,7],
-                                                 sprintf("%.1f", overview_annual$summary_df[,8]),
-                                                 sprintf(run_params$output_fmt1, overview_annual$summary_df[,9]),
-                                                 apply(overview_annual$summary_df[,10:12], 2, sprintf, fmt="%.3f"),
-                                                 overview_annual$summary_df[,13],
-                                                 sprintf(run_params$output_fmt1, overview_annual$summary_df[,14]))
-  } else {
-    overview_annual$summary_df_out <- data.frame(year = overview_annual$summary_df$year,
-                                                 sprintf(overview_annual$summary_df$mb_annual_meas_corr[1], fmt=run_params$output_fmt1),
-                                                 sprintf(overview_annual$summary_df$mb_annual_meas[1], fmt=run_params$output_fmt1),
-                                                 sprintf(overview_annual$summary_df$mb_annual_hydro[1], fmt=run_params$output_fmt1),
-                                                 # sprintf(overview_annual$summary_df$mb_annual_fixed[1], fmt=run_params$output_fmt1),
-                                                 sprintf(overview_annual$summary_df$mb_winter_meas[1], fmt=run_params$output_fmt1),
-                                                 sprintf(overview_annual$summary_df$mb_winter_fixed[1], fmt=run_params$output_fmt1),
-                                                 overview_annual$summary_df$ela,
-                                                 sprintf(overview_annual$summary_df$aar[1], fmt="%.1f"),
-                                                 sprintf(overview_annual$summary_df$rmse[1], fmt=run_params$output_fmt1),
-                                                 sprintf(overview_annual$summary_df$melt_factor[1], fmt="%.3f"),
-                                                 sprintf(overview_annual$summary_df$rad_fact_ice[1], fmt="%.3f"),
-                                                 sprintf(overview_annual$summary_df$rad_fact_snow[1], fmt="%.3f"),
-                                                 overview_annual$summary_df$prec_corr,
-                                                 sprintf(overview_annual$summary_df$mb_cumul[1], fmt=run_params$output_fmt1))
-  }
+  # Prepare data frame for text output.
+  overview_annual$summary_df_out <- data.frame(year = overview_annual$summary_df$year,
+                                               sprintf(overview_annual$summary_df$pdd_sum_hydro_aws, fmt="%.0f"),
+                                               sprintf(overview_annual$summary_df$mb_annual_meas_corr, fmt=run_params$output_fmt1),
+                                               sprintf(overview_annual$summary_df$mb_annual_meas, fmt=run_params$output_fmt1),
+                                               sprintf(overview_annual$summary_df$mb_annual_hydro, fmt=run_params$output_fmt1),
+                                               sprintf(overview_annual$summary_df$mb_winter_meas, fmt=run_params$output_fmt1),
+                                               sprintf(overview_annual$summary_df$mb_winter_fixed, fmt=run_params$output_fmt1),
+                                               overview_annual$summary_df$ela,
+                                               sprintf("%.1f", overview_annual$summary_df$aar),
+                                               sprintf(run_params$output_fmt1, overview_annual$summary_df$rmse),
+                                               sprintf(overview_annual$summary_df$melt_factor, fmt="%.3f"),
+                                               sprintf(overview_annual$summary_df$rad_fact_ice, fmt="%.3f"),
+                                               sprintf(overview_annual$summary_df$rad_fact_snow, fmt="%.3f"),
+                                               overview_annual$summary_df$prec_corr,
+                                               sprintf(overview_annual$summary_df$mb_cumul, fmt=run_params$output_fmt1))
   names(overview_annual$summary_df_out) <- names(overview_annual$summary_df)[1:(ncol(overview_annual$summary_df)-2)]
   write.csv(overview_annual$summary_df_out,
             file.path(run_params$output_dirname, "overview.csv"),

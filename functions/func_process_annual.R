@@ -25,6 +25,7 @@ func_process_annual <- function(year_data,
   
   # Different processing in case we have or not annual mass balance measurements.
   if (year_data$nstakes_annual > 0) {
+    
     # This is a list with both the best model output
     # and the corresponding best corrections.
     optim_res_annual <- func_optimize_mb("annual", year_data$corr_fact_winter,

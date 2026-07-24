@@ -16,6 +16,12 @@ func_process_year <- function(year_data,
                               overview_annual) {
   
   
+  # Calculate and print PDD sum for the hydrological year period.
+  pdd_id1 <- which(data_all$data_weather$timestamp == year_cur_params$hydro_start)
+  pdd_id2 <- which(data_all$data_weather$timestamp == (year_cur_params$hydro_end-1)) # Hydro end is already Oct 1.
+  year_data$pdd_sum_hydro <- sum(pmax(0.0, data_all$data_weather$t2m_mean[pdd_id1:pdd_id2]))
+  cat("PDD sum at the AWS over the hydrological year:", round(year_data$pdd_sum_hydro), "\u00B0C d\n")
+  
   # Find offsets on the grid of all stakes and user-defined points of daily output.
   year_data <- func_find_mb_points_on_grid(year_data,
                                            data_all$data_dhms,
@@ -56,6 +62,7 @@ func_process_year <- function(year_data,
                                              overview_annual$summary_df$year_starting_swe_available,
                                              run_params)
   
+  
   #### .  Simulate winter mass balance (only if measurements available) ####
   year_data <- func_process_winter(year_data,
                                    run_params,
@@ -65,7 +72,6 @@ func_process_year <- function(year_data,
                                    data_all$data_surftype,
                                    data_all$data_radiation,
                                    data_all$data_weather)
-  
   
   
   #### .  Simulate annual mass balance ####

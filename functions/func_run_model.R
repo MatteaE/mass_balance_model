@@ -228,6 +228,7 @@ func_run_model <- function(run_params) {
     for (year_id_id in 1:length(year_ids_todo)) {
       
       year_id <- year_ids_todo[year_id_id]
+      cat("\n")
       func_customlog("Year ", year_id_id, " out of ", length(year_ids_todo), ": ", run_params$years[year_id], level = 4)
       
       
