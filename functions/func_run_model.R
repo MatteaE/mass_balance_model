@@ -107,8 +107,9 @@ func_run_model <- function(run_params) {
   # The assumption is that the minimum mass balance has been reached at each
   # cell by that date (should rather be already by ~end of September in the Northern
   # hemisphere!)
-  # It is quite important to have firnification before the first avalanche, because
-  # avalanches should not move snow left over from the previous winter.
+  # NOTE: it is quite important that the first winter avalanche of the year takes
+  # place later than firnification, otherwise some old snow could be mobilized
+  # which is not very realistic and could interfere with the winter/annual simulations.
   ext_cur     <- ext(data_all$data_dems$elevation[[1]])[1:4]
   crds_center <- cbind(mean(ext_cur[1:2]), mean(ext_cur[3:4]))
   lat_center  <- terra::project(crds_center, run_params$grids_crs_epsg, "EPSG:4326")[,2]
@@ -119,6 +120,7 @@ func_run_model <- function(run_params) {
     run_params$north_south <- "South"
     run_params$firnification_date <- "09/01"
   }
+  
   
   
   # Below: remove cacheDir option to force recompilation of the C++ code (useful after changing computer or editing the source file).

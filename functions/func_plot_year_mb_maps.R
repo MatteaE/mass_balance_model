@@ -195,31 +195,6 @@ func_plot_year_mb_maps <- function(year_data,
   } # End of if (year_data$nstakes_annual > 0)
   
   
-  #### [DISABLED] USER-DEFINED FIXED PERIOD - ANNUAL ####
-  # mb_fixed_period_annual_lab <- paste(run_params$massbal_fixed_annual_start, run_params$massbal_fixed_annual_end, sep = " - ")
-  # mb_fixed_annual_lab <- sprintf(run_params$output_fmt1,year_data$massbal_annual_values[["fixed.mean"]] * run_params$output_mult / 1000.)
-  # plot_df <- plot_df_base
-  # plot_df$massbal <- values(year_data$massbal_annual_maps$fixed, mat = F)
-  # plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
-  #   geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult/1000)) +
-  #   geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
-  #   coord_sf(clip = "off") +
-  #   geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize) +
-  #   geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold") +
-  #   annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-  #                                       x=0.05,  y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-  #   annotation_custom(grobTree(textGrob(paste0("Fixed period (annual): ", mb_fixed_period_annual_lab),
-  #                                       x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-  #   annotation_custom(grobTree(textGrob(bquote(bold(b[n]*" = "*.(mb_fixed_annual_lab)*" "*.(run_params$output_unit)*" w.e.")),
-  #                                       x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-  #   labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
-  #        subtitle = " ") +
-  #   scale_fill_stepsn(name = paste0("SMB [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
-  #                     limits = max_mb*c(-1,1),
-  #                     breaks = run_params$mb_colorscale_breaks) +
-  #   theme_map_massbal
-  
-  
   
   #### USER-DEFINED FIXED PERIOD - WINTER ####
   mb_fixed_period_winter_lab <- paste(run_params$massbal_fixed_winter_start, run_params$massbal_fixed_winter_end, sep = " - ")
@@ -275,7 +250,7 @@ func_plot_year_mb_maps <- function(year_data,
     
     
     
-    #### WIP DEV: MEASUREMENT PERIOD - WINTER, WITH WINTER STAKES ####
+    #### MEASUREMENT PERIOD - WINTER, WITH WINTER STAKES ####
     plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult/1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -290,6 +265,8 @@ func_plot_year_mb_maps <- function(year_data,
                                           x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
       annotation_custom(grobTree(textGrob(bquote(bold(b[w]*" = "*.(mb_meas_winter_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                           x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
+      annotation_custom(grobTree(textGrob(paste0("RMS: ", sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms_winter*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e."),
+                                          x = 0.05, y=y_line4, hjust = 0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
       labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
            subtitle = " ") +
       scale_fill_stepsn(name = paste0("SMB [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
