@@ -16,8 +16,12 @@
 # Annual modeling period ends at the end of the observation period with the latest end
 # (i.e. the annual stake which was surveyed last on the current year), but no earlier than Sep 30 (hydro year).
 # WINTER modeling period starts at the beginning of the observation period with the earliest start
-# (among the winter ones) and ends at the end of the period with the latest end (among the winter ones).
-# It is extended to include te dates of fixed mass balance evaluation set by the user.
+# (among the winter ones), but no later than Oct 1, so that there can be enough
+# snowfall to have a proper snowpack (thus, realistic avalanches) even if
+# the winter measurements would start later (e.g. in case they are set to NA
+# and the mass balance minimum occurs late).
+# Winter modeling period ends on the end day of the measurement
+# with the latest end (among the winter ones).
 func_compute_modeling_periods <- function(year_data, run_params, year_cur_params) {
   
   # na.rm because we also support NA as start date, meaning
@@ -35,7 +39,7 @@ func_compute_modeling_periods <- function(year_data, run_params, year_cur_params
   winter_start <- NA
   winter_end   <- NA
   if (year_data$process_winter) {
-    winter_start <- min(year_data$massbal_winter_meas_cur$start_date)
+    winter_start <- min(c(year_cur_params$hydro_start, year_data$massbal_winter_meas_cur$start_date))
     winter_end   <- max(year_data$massbal_winter_meas_cur$end_date)
   }
   

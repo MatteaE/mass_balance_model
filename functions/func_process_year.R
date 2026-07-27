@@ -133,21 +133,23 @@ func_process_year <- function(year_data,
   
   
   #### . Plot daily maps of SWE and surface type ####
-  if (run_params$plot_daily_maps) {
-    func_plot_daily_maps(year_data,
+  # The function checks whether it should plot anything
+  # from either the annual or winter simulation, and at
+  # what frequency.
+  func_plot_daily_maps(year_data,
+                       run_params,
+                       data_all$data_dhms,
+                       data_all$data_dems,
+                       data_all$data_outlines)
+  
+  
+  #### . Write daily grids of SWE and cumulative mass balance ####
+  # The function checks whether it should write anything
+  # from either the annual or winter simulation, and at
+  # what frequency.
+  func_write_daily_grids(year_data,
                          run_params,
-                         data_all$data_dhms,
-                         data_all$data_dems,
-                         data_all$data_outlines)
-  }
-  
-  
-  #### . Write daily grids of SWE ####
-  if (run_params$write_daily_grids) {
-    func_write_daily_grids(year_data,
-                           run_params,
-                           data_all$data_dems)
-  }
+                         data_all$data_dems)
   
   
   

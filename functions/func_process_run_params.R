@@ -124,8 +124,6 @@ func_process_run_params <- function(run_params) {
   
   
   #### FIXED MASS BALANCE PERIODS choice ----------------------------------------------------------
-  # run_params$massbal_fixed_annual_start   <-   "10/31"    # [month/day]: start of the user-defined fixed period for annual mass balance evaluation. This is referred to (<year_cur> - 1).
-  # run_params$massbal_fixed_annual_end     <-   "8/31"     # [month/day]: end of the user-defined fixed period for annual mass balance evaluation. This is referred to <year_cur>.
   run_params$massbal_fixed_winter_start  <-   "10/1"      # [month/day]: start of the user-defined fixed period for winter mass balance evaluation. This is referred to (<year_cur> - 1).
   run_params$massbal_fixed_winter_end    <-   "4/30"      # [month/day]: end of the user-defined fixed period for winter mass balance evaluation. This is referred to <year_cur>.
   
@@ -174,11 +172,20 @@ func_process_run_params <- function(run_params) {
   
   
   #### . Daily output parameters ------------------------------------------------------------------
-  run_params$plot_daily_maps             <-   FALSE       # [TRUE/FALSE]: at the end of each year, produce daily plots of surface type and SWE (slow, but useful for debug or visualization).
-  run_params$plot_daily_maps_frequency   <-   14           # [days]: produce "daily" plots of surface type and SWE only at a given interval, to speed up their generation.
-  run_params$write_daily_grids           <-   FALSE         # [TRUE/FALSE]: at the end of each year, write daily geotiff grids of SWE (useful for debugging)
-  run_params$write_daily_grids_frequency <-   14            # [days]: write "daily" grids of SWE only at a given interval, to speed up processing
+  run_params$plot_daily_maps_winter        <-   FALSE      # [TRUE/FALSE]: at the end of each year, produce daily plots of surface type and SWE from winter simulation (slow, but useful for debug or visualization).
+  run_params$plot_daily_maps_winter_freq   <-   1          # [days]: produce "daily" plots of surface type and SWE from winter simulation only at a given interval, to speed up their generation.
+  run_params$write_daily_grids_winter      <-   FALSE      # [TRUE/FALSE]: at the end of each year, write daily geotiff grids of SWE from winter simulation (useful for debugging)
+  run_params$write_daily_grids_winter_freq <-   1          # [days]: write "daily" grids of SWE from winter simulation only at a given interval, to speed up processing
+  run_params$daily_massbal_winter_refdate  <-  "11/01"     # [month/day] or "": use this day as reference for the winter cumulative mass balance grids. The grid of that day will be subtracted from all others. If set to "", no subtraction takes place (i.e., it will be the first grid of cumulative mass balance to have 0.0 everywhere). Dates from 1 July are assumed to refer to YYYY-1, before 1 July refer to YYYY.
   
+  run_params$plot_daily_maps_annual        <-   FALSE      # [TRUE/FALSE]: at the end of each year, produce daily plots of surface type and SWE from annual simulation (slow, but useful for debug or visualization).
+  run_params$plot_daily_maps_annual_freq   <-   1          # [days]: produce "daily" plots of surface type and SWE from annual simulation only at a given interval, to speed up their generation.
+  run_params$write_daily_grids_annual      <-   FALSE      # [TRUE/FALSE]: at the end of each year, write daily geotiff grids of SWE from annual simulation (useful for debugging)
+  run_params$write_daily_grids_annual_freq <-   1          # [days]: write "daily" grids of SWE from annual simulation only at a given interval, to speed up processing
+  run_params$daily_massbal_annual_refdate  <-  "11/01"     # [month/day] or "": use this day as reference for the summer cumulative mass balance grids. The grid of that day will be subtracted from all others. If set to "", no subtraction takes place (i.e., it will be the first grid of cumulative mass balance to have 0.0 everywhere). Dates from 1 July are assumed to refer to YYYY-1, before 1 July refer to YYYY.
+  
+  
+
   # Compatibility with older set_params which did not have filename_points_daily_out.
   if (is.null(run_params$filename_points_daily_out)) {
     run_params$filename_points_daily_out <- ""

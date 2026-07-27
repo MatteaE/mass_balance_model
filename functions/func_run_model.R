@@ -102,17 +102,22 @@ func_run_model <- function(run_params) {
   
   # Find out whether we are North or South of the Equator.
   # This is used in multi-annual runs for the firnification routine,
-  # which is called on April 1 in the Northern hemisphere and on
-  # October 1 in the Southern one.
+  # which is called on March 1 in the Northern hemisphere and on
+  # September 1 in the Southern one.
+  # The assumption is that the minimum mass balance has been reached at each
+  # cell by that date (should rather be already by ~end of September in the Northern
+  # hemisphere!)
+  # It is quite important to have firnification before the first avalanche, because
+  # avalanches should not move snow left over from the previous winter.
   ext_cur     <- ext(data_all$data_dems$elevation[[1]])[1:4]
   crds_center <- cbind(mean(ext_cur[1:2]), mean(ext_cur[3:4]))
   lat_center  <- terra::project(crds_center, run_params$grids_crs_epsg, "EPSG:4326")[,2]
   if (lat_center >= 0) {
     run_params$north_south <- "North"
-    run_params$firnification_date <- "04/01"
+    run_params$firnification_date <- "03/01"
   } else {
     run_params$north_south <- "South"
-    run_params$firnification_date <- "10/01"
+    run_params$firnification_date <- "09/01"
   }
   
   

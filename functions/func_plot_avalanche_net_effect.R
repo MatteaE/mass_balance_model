@@ -76,6 +76,8 @@ func_plot_avalanche_net_effect <- function(year_data,
     {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
     {if (year_data$nstakes_annual > 0) geom_point(data = year_data$massbal_annual_meas_cur, aes(x = x, y = y), shape = 3, stroke = 1.5, size = 0)} +
     {if (year_data$nstakes_annual > 0) geom_shadowtext(data = year_data$massbal_annual_meas_cur, aes(x = x, y = y, label = id), size = 3*extent_size_multiplier, fontface = "bold", color = "#000000", hjust = -0.12, vjust = -0.12, bg.color = "#FFFFFF")} +
+    {if (year_data$nstakes_winter > 0) geom_point(data = year_data$massbal_winter_meas_cur, aes(x = x, y = y), shape = 3, stroke = 1.5, size = 0)} +
+    {if (year_data$nstakes_winter > 0) geom_shadowtext(data = year_data$massbal_winter_meas_cur, aes(x = x, y = y, label = id), size = 3*extent_size_multiplier, fontface = "bold", color = "#000000", hjust = -0.12, vjust = -0.12, bg.color = "#FFFFFF")} +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(label_avalanche_dates,

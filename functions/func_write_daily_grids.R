@@ -3,7 +3,9 @@
 # Description:    this program models the distributed mass balance of a glacier at daily          #
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
-#                 This file contains the code to write daily grids of SWE to geotiff.             #
+#                 This file contains the code to write daily grids of SWE and mass balance to     #
+#                 geotiff, calling a worker which uses the same code for winter and annual        #
+#                 results.                                                                        #
 ###################################################################################################
 
 
@@ -12,28 +14,27 @@ func_write_daily_grids <- function(year_data,
                                    data_dems) {
   
   
-  dir.create(file.path(run_params$out_daily_dirpath, "gridded", year_data$year_cur, "swe_grids"), recursive = TRUE, showWarnings = FALSE)
-  
-  plot_df <- data.frame(crds(data_dems$elevation[[year_data$dem_grid_id]], na.rm = FALSE))
-  
-  # Daily loop to produce the plots.
-  # Optionally reduced frequency (e.g. weekly).
-  for (day_id in 1:(year_data$model_annual_days_n + 1)) {
+  # Write daily SWE and mass balance grids from the winter simulation.
+  if (run_params$write_daily_grids_winter) {
     
-    # Plot only one every few days, to speed up.
-    if (!(day_id %% run_params$write_daily_grids_frequency)) {
-      
-      cat("\r** Writing daily grids of SWE...", day_id, "/", year_data$model_annual_days_n+1, "**")
-      cells_cur <- (day_id-1) * run_params$grid_ncells + 1:(run_params$grid_ncells)
-      swe_cur_r <- setValues(data_dems$elevation[[year_data$dem_grid_id]],
-                             year_data$mod_output_annual_cur$vec_swe_all[cells_cur])
-      writeRaster(swe_cur_r,
-                  file.path(run_params$out_daily_dirpath, "gridded", year_data$year_cur, "swe_grids", paste0(sprintf("%03d", day_id), ".tif")),
-                  overwrite = TRUE)
-      
-    } # End selection on day_id to plot only one day every few.
+    func_write_daily_grids_worker(year_data,
+                                  run_params,
+                                  data_dems,
+                                  "winter")
+    cat("\n")
+  } # End if write winter grids.
+  
+  
+  
+  # Write daily SWE grids from the annual simulation.
+  if (run_params$write_daily_grids_annual) {
     
-  } # End daily loop to plot SWE and surface type.
+    func_write_daily_grids_worker(year_data,
+                                  run_params,
+                                  data_dems,
+                                  "annual")
+    cat("\n")
+  } # End if write annual grids.
   
   cat("\n")  
 }

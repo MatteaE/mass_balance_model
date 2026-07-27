@@ -43,7 +43,6 @@ func_plot_massbal_vs_elevation <- function(year_data,
       ele_bands_plot_df$mb_annual_meas[band_id]      <- mean(values(year_data$massbal_annual_maps$meas_period)[band_cell_ids]) * run_params$output_mult / 1000
     }
     ele_bands_plot_df$mb_annual_hydro[band_id]     <- mean(values(year_data$massbal_annual_maps$hydro)[band_cell_ids]) * run_params$output_mult / 1000
-    # ele_bands_plot_df$mb_annual_fixed[band_id]     <- mean(values(year_data$massbal_annual_maps$fixed)[band_cell_ids]) * run_params$output_mult / 1000
     ele_bands_plot_df$mb_winter_fixed[band_id]     <- mean(values(year_data$massbal_winter_maps$fixed)[band_cell_ids]) * run_params$output_mult / 1000
     if (year_data$process_winter) {
       ele_bands_plot_df$mb_winter_meas[band_id]    <- mean(values(year_data$massbal_winter_maps$meas_period)[band_cell_ids]) * run_params$output_mult / 1000
@@ -59,7 +58,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
                                                                     "mb_winter_fixed", "mb_winter_meas",
                                                                     "mb_annual_meas_corr"))))
   # Re-order the data frame so that the final (meas_corr) mass balance profile is plotted on top of the others.
-  ele_bands_plot_df_melt$variable <- factor(ele_bands_plot_df_melt$variable, levels = c("mb_annual_meas", "mb_annual_hydro", # DEV NOTE: first one would have been "mb_annual_fixed", but we have disabled that period.
+  ele_bands_plot_df_melt$variable <- factor(ele_bands_plot_df_melt$variable, levels = c("mb_annual_meas", "mb_annual_hydro",
                                                                                         "mb_winter_fixed", "mb_winter_meas",
                                                                                         "mb_annual_meas_corr"))
   
@@ -145,7 +144,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
       scale_x_continuous(breaks = pretty(df_scatterplot$ele), expand = expansion(mult = 0.05)) +
       scale_y_continuous(expand = expansion(mult = 0.05)) +
       xlab("Elevation [m a.s.l.]") +
-      ylab(paste0("Annual mass balance [", run_params$output_unit, " w.e.]")) +
+      ylab(paste0("Annual mass balance (measurement period) [", run_params$output_unit, " w.e.]")) +
       theme_scatterplot_ele
   }
 
@@ -163,7 +162,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
     # And also, the stake is compared to the proper cells (stakes at the edges use
     # nearest-neighbor instead of bilinear).
     stakes_bias <- year_data$mod_output_annual_cur$global_bias_winter / 1e3
-    stakes_rms <- year_data$mod_output_annual_cur$global_rms_winter / 1e3
+    stakes_rms  <- year_data$mod_output_annual_cur$global_rms_winter / 1e3
     
     # Computed within func_massbal_postprocess().
     stakes_mod_massbal_meas_period <- year_data$mod_output_annual_cur$stakes_winter_measperiod_mb
@@ -193,7 +192,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
       scale_y_continuous(limits = c(min(0.0, df_scatterplot$mb, df_stakes$meas)/1e3, NA_real_),
                          expand = expansion(mult = 0.05)) +
       xlab("Elevation [m a.s.l.]") +
-      ylab(paste0("Winter mass balance [", run_params$output_unit, " w.e.]")) +
+      ylab(paste0("Winter mass balance (measurement period) [", run_params$output_unit, " w.e.]")) +
       theme_scatterplot_ele
   }
   

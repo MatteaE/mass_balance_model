@@ -92,8 +92,8 @@ func_massbal_postprocess <- function(year_data,
     stakes_winter_end_ids_wrt_annual   <- match(stakes_winter_end_dates, year_data$weather_series_annual_cur$timestamp)
     
     # For each winter stake, extract:
-    # annual model result (over full winter measurement period)
-    # and model bias (over each individual stake period).
+    # 1) result of annual run over full winter measurement period
+    # 2) model bias (over each individual stake period).
     year_data$mod_output_annual_cur$stakes_winter_measperiod_mb <- rep(NA_real_, year_data$nstakes_winter) # Model result for each stake over the full winter measurement period.
     year_data$mod_output_annual_cur$stakes_winter_bias <- rep(NA_real_, year_data$nstakes_winter)
     for(stake_id in 1:year_data$nstakes_winter) {
@@ -124,8 +124,8 @@ func_massbal_postprocess <- function(year_data,
   if (year_data$nstakes_annual > 0) {
     year_data$massbal_annual_meas_cur$massbal_standardized <- func_compute_stake_mb_standardized_annual(year_data)
   }
-  
-  
+
+    
   #### Compute standardized stake measurements: WINTER ####
   # See comment above for short explanation.
   # NOTE: this call reuses some of the data/ids computed above for
