@@ -80,6 +80,8 @@ func_load_massbalance_measurements <- function(run_params,
   }
   names(data_massbalance) <- massbal_cols
   
+  # Id should be a character.
+  data_massbalance$id <- as.character(data_massbalance$id)
   
   # Convert timestamps to Date objects.
   data_massbalance$start_date <- as.Date(data_massbalance$start_date, format = "%d.%m.%Y")

@@ -109,6 +109,9 @@ func_process_run_params <- function(run_params) {
     run_params$initial_snow_avalanche <- TRUE
   }
   
+  if (is.null(run_params$model_avalanche_dates)) {
+    run_params$model_avalanche_dates <- ""
+  }
   
   
   
@@ -231,8 +234,6 @@ func_process_run_params <- function(run_params) {
   
   run_params$stakes_unknown_latest_start <- format(as.Date(run_params$stakes_unknown_latest_start, format = "%m/%d"), format = "%m/%d") # Same.
   
-  # run_params$massbal_fixed_annual_start <- format(as.Date(run_params$massbal_fixed_annual_start, format = "%m/%d"), format = "%m/%d")
-  # run_params$massbal_fixed_annual_end <- format(as.Date(run_params$massbal_fixed_annual_end, format = "%m/%d"), format = "%m/%d")
   run_params$massbal_fixed_winter_start <- format(as.Date(run_params$massbal_fixed_winter_start, format = "%m/%d"), format = "%m/%d")
   run_params$massbal_fixed_winter_end <- format(as.Date(run_params$massbal_fixed_winter_end, format = "%m/%d"), format = "%m/%d")
   

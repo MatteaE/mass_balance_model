@@ -59,7 +59,7 @@ func_load_points_daily_out <- function(run_params,
                         (data_points_daily_out$y > ymax(ext_limits)))
   ids_bad_n <- length(ids_df_bad)
   if (ids_bad_n > 0) {
-    func_customlog("FATAL: the selected points for daily output include ", ids_bad_n, " entries which fall outside all provided DHMs. Please fix them manually and re-run. The first bad entry is: ", data_points_daily_out$id[ids_df_bad[1]], " ", data_points_daily_out$x[ids_df_bad[1]], " ", data_points_daily_out$y[ids_df_bad[1]], "\n", level = 2)
+    func_customlog("The selected points for daily output include ", ids_bad_n, " entries which fall outside all provided DHMs. Please fix them manually and re-run. The first bad entry is: ", data_points_daily_out$id[ids_df_bad[1]], " ", data_points_daily_out$x[ids_df_bad[1]], " ", data_points_daily_out$y[ids_df_bad[1]], "\n", level = 2)
     func_stop()
   }
   

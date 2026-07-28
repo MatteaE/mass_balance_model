@@ -5,7 +5,7 @@
 #                 mass balance measurements.                                                      #
 #                 This file contains the generation of the two plots of mass balance evolution    #
 #                 over a year: overall mass balance alone, and also with accumulation and         #
-#                 ablation.                                                                       #
+#                 ablation. Also the plot of daily water fluxes (rainfall and melt)               #
 ###################################################################################################  
 
 func_plot_massbal_cumul <- function(year_data,
@@ -14,6 +14,7 @@ func_plot_massbal_cumul <- function(year_data,
   # Here will go the two plots of annual mass balance
   # ((1) mass balance only, and (2) also with accumulation
   # and ablation components).
+  # Also (3) plot of daily water fluxes (rainfall and melt).
   plots_mb <- list()
   
   

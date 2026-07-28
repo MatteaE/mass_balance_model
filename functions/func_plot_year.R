@@ -71,11 +71,21 @@ func_plot_year <- function(year_data,
   plots_year <- append(plots_year, list(plot_weather_series))
   
   
+  
   #### . PLOT THE DAILY TIME SERIES OF GLACIER-WIDE MASS BALANCE ####
   cat("  Mass balance time series...\n")
   plots_mb_cumul <- func_plot_massbal_cumul(year_data,
                                             run_params)
   plots_year <- append(plots_year, list(plots_mb_cumul))
+  
+  
+  
+  #### . PLOT THE DAILY TIME SERIES OF SNOW-COVERED AREA FRACTION ####
+  cat("  Snow-covered area fraction...\n")
+  plot_scaf <- func_plot_scaf(year_data,
+                              run_params)
+  plots_year <- append(plots_year, list(plot_scaf))
+  
   
   
   #### . PLOT MASS BALANCE VERSUS ELEVATION ####
