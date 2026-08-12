@@ -28,7 +28,7 @@ func_extract_year_massbalance <- function(year_data,
   year_data$massbal_annual_meas_period     <- model_annual_maps_data$meas_period
   year_data$massbal_annual_meas_period_ids <- model_annual_maps_data$meas_period_ids
   
-  # We also extract two winter mass balances:
+  # We also extract two winter mass balances (WINTER period extracted from ANNUAL simulation):
   # (1) "fixed":       user-defined fixed period, such as Oct 1 to Mar 31.
   # (2) "meas_period": measurement period, defined as (earliest winter stake start - latest winter stake end).
   # If process_winter is FALSE, the list contains only (1).

@@ -95,8 +95,8 @@ func_plot_massbal_vs_elevation <- function(year_data,
                        labels = c("Annual, measurement period", "Annual, hydrological year", # DEV NOTE: first one would have been "Annual, fixed dates", but we have disabled that period.
                                   "Winter, fixed dates", "Winter, measurement period", "Annual, measurement period + contour-line")) +
     scale_y_continuous(breaks = pretty(ele_bands_plot_df_melt$value), expand = expansion(mult = c(0,0.05),0)) +
-                       # Optional: secondary horizontal axis with the number of cells for each elevation band (not strictly necessary).
-                       #sec.axis = sec_axis(~ (. - min(ele_bands_plot_df_melt$value)) * 4 * max(ele_bands_plot_df$ncells) / ((max(ele_bands_plot_df_melt$value) - min(ele_bands_plot_df_melt$value)))  )) +
+    # Optional: secondary horizontal axis with the number of cells for each elevation band (not strictly necessary).
+    #sec.axis = sec_axis(~ (. - min(ele_bands_plot_df_melt$value)) * 4 * max(ele_bands_plot_df$ncells) / ((max(ele_bands_plot_df_melt$value) - min(ele_bands_plot_df_melt$value)))  )) +
     scale_x_continuous(expand = expansion(0,0)) +
     coord_flip() +
     xlab("Elevation [m a.s.l.]") +
@@ -108,6 +108,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
   #### Plot #2: scatterplot of annual mass balance ------------------------------------------------
   # We plot the not-band-corrected model result over the measurement period, and the stakes standardized over the same period.
   # Do this only if we have stake measurements, else it's useless.
+  # We plot the model results with different color depending on avalanche effect (ablation/none/deposition).
   if (year_data$nstakes_annual > 0) {
     # We plot the stake measurements, in black, **standardized over the measurement period**.
     # The reported RMS and BIAS refer to the not-standardized stakes: simply each stake
@@ -119,10 +120,16 @@ func_plot_massbal_vs_elevation <- function(year_data,
     stakes_rms <- year_data$mod_output_annual_cur$global_rms / 1e3
     
     stakes_mod_massbal_meas_period <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[2],] - year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[1],]
-    
+
+        
     # This data.frame contains only the mass balance values on glacierized cells.
-    df_scatterplot <- data.frame(ele = data_dems$elevation[[year_data$dem_grid_id]][data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1],
-                                 mb = values(year_data$massbal_annual_maps$meas_period)[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]] * run_params$output_mult)
+    df_scatterplot <- data.frame(ele = values(data_dems$elevation[[year_data$dem_grid_id]], mat = FALSE),
+                                 mb  = values(year_data$massbal_annual_maps$meas_period, mat = FALSE) * run_params$output_mult,
+                                 avalanche_effect = "2") # avalanche effect is "2" for no effect, "1" for deposition, "0" for ablation.
+    df_scatterplot$avalanche_effect[which(year_data$mod_output_annual_cur$avalanche_net >= run_params$avalanche_effect_threshold)] <- "1"
+    df_scatterplot$avalanche_effect[which(year_data$mod_output_annual_cur$avalanche_net <= -run_params$avalanche_effect_threshold)] <- "0"
+    df_scatterplot <- df_scatterplot[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]
+    
     
     df_stakes <- data.frame(z    = year_data$massbal_annual_meas_cur$z_dem,
                             meas = year_data$massbal_annual_meas_cur$massbal_standardized * run_params$output_mult,
@@ -130,29 +137,41 @@ func_plot_massbal_vs_elevation <- function(year_data,
     
     theme_scatterplot_ele <- theme_bw(base_size = base_size) +
       theme(text = element_text(face = "bold"),
-            panel.grid = element_blank())
+            panel.grid = element_blank(),
+            legend.position = "inside",
+            legend.position.inside = c(0.99,0.01),
+            legend.justification.inside = c(1,0))
     
     plots_mb_vs_ele[[2]] <- ggplot(df_scatterplot) +
       annotation_custom(grobTree(textGrob(paste0("Bias: ", sprintf(run_params$output_fmt3, stakes_bias*run_params$output_mult), " ", run_params$output_unit, " w.e."), x=0.02, y = 0.95, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       annotation_custom(grobTree(textGrob(paste0("RMS: ", sprintf(run_params$output_fmt1, stakes_rms*run_params$output_mult), " ", run_params$output_unit, " w.e."), x=0.02, y = 0.87, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
-      geom_point(aes(x = ele, y = mb/1e3), color = "#FF0000", size = 0.5, stroke = 0) +
+      geom_point(aes(x = ele, y = mb/1e3, color = avalanche_effect), size = 0.5, stroke = 0) +
       geom_point(data = df_stakes, aes(x = z, y = meas/1e3), shape = 3, stroke = 1.5, size = 0) +
       geom_segment(data = df_stakes, aes(x = z, xend = z, y = meas/1e3, yend = mod/1e3)) +
       coord_flip() +
       scale_x_continuous(breaks = pretty(df_scatterplot$ele), expand = expansion(mult = 0.05)) +
       scale_y_continuous(expand = expansion(mult = 0.05)) +
+      scale_color_manual(name = "Net effect of\navalanches",
+                         values = c("0" = "#FFA000",
+                                    "1"  = "#FF00A0",
+                                    "2"  = "#707070"),
+                         labels = c("0" = "Ablation",
+                                    "1"  = "Deposition",
+                                    "2"  = "Unaffected"),
+                         guide = guide_legend(override.aes = list(size = 3))) +
       xlab("Elevation [m a.s.l.]") +
       ylab(paste0("Annual mass balance (measurement period) [", run_params$output_unit, " w.e.]")) +
       theme_scatterplot_ele
   }
-
   
-    
+  
+  
   #### Plot #3: scatterplot of winter mass balance ------------------------------------------------
   # We plot the not-band-corrected model over the winter measurement period, and the stakes standardized over the same period.
   # Do this only if we have stake measurements, else it's useless.
+  # We do not have the avalanche net effect over the winter period only, so we do not color points by avalanche effect here.
   if (year_data$process_winter > 0) {
     # We plot the stake measurements, in black, **standardized over the winter measurement period**.
     # The reported RMS and BIAS (computed within func_massbal_postprocess())
@@ -197,7 +216,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
   }
   
   # df_bias_rms <- data.frame(meas = year_data$massbal_annual_meas_cur$massbal_standardized / 1e3,
-                            # mod  = extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear")[,1] / 1e3)
+  # mod  = extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear")[,1] / 1e3)
   
   
   # Arrange plots into pages according
