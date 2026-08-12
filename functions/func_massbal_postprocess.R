@@ -13,6 +13,7 @@
 #                 (5) standardization (to the whole measurement period) of stake measurements     #
 #                     (both annual and - if we have them - winter)                                #
 #                 (6) extraction of the mass balance and SWE time series at user-defined points   #
+#                 (7) calculation of vertical ablation gradients (measured and modeled)           #
 ###################################################################################################
 
 
@@ -121,20 +122,22 @@ func_massbal_postprocess <- function(year_data,
   # (i.e., earliest stake start to latest stake end).
   # If all stakes are measured on the same day, the standardized mass balance
   # is the same as the original one.
+  # We also store the model result over the same period, enabling comparison.
   if (year_data$nstakes_annual > 0) {
-    year_data$massbal_annual_meas_cur$massbal_standardized <- func_compute_stake_mb_standardized_annual(year_data)
+    year_data$massbal_annual_meas_cur$massbal_meas_standardized <- func_compute_stake_mb_standardized_annual(year_data)
+    year_data$massbal_annual_meas_cur$massbal_mod_standardized  <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[2],] - year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[1],]
   }
-
-    
+  
+  
   #### Compute standardized stake measurements: WINTER ####
   # See comment above for short explanation.
   # NOTE: this call reuses some of the data/ids computed above for
   # the computation of BIAS and RMS of winter measurements.
   if (year_data$process_winter > 0) {
-    year_data$massbal_winter_meas_cur$massbal_standardized <- func_compute_stake_mb_standardized_winter(year_data,
-                                                                                                        stakes_winter_mod,
-                                                                                                        stakes_winter_start_ids_wrt_annual,
-                                                                                                        stakes_winter_end_ids_wrt_annual)
+    year_data$massbal_winter_meas_cur$massbal_meas_standardized <- func_compute_stake_mb_standardized_winter(year_data,
+                                                                                                             stakes_winter_mod,
+                                                                                                             stakes_winter_start_ids_wrt_annual,
+                                                                                                             stakes_winter_end_ids_wrt_annual)
   }
   
   
@@ -157,6 +160,44 @@ func_massbal_postprocess <- function(year_data,
                                                               year_data$points_daily_cells)
     
   }
+  
+  
+  #### Calculate vertical ablation gradients ####
+  # Conditions to do this:
+  # - there are at least 2 annual stakes which have negative measured-period mass balance in both measurements (standardized) and model
+  # - those stakes have at least 50 m vertical elevation span (z_dem)
+  # Units are m w.e. / m asl
+  year_data$abl_grad_meas <- NA_real_
+  year_data$abl_grad_mod  <- NA_real_
+  if (year_data$nstakes_annual > 1) {
+    
+    stakes_cand_ids <- which((year_data$massbal_annual_meas_cur$massbal_meas_standardized <= 0) &
+                               year_data$massbal_annual_meas_cur$massbal_mod_standardized <= 0)
+    if (length(stakes_cand_ids) > 1) {
+      
+      if (diff(range(year_data$massbal_annual_meas_cur$z_dem[stakes_cand_ids])) > 50) {
+        
+        year_data$abl_grad_meas <- lm(formula = massbal_meas_standardized~z_dem,
+                                      data = year_data$massbal_annual_meas_cur)$coefficients["z_dem"]/1e3
+        year_data$abl_grad_mod <- lm(formula = massbal_mod_standardized~z_dem,
+                                     data = year_data$massbal_annual_meas_cur)$coefficients["z_dem"]/1e3
+        
+        year_data$abl_grad_diff_rel <- abs((year_data$abl_grad_mod - year_data$abl_grad_meas) / year_data$abl_grad_meas)
+        if (!is.na(year_data$abl_grad_diff_rel) && (year_data$abl_grad_diff_rel > 0.25)) {
+          func_customlog("Year ", year_data$year_cur, ": modeled ablation gradient deviates from measured one by more than 25 %. Please check.", level = 1)
+          func_customlog("Measured gradient: ", sprintf("%.4f", year_data$abl_grad_meas), " m w.e. / m asl", level = 0)
+          func_customlog("Modeled gradient: ", sprintf("%.4f", year_data$abl_grad_mod), " m w.e. / m asl", level = 0)
+        }
+        
+      } else { # End if there is a vertical range of at least 50 m in the selected ablation stakes. Else warning.
+
+        func_customlog("Year ", year_data$year_cur, ": point measurements are insufficient to calculate ablation gradients.", level = 1) 
+        
+      } # End else there is not a 50 m vertical range in the selected ablation stakes
+        
+    } # End if there are at least 2 stakes with actual ablation (modeled and measured)
+  } # End if there are at least 2 annual mass balance values
+  
   
   return(year_data)
   

@@ -119,8 +119,6 @@ func_plot_massbal_vs_elevation <- function(year_data,
     stakes_bias <- year_data$mod_output_annual_cur$global_bias / 1e3
     stakes_rms <- year_data$mod_output_annual_cur$global_rms / 1e3
     
-    stakes_mod_massbal_meas_period <- year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[2],] - year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$massbal_annual_meas_period_ids[1],]
-
         
     # This data.frame contains only the mass balance values on glacierized cells.
     df_scatterplot <- data.frame(ele = values(data_dems$elevation[[year_data$dem_grid_id]], mat = FALSE),
@@ -132,8 +130,8 @@ func_plot_massbal_vs_elevation <- function(year_data,
     
     
     df_stakes <- data.frame(z    = year_data$massbal_annual_meas_cur$z_dem,
-                            meas = year_data$massbal_annual_meas_cur$massbal_standardized * run_params$output_mult,
-                            mod  = stakes_mod_massbal_meas_period * run_params$output_mult)
+                            meas = year_data$massbal_annual_meas_cur$massbal_meas_standardized * run_params$output_mult,
+                            mod  = year_data$massbal_annual_meas_cur$massbal_mod_standardized * run_params$output_mult)
     
     theme_scatterplot_ele <- theme_bw(base_size = base_size) +
       theme(text = element_text(face = "bold"),
@@ -142,10 +140,23 @@ func_plot_massbal_vs_elevation <- function(year_data,
             legend.position.inside = c(0.99,0.01),
             legend.justification.inside = c(1,0))
     
+    abl_grad_meas_txt <- ""
+    if (!is.na(year_data$abl_grad_meas)) {
+      abl_grad_meas_txt <- paste0("Measured ablation gradient: ", sprintf("%.4f", year_data$abl_grad_meas))
+    }
+    abl_grad_mod_txt <- ""
+    if (!is.na(year_data$abl_grad_mod)) {
+      abl_grad_mod_txt <- paste0("Modeled ablation gradient: ", sprintf("%.4f", year_data$abl_grad_mod))
+    }
+    
     plots_mb_vs_ele[[2]] <- ggplot(df_scatterplot) +
       annotation_custom(grobTree(textGrob(paste0("Bias: ", sprintf(run_params$output_fmt3, stakes_bias*run_params$output_mult), " ", run_params$output_unit, " w.e."), x=0.02, y = 0.95, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       annotation_custom(grobTree(textGrob(paste0("RMS: ", sprintf(run_params$output_fmt1, stakes_rms*run_params$output_mult), " ", run_params$output_unit, " w.e."), x=0.02, y = 0.87, hjust = 0,
+                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
+      annotation_custom(grobTree(richtext_grob(abl_grad_meas_txt, x=0.02, y = 0.79, hjust = 0,
+                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
+      annotation_custom(grobTree(richtext_grob(abl_grad_mod_txt, x=0.02, y = 0.71, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       geom_point(aes(x = ele, y = mb/1e3, color = avalanche_effect), size = 0.5, stroke = 0) +
       geom_point(data = df_stakes, aes(x = z, y = meas/1e3), shape = 3, stroke = 1.5, size = 0) +
@@ -191,7 +202,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
                                  mb  = values(year_data$massbal_winter_maps$meas_period)[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]] * run_params$output_mult)
     
     df_stakes <- data.frame(z    = year_data$massbal_winter_meas_cur$z_dem,
-                            meas = year_data$massbal_winter_meas_cur$massbal_standardized * run_params$output_mult,
+                            meas = year_data$massbal_winter_meas_cur$massbal_meas_standardized * run_params$output_mult,
                             mod  = stakes_mod_massbal_meas_period * run_params$output_mult)
     
     theme_scatterplot_ele <- theme_bw(base_size = base_size) +
@@ -215,8 +226,6 @@ func_plot_massbal_vs_elevation <- function(year_data,
       theme_scatterplot_ele
   }
   
-  # df_bias_rms <- data.frame(meas = year_data$massbal_annual_meas_cur$massbal_standardized / 1e3,
-  # mod  = extract(year_data$massbal_annual_maps$meas_period, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear")[,1] / 1e3)
   
   
   # Arrange plots into pages according

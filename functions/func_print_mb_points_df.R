@@ -24,8 +24,13 @@ func_print_mb_points_df <- function(points_df,
   # Print aligned table with all relevant info on the points with avalanche effects.
   for (i in 1:nrow(points_df)) {
     
+    start_date_cur_str <- format(points_df$start_date[i], "%F")
+    if (is.na(start_date_cur_str)) {
+      start_date_cur_str <- "NA" # Need to set this to character explicitly (as.character(NA) does not work)
+    }
+    
     line_cur <- c(substr(points_df$id[i], 1, 20),
-                  format(points_df$start_date[i], "%F"),
+                  start_date_cur_str,
                   format(points_df$end_date[i], "%F"),
                   as.character(points_df$x[i]),
                   as.character(points_df$y[i]),
