@@ -59,12 +59,13 @@ func_process_winter <- function(year_data,
                                              ID = FALSE,
                                              raw = TRUE)[,1]
       
-      year_data$massbal_winter_meas_cur$avalanche_net <- avalanche_stakes_net
+      year_data$mod_output_winter_cur$avalanche_stakes_net <- avalanche_stakes_net
       
       ids_aval <- which(abs(avalanche_stakes_net) > 0)
       if (length(ids_aval) > 0) {
         
-        winter_stakes_avalanche_df <- year_data$massbal_winter_meas_cur[,c("id", "start_date", "end_date", "x", "y", "z_dem", "massbal", "avalanche_net")]
+        winter_stakes_avalanche_df <- year_data$massbal_winter_meas_cur[,c("id", "start_date", "end_date", "x", "y", "z_dem", "massbal")]
+        winter_stakes_avalanche_df$avalanche_net <- year_data$mod_output_winter_cur$avalanche_stakes_net
         winter_stakes_avalanche_df <- winter_stakes_avalanche_df[ids_aval,]
         
         cat("\n")

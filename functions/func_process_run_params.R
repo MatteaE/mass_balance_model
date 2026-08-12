@@ -227,6 +227,7 @@ func_process_run_params <- function(run_params) {
   run_params$dhm_smooth_windowsize       <- max(5, 2 * run_params$curvature_dhm_smooth + 1)
   
   run_params$elevation_equal_threshold   <-   1e-3 # [m]: threshold for considering two elevation values equal when we look for problematic flat patches
+  run_params$avalanche_effect_threshold  <-   1e-9 # [mm w.e.]: threshold for considering nonzero avalanche effect
   
   run_params$ele_bands_auto_min_extent   <- 50 # When automatically computing elevation bands for contour line correction, merge bands which are smaller than this vertical extent in meters.
   

@@ -67,7 +67,7 @@ func_plot_avalanche_net_effect <- function(year_data,
   }
   # We only plot those cells whose net effect is nonzero.
   plot_df_sel <- plot_df
-  plot_df_sel$avalanche_effect[which(abs(plot_df_sel$avalanche_effect) < 1e-9)] <- NA
+  plot_df_sel$avalanche_effect[which(abs(plot_df_sel$avalanche_effect) < run_params$avalanche_effect_threshold)] <- NA
   plots[[length(plots)+1]] <- ggplot(plot_df_sel) +
     geom_raster(aes(x = x, y = y, fill = avalanche_effect * run_params$output_mult/1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +

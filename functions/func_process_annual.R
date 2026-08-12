@@ -51,12 +51,13 @@ func_process_annual <- function(year_data,
                                              ID = FALSE,
                                              raw = TRUE)[,1]
       
-      year_data$massbal_annual_meas_cur$avalanche_net <- avalanche_stakes_net
+      year_data$mod_output_annual_cur$avalanche_stakes_net <- avalanche_stakes_net
       
       ids_aval <- which(abs(avalanche_stakes_net) > 0)
       if (length(ids_aval) > 0) {
         
-        annual_stakes_avalanche_df <- year_data$massbal_annual_meas_cur[,c("id", "start_date", "end_date", "x", "y", "z_dem", "massbal", "avalanche_net")]
+        annual_stakes_avalanche_df <- year_data$massbal_annual_meas_cur[,c("id", "start_date", "end_date", "x", "y", "z_dem", "massbal")]
+        annual_stakes_avalanche_df$avalanche_net <- year_data$mod_output_annual_cur$avalanche_stakes_net
         annual_stakes_avalanche_df <- annual_stakes_avalanche_df[ids_aval,]
         
         cat("\n")

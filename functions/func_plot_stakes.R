@@ -61,13 +61,22 @@ func_plot_stakes <- function(year_data,
   # Loop to plot all stakes.
   for (annual_stake_id in 1:year_data$nstakes_annual) {
     
-    stake_mod_series <- year_data$mod_output_annual_cur$stakes_series_mod_all[,annual_stake_id] * run_params$output_mult
-    stake_start_id <- year_data$mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id]
-    stake_end_id <- year_data$mod_output_annual_cur$stakes_end_ids[annual_stake_id]
+    stake_mod_series        <- year_data$mod_output_annual_cur$stakes_series_mod_all[,annual_stake_id] * run_params$output_mult
+    stake_start_id          <- year_data$mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id]
+    stake_end_id            <- year_data$mod_output_annual_cur$stakes_end_ids[annual_stake_id]
     stake_mod_series_offset <- stake_mod_series - stake_mod_series[stake_start_id]
-    stake_mod_df <- data.frame(day_id = day_ids, mb = stake_mod_series_offset)
-    stake_meas_df <- data.frame(day_id = stake_end_id - day_id_offset,
-                                mb = year_data$mod_output_annual_cur$stakes_mb_meas[annual_stake_id] * run_params$output_mult)
+    stake_mod_df            <- data.frame(day_id = day_ids, mb = stake_mod_series_offset)
+    stake_meas_df           <- data.frame(day_id = stake_end_id - day_id_offset,
+                                          mb = year_data$mod_output_annual_cur$stakes_mb_meas[annual_stake_id] * run_params$output_mult)
+    
+    stake_aval_txt          <- "" # Empty annotation in case avalanche effect is zero.
+    if (abs(year_data$mod_output_annual_cur$avalanche_stakes_net[annual_stake_id]) >= run_params$avalanche_effect_threshold) {
+      stake_aval_txt        <- paste0("Note: ",
+                                      sprintf(run_params$output_fmt3, year_data$mod_output_annual_cur$avalanche_stakes_net[annual_stake_id] * run_params$output_mult/1e3),
+                                      " ", run_params$output_unit, " w.e. from avalanches")
+    }
+    
+    
     base_size <- 12 # For the plots
     theme_stakes_plots <- theme_bw(base_size = base_size) +
       theme(axis.title.x = element_blank(),
@@ -85,9 +94,11 @@ func_plot_stakes <- function(year_data,
       geom_vline(xintercept = c(stake_start_id, stake_end_id) - day_id_offset, linetype = "longdash", color = "#FF00FF", linewidth = 0.4) +
       {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", linewidth = 0.2)} +
       annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = base_size * 0.2) +
+      annotation_custom(grobTree(textGrob(paste0(year_data$massbal_annual_meas_cur$id[annual_stake_id], ": model bias ", sprintf(run_params$output_fmt3, year_data$mod_output_annual_cur$stakes_bias[annual_stake_id] * run_params$output_mult/1e3), " ", run_params$output_unit, " w.e."), x=0.05, y = 0.3, hjust = 0,
+                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
       geom_line(aes(x = day_id, y = mb/1e3)) +
       geom_point(data = stake_meas_df, aes(x = day_id, y = mb/1e3), shape = 5, stroke = 1.2, size = 1) +
-      annotation_custom(grobTree(textGrob(paste0(year_data$massbal_annual_meas_cur$id[annual_stake_id], ": ", sprintf(run_params$output_fmt3, -year_data$mod_output_annual_cur$stakes_bias[annual_stake_id] * run_params$output_mult/1e3), " ", run_params$output_unit, " w.e."), x=0.05, y = 0.3, hjust = 0,
+      annotation_custom(grobTree(textGrob(stake_aval_txt, x=0.05, y = 0.2, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       scale_x_continuous(expand = expansion(0,0)) +
       scale_y_continuous(limits = stakes_mb_lims, breaks = pretty(stakes_mb_lims, n = 3), expand = expansion(mult = c(0.12,0.07))) +
