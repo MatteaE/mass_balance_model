@@ -35,17 +35,17 @@ func_find_mb_points_on_grid <- function(year_data,
                                         data_dems,
                                         run_params) {
   
-  # dx/dy of annual stakes
-  dx1_annual <- (year_data$massbal_annual_meas_cur$x - (ext(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
-  dx2_annual <- run_params$grid_cell_size - dx1_annual
-  dy2_annual <- ((ext(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$massbal_annual_meas_cur$y) %% run_params$grid_cell_size
-  dy1_annual <- run_params$grid_cell_size - dy2_annual
-  
   # dx/dy of winter stakes
   dx1_winter <- (year_data$massbal_winter_meas_cur$x - (ext(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
   dx2_winter <- run_params$grid_cell_size - dx1_winter
   dy2_winter <- ((ext(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$massbal_winter_meas_cur$y) %% run_params$grid_cell_size
   dy1_winter <- run_params$grid_cell_size - dy2_winter
+  
+  # dx/dy of annual stakes
+  dx1_annual <- (year_data$massbal_annual_meas_cur$x - (ext(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
+  dx2_annual <- run_params$grid_cell_size - dx1_annual
+  dy2_annual <- ((ext(data_dhms$elevation[[year_data$dhm_grid_id]])[3] - (run_params$grid_cell_size / 2)) - year_data$massbal_annual_meas_cur$y) %% run_params$grid_cell_size
+  dy1_annual <- run_params$grid_cell_size - dy2_annual
   
   # dx/dy of user-defined points for daily output
   dx1_daily <- (year_data$points_daily_out$x - (ext(data_dhms$elevation[[year_data$dhm_grid_id]])[1] - (run_params$grid_cell_size / 2))) %% run_params$grid_cell_size
@@ -63,29 +63,6 @@ func_find_mb_points_on_grid <- function(year_data,
   # aligned with a cell center, unless we are at the lower raster border (which we should
   # always avoid!) the additional cells returned with duplicates = FALSE (cells which would
   # not be part of the actual adjacent cells) have higher index than the "true" adjacent cells.
-  if (year_data$nstakes_annual > 0) {
-    cells_annual <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,c("x", "y")]), duplicates = FALSE))
-    cells_annual_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][as.integer(t(cells_annual))][,1], ncol = 4, byrow = TRUE)
-    stakes_annual_edge_ids <- integer(0)
-    for (stake_id in 1:year_data$nstakes_annual) {
-      stake_na_cells_logi <- is.na(cells_annual_dem_value[stake_id,])
-      if (length(which(stake_na_cells_logi)) > 0) {
-        cell_distances <- spDistsN1(xyFromCell(data_dhms$elevation[[year_data$dhm_grid_id]], cells_annual[stake_id,]), as.matrix(year_data$massbal_annual_meas_cur[stake_id,c("x", "y")]))
-        cell_scores <- cell_distances / (!stake_na_cells_logi)
-        cell_selected <- which.min(cell_scores)
-        cells_annual[stake_id,] <- cells_annual[stake_id, cell_selected]
-        stakes_annual_edge_ids <- append(stakes_annual_edge_ids, stake_id)
-      }
-    }
-    stakes_annual_edge_n <- length(stakes_annual_edge_ids)
-    if (stakes_annual_edge_n > 0) {
-      func_customlog("Year ", year_data$year_cur, ": found ", stakes_annual_edge_n, " annual measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, using nearest neighbor instead.", level = 1)
-      func_customlog("They are: ", paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_edge_ids], collapse = " | "), "\n")
-    }
-  }
-  
-  
-  # Same, for winter stakes if present.
   if (year_data$nstakes_winter > 0) {
     cells_winter <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,c("x", "y")]), duplicates = FALSE))
     cells_winter_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][as.integer(t(cells_winter))][,1], ncol = 4, byrow = TRUE)
@@ -102,8 +79,37 @@ func_find_mb_points_on_grid <- function(year_data,
     }
     stakes_winter_edge_n <- length(stakes_winter_edge_ids)
     if (stakes_winter_edge_n > 0) {
-      func_customlog("Year ", year_data$year_cur, ": found ", stakes_winter_edge_n, " winter measurement(s) which are at the very edge of the glacier. Bilinear extraction of their modeled series is not possible, using nearest neighbor instead.", level = 1)
-      func_customlog("They are: ", paste0(year_data$massbal_winter_meas_cur$id[stakes_winter_edge_ids], collapse = " | "), "\n")
+      func_customlog("Year ", year_data$year_cur, ": there are ", stakes_winter_edge_n, " winter measurement(s) which are very close to the glacier margin.", level = 1)
+      func_customlog("          Bilinear extraction of their modeled series is not possible, using nearest neighbor instead.", level = 0)
+      func_customlog("          Full information:\n", level = 0)
+      func_print_mb_points_df(year_data$massbal_winter_meas_cur[stakes_winter_edge_ids,c("id", "start_date", "end_date", "x", "y", "z_dem", "massbal")],
+                              run_params)
+    }
+  }
+  
+  
+  # Same, for annual stakes if present.
+  if (year_data$nstakes_annual > 0) {
+    cells_annual <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,c("x", "y")]), duplicates = FALSE))
+    cells_annual_dem_value <- matrix(data_dems$elevation[[year_data$dem_grid_id]][as.integer(t(cells_annual))][,1], ncol = 4, byrow = TRUE)
+    stakes_annual_edge_ids <- integer(0)
+    for (stake_id in 1:year_data$nstakes_annual) {
+      stake_na_cells_logi <- is.na(cells_annual_dem_value[stake_id,])
+      if (length(which(stake_na_cells_logi)) > 0) {
+        cell_distances <- spDistsN1(xyFromCell(data_dhms$elevation[[year_data$dhm_grid_id]], cells_annual[stake_id,]), as.matrix(year_data$massbal_annual_meas_cur[stake_id,c("x", "y")]))
+        cell_scores <- cell_distances / (!stake_na_cells_logi)
+        cell_selected <- which.min(cell_scores)
+        cells_annual[stake_id,] <- cells_annual[stake_id, cell_selected]
+        stakes_annual_edge_ids <- append(stakes_annual_edge_ids, stake_id)
+      }
+    }
+    stakes_annual_edge_n <- length(stakes_annual_edge_ids)
+    if (stakes_annual_edge_n > 0) {
+      func_customlog("Year ", year_data$year_cur, ": there are ", stakes_annual_edge_n, " annual measurement(s) which are very close to the glacier margin.", level = 1)
+      func_customlog("          Bilinear extraction of their modeled series is not possible, using nearest neighbor instead.", level = 0)
+      func_customlog("          Full information:\n", level = 0)
+      func_print_mb_points_df(year_data$massbal_annual_meas_cur[stakes_annual_edge_ids,c("id", "start_date", "end_date", "x", "y", "z_dem", "massbal")],
+                              run_params)
     }
   }
   

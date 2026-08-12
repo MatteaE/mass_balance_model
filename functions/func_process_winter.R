@@ -26,14 +26,6 @@ func_process_winter <- function(year_data,
   
   if (year_data$process_winter)  {
     
-    # We ask duplicates = FALSE, else the bilinear filtering in func_extract_modeled_points()
-    # can fail when a stake is exactly at the same (X and/or Y) coordinate as a cell center.
-    # duplicates = FALSE returns four different cells. In case we have a stake exactly
-    # aligned with a cell center, unless we are at the lower raster border (which we should
-    # always avoid!) the additional cells returned with duplicates = FALSE (cells which would
-    # not be part of the actual adjacent cells) have higher index than the "true" adjacent cells.
-    # year_data$winter_stakes_cells <- rowSort(fourCellsFromXY(data_dhms$elevation[[year_data$dhm_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,4:5]), duplicates = FALSE))
-    
     # Select weather series period.
     year_data$weather_series_winter_cur <- data_weather[which(data_weather$timestamp == year_data$model_time_bounds[3]):(which(data_weather$timestamp == year_data$model_time_bounds[4])),]
     year_data$model_winter_days_n       <- nrow(year_data$weather_series_winter_cur)
@@ -53,9 +45,44 @@ func_process_winter <- function(year_data,
     optim_corr_winter <- optim_res_winter$corrections_best
     year_data$corr_fact_winter <- optim_corr_winter$prec_corr / year_cur_params$prec_corr
     
+    
+    
+    # Check if any winter stakes were affected by avalanches --------------------------------------
+    # If yes, emit a warning
+    if (all(!is.na(run_params$model_avalanche_dates))) {
+      
+      avalanche_r <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]],
+                               year_data$mod_output_winter_cur$avalanche_net)
+      avalanche_stakes_net <- terra::extract(avalanche_r,
+                                             year_data$massbal_winter_meas_cur[,c("x", "y")],
+                                             method = "bilinear",
+                                             ID = FALSE,
+                                             raw = TRUE)[,1]
+      
+      year_data$massbal_winter_meas_cur$avalanche_net <- avalanche_stakes_net
+      
+      ids_aval <- which(abs(avalanche_stakes_net) > 0)
+      if (length(ids_aval) > 0) {
+        
+        winter_stakes_avalanche_df <- year_data$massbal_winter_meas_cur[,c("id", "start_date", "end_date", "x", "y", "z_dem", "massbal", "avalanche_net")]
+        winter_stakes_avalanche_df <- winter_stakes_avalanche_df[ids_aval,]
+        
+        cat("\n")
+        func_customlog("Year ", year_data$year_cur, ": there are ", length(ids_aval), " winter measurement points which are affected by modeled avalanches.", level = 1)
+        func_customlog("          Please check carefully their modeled mass balance, it could have unexpected values.", level = 0)
+        func_customlog("          Full information:\n", level = 0)
+        
+        func_print_mb_points_df(winter_stakes_avalanche_df,
+                                run_params)
+        
+      } # End if there are any winter measurements with avalanche effect
+      
+    } # End if there are any avalanches
+    
     # Free some memory after processing.
     invisible(gc())
-  }
+    
+  } # End if process_winter
   
   return(year_data)
   

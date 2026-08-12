@@ -111,7 +111,7 @@ func_load_massbalance_measurements <- function(run_params,
                                                        ext_limits,
                                                        c(run_params$grids_crs + c(-2, -1, 1, 2), 4326),
                                                        run_params$grids_crs)
-      # Rescued the current pair by changing coordinates system!
+      # Successfully rescued the current pair by changing coordinates system.
       if (all(!is.na(stake_coords_fixed))) {
         data_massbalance$x[ids_df_bad[i]] <- stake_coords_fixed[1]
         data_massbalance$y[ids_df_bad[i]] <- stake_coords_fixed[2]
@@ -123,6 +123,10 @@ func_load_massbalance_measurements <- function(run_params,
       func_customlog("          Successfully recovered ", stake_coords_rescued_n, " entries with a wrong coordinate system.", level = 0)
     } else {
       func_customlog("          No entries could be recovered. Please check them manually.", level = 0)
+      if (ids_bad_n == nrow(data_massbalance)) {
+        func_customlog("        All mass balance points are not usable. Please fix the mass balance file and run again.", level = 2)
+        func_stop()
+      }
     }
     ids_df_bad <- setdiff(ids_df_bad, stake_coords_rescued_ids) # Don't remove rescued stakes.
     if (stake_coords_rescued_n < ids_bad_n) {

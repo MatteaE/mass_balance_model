@@ -74,59 +74,6 @@ func_process_year <- function(year_data,
                                    data_all$data_weather)
   
   
-  #### . . Check if any winter stakes were affected by avalanches ####
-  # If yes, emit a warning
-  if ((year_data$process_winter) && (all(!is.na(run_params$model_avalanche_dates)))) {
-    
-    avalanche_r <- setValues(data_all$data_dhms$elevation[[year_data$dhm_grid_id]],
-                             year_data$mod_output_winter_cur$avalanche_net)
-    avalanche_stakes_net <- terra::extract(avalanche_r,
-                                           year_data$massbal_winter_meas_cur[,c("x", "y")],
-                                           method = "bilinear",
-                                           ID = FALSE,
-                                           raw = TRUE)[,1]
-    
-    year_data$massbal_winter_meas_cur$avalanche_net <- avalanche_stakes_net
-    
-    ids_aval <- which(abs(avalanche_stakes_net) > 0)
-    if (length(ids_aval) > 0) {
-      
-      winter_stakes_avalanche_df <- year_data$massbal_winter_meas_cur[,c("id", "start_date", "end_date", "x", "y", "massbal", "avalanche_net")]
-      winter_stakes_avalanche_df <- winter_stakes_avalanche_df[ids_aval,]
-      
-      cat("\n")
-      func_customlog("Year ", year_data$year_cur, ": there are ", length(ids_aval), " winter measurement points which are affected by modeled avalanches.", level = 1)
-      func_customlog("          Please check carefully their modeled mass balance, it could have unexpected values.", level = 0)
-      func_customlog("          Full information:", level = 0)
-      
-      id_nchar_max <- max(nchar(winter_stakes_avalanche_df$id))
-      field_widths <- c(min(id_nchar_max+2, 20), 12, 12, 10, 10, 9, 15)
-      
-      func_customlog(paste0(str_pad(names(winter_stakes_avalanche_df),
-                                    field_widths, side = "left", pad = " "), collapse = " "),
-                     level = 0)
-      # Print aligned table with all relevant info on the points with avalanche effects.
-      for (i in 1:length(ids_aval)) {
-        
-        func_customlog(paste0(str_pad(c(substr(winter_stakes_avalanche_df$id[i], 1, 20),
-                                        format(winter_stakes_avalanche_df$start_date[i], "%F"),
-                                        format(winter_stakes_avalanche_df$end_date[i], "%F"),
-                                        as.character(winter_stakes_avalanche_df$x[i]),
-                                        as.character(winter_stakes_avalanche_df$y[i]),
-                                        sprintf(run_params$output_fmt1, winter_stakes_avalanche_df$massbal[i]*run_params$output_mult/1000),
-                                        sprintf(run_params$output_fmt3, winter_stakes_avalanche_df$avalanche_net[i]*run_params$output_mult/1000)),
-                                      field_widths, side = "left", pad = " "), collapse = " "),
-                       level = 0)
-      } # End loop on winter measurements with avalanche effect
-    
-      cat("\n")  
-    } # End if there are any winter measurements with avalanche effect
-    
-  } # End if process_winter is TRUE and there are avalanches
-  
-  
-  
-  
   #### .  Simulate annual mass balance ####
   # If we have mass balance data, this runs the optimization.
   # Else just a single simulation.

@@ -71,7 +71,7 @@ func_set_year_params <- function(year_data,
           # Parameter probes_snowdist_filename - keep it as "" to signal that we do not take snowdist
         } else if (params_names_all[param_id] == "probes_snowdist_filename") {
           
-          cat("No external map of snow distribution was supplied\n")
+          cat("No external map of snow distribution was supplied.\n")
           year_cur_params[[param_id]] <- ""
           
           # All other parameters
