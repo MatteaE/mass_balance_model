@@ -127,7 +127,6 @@ func_massbal_model <- function(run_params,
     radiation_cur <- radiation_values_list[[doy]]
     
     offset_cur <- day_id * run_params$grid_ncells # The _cur start at the end of the first day (i.e. there is one "iteration" before which holds the initial state).
-    offset_prev <- (day_id - 1) * run_params$grid_ncells
     cells_cur  <- offset_cur + 1:run_params$grid_ncells # Indices of all the grid cells with values at the end of the current day.
     cells_prev <- cells_cur - run_params$grid_ncells    # Indices of all the grid cells with values at the beginning of the current day.
     
@@ -194,7 +193,7 @@ func_massbal_model <- function(run_params,
     
     
     # Compute melt amounts.
-    melt_cur[cells_ice]    <- (year_cur_params$melt_factor + 24 * year_cur_params$rad_fact_ice * grid_ice_albedo_fact_cur_values[cells_ice] / 1000. * radiation_cur[cells_ice]) * temp_cur[cells_ice] # We use offset_prev in the temperature vector because it has one timestep less than the modeled grids (which also have the initial conditions as first timestep).
+    melt_cur[cells_ice]    <- (year_cur_params$melt_factor + 24 * year_cur_params$rad_fact_ice * grid_ice_albedo_fact_cur_values[cells_ice] / 1000. * radiation_cur[cells_ice]) * temp_cur[cells_ice]
     melt_cur[cells_firn]   <- (year_cur_params$melt_factor + 24 * year_cur_params$rad_fact_firn / 1000. * radiation_cur[cells_firn]) * temp_cur[cells_firn]
     melt_cur[cells_snow]   <- (year_cur_params$melt_factor + 24 * year_cur_params$rad_fact_snow / 1000. * radiation_cur[cells_snow]) * temp_cur[cells_snow]
     melt_cur[cells_debris] <- run_params$debris_red_fac * (year_cur_params$melt_factor + 24  * year_cur_params$rad_fact_ice / 1000. * radiation_cur[cells_debris]) * temp_cur[cells_debris]
