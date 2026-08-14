@@ -64,7 +64,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
     massbal_meas_cur   <- year_data$massbal_annual_meas_cur
     stakes_cells       <- year_data$annual_stakes_cells
   }
-
+  
   cat("Simulation runs", nrow(weather_series_cur), "days, from", format(weather_series_cur$timestamp[1], "%F"), "to", format(weather_series_cur$timestamp[nrow(weather_series_cur)], "%F"), "included\n")
   
   cat("\n* Optimization run # 1\n")
@@ -81,6 +81,19 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells,
                                       1:nstakes, verbose_logi = TRUE)
   bias_prev <- mod_output_cur$global_bias
+  
+  # Create output data frames.
+  # Note: we also extract and store the glacier-wide hydrological and measurement period mass balances.
+  # These are extracted again later (only for the final calibrated run) to write the output and plots,
+  # with a different logic (going through mass balance maps).
+  # But if we do LOO validation/sensitivity, we need them earlier,
+  # to store the result of each run (including uncalibrated and LOO ones),
+  # so we extract them here for each run, from the gl_massbal_cumul vector.
+  if (year_data$run_loo_logi) {
+    df_runs_smb    <- func_compile_df_runs_smb(year_cur_params, year_data, mod_output_cur, 1, corr_fact_prev, "main_optim_dummy")
+    df_runs_biases <- func_compile_df_runs_biases(year_data, mod_output_cur, 1, corr_fact_prev, "main_optim_dummy")
+  }
+  
   
   cat("\n* Optimization run # 2\n")
   # This 0.01 increment is arbitrary, we just need
@@ -101,7 +114,14 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells,
                                       1:nstakes, verbose_logi = TRUE)
   bias_cur <- mod_output_cur$global_bias
-    
+  if (year_data$run_loo_logi) {
+    df_runs_smb    <- rbind(df_runs_smb,
+                            func_compile_df_runs_smb(year_cur_params, year_data, mod_output_cur, 2, corr_fact_cur, "main_optim_dummy"))
+    df_runs_biases <- rbind(df_runs_biases,
+                            func_compile_df_runs_biases(year_data, mod_output_cur, 2, corr_fact_cur, "main_optim_dummy"))
+  }
+  
+  
   niter <- 2
   while ((abs(bias_cur) > run_params$optim_bias_threshold) && (niter < run_params$optim_max_iter)) {
     bias_slope <- (bias_cur - bias_prev) / (corr_fact_cur - corr_fact_prev)
@@ -121,7 +141,20 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                         nstakes, model_days_n, massbal_meas_cur, stakes_cells,
                                         1:nstakes, verbose_logi = TRUE)
     bias_cur <- mod_output_cur$global_bias
+    if (year_data$run_loo_logi) {
+      df_runs_smb    <- rbind(df_runs_smb,
+                              func_compile_df_runs_smb(year_cur_params, year_data, mod_output_cur, niter, corr_fact_cur, "main_optim"))
+      df_runs_biases <- rbind(df_runs_biases,
+                              func_compile_df_runs_biases(year_data, mod_output_cur, niter, corr_fact_cur, "main_optim"))
+    }
   }
+  # The last (highest-id) iteration is the one which converged to zero global bias.
+  # We mark it as such.
+  if (year_data$run_loo_logi) {
+    df_runs_smb$run_type[nrow(df_runs_smb)]       <- "main_optim_final"
+    df_runs_biases$run_type[nrow(df_runs_biases)] <- "main_optim_final"
+  }
+  
   
   
   # These are the absolute additive corrections.
@@ -135,7 +168,16 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
     corrections_best <- list(prec_corr    = corr_fact_cur    * year_cur_params$prec_corr)
   }
   
-  return(list(mod_output_cur   = mod_output_cur,
-              corrections_best = corrections_best))
+  
+  
+  # Assemble output.
+  out_l <- list(mod_output_cur   = mod_output_cur,
+                corrections_best = corrections_best)
+  if (year_data$run_loo_logi) {
+    out_l$df_runs_smb    <- df_runs_smb
+    out_l$df_runs_biases <- df_runs_biases
+  }
+  
+  return(out_l)
   
 }

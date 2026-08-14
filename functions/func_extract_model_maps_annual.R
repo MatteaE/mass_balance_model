@@ -58,14 +58,6 @@ func_extract_model_maps_annual <- function(year_data,
     swe_measperiod_end_map      <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], swe_measperiod_end_values)
   }
   
-  # id_fixed_start <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$fixed_annual_start)
-  # id_fixed_end <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$fixed_annual_end)
-  # massbal_fixed_start_values <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_fixed_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
-  # massbal_fixed_end_values   <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_fixed_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
-  # massbal_fixed_map <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_fixed_end_values - massbal_fixed_start_values)
-  # massbal_fixed_map_masked <- mask(massbal_fixed_map, data_dems$elevation[[year_data$dem_grid_id]])
-  
-  
   # Add maps relative to measurement period if available.
   # We can't use ifelse() with rasters!
   massbal_maps <- list(hydro       = massbal_hydro_map_masked)

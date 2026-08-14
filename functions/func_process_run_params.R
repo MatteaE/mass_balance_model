@@ -68,7 +68,7 @@ func_process_run_params <- function(run_params) {
   
   # For the "adaptive" interpolation: minimum distance to avoid excessive weighting
   if (is.null(run_params$probes_snowdist_dist_min)) {
-    run_params$probes_snowdist_dist_min <- 25 
+    run_params$probes_snowdist_dist_min   <- 25 
   }
   
   # For the "adaptive" interpolation: minimum number of points to use (otherwise, grow search radius)
@@ -78,7 +78,7 @@ func_process_run_params <- function(run_params) {
   
   # For both types of IDW interpolation: IDW exponent to use
   if (is.null(run_params$probes_snowdist_idw_exp)) {
-    run_params$probes_snowdist_idw_exp <-   0.75        # [-]: exponent for the IDW interpolation of winter snow measurements
+    run_params$probes_snowdist_idw_exp    <- 0.75        # [-]: exponent for the IDW interpolation of winter snow measurements
   }
   
   # Smoothing radius (in m) for the result of the IDW interpolation
@@ -88,16 +88,16 @@ func_process_run_params <- function(run_params) {
   
   # Importance of topographic snow distribution
   if (is.null(run_params$topographic_snowdist_fact)) {
-    run_params$topographic_snowdist_fact <- 1.0
+    run_params$topographic_snowdist_fact  <- 1.0
   }
   
   # Importance of probes snow distribution
   # Used to be called accum_probes_red_fac in an old version
   if (is.null(run_params$probes_snowdist_fact)) {
     if (!is.null(run_params$accum_probes_red_fac)) {
-      run_params$probes_snowdist_fact <- run_params$accum_probes_red_fac
+      run_params$probes_snowdist_fact     <- run_params$accum_probes_red_fac
     } else {
-      run_params$probes_snowdist_fact <- 1.0
+      run_params$probes_snowdist_fact     <- 1.0
     }
   }
   
@@ -116,30 +116,32 @@ func_process_run_params <- function(run_params) {
   
   
   #### MODEL OPTIMIZATION parameters --------------------------------------------------------------
-  run_params$optim_bias_threshold        <-   1           # [mm w.e.]: if abs(bias) is below this threshold then we stop the optimization. This saves us a couple iterations since the optim() function will stop when the value *change* is less than a threshold, not the value itself.
-  run_params$optim_max_iter              <-   20          # [-]: force mass balance optimization to stop after this number of iterations, even if bias is not within threshold. This is useful in case the optimization is not converging due to avalanches barely reaching a stake, thus a small change in the snow amounts changes a stake's simulated mass balance by a lot, thus bias keeps jumping around 0. In normal conditions, the model converges much faster than 20 iterations.
+  run_params$optim_bias_threshold         <-   1           # [mm w.e.]: if abs(bias) is below this threshold then we stop the optimization. This saves us a couple iterations since the optim() function will stop when the value *change* is less than a threshold, not the value itself.
+  run_params$optim_max_iter               <-   20          # [-]: force mass balance optimization to stop after this number of iterations, even if bias is not within threshold. This is useful in case the optimization is not converging due to avalanches barely reaching a stake, thus a small change in the snow amounts changes a stake's simulated mass balance by a lot, thus bias keeps jumping around 0. In normal conditions, the model converges much faster than 20 iterations.
   
   
   
   #### MASS BALANCE PROCESSING parameters ---------------------------------------------------------
-  run_params$ele_bands_ela_size          <-   10          # [m]: to compute the equilibrium line altitude, divide the glacier grid into elevation bands with this vertical extent.
-  
+  run_params$ele_bands_ela_size           <-   10          # [m]: to compute the equilibrium line altitude, divide the glacier grid into elevation bands with this vertical extent.
+  if (is.null(run_params$run_loo_validation)) {
+    run_params$run_loo_validation         <- FALSE
+  }
   
   
   #### FIXED MASS BALANCE PERIODS choice ----------------------------------------------------------
-  run_params$massbal_fixed_winter_start  <-   "10/1"      # [month/day]: start of the user-defined fixed period for winter mass balance evaluation. This is referred to (<year_cur> - 1).
-  run_params$massbal_fixed_winter_end    <-   "4/30"      # [month/day]: end of the user-defined fixed period for winter mass balance evaluation. This is referred to <year_cur>.
+  run_params$massbal_fixed_winter_start   <-   "10/1"      # [month/day]: start of the user-defined fixed period for winter mass balance evaluation. This is referred to (<year_cur> - 1).
+  run_params$massbal_fixed_winter_end     <-   "4/30"      # [month/day]: end of the user-defined fixed period for winter mass balance evaluation. This is referred to <year_cur>.
   
   
   #### OUTPUT parameters --------------------------------------------------------------------------
   # Should we call save.image() at the end of the model run?
   # Useful for faster debugging.
-  run_params$save_simulation_RData       <-   FALSE
+  run_params$save_simulation_RData        <-   FALSE
   
   # Should we run the model if we find the
   # output directory already present?
   # Or stop with a warning?
-  run_params$overwrite_output            <-   TRUE
+  run_params$overwrite_output             <-   TRUE
   
 
   # If output unit is unspecified or invalid, use meters water equivalent.

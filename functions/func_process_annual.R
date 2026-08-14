@@ -16,7 +16,7 @@ func_process_annual <- function(year_data,
                                 data_weather) {
   
   
-  # Select weather series period.
+  # Select weather series period ------------------------------------------------------------------
   # model_time_bounds[1] is the start of the annual run, 
   # model_time_bounds[2] is the end.
   year_data$weather_series_annual_cur <- data_weather[which(data_weather$timestamp == year_data$model_time_bounds[1]):(which(data_weather$timestamp == year_data$model_time_bounds[2])),]
@@ -24,22 +24,40 @@ func_process_annual <- function(year_data,
   
   
   # Different processing in case we have or not annual mass balance measurements.
+  # If we have mass balance data ------------------------------------------------------------------
+  year_data$run_loo_logi <- FALSE
   if (year_data$nstakes_annual > 0) {
     
-    # This is a list with both the best model output
-    # and the corresponding best corrections.
+    year_data$run_loo_logi <- run_params$run_loo_validation
+    if ((year_data$run_loo_logi == TRUE) && (year_data$nstakes_annual < 2)) {
+      func_customlog("Year ", year_data$year_cur, ": there are not enough points to run LOO validation. It will be skipped.", level = 1)
+      year_data$run_loo_logi <- FALSE
+    }
+    
+    
+    # . Run optimization --------------------------------------------------------------------------    
+    # The return value is a list with everything we need.
     optim_res_annual <- func_optimize_mb("annual", year_data$corr_fact_winter,
                                          run_params, year_cur_params,
                                          year_data,
                                          data_dhms, data_dems, data_surftype, data_radiation)
+    
+    # Store full model output
     year_data$mod_output_annual_cur <- optim_res_annual$mod_output_cur
     
-    # Save best correction parameters (additive!).
-    year_data$optim_corr_annual <- optim_res_annual$corrections_best
+    # Store best correction parameters (additive!)
+    year_data$optim_corr_annual     <- optim_res_annual$corrections_best
+    
+    # Store data frames with point smb and biases for all model runs
+    # (useful for LOO validation/sensitivity plots).
+    # If there is no LOO validation (year_data$run_loo_logi is FALSE)
+    # then these are just NULL, i.e. not set in year_data.
+    year_data$df_runs_smb           <- optim_res_annual$df_runs_smb
+    year_data$df_runs_biases        <- optim_res_annual$df_runs_biases
     
     
     
-    # Check if any annual stakes were affected by avalanches --------------------------------------
+    # . Check if any annual stakes were affected by avalanches ------------------------------------
     # If yes, emit a warning
     if (all(!is.na(run_params$model_avalanche_dates))) {
       
@@ -73,11 +91,18 @@ func_process_annual <- function(year_data,
     } # End if there are any avalanches
     
     
-    # If we don't have mass balance data:
+    
+    # . Run LOO validation ------------------------------------------------------------------------
+    func_loo_validation(run_params, year_cur_params, year_data,
+                        data_dhms, data_dems, data_surftype, data_radiation)
+    # TODO!
+    
+    
+    # If we don't have mass balance data ----------------------------------------------------------
   } else {
     
-    # Simulate year with a single model run,
-    # using unmodified year_cur_params.
+    # . Simulate year with a single model run -----------------------------------------------------
+    # The run uses unmodified year_cur_params.
     year_data$mod_output_annual_cur <- func_simulate_mb_without_data(run_params, year_cur_params, year_data,
                                                                      data_dhms, data_dems, data_surftype, data_radiation)
     # No corrections are computed.

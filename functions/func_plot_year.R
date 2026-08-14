@@ -17,7 +17,8 @@ func_plot_year <- function(year_data,
   
   cat("\n** Producing year plots... **\n")
   
-  #### . PLOT THE MASS BALANCE MAPS ####
+  
+  # Plot the mass balance maps --------------------------------------------------------------------
   # This returns a list with the (5 or 6, depending on whether we have winter measurements)
   # mass balance maps for the current year.
   # Then we will append to this list also the
@@ -30,7 +31,7 @@ func_plot_year <- function(year_data,
                                        data_outlines)
   
   
-  #### . PLOT THE SWE MAPS ####
+  # Plot the SWE maps -----------------------------------------------------------------------------
   cat("  SWE maps...\n")
   plots_swe <- func_plot_year_swe_maps(year_data,
                                        run_params,
@@ -41,7 +42,7 @@ func_plot_year <- function(year_data,
   
   
   
-  #### . PLOT THE MAP OF AVALANCHE EFFECT ####
+  # Plot the map of avalanche effect --------------------------------------------------------------
   cat("  Avalanche map...\n")
   plots_avalanche <- func_plot_avalanche_net_effect(year_data,
                                                     run_params,
@@ -52,7 +53,7 @@ func_plot_year <- function(year_data,
   
   
   
-  #### . PLOT THE MAP OF SNOWFALL DISTRIBUTION ####
+  # Plot the map of snowfall distribution ---------------------------------------------------------
   cat("  Snowfall distribution map...\n")
   plots_snowdist <- func_plot_year_snowdist_maps(year_data,
                                                  run_params,
@@ -62,7 +63,7 @@ func_plot_year <- function(year_data,
   
   
   
-  #### . PLOT THE DAILY METEOROLOGICAL SERIES ####
+  # Plot the daily meteorological series ----------------------------------------------------------
   # This also plots the result of prec_corr/100 * prec_summer_fact, that is, the daily correction to the precipitation series.
   cat("  Meteorological series...\n")
   plot_weather_series <- func_plot_weather_series(year_data,
@@ -72,7 +73,7 @@ func_plot_year <- function(year_data,
   
   
   
-  #### . PLOT THE DAILY TIME SERIES OF GLACIER-WIDE MASS BALANCE ####
+  # Plot the daily time series of glacier-wide mass balance ---------------------------------------
   cat("  Mass balance time series...\n")
   plots_mb_cumul <- func_plot_massbal_cumul(year_data,
                                             run_params)
@@ -80,7 +81,7 @@ func_plot_year <- function(year_data,
   
   
   
-  #### . PLOT THE DAILY TIME SERIES OF SNOW-COVERED AREA FRACTION ####
+  # Plot the daily time series of snow-covered area fraction --------------------------------------
   cat("  Snow-covered area fraction...\n")
   plot_scaf <- func_plot_scaf(year_data,
                               run_params)
@@ -88,7 +89,7 @@ func_plot_year <- function(year_data,
   
   
   
-  #### . PLOT MASS BALANCE VERSUS ELEVATION ####
+  # Plot mass balance versus elevation ------------------------------------------------------------
   cat("  Mass balance altitudinal gradient...\n")
   mb_vs_ele_list <- func_plot_massbal_vs_elevation(year_data,
                                                    run_params,
@@ -106,7 +107,7 @@ func_plot_year <- function(year_data,
   
   
   
-  #### . PLOT MODELED SERIES OF EACH STAKE ####
+  # Plot modeled series of each stake -------------------------------------------------------------
   if (year_data$nstakes_annual > 0) {
     cat("  Mass balance at the stakes...\n")
     plots_stakes <- func_plot_stakes(year_data,
@@ -115,8 +116,19 @@ func_plot_year <- function(year_data,
       plots_year <- append(plots_year, list(plots_stakes[[stakes_page_id]]))
     }
   }
+
+    
+  # Plot LOO results ------------------------------------------------------------------------------
+  if (year_data$run_loo_logi) {
+    cat("  Leave-one-out results...\n")
+    plots_loo_results <- func_plot_loo_results(year_data,
+                                              run_params)
+    plots_year <- append(plots_year, list(plots_loo_results))
+  }
   
-  # Write multi-page PDF for the current year.
+  
+  
+  # Write multi-page PDF for the current year -----------------------------------------------------
   cat("  Putting it all together...\n")
   plots_year_out <- suppressWarnings(ggarrange(plotlist = plots_year, ncol = 1, nrow = 1, align = "hv"))
   suppressMessages(ggexport(plots_year_out,
