@@ -19,7 +19,8 @@ func_optim_worker <- function(optimization_period, corr_fact_cur, corr_fact_wint
                               dist_probes_norm_values_red, grids_avalanche_cur,
                               grid_ice_albedo_fact_cur_values,
                               dx1, dx2, dy1, dy2,
-                              nstakes, model_days_n, massbal_meas_cur, stakes_cells) {
+                              nstakes, model_days_n, massbal_meas_cur, stakes_cells,
+                              stakes_ids_sel, verbose_logi) {
   
   
   if (optimization_period == "annual") {
@@ -48,7 +49,8 @@ func_optim_worker <- function(optimization_period, corr_fact_cur, corr_fact_wint
                                                dist_probes_norm_values_red, grids_avalanche_cur,
                                                grid_ice_albedo_fact_cur_values,
                                                dx1, dx2, dy1, dy2,
-                                               nstakes, model_days_n, massbal_meas_cur, stakes_cells)
+                                               nstakes, model_days_n, massbal_meas_cur, stakes_cells,
+                                               stakes_ids_sel, verbose_logi)
   
   return(mod_output_cur)
 }

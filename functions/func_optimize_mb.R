@@ -78,7 +78,8 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                       year_data$dist_probes_norm_values_red, year_data$grids_avalanche_cur,
                                       year_data$grid_ice_albedo_fact_cur_values,
                                       dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
-                                      nstakes, model_days_n, massbal_meas_cur, stakes_cells)
+                                      nstakes, model_days_n, massbal_meas_cur, stakes_cells,
+                                      1:nstakes, verbose_logi = TRUE)
   bias_prev <- mod_output_cur$global_bias
   
   cat("\n* Optimization run # 2\n")
@@ -97,7 +98,8 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                       year_data$dist_probes_norm_values_red, year_data$grids_avalanche_cur,
                                       year_data$grid_ice_albedo_fact_cur_values,
                                       dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
-                                      nstakes, model_days_n, massbal_meas_cur, stakes_cells)
+                                      nstakes, model_days_n, massbal_meas_cur, stakes_cells,
+                                      1:nstakes, verbose_logi = TRUE)
   bias_cur <- mod_output_cur$global_bias
     
   niter <- 2
@@ -116,7 +118,8 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                         year_data$dist_probes_norm_values_red, year_data$grids_avalanche_cur,
                                         year_data$grid_ice_albedo_fact_cur_values,
                                         dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
-                                        nstakes, model_days_n, massbal_meas_cur, stakes_cells)
+                                        nstakes, model_days_n, massbal_meas_cur, stakes_cells,
+                                        1:nstakes, verbose_logi = TRUE)
     bias_cur <- mod_output_cur$global_bias
   }
   

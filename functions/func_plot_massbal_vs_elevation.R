@@ -154,9 +154,9 @@ func_plot_massbal_vs_elevation <- function(year_data,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       annotation_custom(grobTree(textGrob(paste0("RMS: ", sprintf(run_params$output_fmt1, stakes_rms*run_params$output_mult), " ", run_params$output_unit, " w.e."), x=0.02, y = 0.87, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
-      annotation_custom(grobTree(richtext_grob(abl_grad_meas_txt, x=0.02, y = 0.79, hjust = 0,
+      annotation_custom(grobTree(textGrob(abl_grad_meas_txt, x=0.02, y = 0.79, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
-      annotation_custom(grobTree(richtext_grob(abl_grad_mod_txt, x=0.02, y = 0.71, hjust = 0,
+      annotation_custom(grobTree(textGrob(abl_grad_mod_txt, x=0.02, y = 0.71, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       geom_point(aes(x = ele, y = mb/1e3, color = avalanche_effect), size = 0.5, stroke = 0) +
       geom_point(data = df_stakes, aes(x = z, y = meas/1e3), shape = 3, stroke = 1.5, size = 0) +

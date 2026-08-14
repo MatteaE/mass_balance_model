@@ -24,7 +24,13 @@ func_massbal_model <- function(run_params,
                                snowdist_topographic_values_red,
                                snowdist_probes_norm_values_red,
                                grids_avalanche_cur,
-                               grid_ice_albedo_fact_cur_values) {
+                               grid_ice_albedo_fact_cur_values,
+                               verbose_level) {
+  
+  
+  # verbose_level = 0 is fully quiet
+  # verbose_level = 1 is normal output (currently only announcing firnification-related news)
+  # verbose_level = 2 is verbose (also announcing avalanches)
   
   # t1 <- Sys.time()
   
@@ -146,7 +152,9 @@ func_massbal_model <- function(run_params,
     # NOTE: to update the vectors we use the cells_prev indices, since those are used as input to the melt model just below. This means that the mass balance change due to the avalanche is assigned to the day BEFORE the avalanche.
     if (avalanche_condition) {
       
-      # cat("Avalanche!\n")
+      if (verbose_level >= 2) {
+        cat("Avalanche on", format(weather_series_cur$timestamp[day_id], "%Y/%m/%d"), "\n")
+      }
       
       avalanche_input_values        <- pmax(0.0, vec_snow_swe[cells_prev] - swe_post_previous_avalanche)
       avalanche_output              <- func_avalanche(run_params,
@@ -262,7 +270,9 @@ func_massbal_model <- function(run_params,
       ids_swe_nonzero <- which(swe_min_vec > 0)
       ids_swe_nonzero_n <- length(ids_swe_nonzero)
       if (ids_swe_nonzero_n > 0) {
-        cat(paste0(format(weather_series_cur$timestamp[day_id], "%Y-%m-%d"), ": transforming leftover snow from previous year into firn on ", ids_swe_nonzero_n, " cells (mean SWE subtracted from them: ", round(mean(swe_min_vec[ids_swe_nonzero])), " mm w.e.)\n"))
+        if (verbose_level >= 1) {
+          cat(paste0(format(weather_series_cur$timestamp[day_id], "%Y-%m-%d"), ": transforming leftover snow from previous year into firn on ", ids_swe_nonzero_n, " cells (mean SWE subtracted from them: ", round(mean(swe_min_vec[ids_swe_nonzero])), " mm w.e.)\n"))
+        }
         
         ids_swe_depleted_to_firn            <- which((vec_snow_swe[cells_cur] > 0) &
                                                        (vec_snow_swe[cells_cur] <= swe_min_vec))
@@ -270,15 +280,19 @@ func_massbal_model <- function(run_params,
         swe_depleted_to_firn_n              <- length(ids_swe_depleted_to_firn)
         swe_depleted_to_firn_on_glacier_n   <- length(ids_swe_depleted_to_firn_on_glacier)
         if (swe_depleted_to_firn_n > 0) {
-          func_customlog("Firnification has just removed all snow on ",
-                         swe_depleted_to_firn_n, " cells, ",
-                         swe_depleted_to_firn_on_glacier_n, " of them on glacier! This is extremely unlikely (it means that the date of firnification is the date of minimum mass balance for each of those cells). Please check the meteorological series! This total removal might introduce second-order biases in the mass balance.", level = 1)
+          if (verbose_level >= 1) {
+            func_customlog("Firnification has just removed all snow on ",
+                           swe_depleted_to_firn_n, " cells, ",
+                           swe_depleted_to_firn_on_glacier_n, " of them on glacier! This is extremely unlikely (it means that the date of firnification is the date of minimum mass balance for each of those cells). Please check the meteorological series! This total removal might introduce second-order biases in the mass balance.", level = 1)
+          }
           vec_surf_type[cells_cur][ids_swe_depleted_to_firn] <- surftype_init_values[ids_swe_depleted_to_firn]
         }
         vec_snow_swe[cells_cur] <- pmax(0, vec_snow_swe[cells_cur] - swe_min_vec)
         
       } else {
-        cat("There is no leftover snow from previous year, which would have become firn\n")
+        if (verbose_level >= 1) {
+          cat("There is no leftover snow from previous year, which would have become firn\n")
+        }
       }
     }
     

@@ -16,7 +16,12 @@ func_run_simulation_single <- function(year_param_corrections,
                                        snowdist_init, data_radiation, weather_series_cur, dist_topographic_values_red,
                                        dist_probes_norm_values_red, grids_avalanche_cur,
                                        grid_ice_albedo_fact_cur_values, dx1, dx2, dy1, dy2,
-                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells) {
+                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells,
+                                       stakes_ids_sel, verbose_logi) {
+  
+  # stakes_ids_sel enables to select which stakes are to be included in the bias and rms calculations.
+  #   It is used for LOO validation (otherwise it is just set to all stakes).
+  # verbose_logi can be used to mute the output (used for LOO validation)
   
   
   #### . .  APPLY ADDITIVE CORRECTIONS FOR OPTIMIZATION ####
@@ -34,9 +39,11 @@ func_run_simulation_single <- function(year_param_corrections,
   # fixed (initial) ratio of the radiation factors.
   year_cur_params_corr$rad_fact_snow <- year_cur_params_corr$rad_fact_ice * year_cur_params_corr$rad_fact_ratio_snow_ice
   
-  cat("melt_factor =",  round(year_cur_params_corr$melt_factor, 3),  "\n")
-  cat("rad_fact_ice =", round(year_cur_params_corr$rad_fact_ice, 3), "\n")
-  cat("prec_corr =",    round(year_cur_params_corr$prec_corr, 3),    "\n")
+  if (verbose_logi) {
+    cat("melt_factor =",  round(year_cur_params_corr$melt_factor, 3),  "\n")
+    cat("rad_fact_ice =", round(year_cur_params_corr$rad_fact_ice, 3), "\n")
+    cat("prec_corr =",    round(year_cur_params_corr$prec_corr, 3),    "\n")
+  }
   
   #### . .  RUN MASS BALANCE MODEL ####
   mb_model_output <- func_massbal_model(run_params,
@@ -50,7 +57,8 @@ func_run_simulation_single <- function(year_param_corrections,
                                         dist_topographic_values_red,
                                         dist_probes_norm_values_red,
                                         grids_avalanche_cur,
-                                        grid_ice_albedo_fact_cur_values)
+                                        grid_ice_albedo_fact_cur_values,
+                                        verbose_level = min(verbose_logi, 1)) # Keep verbosity from received parameter
   
   
   #### . .  COMPARE TO STAKE MEASUREMENTS ####
@@ -83,7 +91,7 @@ func_run_simulation_single <- function(year_param_corrections,
   # Cumulative mass balance of each stake
   # over its individual measurement period (numeric vector).
   stakes_mb_mod  <- as.numeric(stakes_series_mod_all)[((1:nstakes)-1)*(model_days_n+1) + stakes_end_ids] -
-                    as.numeric(stakes_series_mod_all)[((1:nstakes)-1)*(model_days_n+1) + stakes_start_ids_corr]
+    as.numeric(stakes_series_mod_all)[((1:nstakes)-1)*(model_days_n+1) + stakes_start_ids_corr]
   
   # Corresponding measurement.
   stakes_mb_meas <- massbal_meas_cur$massbal
@@ -91,11 +99,13 @@ func_run_simulation_single <- function(year_param_corrections,
   # Bias of each stake (numeric vector, one element per stake).
   stakes_bias <- stakes_mb_mod - stakes_mb_meas
   
-  global_bias <- mean(stakes_bias)
-  global_rms  <- sqrt(mean(stakes_bias^2))
+  global_bias <- mean(stakes_bias[stakes_ids_sel])
+  global_rms  <- sqrt(mean(stakes_bias[stakes_ids_sel]^2))
   
-  cat("BIAS:", round(global_bias, 2), "mm w.e.\n")
-  cat("RMS:",  round(global_rms, 2),  "mm w.e.\n")
+  if (verbose_logi) {
+    cat("BIAS:", round(global_bias, 2), "mm w.e.\n")
+    cat("RMS:",  round(global_rms, 2),  "mm w.e.\n")
+  }
   
   # Compile output with everything we may need
   # for either plots or optimization.
