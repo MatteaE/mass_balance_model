@@ -102,9 +102,18 @@ func_run_simulation_single <- function(year_param_corrections,
   global_bias <- mean(stakes_bias[stakes_ids_sel])
   global_rms  <- sqrt(mean(stakes_bias[stakes_ids_sel]^2))
   
+  # Align digits of BIAS and RMS with ad-hoc whitespace padding.
   if (verbose_logi) {
-    cat("BIAS:", round(global_bias, 2), "mm w.e.\n")
-    cat("RMS:",  round(global_rms, 2),  "mm w.e.\n")
+    bias_val_txt <- sprintf("%+.2f", global_bias)
+    rms_val_txt  <- sprintf("%.2f", global_rms)
+    pad_rms  <- nchar(bias_val_txt) - nchar(rms_val_txt) + 1
+    pad_bias <- 0
+    if (pad_rms < 0) {
+      pad_bias <- -pad_rms
+      pad_rms <- 0
+    }
+    cat(paste0("BIAS:", paste0(rep(" ", pad_bias), collapse = "")), bias_val_txt, "mm w.e.\n")
+    cat(paste0("RMS:",  paste0(rep(" ", pad_rms), collapse = "")), rms_val_txt,  "mm w.e.\n")
   }
   
   # Compile output with everything we may need
