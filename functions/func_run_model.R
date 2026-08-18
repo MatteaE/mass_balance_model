@@ -228,7 +228,7 @@ func_run_model <- function(run_params) {
   if (length(year_ids_todo) > 0) {
     
     cat("\n")
-    func_customlog("There are still ", years_todo_n, " year(s) without mass balance measurements. Entering second processing loop\n", level = 4)
+    func_customlog("There are still ", years_todo_n, " year(s) without mass balance measurements. Entering second processing loop...\n", level = 4)
     cat("\n")
     
     # Loop over the years without data ------------------------------------------------------------

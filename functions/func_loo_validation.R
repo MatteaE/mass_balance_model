@@ -197,6 +197,7 @@ func_loo_validation <- function(run_params, year_cur_params, year_data,
   
   year_data$df_loo_out     <- df_loo_out
   
+  # Store LOO RMS for plotting and saving.
   year_data$global_loo_rms <- sqrt(mean(year_data$df_loo_out$stake_loo_bias^2))
   
   return(year_data)

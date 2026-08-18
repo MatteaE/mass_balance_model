@@ -31,9 +31,9 @@ func_plot_loo_results <- function(year_data,
   stakes_col_ids         <- grep("^s[0-9]+$", names(plot_df)) # Only the stakes values, which are called like s01, s123, etc.
   plot_df$stakes_average <- rowMeans(plot_df[,stakes_col_ids])
   
-  plot_df_melt1           <- melt(plot_df,
-                                  id.vars = c("run_id", "corr_fact", "run_type"),
-                                  measure.vars = names(plot_df)[stakes_col_ids])
+  plot_df_melt1          <- melt(plot_df,
+                                 id.vars = c("run_id", "corr_fact", "run_type"),
+                                 measure.vars = names(plot_df)[stakes_col_ids])
   
   plot_df_melt2          <- melt(plot_df,
                                  id.vars = c("run_id", "corr_fact", "run_type"),
@@ -51,7 +51,7 @@ func_plot_loo_results <- function(year_data,
     
     # Draw the individual stakes
     geom_line(aes(x = 1+corr_fact, y = value*run_params$output_mult/1e3, group = variable, color = "stakes_single"), alpha = 0.4, linewidth = 0.5) +
-    geom_point(aes(x = 1+corr_fact, y = value*run_params$output_mult/1e3, group = variable, shape = run_type, color = "stakes_single"), alpha = 0.4, size = 3, stroke = 0.5) +
+    geom_point(aes(x = 1+corr_fact, y = value*run_params$output_mult/1e3, group = variable, shape = run_type, color = "stakes_single"), alpha = 0.4, size = 2, stroke = 0.3) +
     
     # Draw the glacier-wide mass balances and the arithmetic mean of the stakes, with partial alpha.
     geom_line(data = plot_df_melt2, aes(x = 1+corr_fact, y = value*run_params$output_mult/1e3, color = variable), linewidth = 1, alpha = 0.6) +
@@ -81,10 +81,17 @@ func_plot_loo_results <- function(year_data,
     guides(color = guide_legend(order = 1),
            linetype = guide_legend(order = 2),
            shape = guide_none()) +
-    scale_y_continuous(expand = expansion(mult = c(0.2,0.05),0)) +
+    scale_y_continuous(expand = expansion(mult = c(0.25,0.05),0)) +
     xlab("Optimization factor [-]") +
     ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
     theme_loo_plot
+  
+  
+  browser()
+  
+  
+  
+  
   
   
   # NOTE: if more plots are added to this list then this function should return the list, not its first element

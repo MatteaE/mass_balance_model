@@ -28,6 +28,7 @@ func_process_year <- function(year_data,
                                            data_all$data_dems,
                                            run_params)
   
+  
   # Setup grids from winter snow probes, if available. Also set flag year_data$process_winter to TRUE/FALSE.
   year_data <- func_setup_winter_probes_dist(year_data,
                                              data_all$data_dhms,
@@ -35,6 +36,7 @@ func_process_year <- function(year_data,
                                              data_all$data_outlines,
                                              run_params,
                                              year_cur_params)
+  
   
   #### . Compute annual and winter modeling periods ####
   year_data <- func_compute_modeling_periods(year_data,
@@ -93,6 +95,7 @@ func_process_year <- function(year_data,
     overview_annual$summary_df$year_starting_swe_available[year_data$year_id+1] <- TRUE
   }
   
+  
   #### . Extract mass balance results ####
   year_data <- func_extract_year_massbalance(year_data,
                                              run_params,
@@ -100,17 +103,20 @@ func_process_year <- function(year_data,
                                              data_all$data_dhms,
                                              data_all$data_dems)
   
+  
   #### . Post-process mass balance (correction in elevation bands, ELA/AAR, standardized over the measurement period) ####
   year_data <- func_massbal_postprocess(year_data,
                                         run_params,
                                         year_cur_params,
                                         data_all$data_dems)
   
+  
   #### . Save to overview_annual$summary_df the overview values for the current year ####
   overview_annual$summary_df <- func_save_overview_values(year_data,
                                                           year_cur_params,
                                                           run_params,
                                                           overview_annual$summary_df)
+  
   
   #### . Produce all plots for the year ####
   # This creates a PDF file for the year
@@ -123,13 +129,13 @@ func_process_year <- function(year_data,
                                                    data_all$data_dhms,
                                                    data_all$data_outlines)
   
+  
   #### . Write annual model output to files ####
   overview_annual$daily_data_list <- func_write_year_output(year_data,
                                                             run_params,
                                                             data_all$data_dhms,
                                                             data_all$data_dems,
                                                             overview_annual$daily_data_list)
-  
   
   
   #### . Plot daily maps of SWE and surface type ####
@@ -152,7 +158,6 @@ func_process_year <- function(year_data,
                          data_all$data_dems)
   
   
-
   # Commented code below: if a stake is at the very edge of the
   # glacier, bilinear extraction of the modeled series is impossible
   # (one or more cells of the 4 neighbors are outside the glacierized area).

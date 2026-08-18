@@ -76,11 +76,9 @@ func_plot_overview <- function(overview_annual,
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("Annual mass balance (no local correction)") +
     {if (any(overview_annual$summary_df$year_has_data) == TRUE) annotation_custom(grobTree(textGrob("Measurement period", x=0.05, y = 0.12, hjust = 0,
-                                        gp=gpar(col="#FF00FF", fontsize = base_size * 1., fontface="bold"))))} +
+                                                                                                    gp=gpar(col="#FF00FF", fontsize = base_size * 1., fontface="bold"))))} +
     annotation_custom(grobTree(textGrob("Hydrological year", x=0.05, y = 0.05, hjust = 0,
                                         gp=gpar(col="#0000FF", fontsize = base_size * 1., fontface="bold")))) +
-    # annotation_custom(grobTree(textGrob("Fixed period", x=0.05, y = 0.05, hjust = 0,
-                                        # gp=gpar(col="#00FFFF", fontsize = base_size * 1., fontface="bold")))) +
     theme_overview_plots
   
   
@@ -145,17 +143,33 @@ func_plot_overview <- function(overview_annual,
   # Also in case there are isolated years with mass balance measurements,
   # else they are not visible (geom_line of a single point).
   if (any(overview_annual$summary_df$year_has_data) == TRUE) {
-    single_year_point <- NULL
+    single_year_point1 <- NULL # For RMSE
+    single_year_point2 <- NULL # For LOO RMSE
     year_has_data_rle <- rle(overview_annual$summary_df$year_has_data)
     if (single_year || any((year_has_data_rle$values == TRUE) & (year_has_data_rle$lengths == 1))) {
-      single_year_point <- geom_point(aes(x = year, y = rmse))
+      single_year_point1 <- geom_point(aes(x = year, y = rmse, color = "rmse"))
+      if (!all(is.na(overview_annual$summary_df$loo_rmse, color = "loo_rmse"))) {
+        single_year_point2 <- geom_point(aes(x = year, y = loo_rmse))
+      }
     }
     plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-      geom_line(aes(x = year, y = rmse), linewidth = 1) +
-      single_year_point +
+      geom_line(aes(x = year, y = rmse, color = "rmse"), linewidth = 1) +
+      {if (!all(is.na(overview_annual$summary_df$loo_rmse))) geom_line(aes(x = year, y = loo_rmse, color = "loo_rmse"), linewidth = 1)} +
+      single_year_point1 +
+      single_year_point2 +
+      # Write key to RMSE colors only if the LOO one (blue) is displayed.
+      {if (!all(is.na(overview_annual$summary_df$loo_rmse))) annotation_custom(grobTree(textGrob("Leave-one-out RMSE", x=0.05, y = 0.12, hjust = 0,
+                                                                                                 gp=gpar(col="blue", fontsize = base_size * 1., fontface="bold"))))} +
+      {if (!all(is.na(overview_annual$summary_df$loo_rmse))) annotation_custom(grobTree(textGrob("Full RMSE", x=0.05, y = 0.05, hjust = 0,
+                                                                                                 gp=gpar(col="black", fontsize = base_size * 1., fontface="bold"))))} +
       ylab(paste0("RMSE [", run_params$output_unit, " w.e.]")) +
       scale_y_continuous(limits = c(0,NA), expand = expansion(mult = c(0, 0.2))) +
       scale_x_continuous(breaks = x_breaks) +
+      scale_color_manual(values = c("rmse" = "black",
+                                    "loo_rmse" = "blue"),
+                         labels = c("rmse" = "RMSE",
+                                    "loo_rmse" = "Leave-one-out RMSE"),
+                         guide = guide_none()) +
       ggtitle("Root-Mean-Square Error") +
       theme_overview_plots
   }
@@ -273,7 +287,7 @@ func_plot_overview <- function(overview_annual,
   mb_first_year_hydro_start <- overview_annual$daily_data_list$mb_series_all_raw[[1]][first_year_hydro_start_id]
   mb_series_all <- overview_annual$daily_data_list$mb_series_all_raw
   mb_series_all[[1]] <- mb_series_all[[1]] - mb_first_year_hydro_start
-
+  
   date_breaks_by <- "3 months" # Used only in case there is a single year, else we change this below.
   date_breaks_extend_before <- 1 # In case we label all years, we extend breaks by 1 to get enough labels.
   date_labels_cur <- "%Y/%m"

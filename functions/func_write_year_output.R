@@ -17,7 +17,7 @@ func_write_year_output <- function(year_data,
   
   cat("\n** Writing year output... **\n")
   
-  # Write mass balance maps (rasters) -------------------------------------------------------------
+  # Mass balance maps (rasters) -------------------------------------------------------------------
   writeRaster(year_data$massbal_annual_maps$hydro * run_params$output_mult / 1000,
               file.path(run_params$out_annual_gridded_dirpath,
                         paste0("mb_annual_hydro_", year_data$year_cur, run_params$output_grid_ext)),
@@ -32,10 +32,7 @@ func_write_year_output <- function(year_data,
                           paste0("mb_annual_measperiod_corrected_", year_data$year_cur, run_params$output_grid_ext)),
                 overwrite = TRUE)
   }
-  # writeRaster(year_data$massbal_annual_maps$fixed,
-  # file.path(run_params$out_annual_gridded_dirpath,
-  # paste0("mb_annual_fixedperiod_", year_data$year_cur, run_params$output_grid_ext)),
-  # overwrite = TRUE)
+
   
   writeRaster(year_data$massbal_winter_maps$fixed * run_params$output_mult / 1000,
               file.path(run_params$out_annual_gridded_dirpath,
@@ -48,7 +45,7 @@ func_write_year_output <- function(year_data,
                 overwrite = TRUE)
   }
   
-  # Write used DEM --------------------------------------------------------------------------------
+  # Used DEM --------------------------------------------------------------------------------------
   if (run_params$dem_write) {
     writeRaster(data_dems$elevation[[year_data$dem_grid_id]],
                 file.path(run_params$out_annual_gridded_dirpath,
@@ -57,7 +54,7 @@ func_write_year_output <- function(year_data,
   }
   
   
-  # Write maps of snow distribution ---------------------------------------------------------------
+  # Maps of snow distribution ---------------------------------------------------------------------
   # Small-scale variability (topographic)
   writeRaster(setValues(data_dhms$elevation[[year_data$dhm_grid_id]],
                         year_data$dist_topographic_values_red),
@@ -74,7 +71,7 @@ func_write_year_output <- function(year_data,
   
   
   
-  # Write modeled glacier-wide daily mass balance series ------------------------------------------
+  # Modeled glacier-wide daily mass balance series ------------------------------------------------
   # NOTE: the cumulative values refer to the value *AT THE BEGINNING* of the respective day.
   # the daily values refer to the value added *OVER* the respective day.
   # Thus, the *LAST* daily value is always 0.0 (that day is not actually
@@ -112,7 +109,7 @@ func_write_year_output <- function(year_data,
             row.names = FALSE)
   
   
-  # Write modeled glacier-wide daily mass balance, for hydrological year only ---------------------
+  # Modeled glacier-wide daily mass balance, for hydrological year only ---------------------------
   # This enables comparison of the output files of years with and without measurements
   # and of years with inconsistent measurement date.
   # The cumulative time series are reset to 0 on <YYYY-1>-10-01.
@@ -140,7 +137,7 @@ func_write_year_output <- function(year_data,
   
   
   
-  # Write modeled daily mass balance series at the stakes -----------------------------------------
+  # Modeled daily mass balance series at the stakes -----------------------------------------------
   if (year_data$nstakes_annual > 0) {
     df_stakes_daily <- data.frame(date   = model_annual_dates,
                                   stakes = year_data$mod_output_annual_cur$stakes_series_mod_all * run_params$output_mult / 1000)
@@ -158,7 +155,7 @@ func_write_year_output <- function(year_data,
   
   
   
-  # Write modeled daily mass balance series at the stakes, for hydrological year only -------------
+  # Modeled daily mass balance series at the stakes, for hydrological year only -------------------
   # This enables comparison of the output files of years with and without measurements
   # and of years with inconsistent measurement date.
   # The cumulative time series are reset to 0 on <YYYY-1>-10-01.
@@ -177,7 +174,7 @@ func_write_year_output <- function(year_data,
   }
   
   
-  # Write modeled daily series of cumulative mass balance and SWE at the user-defined points ------
+  # Modeled daily series of cumulative mass balance and SWE at the user-defined points ------------
   if (year_data$npoints_daily > 0) {
     
     dir.create(file.path(run_params$out_daily_dirpath), recursive = TRUE, showWarnings = FALSE)
@@ -201,7 +198,7 @@ func_write_year_output <- function(year_data,
   
   
   
-  # Write mass balance in vertical bands ----------------------------------------------------------
+  # Annual mass balance in vertical bands ---------------------------------------------------------
   # Note: we have disabled the fixed annual period,
   # This has changed the indices below from 4:9 to 4:8.
   # Note: df_ele_bands_out already uses the correct unit (mm or m,
@@ -217,9 +214,36 @@ func_write_year_output <- function(year_data,
             row.names = FALSE) 
   
   
+  # LOO validation results ------------------------------------------------------------------------
+  if (year_data$run_loo_logi) {
+    
+    df_loo_out                <- year_data$df_loo_out[,setdiff(names(year_data$df_loo_out), "stake_id")]
+    df_loo_out$stake_loo_bias <- sprintf(run_params$output_fmt4, df_loo_out$stake_loo_bias * run_params$output_mult/1e3)
+    df_loo_out$loo_corr_fact  <- sprintf("%.5f", df_loo_out$loo_corr_fact)
+    write.csv(df_loo_out,
+              file.path(run_params$output_dirname, "annual_results", paste0("loo_validation_", year_data$year_cur, ".csv")),
+              quote = FALSE,
+              row.names = FALSE)
+    
+  }
+  
+  
+  # Glacier-wide mass balance of all model realizations -------------------------------------------
+  df_smb_all_out                      <- year_data$df_runs_smb[,c("run_id", "corr_fact", "run_type", "mb_annual_hydro", "mb_annual_measperiod")]
+  df_smb_all_out$mb_annual_hydro      <- sprintf(run_params$output_fmt4, df_smb_all_out$mb_annual_hydro * run_params$output_mult/1e3)
+  df_smb_all_out$mb_annual_measperiod <- sprintf(run_params$output_fmt4, df_smb_all_out$mb_annual_measperiod * run_params$output_mult/1e3)
+  df_smb_all_out$corr_fact            <- sprintf("%.5f", df_smb_all_out$corr_fact)
+  
+  write.csv(df_smb_all_out,
+            file.path(run_params$output_dirname, "annual_results", paste0("mb_all_runs_", year_data$year_cur, ".csv")),
+            quote = FALSE,
+            row.names = FALSE)
+  
+  
+  
   # Save some values which we will use for the overview plots -------------------------------------
   overview_daily_data$mb_series_all_dates[[year_data$year_id]]              <- model_annual_dates
-  if(year_data$nstakes_annual > 0) {
+  if (year_data$nstakes_annual > 0) {
     overview_daily_data$mb_series_all_measperiod_dates[[year_data$year_id]] <- year_data$massbal_annual_meas_period
   } else {
     overview_daily_data$mb_series_all_measperiod_dates[[year_data$year_id]] <- NA
