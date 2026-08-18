@@ -126,6 +126,9 @@ func_process_run_params <- function(run_params) {
   if (is.null(run_params$run_loo_validation)) {
     run_params$run_loo_validation         <- FALSE
   }
+  if (is.null(run_params$loo_stake_iter_max_n)) {
+    run_params$loo_stake_iter_max_n <- 10
+  }
   
   
   #### FIXED MASS BALANCE PERIODS choice ----------------------------------------------------------

@@ -116,7 +116,11 @@ func_plot_year_mb_maps <- function(year_data,
     
     
     #### MEASUREMENT PERIOD - ANNUAL, WITH STAKES ####
-    # Also RMS.
+    # Also RMS, with LOO RMS in addition if available
+    rms_txt <- paste0("RMS: ", sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.")
+    if (!is.null(year_data$global_loo_rms)) {
+      rms_txt <- paste0(rms_txt, " (LOO: ", sprintf(run_params$output_fmt1, year_data$global_loo_rms*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.)")
+    }
     plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult / 1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -131,7 +135,7 @@ func_plot_year_mb_maps <- function(year_data,
                                           x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
       annotation_custom(grobTree(textGrob(bquote(bold(b[n]*" = "*.(mb_meas_annual_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                           x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-      annotation_custom(grobTree(textGrob(paste0("RMS: ", sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e."),
+      annotation_custom(grobTree(textGrob(rms_txt,
                                           x = 0.05, y=y_line4, hjust = 0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
       labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
            subtitle = " ") +

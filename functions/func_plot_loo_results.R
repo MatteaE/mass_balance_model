@@ -9,7 +9,6 @@
 
 func_plot_loo_results <- function(year_data,
                                   run_params) {
-  
   plots_loo_results <- list()
   
   
@@ -75,9 +74,10 @@ func_plot_loo_results <- function(year_data,
                                   "stakes_single" = "Individual stakes")) +
     scale_linetype_manual(values = c("hline_stakes_measured_avg" ="dashed"),
                           labels = c("hline_stakes_measured_avg" = "Measured stake average")) +
-    scale_shape_manual(values = c("main_optim_dummy" = 4,
-                                  "main_optim" = 4,
-                                  "main_optim_final" = 19)) +
+    scale_shape_manual(values = c("main_optim_dummy" = 1,
+                                  "main_optim" = 1,
+                                  "main_optim_final" = 19,
+                                  "loo" = 4)) +
     guides(color = guide_legend(order = 1),
            linetype = guide_legend(order = 2),
            shape = guide_none()) +

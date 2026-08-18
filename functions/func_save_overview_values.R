@@ -16,7 +16,6 @@ func_save_overview_values <- function(year_data,
   # Save overview values for the year.
   # After the loop we show them in the multi-year plots.
   df_overview$mb_annual_hydro[year_data$year_id]      <- year_data$massbal_annual_values[["hydro.mean"]] * run_params$output_mult / 1e3
-  # df_overview$mb_annual_hydro_corr[year_data$year_id] <- year_data$massbal_annual_values[["hydro_corr.mean"]] * run_params$output_mult / 1e3
   df_overview$mb_winter_fixed[year_data$year_id]      <- year_data$massbal_winter_values[["fixed.mean"]] * run_params$output_mult / 1e3
   df_overview$ela[year_data$year_id]                  <- year_data$ela_aar[["ela"]]
   df_overview$aar[year_data$year_id]                  <- year_data$ela_aar[["aar"]] * 100
@@ -37,6 +36,10 @@ func_save_overview_values <- function(year_data,
     df_overview$rmse[year_data$year_id]                 <- year_data$mod_output_annual_cur$global_rms * run_params$output_mult / 1e3
     df_overview$year_has_data[year_data$year_id]        <- TRUE
     
+  }
+  
+  if (!is.null(year_data$global_loo_rms)) {
+    df_overview$loo_rmse[year_data$year_id]             <- year_data$global_loo_rms * run_params$output_mult / 1e3
   }
   
   return(df_overview)

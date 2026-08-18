@@ -16,11 +16,8 @@ func_run_simulation_single <- function(year_param_corrections,
                                        snowdist_init, data_radiation, weather_series_cur, dist_topographic_values_red,
                                        dist_probes_norm_values_red, grids_avalanche_cur,
                                        grid_ice_albedo_fact_cur_values, dx1, dx2, dy1, dy2,
-                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells,
-                                       stakes_ids_sel, verbose_logi) {
+                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells, verbose_logi) {
   
-  # stakes_ids_sel enables to select which stakes are to be included in the bias and rms calculations.
-  #   It is used for LOO validation (otherwise it is just set to all stakes).
   # verbose_logi can be used to mute the output (used for LOO validation)
   
   
@@ -79,13 +76,16 @@ func_run_simulation_single <- function(year_param_corrections,
   # cumulative mass balance by the end of that same day.
   # So it would be equally correct to also shift all the day indices by one (little to no change).
   # We also find the start date for stakes set to NA (i.e. start date = date of mass balance minimum).
-  stakes_start_ids <- pmatch(massbal_meas_cur$start_date,
-                             weather_series_cur$timestamp,
-                             duplicates.ok = TRUE)
-  stakes_end_ids   <- pmatch(massbal_meas_cur$end_date,
-                             weather_series_cur$timestamp,
-                             duplicates.ok = TRUE)
-  stakes_start_ids_corr <- func_compute_unknown_stakes_start_ids(run_params, stakes_start_ids, weather_series_cur, stakes_series_mod_all)
+  stakes_start_ids      <- pmatch(massbal_meas_cur$start_date,
+                                  weather_series_cur$timestamp,
+                                  duplicates.ok = TRUE)
+  stakes_end_ids        <- pmatch(massbal_meas_cur$end_date,
+                                  weather_series_cur$timestamp,
+                                  duplicates.ok = TRUE)
+  stakes_start_ids_corr <- func_compute_unknown_stakes_start_ids(run_params,
+                                                                 stakes_start_ids,
+                                                                 weather_series_cur,
+                                                                 stakes_series_mod_all)
   
   
   # Cumulative mass balance of each stake
@@ -99,8 +99,8 @@ func_run_simulation_single <- function(year_param_corrections,
   # Bias of each stake (numeric vector, one element per stake).
   stakes_bias <- stakes_mb_mod - stakes_mb_meas
   
-  global_bias <- mean(stakes_bias[stakes_ids_sel])
-  global_rms  <- sqrt(mean(stakes_bias[stakes_ids_sel]^2))
+  global_bias <- mean(stakes_bias)
+  global_rms  <- sqrt(mean(stakes_bias^2))
   
   # Align digits of BIAS and RMS with ad-hoc whitespace padding.
   if (verbose_logi) {

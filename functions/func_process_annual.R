@@ -93,9 +93,10 @@ func_process_annual <- function(year_data,
     
     
     # . Run LOO validation ------------------------------------------------------------------------
-    func_loo_validation(run_params, year_cur_params, year_data,
-                        data_dhms, data_dems, data_surftype, data_radiation)
-    # TODO!
+    year_data <- func_loo_validation(run_params, year_cur_params, year_data,
+                        data_dhms, data_dems, data_surftype, data_radiation,
+                        verbose_logi = FALSE)
+    
     
     
     # If we don't have mass balance data ----------------------------------------------------------

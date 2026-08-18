@@ -33,6 +33,7 @@ func_setup_overview_annual <- function(run_params) {
                                            ela                         = NA_real_,
                                            aar                         = NA_real_,
                                            rmse                        = NA_real_,
+                                           loo_rmse                    = NA_real_,
                                            melt_factor                 = NA_real_,
                                            rad_fact_ice                = NA_real_,
                                            rad_fact_snow               = NA_real_,

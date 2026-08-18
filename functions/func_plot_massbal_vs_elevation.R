@@ -149,10 +149,15 @@ func_plot_massbal_vs_elevation <- function(year_data,
       abl_grad_mod_txt <- paste0("Modeled ablation gradient: ", sprintf("%.4f", year_data$abl_grad_mod))
     }
     
+    # RMS label with also LOO RMS if available.
+    rms_txt <- paste0("RMS: ", sprintf(run_params$output_fmt1, stakes_rms*run_params$output_mult), " ", run_params$output_unit, " w.e.")
+    if (!is.null(year_data$global_loo_rms)) {
+      rms_txt <- paste0(rms_txt, " (LOO: ", sprintf(run_params$output_fmt1, year_data$global_loo_rms*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.)")
+    }
     plots_mb_vs_ele[[2]] <- ggplot(df_scatterplot) +
       annotation_custom(grobTree(textGrob(paste0("Bias: ", sprintf(run_params$output_fmt3, stakes_bias*run_params$output_mult), " ", run_params$output_unit, " w.e."), x=0.02, y = 0.95, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
-      annotation_custom(grobTree(textGrob(paste0("RMS: ", sprintf(run_params$output_fmt1, stakes_rms*run_params$output_mult), " ", run_params$output_unit, " w.e."), x=0.02, y = 0.87, hjust = 0,
+      annotation_custom(grobTree(textGrob(rms_txt, x=0.02, y = 0.87, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       annotation_custom(grobTree(textGrob(abl_grad_meas_txt, x=0.02, y = 0.79, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
