@@ -27,6 +27,10 @@ func_plot_loo_results <- function(year_data,
           legend.margin=margin(0,0,0,0,"pt"))
   
   
+  
+  
+  # Line and point plot of mass balance of individual stakes --------------------------------------
+  # (in all model realizations, vs correction factor)
   plot_df                <- year_data$df_runs_smb
   stakes_col_ids         <- grep("^s[0-9]+$", names(plot_df)) # Only the stakes values, which are called like s01, s123, etc.
   plot_df$stakes_average <- rowMeans(plot_df[,stakes_col_ids])
@@ -87,14 +91,36 @@ func_plot_loo_results <- function(year_data,
     theme_loo_plot
   
   
-  browser()
   
   
+  # Boxplot of glacier-wide mass balance in all the LOO realizations (sensitivity) ----------------
+  mb_sensitivity_df <- data.frame(mb_measperiod = year_data$df_runs_smb$mb_annual_measperiod[year_data$df_loo_out$loo_run_id],
+                                  mb_hydro      = year_data$df_runs_smb$mb_annual_hydro[year_data$df_loo_out$loo_run_id],
+                                  stake_id      = year_data$df_loo_out$stake_id)
+  mb_sensitivity_df_melt <- melt(mb_sensitivity_df,
+                                 id.vars = "stake_id")
+  plots_loo_results[[2]] <- ggplot(mb_sensitivity_df_melt) +
+    geom_boxplot(aes(x = variable, y = value*run_params$output_mult/1e3)) +
+    # Also add non-LOO values, as points.
+    geom_point(data = data.frame(type = c("mb_measperiod", "mb_hydro"),
+                                 mb   = c(year_data$massbal_annual_values$meas_period.mean,
+                                          year_data$massbal_annual_values$hydro.mean)),
+                                 aes(x = type, y = mb*run_params$output_mult/1e3, color = type),
+               shape = 8) +
+    scale_x_discrete(labels = c("mb_measperiod" = "Measurement period (annual)",
+                                "mb_hydro"      = "Hydrological year")) +
+    scale_color_manual(values = c("mb_measperiod" = "#FF00FF",
+                                  "mb_hydro" = "#0000FF"),
+                       guide = guide_none()) +
+    xlab("") +
+    ylab(paste0("LOO mass balance [", run_params$output_unit, " w.e.]")) +
+    theme_loo_plot
   
   
+  # Align panels.
+  plots_out <- plot_grid(plotlist = plots_loo_results, align = "hv", ncol = 1, nrow = 2)
   
   
-  # NOTE: if more plots are added to this list then this function should return the list, not its first element
-  return(plots_loo_results[[1]])
+  return(plots_out)
   
 }

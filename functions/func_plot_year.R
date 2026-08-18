@@ -15,7 +15,7 @@ func_plot_year <- function(year_data,
                            data_dhms,
                            data_outlines) {
   
-  cat("\n** Producing year plots... **\n")
+  cat("\n** Producing year plots **\n")
   
   
   # Plot the mass balance maps --------------------------------------------------------------------

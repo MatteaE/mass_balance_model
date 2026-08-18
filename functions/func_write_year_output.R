@@ -15,7 +15,7 @@ func_write_year_output <- function(year_data,
                                    data_dems,
                                    overview_daily_data) {
   
-  cat("\n** Writing year output... **\n")
+  cat("\n** Writing year output **\n")
   
   # Mass balance maps (rasters) -------------------------------------------------------------------
   writeRaster(year_data$massbal_annual_maps$hydro * run_params$output_mult / 1000,
