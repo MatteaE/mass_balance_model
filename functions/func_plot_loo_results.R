@@ -87,7 +87,7 @@ func_plot_loo_results <- function(year_data,
            shape = guide_none()) +
     scale_y_continuous(expand = expansion(mult = c(0.25,0.05),0)) +
     xlab("Optimization factor [-]") +
-    ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
+    ylab(paste0("LOO mass balance [", run_params$output_unit, " w.e.]")) +
     theme_loo_plot
   
   

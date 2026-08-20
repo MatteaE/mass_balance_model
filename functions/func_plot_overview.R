@@ -148,8 +148,8 @@ func_plot_overview <- function(overview_annual,
     year_has_data_rle <- rle(overview_annual$summary_df$year_has_data)
     if (single_year || any((year_has_data_rle$values == TRUE) & (year_has_data_rle$lengths == 1))) {
       single_year_point1 <- geom_point(aes(x = year, y = rmse, color = "rmse"))
-      if (!all(is.na(overview_annual$summary_df$loo_rmse, color = "loo_rmse"))) {
-        single_year_point2 <- geom_point(aes(x = year, y = loo_rmse))
+      if (!all(is.na(overview_annual$summary_df$loo_rmse))) {
+        single_year_point2 <- geom_point(aes(x = year, y = loo_rmse, color = "loo_rmse"))
       }
     }
     plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +

@@ -44,12 +44,12 @@ func_plot_year_swe_maps <- function(year_data,
           legend.key.width = unit(3, "cm"),
           legend.key.height = unit(0.25, "cm"),
           legend.box.margin = margin(0,0,5,0),
-          legend.title = element_text(vjust = 1.1, face = "bold", size = 16, margin = margin(0,20,0,0,unit = "pt")),
+          legend.title = element_text(vjust = 0, face = "bold", size = 16, margin = margin(0,20,0,0,unit = "pt")),
           legend.text = element_text(face = "bold", size = 12),
           plot.margin = margin(margin_top,0,0,0, unit = "pt"))
   
   # palette_RdPu_adj <- c(RColorBrewer::brewer.pal(9, "RdPu")[c(2:8)], "#310063")
-  palette_swe <- c("#CDFFCC", "#99F1B3", "#53BCA0", "#3296B3", "#0770AE", "#00358F", "#d30688", "#ff00ff")
+  palette_swe <- c("#CDFFCC", "#99F1B3", "#53BCA0", "#3296B3", "#0770AE", "#00358F", "#D30688", "#FF00FF")
   # palette_cur <- palette_RdPu_adj
   palette_cur <- palette_swe
   
@@ -93,7 +93,7 @@ func_plot_year_swe_maps <- function(year_data,
                                         x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
-    scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]"),
+    scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]\n"),
                       colors = palette_cur,
                       limits = c(0,max_swe),
                       breaks = swe_breaks,
@@ -122,7 +122,7 @@ func_plot_year_swe_maps <- function(year_data,
                                         x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
-    scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]"),
+    scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]\n"),
                       colors = palette_cur,
                       limits = c(0,max_swe),
                       breaks = swe_breaks,
@@ -156,7 +156,7 @@ func_plot_year_swe_maps <- function(year_data,
                                           x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
       labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
            subtitle = " ") +
-      scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]"),
+      scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]\n"),
                         colors = palette_cur,
                         limits = c(0,max_swe),
                         breaks = swe_breaks,
@@ -185,7 +185,7 @@ func_plot_year_swe_maps <- function(year_data,
                                           x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
       labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
            subtitle = " ") +
-      scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]"),
+      scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]\n"),
                         colors = palette_cur,
                         limits = c(0,max_swe),
                         breaks = swe_breaks,
@@ -216,7 +216,7 @@ func_plot_year_swe_maps <- function(year_data,
                                         x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
-    scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]"),
+    scale_fill_stepsn(name = paste0("SWE [", run_params$output_unit, " w.e.]\n"),
                       colors = palette_cur,
                       limits = c(0,max_swe),
                       breaks = swe_breaks,

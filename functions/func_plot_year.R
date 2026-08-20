@@ -41,7 +41,6 @@ func_plot_year <- function(year_data,
   plots_year <- append(plots_year, plots_swe)
   
   
-  
   # Plot the map of avalanche effect --------------------------------------------------------------
   cat("  Avalanche map...\n")
   plots_avalanche <- func_plot_avalanche_net_effect(year_data,
@@ -52,13 +51,23 @@ func_plot_year <- function(year_data,
   plots_year <- append(plots_year, plots_avalanche)
   
   
+  # Plot the map of snow cover duration (hydrological year) ---------------------------------------
+  cat("  Snow cover duration...\n")
+  plots_snow_duration <- func_plot_snowcover_duration(year_data,
+                                                      year_cur_params,
+                                                      run_params,
+                                                      data_dhms,
+                                                      data_dems,
+                                                      data_outlines)
+  plots_year <- append(plots_year, plots_snow_duration)
+  
   
   # Plot the map of snowfall distribution ---------------------------------------------------------
   cat("  Snowfall distribution map...\n")
-  plots_snowdist <- func_plot_year_snowdist_maps(year_data,
-                                                 run_params,
-                                                 data_dhms,
-                                                 data_outlines)
+  plots_snowdist <- func_plot_year_snowdist_map(year_data,
+                                                run_params,
+                                                data_dhms,
+                                                data_outlines)
   plots_year <- append(plots_year, plots_snowdist)
   
   
@@ -116,13 +125,13 @@ func_plot_year <- function(year_data,
       plots_year <- append(plots_year, list(plots_stakes[[stakes_page_id]]))
     }
   }
-
-    
+  
+  
   # Plot LOO results ------------------------------------------------------------------------------
   if (year_data$run_loo_logi) {
     cat("  Leave-one-out results...\n")
     plots_loo_results <- func_plot_loo_results(year_data,
-                                              run_params)
+                                               run_params)
     plots_year <- append(plots_year, list(plots_loo_results))
   }
   

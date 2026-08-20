@@ -3,11 +3,11 @@
 # Description:    this program models the distributed mass balance of a glacier at daily          #
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
-#                 This file contains the routine which plots the maps of snow distribution.       #
+#                 This file contains the routine which plots the map of snow distribution.        #
 ################################################################################################### 
 
 
-func_plot_year_snowdist_maps <- function(year_data,
+func_plot_year_snowdist_map <- function(year_data,
                                          run_params,
                                          data_dhms,
                                          data_outlines) {
@@ -30,7 +30,7 @@ func_plot_year_snowdist_maps <- function(year_data,
           legend.key.width = unit(3, "cm"),
           legend.key.height = unit(0.25, "cm"),
           legend.box.margin = margin(0,0,5,0),
-          legend.title = element_text(vjust = 1.1, face = "bold", size = 16, margin = margin(0,20,0,0,unit = "pt")),
+          legend.title = element_text(vjust = 0, face = "bold", size = 16, margin = margin(0,20,0,0,unit = "pt")),
           legend.text = element_text(face = "bold", size = 12),
           plot.margin = margin(margin_top,0,0,0, unit = "pt"))
   
@@ -61,7 +61,7 @@ func_plot_year_snowdist_maps <- function(year_data,
   #### COMBINED TOPOGRAPHY and PROBES ####
   plot_df <- plot_df_base
   plot_df$snowdist_percent <- dist_final_values*100
-  # swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe) * run_params$output_mult / 1000.)
+  
   plots[[length(plots)+1]] <- ggplot(plot_df) +
     geom_raster(aes(x = x, y = y, fill = snowdist_percent)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -76,7 +76,7 @@ func_plot_year_snowdist_maps <- function(year_data,
                                         x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
-    scale_fill_stepsn(name = paste0("Multiplier [%]"),
+    scale_fill_stepsn(name = paste0("Multiplier [%]\n"),
                       colors = palette_cur,
                       limits = c(0,200),
                       breaks = val_breaks,
@@ -85,6 +85,6 @@ func_plot_year_snowdist_maps <- function(year_data,
                       values = val_breaks/max(val_breaks)) +
     theme_map_mult
   
-  
+  return(plots)
   
 }

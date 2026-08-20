@@ -93,9 +93,11 @@ func_process_annual <- function(year_data,
     
     
     # . Run LOO validation ------------------------------------------------------------------------
-    year_data <- func_loo_validation(run_params, year_cur_params, year_data,
-                        data_dhms, data_dems, data_surftype, data_radiation,
-                        verbose_logi = FALSE)
+    if (year_data$run_loo_logi) {
+      year_data <- func_loo_validation(run_params, year_cur_params, year_data,
+                                       data_dhms, data_dems, data_surftype, data_radiation,
+                                       verbose_logi = FALSE)
+    }
     
     
     

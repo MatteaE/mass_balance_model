@@ -16,12 +16,6 @@ func_process_year <- function(year_data,
                               overview_annual) {
   
   
-  # Calculate and print PDD sum for the hydrological year period.
-  pdd_id1 <- which(data_all$data_weather$timestamp == year_cur_params$hydro_start)
-  pdd_id2 <- which(data_all$data_weather$timestamp == (year_cur_params$hydro_end-1)) # Hydro end is already Oct 1.
-  year_data$pdd_sum_hydro <- sum(pmax(0.0, data_all$data_weather$t2m_mean[pdd_id1:pdd_id2]))
-  cat("PDD sum at the AWS over the hydrological year:", round(year_data$pdd_sum_hydro), "\u00B0C d\n")
-  
   # Find offsets on the grid of all stakes and user-defined points of daily output.
   year_data <- func_find_mb_points_on_grid(year_data,
                                            data_all$data_dhms,
@@ -49,10 +43,18 @@ func_process_year <- function(year_data,
   if (any(is.na(time_bounds_match))) {
     offending_id1 <- which(is.na(time_bounds_match))[1] # The [1] to handle the case where both simulation start and end don't have meteo data. This index then is either value 1 or 2
     offending_date <- model_time_bounds_range[offending_id1]
-    func_customlog("Meteo data for the current year are missing. Please check the meteo file and the first_year/last_year!", level = 2)
-    func_customlog("Offending date:", format(offending_date, "%Y/%m/%d"), "(day-of-year:", format(offending_date, "%j)."), "\n", level = 0)
+    func_customlog("Meteo data for the current year are missing. Please check the meteo file and the first_year/last_year.", level = 2)
+    func_customlog("Problematic date: ", format(offending_date, "%Y/%m/%d"), " (day-of-year: ", format(offending_date, "%j)."), "\n", level = 0)
     func_stop()
   }
+  
+  
+  # Calculate and print PDD sum for the hydrological year period.
+  pdd_id1 <- which(data_all$data_weather$timestamp == year_cur_params$hydro_start)
+  pdd_id2 <- which(data_all$data_weather$timestamp == (year_cur_params$hydro_end-1)) # Hydro end is already Oct 1.
+  year_data$pdd_sum_hydro <- sum(pmax(0.0, data_all$data_weather$t2m_mean[pdd_id1:pdd_id2]))
+  cat("PDD sum at the AWS over the hydrological year:", round(year_data$pdd_sum_hydro), "\u00B0C d\n")
+  
   
   
   #### .  Setup initial snow cover from previous year or estimation ####

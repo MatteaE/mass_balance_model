@@ -222,13 +222,13 @@ func_massbal_model <- function(run_params,
     
     #### .  ACCUMULATION and MASS BALANCE ####
     # Add accumulation and update cumulative mass balance.
-    vec_snow_swe[cells_cur] <- vec_snow_swe[cells_cur] + accumulation_cur
+    vec_snow_swe[cells_cur]      <- vec_snow_swe[cells_cur] + accumulation_cur
     vec_massbal_cumul[cells_cur] <- vec_massbal_cumul[cells_prev] - melt_cur + accumulation_cur
     vec_surf_type[cells_cur][which(accumulation_cur > 0.0)] <- 2 # Mark surface as snow after snowfall.
     gl_massbal_cumul[day_id + 1] <- mean(vec_massbal_cumul[offset_cur + glacier_cell_ids])
-    gl_melt_daily[day_id] <- mean(melt_cur[glacier_cell_ids])
-    gl_accum_daily[day_id] <- gl_accum_daily[day_id] + mean(accumulation_cur[glacier_cell_ids]) # We use the sum because we may already have a non-zero value here in case there has been an avalanche.
-    gl_rainfall_daily[day_id] <- mean(rainfall_cur[glacier_cell_ids])
+    gl_melt_daily[day_id]        <- mean(melt_cur[glacier_cell_ids])
+    gl_accum_daily[day_id]       <- gl_accum_daily[day_id] + mean(accumulation_cur[glacier_cell_ids]) # We use the sum because we may already have a non-zero value here in case there has been an avalanche.
+    gl_rainfall_daily[day_id]    <- mean(rainfall_cur[glacier_cell_ids])
     
     
     
