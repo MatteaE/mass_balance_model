@@ -27,7 +27,6 @@ func_plot_year_swe_maps <- function(year_data,
                                     data_dems,
                                     data_outlines) {
   
-  
   base_size <- 16 # For the plots.
   grid_extent <- ext(data_dhms$elevation[[year_data$dhm_grid_id]])
   grid_area   <- (grid_extent[2] - grid_extent[1]) * (grid_extent[4] - grid_extent[3])
@@ -64,7 +63,13 @@ func_plot_year_swe_maps <- function(year_data,
   
   
   # Values exceeding +/- max_swe will be clamped.
-  max_swe <- round(quantile(year_data$mod_output_annual_cur$vec_swe_all, 0.98) / 400) * 400 * run_params$output_mult/1000
+  swe_positive_ids <- which(year_data$mod_output_annual_cur$vec_swe_all > 0)
+  if (length(swe_positive_ids) > 0) {
+    max_swe <- max(400, round(quantile(year_data$mod_output_annual_cur$vec_swe_all[swe_positive_ids], 0.98) / 400) * 400) * run_params$output_mult/1000
+    # No snow ever? Unlikely, but set a default value for max_swe.
+  } else {
+    max_swe <- 400 * run_params$output_mult/1000
+  }
   swe_breaks <- c(0.000, 0.025, 0.050, 0.125, 0.250, 0.375, 0.500, 0.750, 1.000)*max_swe
   swe_labels <- sprintf(run_params$output_fmt2, swe_breaks)
   swe_labels[length(swe_labels)] <- ""
@@ -78,8 +83,9 @@ func_plot_year_swe_maps <- function(year_data,
   #### HYDROLOGICAL YEAR START ####
   plot_df <- plot_df_base
   plot_df$swe <- values(year_data$swe_annual_maps$hydro_start, mat = F)
-  swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
-  plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
+  swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]], na.rm = T) * run_params$output_mult / 1000.)
+  plot_df$swe[which(plot_df$swe == 0)] <- NA_real_
+  plots[[length(plots)+1]] <- ggplot(plot_df) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult/1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
     coord_sf(clip = "off") +
@@ -99,7 +105,8 @@ func_plot_year_swe_maps <- function(year_data,
                       breaks = swe_breaks,
                       labels = swe_labels,
                       oob = scales::oob_squish,
-                      values = swe_breaks/max(swe_breaks)) +
+                      values = swe_breaks/max(swe_breaks),
+                      na.value = "#FFFFFF00") +
     theme_map_swe
   
   
@@ -108,6 +115,7 @@ func_plot_year_swe_maps <- function(year_data,
   plot_df <- plot_df_base
   plot_df$swe <- values(year_data$swe_annual_maps$hydro_end, mat = F)
   swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
+  plot_df$swe[which(plot_df$swe == 0)] <- NA_real_
   plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult/1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -128,7 +136,8 @@ func_plot_year_swe_maps <- function(year_data,
                       breaks = swe_breaks,
                       labels = swe_labels,
                       oob = scales::oob_squish,
-                      values = swe_breaks/max(swe_breaks)) +
+                      values = swe_breaks/max(swe_breaks),
+                      na.value = "#FFFFFF00") +
     theme_map_swe
   
   
@@ -142,6 +151,7 @@ func_plot_year_swe_maps <- function(year_data,
     plot_df <- plot_df_base
     plot_df$swe <- values(year_data$swe_annual_maps$meas_period_start, mat = F)
     swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
+    plot_df$swe[which(plot_df$swe == 0)] <- NA_real_
     plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
       geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -162,7 +172,8 @@ func_plot_year_swe_maps <- function(year_data,
                         breaks = swe_breaks,
                         labels = swe_labels,
                         oob = scales::oob_squish,
-                        values = swe_breaks/max(swe_breaks)) +
+                        values = swe_breaks/max(swe_breaks),
+                        na.value = "#FFFFFF00") +
       theme_map_swe
     
     
@@ -171,6 +182,7 @@ func_plot_year_swe_maps <- function(year_data,
     plot_df <- plot_df_base
     plot_df$swe <- values(year_data$swe_annual_maps$meas_period_end, mat = F)
     swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
+    plot_df$swe[which(plot_df$swe == 0)] <- NA_real_
     plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
       geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -191,7 +203,8 @@ func_plot_year_swe_maps <- function(year_data,
                         breaks = swe_breaks,
                         labels = swe_labels,
                         oob = scales::oob_squish,
-                        values = swe_breaks/max(swe_breaks)) +
+                        values = swe_breaks/max(swe_breaks),
+                        na.value = "#FFFFFF00") +
       theme_map_swe
   }
   
@@ -202,6 +215,7 @@ func_plot_year_swe_maps <- function(year_data,
   plot_df <- plot_df_base
   plot_df$swe <- values(year_data$swe_winter_maps$fixed_end, mat = F)
   swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
+  plot_df$swe[which(plot_df$swe == 0)] <- NA_real_
   plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -222,7 +236,8 @@ func_plot_year_swe_maps <- function(year_data,
                       breaks = swe_breaks,
                       labels = swe_labels,
                       oob = scales::oob_squish,
-                      values = swe_breaks/max(swe_breaks)) +
+                      values = swe_breaks/max(swe_breaks),
+                      na.value = "#FFFFFF00") +
     theme_map_swe
   
   

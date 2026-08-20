@@ -65,7 +65,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
     stakes_cells       <- year_data$annual_stakes_cells
   }
   
-  cat("Simulation runs", nrow(weather_series_cur), "days, from", format(weather_series_cur$timestamp[1], "%F"), "to", format(weather_series_cur$timestamp[nrow(weather_series_cur)], "%F"), "included\n")
+  cat("Simulation runs", nrow(weather_series_cur), "days, from the start of", format(weather_series_cur$timestamp[1], "%F"), "to the end of", format(weather_series_cur$timestamp[nrow(weather_series_cur)], "%F"), "included\n")
   
   cat("\n* Optimization run # 1\n")
   corr_fact_prev <- 0

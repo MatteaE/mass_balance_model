@@ -16,14 +16,16 @@ func_process_year <- function(year_data,
                               overview_annual) {
   
   
-  # Find offsets on the grid of all stakes and user-defined points of daily output.
+  # Find grid cell offsets of all points of interest ----------------------------------------------
+  # (stakes and user-defined points of daily output - used for bilinear extraction).
   year_data <- func_find_mb_points_on_grid(year_data,
                                            data_all$data_dhms,
                                            data_all$data_dems,
                                            run_params)
   
   
-  # Setup grids from winter snow probes, if available. Also set flag year_data$process_winter to TRUE/FALSE.
+  # Setup grids from winter snow probes, if available ---------------------------------------------
+  # Also set flag year_data$process_winter to TRUE/FALSE.
   year_data <- func_setup_winter_probes_dist(year_data,
                                              data_all$data_dhms,
                                              data_all$data_dems,
@@ -32,7 +34,7 @@ func_process_year <- function(year_data,
                                              year_cur_params)
   
   
-  #### . Compute annual and winter modeling periods ####
+  # Compute annual and winter modeling periods ----------------------------------------------------
   year_data <- func_compute_modeling_periods(year_data,
                                              run_params,
                                              year_cur_params)
@@ -49,15 +51,7 @@ func_process_year <- function(year_data,
   }
   
   
-  # Calculate and print PDD sum for the hydrological year period.
-  pdd_id1 <- which(data_all$data_weather$timestamp == year_cur_params$hydro_start)
-  pdd_id2 <- which(data_all$data_weather$timestamp == (year_cur_params$hydro_end-1)) # Hydro end is already Oct 1.
-  year_data$pdd_sum_hydro <- sum(pmax(0.0, data_all$data_weather$t2m_mean[pdd_id1:pdd_id2]))
-  cat("PDD sum at the AWS over the hydrological year:", round(year_data$pdd_sum_hydro), "\u00B0C d\n")
-  
-  
-  
-  #### .  Setup initial snow cover from previous year or estimation ####
+  # Setup initial snow cover from previous year or estimation -------------------------------------
   year_data <- func_setup_initial_snow_cover(year_data,
                                              year_data_prev,
                                              data_all$data_dhms,
@@ -67,7 +61,14 @@ func_process_year <- function(year_data,
                                              run_params)
   
   
-  #### .  Simulate winter mass balance (only if measurements available) ####
+  # Calculate and print PDD sum for the hydrological year period ----------------------------------
+  pdd_id1 <- which(data_all$data_weather$timestamp == year_cur_params$hydro_start)
+  pdd_id2 <- which(data_all$data_weather$timestamp == (year_cur_params$hydro_end-1)) # Hydro end is already Oct 1.
+  year_data$pdd_sum_hydro <- sum(pmax(0.0, data_all$data_weather$t2m_mean[pdd_id1:pdd_id2]))
+  cat("PDD sum at the AWS over the hydrological year:", round(year_data$pdd_sum_hydro), "\u00B0C d\n")
+  
+  
+  # Simulate winter mass balance (only if measurements available) ---------------------------------
   year_data <- func_process_winter(year_data,
                                    run_params,
                                    year_cur_params,
@@ -78,7 +79,7 @@ func_process_year <- function(year_data,
                                    data_all$data_weather)
   
   
-  #### .  Simulate annual mass balance ####
+  # Simulate annual mass balance ------------------------------------------------------------------
   # If we have mass balance data, this runs the optimization.
   # Else just a single simulation.
   year_data <- func_process_annual(year_data,
@@ -98,7 +99,7 @@ func_process_year <- function(year_data,
   }
   
   
-  #### . Extract mass balance results ####
+  # Extract mass balance results ------------------------------------------------------------------
   year_data <- func_extract_year_massbalance(year_data,
                                              run_params,
                                              year_cur_params,
@@ -106,21 +107,22 @@ func_process_year <- function(year_data,
                                              data_all$data_dems)
   
   
-  #### . Post-process mass balance (correction in elevation bands, ELA/AAR, standardized over the measurement period) ####
+  # Post-process mass balance ---------------------------------------------------------------------
+  # (Correction in elevation bands, ELA/AAR, standardized over the measurement period).
   year_data <- func_massbal_postprocess(year_data,
                                         run_params,
                                         year_cur_params,
                                         data_all$data_dems)
   
   
-  #### . Save to overview_annual$summary_df the overview values for the current year ####
+  # Save to overview_annual$summary_df the overview values for the current year -------------------
   overview_annual$summary_df <- func_save_overview_values(year_data,
                                                           year_cur_params,
                                                           run_params,
                                                           overview_annual$summary_df)
   
   
-  #### . Produce all plots for the year ####
+  # Produce all plots for the year ----------------------------------------------------------------
   # This creates a PDF file for the year
   # and also adds a plot to the overview
   # plots, which are saved to PDF at the end.
@@ -132,7 +134,7 @@ func_process_year <- function(year_data,
                                                    data_all$data_outlines)
   
   
-  #### . Write annual model output to files ####
+  # Write annual model output to files ------------------------------------------------------------
   overview_annual$daily_data_list <- func_write_year_output(year_data,
                                                             run_params,
                                                             data_all$data_dhms,
@@ -140,7 +142,7 @@ func_process_year <- function(year_data,
                                                             overview_annual$daily_data_list)
   
   
-  #### . Plot daily maps of SWE and surface type ####
+  # Plot daily maps of SWE and surface type -------------------------------------------------------
   # The function checks whether it should plot anything
   # from either the annual or winter simulation, and at
   # what frequency.
@@ -151,7 +153,7 @@ func_process_year <- function(year_data,
                        data_all$data_outlines)
   
   
-  #### . Write daily grids of SWE and cumulative mass balance ####
+  # Write daily grids of SWE and cumulative mass balance ------------------------------------------
   # The function checks whether it should write anything
   # from either the annual or winter simulation, and at
   # what frequency.

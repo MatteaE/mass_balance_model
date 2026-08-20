@@ -22,7 +22,7 @@ func_simulate_mb_without_data <- function(run_params,
   weather_series_cur <- year_data$weather_series_annual_cur
   # model_days_n       <- year_data$model_annual_days_n
   
-  cat("Simulation runs", nrow(weather_series_cur), "days, from", format(weather_series_cur$timestamp[1], "%F"), "to", format(weather_series_cur$timestamp[nrow(weather_series_cur)], "%F"), "included\n")
+  cat("Simulation runs", nrow(weather_series_cur), "days, from the start of", format(weather_series_cur$timestamp[1], "%F"), "to the end of", format(weather_series_cur$timestamp[nrow(weather_series_cur)], "%F"), "included\n")
   
   #### RUN MASS BALANCE MODEL ####
   mb_model_output <- func_massbal_model(run_params,

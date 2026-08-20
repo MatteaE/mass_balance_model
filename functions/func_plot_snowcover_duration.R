@@ -55,15 +55,6 @@ func_plot_snowcover_duration <- function(year_data,
                                      byrow = TRUE)[id_hydro_start:id_hydro_end,]
   snowcover_days_n_vec <- colSums(mat_snowcover_logi_hydro)
   
-  # snowcover_days_n_vec <- rep(0.0, run_params$grid_ncells)
-  # for (day_id in id_hydro_start:id_hydro_end) {
-  #   
-  #   offset_cur <- (day_id-1) * run_params$grid_ncells
-  #   cells_cur  <- offset_cur + 1:run_params$grid_ncells
-  #   snowcover_days_n_vec <- snowcover_days_n_vec + (year_data$mod_output_annual_cur$vec_surftype_all[cells_cur] == 2)
-  #   
-  # }
-  
   
   # palette_RdPu_adj <- c(RColorBrewer::brewer.pal(9, "RdPu")[c(2:8)], "#310063")
   palette_cur <- c("#FFFFD9", "#EDF8B1", "#C7E9B4", "#7FCDBB", "#41B6C4", "#1D91C0", "#225EA8", "#2024A4", "#A30688")
@@ -97,12 +88,12 @@ func_plot_snowcover_duration <- function(year_data,
                                         x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +
-    scale_fill_stepsn(name = paste0("Snow cover\nduration [d]"),
+    scale_fill_stepsn(name   = paste0("Snow cover\nduration [d]"),
                       colors = palette_cur,
                       limits = c(0,366),
                       breaks = val_breaks,
                       labels = val_labels,
-                      oob = scales::oob_squish,
+                      oob    = scales::oob_squish,
                       values = val_breaks/max(val_breaks)) +
     theme_map_snowcover
   

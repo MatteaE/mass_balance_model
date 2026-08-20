@@ -90,7 +90,7 @@ func_plot_avalanche_net_effect <- function(year_data,
     scale_fill_stepsn(name = paste0("Net avalanche\neffect [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
                       limits = max_mb*c(-1,1),
                       breaks = run_params$mb_colorscale_breaks,
-                      na.value = "#00000000") +
+                      na.value = "#FFFFFF00") +
     theme_map_avalanches
   
   
