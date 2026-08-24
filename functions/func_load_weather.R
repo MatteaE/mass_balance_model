@@ -65,8 +65,14 @@ func_load_weather <- function(run_params) {
   }
   
   data_raw$month <- as.integer(format(data_raw$timestamp, "%m"))
-  # Hydrological year always starts 92 days before calendar year.
-  data_raw$year_hydro <- as.integer(format(data_raw$timestamp + 92, "%Y"))
+  
+  # Hydrological year always starts 92 days before calendar year in the Northern Hemisphere,
+  # 92 + 183 = 275 days before calendar year in the Southern Hemisphere.
+  if (run_params$north_south == "North") {
+    data_raw$year_hydro <- as.integer(format(data_raw$timestamp + 92, "%Y"))
+  } else {
+    data_raw$year_hydro <- as.integer(format(data_raw$timestamp + 275, "%Y"))
+  }
   
   data_weather <- data_raw[, c(6, 1, 8, 7, 2, 4, 5)]
   

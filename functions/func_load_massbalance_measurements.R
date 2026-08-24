@@ -174,7 +174,7 @@ func_load_massbalance_measurements <- function(run_params,
     
     stakes_dist_proc <- stakes_dists_spatial*stakes_dists_date
     stakes_dist_proc[is.infinite(stakes_dist_proc)] <- 1e9 # Clustering does not like infinity. So we use a very big number instead.
-    stakes_dist_proc[is.nan(stakes_dist_proc)] <- 1e9 # This in case we have two stakes at the same place but on different years (0*Inf = NaN, we shouldn't merge them).
+    stakes_dist_proc[is.nan(stakes_dist_proc)]      <- 1e9 # This in case we have two stakes at the same place but on different years (0*Inf = NaN, we shouldn't merge them).
     
     # Clustering happens here.
     stakes_clusters     <- hclust(stats::as.dist(stakes_dist_proc))

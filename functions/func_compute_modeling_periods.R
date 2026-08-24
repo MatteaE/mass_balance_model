@@ -12,14 +12,16 @@
 
 # ANNUAL modeling period starts at the beginning of the observation
 # period with the earliest start (i.e. the stake which was surveyed first
-# on the previous year), but no later than Oct 1 (to include the whole hydrological year).
+# on the previous year), but no later than the start of the hydrological year
+# (Oct 1 YYYY-1, or Apr 1 YYYY-1 in the Southern Hemisphere)
 # Annual modeling period ends at the end of the observation period with the latest end
-# (i.e. the annual stake which was surveyed last on the current year), but no earlier than Sep 30 (hydro year).
+# (i.e. the annual stake which was surveyed last on the current year), but no earlier than
+# the end of the hydrological year.
 # Note: annual modeling period also includes the full winter modeling period, since there are plots
 # detailing the winter stakes within the final (i.e., annual) simulation.
 # WINTER modeling period starts at the beginning of the observation period with the earliest start
-# (among the winter ones), but no later than Oct 1, so that there can be enough
-# snowfall to have a proper snowpack (thus, realistic avalanches) even if
+# (among the winter ones), but no later than the start of the hydrological year,
+# so that there can be enough snowfall to have a proper snowpack (thus, realistic avalanches) even if
 # the winter measurements would start later (e.g. in case they are set to NA
 # and the mass balance minimum occurs late).
 # Winter modeling period ends on the end day of the measurement
@@ -35,6 +37,7 @@ func_compute_modeling_periods <- function(year_data, run_params, year_cur_params
   # set at Sep 30.
   # We use year_cur_params$hydro_end-1 since hydro_end is Oct 1 (00:00, i.e. as.Date(Oct 1)),
   # which means we can stop modeling after the (weather series) time step of Sep 30.
+  # Same logic in the Southern Hemisphere (but with Apr 1 / Mar 31 instead of Oct 1 / Sep 30).
   annual_start <- min(c(year_cur_params$hydro_start, year_data$massbal_annual_meas_cur$start_date, year_data$massbal_winter_meas_cur$start_date), na.rm = T)
   annual_end   <- max(c(year_cur_params$hydro_end-1, year_data$massbal_annual_meas_cur$end_date))
   

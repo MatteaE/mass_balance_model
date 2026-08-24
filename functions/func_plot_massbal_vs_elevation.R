@@ -31,7 +31,6 @@ func_plot_massbal_vs_elevation <- function(year_data,
                                       mb_annual_meas_corr = NA_real_,
                                       mb_annual_meas      = NA_real_,
                                       mb_annual_hydro     = NA_real_,
-                                      # mb_annual_fixed     = NA_real_,
                                       mb_winter_fixed     = NA_real_,
                                       mb_winter_meas      = NA_real_)
   for (band_id in 1:nrow(ele_bands_plot_df)) {

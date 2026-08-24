@@ -164,7 +164,8 @@ func_massbal_postprocess <- function(year_data,
                                year_data$massbal_annual_meas_cur$massbal_mod_standardized <= 0)
     if (length(stakes_cand_ids) > 1) {
       
-      if (diff(range(year_data$massbal_annual_meas_cur$z_dem[stakes_cand_ids])) > 50) {
+      # Require at least 1 m vertical coverage of stakes to compute gradients.
+      if (diff(range(year_data$massbal_annual_meas_cur$z_dem[stakes_cand_ids])) > 1) {
         
         meas_lm <- lm(formula = massbal_meas_standardized~z_dem,
                       data = year_data$massbal_annual_meas_cur)

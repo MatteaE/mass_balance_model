@@ -98,36 +98,18 @@ func_run_model <- function(run_params) {
   # has not supplied and computing derived parameters.
   run_params <- func_process_run_params(run_params)
   
-  # Load all input data
+  # Load all input data.
+  # This also sets the parameters controlling whether we are in the Northern or Southern Hemisphere.
   cat("\n")
   func_customlog("Loading all input data...", level = 4)
-  data_all   <- func_load_data_all(run_params)
+  load_all_l <- func_load_data_all(run_params)
+  data_all   <- load_all_l$data_all
+  run_params <- load_all_l$run_params
   func_customlog("Finished loading all input data.", level = 4)
   cat("\n")
   
   
   func_customlog("Setting up the model.", level = 4)
-  
-  
-  
-  # Process Northern/Southern Hemisphere parameters -----------------------------------------------
-  ext_cur     <- ext(data_all$data_dems$elevation[[1]])[1:4]
-  crds_center <- cbind(mean(ext_cur[1:2]), mean(ext_cur[3:4]))
-  lat_center  <- terra::project(crds_center, run_params$grids_crs_epsg, "EPSG:4326")[,2]
-  if (lat_center >= 0) {
-    run_params$north_south        <- "North"
-    run_params$firnification_date <- "03/01"
-    if (is.na(run_params$massbal_fixed_winter_start))  run_params$massbal_fixed_winter_start   <- "10/01"
-    if (is.na(run_params$massbal_fixed_winter_end))    run_params$massbal_fixed_winter_end     <- "04/30"
-    if (is.na(run_params$stakes_unknown_latest_start)) run_params$stakes_unknown_latest_start  <- "02/28"
-  } else {
-    run_params$north_south        <- "South"
-    run_params$firnification_date <- "09/01"
-    if (is.na(run_params$massbal_fixed_winter_start))  run_params$massbal_fixed_winter_start   <- "04/01"
-    if (is.na(run_params$massbal_fixed_winter_end))    run_params$massbal_fixed_winter_end     <- "10/31"
-    if (is.na(run_params$stakes_unknown_latest_start)) run_params$stakes_unknown_latest_start  <- "08/31"
-  }
-  
   
   
   # Below: remove cacheDir option to force recompilation of the C++ code (useful after changing computer or editing the source file).

@@ -16,7 +16,7 @@
 # are NOT the same as for the correction of modeled mass
 # balance in elevation bands (glacier-dependent bands),
 # and NOT the same as for the plot of modeled mass balance
-# vs elevation bands (typically 40 vertical meters wide).
+# vs elevation bands (typically 50 vertical meters wide).
 func_compute_ela_aar <- function(year_data,
                                  run_params,
                                  data_dems) {
@@ -26,7 +26,6 @@ func_compute_ela_aar <- function(year_data,
   ele_bands_max <- max(ele_bands_values, na.rm = T)
   ele_bands_df <- data.frame(ele = seq(ele_bands_min, ele_bands_max, run_params$ele_bands_ela_size),
                              mb_hydro = NA_real_)
-                             # mb_corr = NA_real_)
   
   mb_hydro_map_values <- values(year_data$massbal_annual_maps$hydro)
   

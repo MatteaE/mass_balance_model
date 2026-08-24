@@ -19,6 +19,12 @@ func_compute_unknown_stakes_start_ids <- function(run_params, annual_stakes_star
   # the stake start, i.e. for the mass balance minimum.
   stakes_start_latest_id <- which(format(weather_series_cur$timestamp, "%m/%d") == run_params$stakes_unknown_latest_start)
   
+  if (length(stakes_start_latest_id) != 1) {
+    func_customlog("There was a problem setting the search range for the date of stakes with unknown start.", level = 2)
+    func_customlog("Please check the time bounds of the simulation against the value of run_params$stakes_unknown_latest_start, the latter day should be modeled only once!", level = 0)
+    func_stop()
+  }
+  
   for (stake_cur_id in stakes_start_unknown_ids) {
     # cat("Finding start date for stake", stake_cur_id, "...\n")
     annual_stakes_start_ids_corr[stake_cur_id] <- which.min(stakes_series_mod_all[1:stakes_start_latest_id, stake_cur_id])

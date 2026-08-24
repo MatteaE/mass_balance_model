@@ -14,7 +14,7 @@ func_extract_year_massbalance <- function(year_data,
                                           data_dems) {
   
   # We extract two maps of cumulative annual mass balances:
-  # (1) "hydro":       hydrological year (1 October <Year-1> - 30 September <Year>)
+  # (1) "hydro":       hydrological year (1 Oct YYYY-1 00:00 to 1 Oct YYYY 00:00; Apr instead of Oct in the Southern Hemisphere)
   # (2) "meas_period": measurement period, defined as (earliest annual stake start - latest annual stake end)
   # We also extract maps of SWE at defined periods (start/end of hydrological year and of meas_period)
   model_annual_maps_data <- func_extract_model_maps_annual(year_data,

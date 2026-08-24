@@ -19,8 +19,8 @@ func_compute_scaf <- function(year_data,
     offset_cur <- day_id * run_params$grid_ncells # The _cur start at the end of the first day (i.e. there is one "iteration" before which holds the initial state).
     cells_ids  <- offset_cur - run_params$grid_ncells + 1:run_params$grid_ncells # Indices of all the grid cells with values at the beginning of the current day.
     cells_glacierized_ids <- cells_ids[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]
-    cells_snow_n <- length(which(year_data$mod_output_annual_cur$vec_surftype_all[cells_glacierized_ids] == 2))
-    scaf_daily[day_id] <- cells_snow_n * run_params$grid_cell_size * run_params$grid_cell_size / year_data$glacier_area
+    cells_snow_n          <- length(which(year_data$mod_output_annual_cur$vec_surftype_all[cells_glacierized_ids] == 2))
+    scaf_daily[day_id]    <- cells_snow_n * run_params$grid_cell_size * run_params$grid_cell_size / year_data$glacier_area
   }
   
   return(scaf_daily * 100) # Percent.

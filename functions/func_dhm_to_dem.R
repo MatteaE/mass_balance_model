@@ -75,12 +75,7 @@ func_dhm_to_dem <- function(run_params,
     # elevation bands (user-defined vertical extent, typically 50 m).
     # We center them at extent/2 so that the band limits are nice.
     data_dems$elevation_bands_plot[[dem_id]] <- round((data_dems$elevation[[dem_id]] - run_params$ele_bands_plot_size/2) / run_params$ele_bands_plot_size) * run_params$ele_bands_plot_size + run_params$ele_bands_plot_size/2
-      
     
-    # Highest and lowest glacier points, used
-    # to automatically compute correction bands.
-    # data_dems$gl_ele_max[dem_id] <- max(dem_cur_values, na.rm = TRUE)
-    # data_dems$gl_ele_min[dem_id] <- min(dem_cur_values, na.rm = TRUE)
   }
   
   return(data_dems)

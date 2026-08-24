@@ -6,7 +6,7 @@
 #                 This file contains the routine which calls all the data loading sub-routines.   #
 #                 The DEM (= elevation model cropped to the glacier) is also computed here, from  #
 #                 DHM (= full elevation model with no gaps) and outline.                          #
-###################################################################################################  
+###################################################################################################
 
 
 #### Load input data ####
@@ -20,7 +20,6 @@ func_load_data_all <- function(run_params) {
   
   data_all <- list()
   
-  data_all$data_weather               <-   func_load_weather(run_params)
   data_all$data_surftype              <-   func_load_surftype_grids(run_params)
   data_all$data_outlines              <-   func_load_outlines(run_params)
   data_all$data_dhms                  <-   func_load_elevation_grids(run_params)
@@ -28,6 +27,13 @@ func_load_data_all <- function(run_params) {
   # Check and if needed resample the elevation / surface type grids, for alignment.
   data_all$raster_blueprint           <-   func_compute_blueprint_grid(run_params, data_all$data_surftype, data_all$data_dhms)
   data_all                            <-   func_check_resample_grids(run_params, data_all)
+  
+  # Check whether the model domain is in the Northern or Southern Hemisphere.
+  # Needed here because the meteorological series is loaded next and it wants
+  # to know when the hydrological year starts.
+  run_params                          <-   func_check_north_south(data_all)
+  
+  data_all$data_weather               <-   func_load_weather(run_params)
   
   # Compute DEMs from DHMs and outlines.
   data_all$data_dems                  <-   func_dhm_to_dem(run_params, data_all$data_dhms, data_all$data_outlines)
@@ -45,5 +51,6 @@ func_load_data_all <- function(run_params) {
   # Memory cleanup.
   invisible(gc())
   
-  return(data_all)
+  return(list(data_all   = data_all,
+              run_params = run_params))
 }

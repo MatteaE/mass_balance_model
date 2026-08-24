@@ -15,19 +15,19 @@ func_extract_model_maps_annual <- function(year_data,
                                            data_dems) {
   
 
-  # Cumulative mass balance values at 00:00 of the first day of the current hydrological year.
+  # Cumulative mass balance values at the start of the first day of the current hydrological year.
   massbal_hydro_start_values <- year_data$mod_output_annual_cur$vec_massbal_cumul[(year_data$id_hydro_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
   
-  # Cumulative mass balance values at 23:59:59 of the last day of the current hydrological year (actually, 00:00 of the next day).
+  # Cumulative mass balance values at the end of the last day of the current hydrological year (technically, at the start of the next day)
   massbal_hydro_end_values   <- year_data$mod_output_annual_cur$vec_massbal_cumul[(year_data$id_hydro_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
   
   massbal_hydro_map          <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_hydro_end_values - massbal_hydro_start_values)
   massbal_hydro_map_masked   <- mask(massbal_hydro_map, data_dems$elevation[[year_data$dem_grid_id]])
   
-  # SWE values at 00:00 of the first day of the current hydrological year.
+  # SWE values at the start of the first day of the current hydrological year.
   swe_hydro_start_values <- year_data$mod_output_annual_cur$vec_swe_all[(year_data$id_hydro_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
   
-  # SWE values at 23:59:59 of the last day of the current hydrological year (actually, 00:00 of the next day).
+  # SWE values at the end of the last day of the current hydrological year (technically, at the start of the next day)
   swe_hydro_end_values   <- year_data$mod_output_annual_cur$vec_swe_all[(year_data$id_hydro_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
   swe_hydro_start_map    <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], swe_hydro_start_values)
   swe_hydro_end_map      <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], swe_hydro_end_values)

@@ -62,7 +62,7 @@ func_compute_ele_bands_from_stakes <- function(stakes_ele,
     ele_bands_smallest_id <-  which.min(ele_bands$extent)
   }
   
-  # If fewer than 4 correction bands give up,
+  # If fewer than 3 correction bands give up,
   # if more than 10 keep merging until we have 10 or fewer.
   ele_bands_n <- nrow(ele_bands)
   if (ele_bands_n < 3) {
