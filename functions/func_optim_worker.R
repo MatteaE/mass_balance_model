@@ -20,7 +20,7 @@ func_optim_worker <- function(optimization_period, corr_fact_cur, corr_fact_wint
                               grid_ice_albedo_fact_cur_values,
                               dx1, dx2, dy1, dy2,
                               nstakes, model_days_n, massbal_meas_cur, stakes_cells,
-                              store_melt_logi = FALSE, verbose_logi = FALSE) {
+                              verbose_logi = FALSE) {
   
   
   if (optimization_period == "annual") {
@@ -50,7 +50,7 @@ func_optim_worker <- function(optimization_period, corr_fact_cur, corr_fact_wint
                                                grid_ice_albedo_fact_cur_values,
                                                dx1, dx2, dy1, dy2,
                                                nstakes, model_days_n, massbal_meas_cur, stakes_cells,
-                                               store_melt_logi, verbose_logi)
+                                               verbose_logi)
   
   return(mod_output_cur)
 }

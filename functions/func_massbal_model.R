@@ -25,9 +25,6 @@ func_massbal_model <- function(run_params,
                                snowdist_probes_norm_values_red,
                                grids_avalanche_cur,
                                grid_ice_albedo_fact_cur_values,
-                               # If not NULL, two indices (start/stop) are expected, and the per-cell melt is accumulated
-                               # over the corresponding days. Used to retrieve the fraction of melt which is induced by radiation.
-                               store_melt_ids = NULL,
                                verbose_level = 1) {
   
 
@@ -87,7 +84,6 @@ func_massbal_model <- function(run_params,
   vec_surf_type     <- rep(NA_real_, vec_items_n) # We use 0 for ice, 1 for firn, 2 for snow, 4 for rock, 5 for debris.
   vec_massbal_cumul <- rep(NA_real_, vec_items_n)
   melt_cur          <- rep(NA_real_, run_params$grid_ncells) # This instead holds only a single timestep. Here goes the daily melt amount.
-  melt_cumul_mat    <- matrix(0.0, nrow = run_params$grid_ncells, ncol = 2) # This holds cumulative melt between day melt_cumul_ids[1] and day melt_cumul_ids[2]. One row per cell, first column total melt and second column melt attributed to temperature (the year_cur_params$melt_factor part of the melt formula).
   gl_massbal_cumul  <- rep(0.0, model_days_n + 1)   # This holds the cumulative glacier-wide mass balance *AT THE BEGINNING* of the corresponding day (i.e. before adding the day's melt and accumulation and avalanches).
   gl_melt_daily     <- rep(0.0, model_days_n + 1)   # This holds the daily mean melt amount over the glacier *OVER* the corresponding day.
   gl_accum_daily    <- rep(0.0, model_days_n + 1)   # This holds the daily mean accumulation amount over the glacier *OVER* the corresponding day.
@@ -99,11 +95,6 @@ func_massbal_model <- function(run_params,
   vec_surf_type[which(vec_snow_swe[1:run_params$grid_ncells] > 0)] <- 2  # Add computed snow to the initial ice/firn/debris map.
   vec_massbal_cumul[1:run_params$grid_ncells] <- 0
   
-  # If we are tracking the melt over the measurement period,
-  # set to NA the melt on rock.
-  if (!is.null(store_melt_ids)) {
-    melt_cumul_mat[which(surftype_init_values == 4),1:2] <- NA_real_
-  }
   
   # This below is a vector[ncells] to keep track of the swe
   # after the last avalanche: we assume that snow can be
@@ -211,31 +202,20 @@ func_massbal_model <- function(run_params,
     
     
     # Compute melt amounts.
-    # First the melt component deriving from temperature alone, separated so
-    # that we keep track of the relative contribution (w.r.t. radiation).
-    melt_temp_cur                       <- year_cur_params$melt_factor * temp_cur
-    melt_temp_cur[cells_debris]         <- run_params$debris_red_fac * melt_temp_cur[cells_debris]
-    melt_temp_cur[is.na(melt_temp_cur)] <- 0.0
-    melt_temp_cur                       <- pmax(0.0, melt_temp_cur)
-    
-    melt_cur[cells_ice]    <- melt_temp_cur[cells_ice] + (24 * year_cur_params$rad_fact_ice * grid_ice_albedo_fact_cur_values[cells_ice] / 1000. * radiation_cur[cells_ice]) * temp_cur[cells_ice]
-    melt_cur[cells_firn]   <- melt_temp_cur[cells_firn] + (24 * year_cur_params$rad_fact_firn / 1000. * radiation_cur[cells_firn]) * temp_cur[cells_firn]
-    melt_cur[cells_snow]   <- melt_temp_cur[cells_snow] + (24 * year_cur_params$rad_fact_snow / 1000. * radiation_cur[cells_snow]) * temp_cur[cells_snow]
-    melt_cur[cells_debris] <- melt_temp_cur[cells_debris] + (run_params$debris_red_fac * 24 * year_cur_params$rad_fact_ice / 1000. * radiation_cur[cells_debris]) * temp_cur[cells_debris]
+    melt_cur[cells_ice]    <- (year_cur_params$melt_factor + 24 * year_cur_params$rad_fact_ice * grid_ice_albedo_fact_cur_values[cells_ice] / 1000. * radiation_cur[cells_ice]) * temp_cur[cells_ice]
+    melt_cur[cells_firn]   <- (year_cur_params$melt_factor + 24 * year_cur_params$rad_fact_firn / 1000. * radiation_cur[cells_firn]) * temp_cur[cells_firn]
+    melt_cur[cells_snow]   <- (year_cur_params$melt_factor + 24 * year_cur_params$rad_fact_snow / 1000. * radiation_cur[cells_snow]) * temp_cur[cells_snow]
+    melt_cur[cells_debris] <- run_params$debris_red_fac * (year_cur_params$melt_factor + 24  * year_cur_params$rad_fact_ice / 1000. * radiation_cur[cells_debris]) * temp_cur[cells_debris]
     
     melt_cur[is.na(melt_cur)] <- 0.0 # Don't melt rock, but never go into the NAs (we care about the SWE over rock, for avalanches!)
     melt_cur <- pmax(0.0, melt_cur)  # Clamp to positive values: negative PDDs do not add mass.
     
-    if ((!is.null(store_melt_ids)) && (day_id >= store_melt_ids[1]) && (day_id <= store_melt_ids[2])) {
-      melt_cumul_mat[,1] <- melt_cumul_mat[,1] + melt_cur
-      melt_cumul_mat[,2] <- melt_cumul_mat[,2] + melt_temp_cur
-    }
     
-    # We check which cells have had their snow cover depleted
+    # Check which cells have had their snow cover depleted
     # at the current time step, to change their surface type.
-    # We ignore the "mixed" melting regime arising from a day
-    # where snow cover is depleted (radiation factor should in
-    # principle be partly snow, partly ice or firn or debris).
+    # NOTE: the "mixed" melting regime (on days where snow cover
+    # gets depleted, thus having partly snow and partly ice) is ignored
+    # (radiation factor should in principle be partly snow, partly ice or firn or debris).
     ids_swe_depleted <- which(melt_cur[cells_snow] >= vec_snow_swe[cells_prev][cells_snow])
     vec_snow_swe[cells_cur] <- pmax(0, vec_snow_swe[cells_prev] - melt_cur)
     vec_surf_type[cells_cur] <- vec_surf_type[cells_prev]
@@ -326,7 +306,6 @@ func_massbal_model <- function(run_params,
   mb_model_output <- list(vec_swe_all       = vec_snow_swe,
                           vec_surftype_all  = vec_surf_type,
                           vec_massbal_cumul = vec_massbal_cumul,
-                          melt_cumul_mat    = melt_cumul_mat,
                           avalanche_net     = avalanche_cumul_effect,
                           gl_massbal_cumul  = gl_massbal_cumul,
                           gl_melt_daily     = gl_melt_daily,

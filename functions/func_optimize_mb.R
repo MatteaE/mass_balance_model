@@ -55,7 +55,6 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
     model_days_n       <- year_data$model_winter_days_n
     massbal_meas_cur   <- year_data$massbal_winter_meas_cur
     stakes_cells       <- year_data$winter_stakes_cells
-    store_melt_logi    <- FALSE
   } else {
     snowdist_init      <- year_data$snowdist_init_annual
     weather_series_cur <- year_data$weather_series_annual_cur
@@ -64,7 +63,6 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
     model_days_n       <- year_data$model_annual_days_n
     massbal_meas_cur   <- year_data$massbal_annual_meas_cur
     stakes_cells       <- year_data$annual_stakes_cells
-    store_melt_logi    <- TRUE
   }
   
   cat("Simulation runs", nrow(weather_series_cur), "days, from the start of", format(weather_series_cur$timestamp[1], "%F"), "to the end of", format(weather_series_cur$timestamp[nrow(weather_series_cur)], "%F"), "included\n")
@@ -81,7 +79,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                       year_data$grid_ice_albedo_fact_cur_values,
                                       dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells,
-                                      store_melt_logi = FALSE, verbose_logi = TRUE) # First iteration is never the final one so no need to store the melt.
+                                      verbose_logi = TRUE)
   bias_prev <- mod_output_cur$global_bias
   
   # Create output data frames.
@@ -114,7 +112,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                       year_data$grid_ice_albedo_fact_cur_values,
                                       dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells,
-                                      store_melt_logi, verbose_logi = TRUE)
+                                      verbose_logi = TRUE)
   bias_cur <- mod_output_cur$global_bias
   if (year_data$run_loo_logi) {
     df_runs_smb    <- rbind(df_runs_smb,
@@ -141,7 +139,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                         year_data$grid_ice_albedo_fact_cur_values,
                                         dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
                                         nstakes, model_days_n, massbal_meas_cur, stakes_cells,
-                                        store_melt_logi, verbose_logi = TRUE)
+                                        verbose_logi = TRUE)
     bias_cur <- mod_output_cur$global_bias
     if (year_data$run_loo_logi) {
       df_runs_smb    <- rbind(df_runs_smb,

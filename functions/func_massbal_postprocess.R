@@ -177,10 +177,15 @@ func_massbal_postprocess <- function(year_data,
       
       if (diff(range(year_data$massbal_annual_meas_cur$z_dem[stakes_cand_ids])) > 50) {
         
-        year_data$abl_grad_meas <- lm(formula = massbal_meas_standardized~z_dem,
-                                      data = year_data$massbal_annual_meas_cur)$coefficients["z_dem"]/1e3
-        year_data$abl_grad_mod <- lm(formula = massbal_mod_standardized~z_dem,
-                                     data = year_data$massbal_annual_meas_cur)$coefficients["z_dem"]/1e3
+        meas_lm <- lm(formula = massbal_meas_standardized~z_dem,
+                      data = year_data$massbal_annual_meas_cur)
+        mod_lm  <- lm(formula = massbal_mod_standardized~z_dem,
+                      data = year_data$massbal_annual_meas_cur)
+        
+        year_data$abl_grad_meas   <- meas_lm$coefficients["z_dem"]/1e3       # Gradient in m w.e. / m asl
+        year_data$abl_grad_meas_i <- meas_lm$coefficients["(Intercept)"]/1e3 # Mass balance at 0 m asl, in m w.e.
+        year_data$abl_grad_mod    <- mod_lm$coefficients["z_dem"]/1e3        # Gradient in m w.e. / m asl
+        year_data$abl_grad_mod_i  <- mod_lm$coefficients["(Intercept)"]/1e3  # Mass balance at 0 m asl, in m w.e.
         
         year_data$abl_grad_diff_rel <- abs((year_data$abl_grad_mod - year_data$abl_grad_meas) / year_data$abl_grad_meas)
         if (!is.na(year_data$abl_grad_diff_rel) && (year_data$abl_grad_diff_rel > 0.25)) {
@@ -190,11 +195,11 @@ func_massbal_postprocess <- function(year_data,
         }
         
       } else { # End if there is a vertical range of at least 50 m in the selected ablation stakes. Else warning.
-
+        
         func_customlog("Year ", year_data$year_cur, ": point measurements are insufficient to calculate ablation gradients.", level = 1) 
         
       } # End else there is not a 50 m vertical range in the selected ablation stakes
-        
+      
     } # End if there are at least 2 stakes with actual ablation (modeled and measured)
   } # End if there are at least 2 annual mass balance values
   

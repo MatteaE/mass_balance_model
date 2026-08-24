@@ -57,11 +57,6 @@ func_process_annual <- function(year_data,
     year_data$df_runs_biases        <- optim_res_annual$df_runs_biases
     
     
-    # Store map of fraction of radiation-driven melt.
-    year_data$melt_from_radiation_frac <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]],
-                                                    1 - (year_data$mod_output_annual_cur$melt_cumul_mat[,2] / year_data$mod_output_annual_cur$melt_cumul_mat[,1]))
-    
-    
     # . Check if any annual stakes were affected by avalanches ------------------------------------
     # If yes, emit a warning
     if (all(!is.na(run_params$model_avalanche_dates))) {

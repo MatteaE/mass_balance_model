@@ -119,7 +119,7 @@ func_plot_massbal_vs_elevation <- function(year_data,
     stakes_bias <- year_data$mod_output_annual_cur$global_bias / 1e3
     stakes_rms <- year_data$mod_output_annual_cur$global_rms / 1e3
     
-        
+    
     # This data.frame contains only the mass balance values on glacierized cells.
     df_scatterplot <- data.frame(ele = values(data_dems$elevation[[year_data$dem_grid_id]], mat = FALSE),
                                  mb  = values(year_data$massbal_annual_maps$meas_period, mat = FALSE) * run_params$output_mult,
@@ -138,15 +138,27 @@ func_plot_massbal_vs_elevation <- function(year_data,
             panel.grid = element_blank(),
             legend.position = "inside",
             legend.position.inside = c(0.99,0.01),
-            legend.justification.inside = c(1,0))
+            legend.justification.inside = c(1,0),
+            legend.background = element_blank(),
+            legend.box.background = element_blank())
     
+    
+    # If we have ablation gradients, annotate them and draw them as segments.
     abl_grad_meas_txt <- ""
     if (!is.na(year_data$abl_grad_meas)) {
       abl_grad_meas_txt <- paste0("Measured ablation gradient: ", sprintf("%.4f", year_data$abl_grad_meas))
+      abl_grad_meas_df <- data.frame(x1 = min(df_scatterplot$ele),
+                                     y1 = (year_data$abl_grad_meas_i + min(df_scatterplot$ele) * year_data$abl_grad_meas)*run_params$output_mult,
+                                     x2 = -year_data$abl_grad_meas_i / year_data$abl_grad_meas,
+                                     y2 = 0)
     }
     abl_grad_mod_txt <- ""
     if (!is.na(year_data$abl_grad_mod)) {
       abl_grad_mod_txt <- paste0("Modeled ablation gradient: ", sprintf("%.4f", year_data$abl_grad_mod))
+      abl_grad_mod_df <- data.frame(x1 = min(df_scatterplot$ele),
+                                    y1 = (year_data$abl_grad_mod_i + min(df_scatterplot$ele) * year_data$abl_grad_mod)*run_params$output_mult,
+                                    x2 = -year_data$abl_grad_mod_i / year_data$abl_grad_mod,
+                                    y2 = 0)
     }
     
     # RMS label with also LOO RMS if available.
@@ -154,21 +166,32 @@ func_plot_massbal_vs_elevation <- function(year_data,
     if (!is.null(year_data$global_loo_rms)) {
       rms_txt <- paste0(rms_txt, " (LOO: ", sprintf(run_params$output_fmt1, year_data$global_loo_rms*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.)")
     }
+    
     plots_mb_vs_ele[[2]] <- ggplot(df_scatterplot) +
-      annotation_custom(grobTree(textGrob(paste0("Bias: ", sprintf(run_params$output_fmt3, stakes_bias*run_params$output_mult), " ", run_params$output_unit, " w.e."), x=0.02, y = 0.95, hjust = 0,
-                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
-      annotation_custom(grobTree(textGrob(rms_txt, x=0.02, y = 0.87, hjust = 0,
-                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
-      annotation_custom(grobTree(textGrob(abl_grad_meas_txt, x=0.02, y = 0.79, hjust = 0,
-                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
-      annotation_custom(grobTree(textGrob(abl_grad_mod_txt, x=0.02, y = 0.71, hjust = 0,
-                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
       geom_point(aes(x = ele, y = mb/1e3, color = avalanche_effect), size = 0.5, stroke = 0) +
       geom_point(data = df_stakes, aes(x = z, y = meas/1e3), shape = 3, stroke = 1.5, size = 0) +
       geom_segment(data = df_stakes, aes(x = z, xend = z, y = meas/1e3, yend = mod/1e3)) +
+      geom_segment(data = abl_grad_meas_df, aes(x = x1, xend = x2, y = y1, yend = y2), linetype = "solid") +
+      geom_segment(data = abl_grad_mod_df, aes(x = x1, xend = x2, y = y1, yend = y2), linetype = "longdash") +
+      annotation_custom(grobTree(textGrob(paste0("Bias: ", sprintf(run_params$output_fmt3, stakes_bias*run_params$output_mult), " ", run_params$output_unit, " w.e."),
+                                          x=0.02, y = 0.93, hjust = 0, vjust = 0, gp=gpar(fontsize = base_size, fontface="bold")))) +
+      annotation_custom(grobTree(textGrob(rms_txt, x=0.02, y = 0.85, hjust = 0, vjust = 0,
+                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
+      annotation_custom(grobTree(textGrob(abl_grad_meas_txt, x=0.02, y = 0.77, hjust = 0, vjust = 0,
+                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
+      {if (!is.na(year_data$abl_grad_meas)) annotation_custom(grobTree(linesGrob(x=c(0.02,0.424), y = 0.761,
+                                                                                gp=gpar(lty = "solid", lwd=2.0))))} +
+      annotation_custom(grobTree(textGrob(abl_grad_mod_txt, x=0.02, y = 0.69, hjust = 0, vjust = 0,
+                                          gp=gpar(fontsize = base_size, fontface="bold")))) +
+      {if (!is.na(year_data$abl_grad_mod)) annotation_custom(grobTree(linesGrob(x=c(0.02,0.4055), y = 0.681,
+                                                                                 gp=gpar(lty = "longdash", lwd=2.0))))} +
       coord_flip() +
-      scale_x_continuous(breaks = pretty(df_scatterplot$ele), expand = expansion(mult = 0.05)) +
-      scale_y_continuous(expand = expansion(mult = 0.05)) +
+      scale_x_continuous(breaks = pretty(df_scatterplot$ele),
+                         expand = expansion(mult = 0.05)) +
+      scale_y_continuous(limits = c(min(c(df_scatterplot$mb, df_stakes$meas)),
+                                    max(c(df_scatterplot$mb, df_stakes$meas)))/1e3,
+                         oob = scales::oob_keep,
+                         expand = expansion(mult = 0.05)) +
       scale_color_manual(name = "Net effect of\navalanches",
                          values = c("0" = "#FFA000",
                                     "1"  = "#FF00A0",

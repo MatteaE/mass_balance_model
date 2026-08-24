@@ -97,13 +97,17 @@ func_plot_year <- function(year_data,
   plots_year <- append(plots_year, list(plot_scaf))
   
   
-  # Plot model bias at the stakes vs fraction of melt from radiation ------------------------------
+  # Plot scatterplots of model bias at the stakes -------------------------------------------------
+  # Plots of bias vs elevation and vs accumulation multiplier, useful to manually inspect / improve the RMS.
   if (year_data$nstakes_annual > 0) {
-    cat("  Bias vs radiation melt...\n")
-    plot_bias_rad <- func_plot_bias_vs_rad(year_data,
-                                           run_params)
-    # Combine with SCAF plot, on same page.
-    plots_year[[length(plots_year)]] <- plot_grid(plotlist = list(plots_year[[length(plots_year)]], plot_bias_rad),
+    cat("  Bias scatterplots...\n")
+    plots_bias_scatterplots <- func_plot_bias_scatterplots(year_data,
+                                                           data_dhms,
+                                                           run_params)
+    # Combine with SCAF plot, on the same page.
+    plots_year[[length(plots_year)]] <- plot_grid(plotlist = list(plots_year[[length(plots_year)]],
+                                                                  plots_bias_scatterplots[[1]],
+                                                                  plots_bias_scatterplots[[2]]),
                                                   align = "v", ncol = 1, nrow = 3)
   }
   

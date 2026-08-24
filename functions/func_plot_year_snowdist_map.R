@@ -48,7 +48,6 @@ func_plot_year_snowdist_map <- function(year_data,
   
   dist_final_values <- year_data$dist_topographic_values_red * year_data$dist_probes_norm_values_red
   
-  # max_val <- max(dist_final_values)
   val_breaks <- c(0.0, 0.5, 0.75, 0.9, 0.95, 1.0, 1.05, 1.10, 1.25, 1.5, 2.0)*100
   val_labels <- as.character(val_breaks)
   val_labels[length(val_labels)] <- ""

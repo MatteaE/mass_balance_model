@@ -37,7 +37,6 @@ func_simulate_mb_without_data <- function(run_params,
                                         year_data$dist_probes_norm_values_red,
                                         year_data$grids_avalanche_cur,
                                         year_data$grid_ice_albedo_fact_cur_values,
-                                        store_melt_ids = NULL,
                                         verbose_level = 1)
   cat("melt_factor =",  round(year_cur_params$melt_factor, 3),  "\n")
   cat("rad_fact_ice =", round(year_cur_params$rad_fact_ice, 3), "\n")
