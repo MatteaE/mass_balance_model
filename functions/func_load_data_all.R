@@ -31,7 +31,8 @@ func_load_data_all <- function(run_params) {
   # Check whether the model domain is in the Northern or Southern Hemisphere.
   # Needed here because the meteorological series is loaded next and it wants
   # to know when the hydrological year starts.
-  run_params                          <-   func_check_north_south(data_all)
+  run_params                          <-   func_check_north_south(data_all$raster_blueprint,
+                                                                  run_params)
   
   data_all$data_weather               <-   func_load_weather(run_params)
   

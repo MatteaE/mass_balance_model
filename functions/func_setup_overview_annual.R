@@ -40,6 +40,7 @@ func_setup_overview_annual <- function(run_params) {
                                            rad_fact_snow               = NA_real_,
                                            prec_corr                   = NA_real_,
                                            mb_cumul                    = NA_real_,
+                                           mb_range                    = NA_real_, # Range of the cumulative mass balance during the respective hydrological year
                                            year_has_data               = FALSE,
                                            year_starting_swe_available = FALSE) # This is used to optionally enable re-using of the modeled SWE as starting condition for a modeled year. If swe_prev_available[year_id] is TRUE, then year_id can use as starting condition the model output of (year_id-1).
   

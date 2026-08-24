@@ -11,6 +11,7 @@
 
 func_check_north_south <- function(raster_blueprint,
                                    run_params) {
+  
   ext_cur     <- ext(raster_blueprint)[1:4]
   crds_center <- cbind(mean(ext_cur[1:2]), mean(ext_cur[3:4]))
   lat_center  <- terra::project(crds_center, run_params$grids_crs_epsg, "EPSG:4326")[,2]

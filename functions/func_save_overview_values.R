@@ -25,19 +25,23 @@ func_save_overview_values <- function(year_data,
   df_overview$rad_fact_ice[year_data$year_id]         <- year_cur_params$rad_fact_ice + year_data$optim_corr_annual$rad_fact_ice
   df_overview$rad_fact_snow[year_data$year_id]        <- year_cur_params$rad_fact_snow + year_data$optim_corr_annual$rad_fact_ice * year_cur_params$rad_fact_ratio_snow_ice
   df_overview$prec_corr[year_data$year_id]            <- year_cur_params$prec_corr + year_data$optim_corr_annual$prec_corr
+  df_overview$mb_range[year_data$year_id]             <- diff(range(year_data$mod_output_annual_cur$gl_massbal_cumul[year_data$id_hydro_start:year_data$id_hydro_end])) * run_params$output_mult / 1e3
   df_overview$pdd_sum_hydro_aws[year_data$year_id]    <- year_data$pdd_sum_hydro
 
+  
   # Below: additional output values in case the year has measured mass balance data.
   if (year_data$nstakes_annual > 0) {
     
     df_overview$mb_annual_meas_corr[year_data$year_id]  <- year_data$massbal_annual_values[["meas_period_corr.mean"]] * run_params$output_mult / 1e3
     df_overview$mb_annual_meas[year_data$year_id]       <- year_data$massbal_annual_values[["meas_period.mean"]] * run_params$output_mult / 1e3
-    if (year_data$process_winter) {
-      df_overview$mb_winter_meas[year_data$year_id]     <- year_data$massbal_winter_values[["meas_period.mean"]] * run_params$output_mult / 1e3
-    }
+
     df_overview$rmse[year_data$year_id]                 <- year_data$mod_output_annual_cur$global_rms * run_params$output_mult / 1e3
     df_overview$year_has_data[year_data$year_id]        <- TRUE
     
+  }
+  
+  if (year_data$process_winter) {
+    df_overview$mb_winter_meas[year_data$year_id]     <- year_data$massbal_winter_values[["meas_period.mean"]] * run_params$output_mult / 1e3
   }
   
   if (!is.null(year_data$global_loo_rms)) {
