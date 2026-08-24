@@ -85,9 +85,11 @@ func_plot_overview <- function(overview_annual,
   single_year_point2 <- NULL
   if (single_year) {
     single_year_point1 <- geom_point(aes(x = year, y = mb_winter_fixed), color = "#00FFFF")
-    if(any(!is.na(overview_annual$summary_df$mb_winter_meas))) {
-      single_year_point2 <- geom_point(aes(x = year, y = mb_winter_meas), color = "#FF00FF")
-    }
+    single_year_point2 <- geom_point(aes(x = year, y = mb_winter_meas), color = "#FF00FF")
+  }
+  year_has_data_rle <- rle(is.na(overview_annual$summary_df$mb_winter_meas))
+  if (any((year_has_data_rle$values == TRUE) & (year_has_data_rle$lengths == 1))) {
+    single_year_point2 <- geom_point(aes(x = year, y = mb_winter_meas), color = "#FF00FF")
   }
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
     {if(any(!is.na(overview_annual$summary_df$mb_winter_meas))) geom_line(aes(x = year, y = mb_winter_meas), color = "#FF00FF", linewidth = 1)} +

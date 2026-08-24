@@ -110,7 +110,7 @@ func_run_model <- function(run_params) {
   
   
   
-  # . Process Northern/Southern Hemisphere parameters ---------------------------------------------
+  # Process Northern/Southern Hemisphere parameters -----------------------------------------------
   ext_cur     <- ext(data_all$data_dems$elevation[[1]])[1:4]
   crds_center <- cbind(mean(ext_cur[1:2]), mean(ext_cur[3:4]))
   lat_center  <- terra::project(crds_center, run_params$grids_crs_epsg, "EPSG:4326")[,2]

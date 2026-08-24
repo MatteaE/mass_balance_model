@@ -25,11 +25,19 @@ func_compute_derived_year_params <- function(year_data, year_cur_params, run_par
   # Since we use Date objects which don't include the time of day, we can set the
   # hydro end to October 1 (else we would miss the mass balance
   # between YYYY/09/30 00:00 and YYYY/10/01 00:00).
-  year_cur_params$hydro_start <- as.Date(paste(year_data$year_cur-1, 10, 1), format="%Y %m %d")
-  year_cur_params$hydro_end   <- as.Date(paste(year_data$year_cur, 10, 1), format = "%Y %m %d")
-  
-  year_cur_params$fixed_winter_start <- as.Date(paste(year_data$year_cur-1, run_params$massbal_fixed_winter_start), format = "%Y %m/%d")
-  year_cur_params$fixed_winter_end   <- as.Date(paste(year_data$year_cur, run_params$massbal_fixed_winter_end), format = "%Y %m/%d")
+  if (run_params$north_south == "North") {
+    year_cur_params$hydro_start <- as.Date(paste(year_data$year_cur-1, 10, 1), format="%Y %m %d")
+    year_cur_params$hydro_end   <- as.Date(paste(year_data$year_cur, 10, 1), format = "%Y %m %d")
+    
+    year_cur_params$fixed_winter_start <- as.Date(paste(year_data$year_cur-1, run_params$massbal_fixed_winter_start), format = "%Y %m/%d")
+    year_cur_params$fixed_winter_end   <- as.Date(paste(year_data$year_cur, run_params$massbal_fixed_winter_end), format = "%Y %m/%d")
+  } else {
+    year_cur_params$hydro_start <- as.Date(paste(year_data$year_cur-1, 4, 1), format="%Y %m %d")
+    year_cur_params$hydro_end   <- as.Date(paste(year_data$year_cur, 4, 1), format = "%Y %m %d")
+    
+    year_cur_params$fixed_winter_start <- as.Date(paste(year_data$year_cur-1, run_params$massbal_fixed_winter_start), format = "%Y %m/%d")
+    year_cur_params$fixed_winter_end   <- as.Date(paste(year_data$year_cur-1, run_params$massbal_fixed_winter_end), format = "%Y %m/%d")
+  }
   
   
   # Compute daily precipitation summer factor following the user-selected method.

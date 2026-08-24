@@ -141,8 +141,8 @@ func_process_run_params <- function(run_params) {
     # . (11) Mass balance postprocessing parameters -------
     ele_bands_auto_min_extent          = 50,          # [m]: when automatically computing elevation bands for local correction, merge bands which are smaller than this vertical extent.
     ele_bands_ela_size                 = 10,          # [m]: to compute the equilibrium line altitude, divide the glacier grid into elevation bands with this vertical extent.
-    massbal_fixed_winter_start         = NA,          # [month/day or NA]: start of the fixed "winter" period for mass balance evaluation. If NA, this will be 1 October (YYYY-1) in the Northern Hemisphere and 1 April (YYYY-1) in the Southern Hemisphere.
-    massbal_fixed_winter_end           = NA,          # [month/day or NA]: end of the fixed "winter" period for mass balance evaluation. If NA, this will be 30 April (YYYY) in the Northern Hemisphere and 31 October (YYYY-1) in the Southern Hemisphere.
+    massbal_fixed_winter_start         = NA,          # [month/day or NA]: start of the fixed "winter" period for mass balance evaluation. If NA, this will be 1 October (YYYY-1) in the Northern Hemisphere and 1 April (YYYY-1) in the Southern Hemisphere. Note: this MM/DD date is always assigned to YYYY-1.
+    massbal_fixed_winter_end           = NA,          # [month/day or NA]: end of the fixed "winter" period for mass balance evaluation. If NA, this will be 30 April (YYYY) in the Northern Hemisphere and 31 October (YYYY-1) in the Southern Hemisphere. Note: this MM/DD date is assigned to YYYY in the Northern Hemisphere and to YYYY-1 in the Southern Hemisphere.
     
     
     # . (12) Leave-one-out validation parameters ---------------
