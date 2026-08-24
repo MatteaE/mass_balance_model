@@ -171,8 +171,12 @@ func_plot_massbal_vs_elevation <- function(year_data,
       geom_point(aes(x = ele, y = mb/1e3, color = avalanche_effect), size = 0.5, stroke = 0) +
       geom_point(data = df_stakes, aes(x = z, y = meas/1e3), shape = 3, stroke = 1.5, size = 0) +
       geom_segment(data = df_stakes, aes(x = z, xend = z, y = meas/1e3, yend = mod/1e3)) +
-      geom_segment(data = abl_grad_meas_df, aes(x = x1, xend = x2, y = y1, yend = y2), linetype = "solid") +
-      geom_segment(data = abl_grad_mod_df, aes(x = x1, xend = x2, y = y1, yend = y2), linetype = "longdash") +
+      geom_segment(data = abl_grad_meas_df, aes(x = x1, xend = x2, y = y1, yend = y2),
+                   linetype = "solid",
+                   color = "#ff0000") +
+      geom_segment(data = abl_grad_mod_df, aes(x = x1, xend = x2, y = y1, yend = y2),
+                   linetype = "longdash",
+                   color = "#ff0000") +
       annotation_custom(grobTree(textGrob(paste0("Bias: ", sprintf(run_params$output_fmt3, stakes_bias*run_params$output_mult), " ", run_params$output_unit, " w.e."),
                                           x=0.02, y = 0.93, hjust = 0, vjust = 0, gp=gpar(fontsize = base_size, fontface="bold")))) +
       annotation_custom(grobTree(textGrob(rms_txt, x=0.02, y = 0.85, hjust = 0, vjust = 0,
@@ -180,11 +184,11 @@ func_plot_massbal_vs_elevation <- function(year_data,
       annotation_custom(grobTree(textGrob(abl_grad_meas_txt, x=0.02, y = 0.77, hjust = 0, vjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       {if (!is.na(year_data$abl_grad_meas)) annotation_custom(grobTree(linesGrob(x=c(0.02,0.424), y = 0.761,
-                                                                                gp=gpar(lty = "solid", lwd=2.0))))} +
+                                                                                gp=gpar(col = "#ff0000", lty = "solid", lwd=2.0))))} +
       annotation_custom(grobTree(textGrob(abl_grad_mod_txt, x=0.02, y = 0.69, hjust = 0, vjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       {if (!is.na(year_data$abl_grad_mod)) annotation_custom(grobTree(linesGrob(x=c(0.02,0.4055), y = 0.681,
-                                                                                 gp=gpar(lty = "longdash", lwd=2.0))))} +
+                                                                                 gp=gpar(col = "#ff0000", lty = "longdash", lwd=2.0))))} +
       coord_flip() +
       scale_x_continuous(breaks = pretty(df_scatterplot$ele),
                          expand = expansion(mult = 0.05)) +

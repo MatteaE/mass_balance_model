@@ -6,14 +6,15 @@
 #                 This file contains the code to post-process the simulated mass balance.         #
 #                 Specifically, here are performed:                                               #
 #                 (1) mass balance correction in elevation bands                                  #
-#                 (2) computation of (band-corrected) mass balance over the hydrological year     #
-#                 (3) computation of ELA and AAR                                                  #
+#                 (2) computation of ELA and AAR                                                  #
+#                 (3) computation of daily SCAF                                                   #
 #                 (4) computation of BIAS and RMS of winter stakes in the annual simulation       #
 #                     (if we have them)                                                           #
-#                 (5) standardization (to the whole measurement period) of stake measurements     #
+#                 (5,6) standardization (to the whole measurement period) of stake measurements   #
 #                     (both annual and - if we have them - winter)                                #
-#                 (6) extraction of the mass balance and SWE time series at user-defined points   #
-#                 (7) calculation of vertical ablation gradients (measured and modeled)           #
+#                 (7) extraction of the mass balance and SWE time series at user-defined points   #
+#                 (8) calculation of vertical ablation gradients (measured and modeled)           #
+#                 (9) calculation of snow cover duration on glacier                               #
 ###################################################################################################
 
 
@@ -22,7 +23,7 @@ func_massbal_postprocess <- function(year_data,
                                      year_cur_params,
                                      data_dems) {
   
-  #### Correct mass balance bias according to user-defined elevation bands ####
+  #### (1) Correct mass balance bias according to user-defined elevation bands ####
   if (year_data$nstakes_annual > 0) {
     year_data$massbal_annual_maps$meas_period_corr <- func_correct_massbal_elebands(year_data,
                                                                                     year_cur_params,
@@ -45,33 +46,21 @@ func_massbal_postprocess <- function(year_data,
     year_data$mod_output_annual_cur$gl_massbal_cumul_bandcorr <- year_data$mod_output_annual_cur$gl_accum_cumul - year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr
   }
   
-  # COMMENTED OUT: WE NO LONGER CORRECT GLACIER-WIDE MASS BALANCE WITH THE LOCAL BAND CORRECTION
-  # AS THIS RE-INTRODUCES SOME GLOBAL BIAS. WE KEEP THE LOCAL BAND CORRECTION ONLY FOR DISTRIBUTED
-  # MASS BALANCE MAPS.
-  # Apply the correction also to the hydrological year mass balance
-  # (selecting the appropriate correction offsets, i.e. at the start
-  # and end of the hydrological year: one is summed, the other one
-  # is subtracted).
-  # id_hydro_start <- which(weather_series_annual_cur$timestamp == year_cur_params$hydro_start)
-  # id_hydro_end   <- which(weather_series_annual_cur$timestamp == (year_cur_params$hydro_end - 1)) + 1
-  # massbal_corr_series <- mod_output_annual_cur$gl_massbal_cumul_bandcorr - mod_output_annual_cur$gl_massbal_cumul
-  # massbal_annual_values[["hydro_corr.mean"]] <- massbal_annual_values[["hydro.mean"]] + massbal_corr_series[id_hydro_end] - massbal_corr_series[id_hydro_start]
   
-  
-  #### Compute ELA and AAR ####
+  #### (2) Compute ELA and AAR ####
   year_data$ela_aar <- func_compute_ela_aar(year_data,
                                             run_params,
                                             data_dems)
   
   
-  #### Compute daily SCAF in percent ####
+  #### (3) Compute daily SCAF in percent ####
   year_data$gl_scaf_daily <- func_compute_scaf(year_data,
                                                run_params,
                                                data_dems)
   
   
   
-  #### Compute BIAS and RMS of winter measurements within the annual simulation ####
+  #### (4) Compute BIAS and RMS of winter measurements within the annual simulation ####
   # This is used in the vertical scatterplot of winter measurements.
   if (year_data$process_winter > 0) {
     
@@ -116,7 +105,7 @@ func_massbal_postprocess <- function(year_data,
   }
   
   
-  #### Compute standardized stake measurements: ANNUAL ####
+  #### (5) Compute standardized stake measurements: ANNUAL ####
   # We correct the mass balance at each stake (using the model) to cover
   # a same standardized period: the longest annual measurement periods
   # (i.e., earliest stake start to latest stake end).
@@ -129,7 +118,7 @@ func_massbal_postprocess <- function(year_data,
   }
   
   
-  #### Compute standardized stake measurements: WINTER ####
+  #### (6) Compute standardized stake measurements: WINTER ####
   # See comment above for short explanation.
   # NOTE: this call reuses some of the data/ids computed above for
   # the computation of BIAS and RMS of winter measurements.
@@ -141,7 +130,7 @@ func_massbal_postprocess <- function(year_data,
   }
   
   
-  #### Extract daily data at user-defined points ####
+  #### (7) Extract daily data at user-defined points ####
   if (year_data$npoints_daily_out > 0) {
     
     dxdy_daily       <- year_data$points_dxdy[["daily"]]
@@ -162,7 +151,7 @@ func_massbal_postprocess <- function(year_data,
   }
   
   
-  #### Calculate vertical ablation gradients ####
+  #### (8) Calculate vertical ablation gradients ####
   # Conditions to do this:
   # - there are at least 2 annual stakes which have negative measured-period mass balance in both measurements (standardized) and model
   # - those stakes have at least 50 m vertical elevation span (z_dem)
@@ -202,6 +191,16 @@ func_massbal_postprocess <- function(year_data,
       
     } # End if there are at least 2 stakes with actual ablation (modeled and measured)
   } # End if there are at least 2 annual mass balance values
+  
+  
+  #### (9) Calculate on-glacier snow cover duration ####
+  # 1 row per modeled day, 1 column per DHM cell
+  mat_snowcover_logi_hydro <- matrix(year_data$mod_output_annual_cur$vec_surftype_all == 2,
+                                     nrow = year_data$model_annual_days_n + 1,
+                                     byrow = TRUE)[year_data$id_hydro_start:(year_data$id_hydro_end-1),] # There is -1 here because we want a 365 (or 366) days period, i.e., ending on the last day of the hydro year, not the one after that.
+  year_data$snowcover_days_n_vec <- colSums(mat_snowcover_logi_hydro)
+  year_data$snowcover_min        <- min(year_data$snowcover_days_n_vec[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]])
+  year_data$snowcover_mean       <- mean(year_data$snowcover_days_n_vec[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]])
   
   
   return(year_data)

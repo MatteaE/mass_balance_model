@@ -109,6 +109,10 @@ func_plot_year <- function(year_data,
                                                                   plots_bias_scatterplots[[1]],
                                                                   plots_bias_scatterplots[[2]]),
                                                   align = "v", ncol = 1, nrow = 3)
+    # If no annual stakes are present, ensure that the SCAF plot does not get vertically warped to the full page.
+  } else {
+    plots_year[[length(plots_year)]] <- plot_grid(plotlist = plots_year[length(plots_year)],
+                                                  align = "v", ncol = 1, nrow = 3)
   }
   
   

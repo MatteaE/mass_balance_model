@@ -14,27 +14,21 @@ func_extract_model_maps_annual <- function(year_data,
                                            data_dhms,
                                            data_dems) {
   
-  # Indices: in the weather series index 1 refers to the whole first day,
-  # in the mass balance series index 1 refers to the instant mass balance at the *beginning* of that same first day,
-  # index 2 refers to the instant mass balance at the *end* of that same first day.
-  # Remember that mass balance vectors have one more element compared to the weather series.
+
+  # Cumulative mass balance values at 00:00 of the first day of the current hydrological year.
+  massbal_hydro_start_values <- year_data$mod_output_annual_cur$vec_massbal_cumul[(year_data$id_hydro_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
   
-  # id of the cumulative mass balance value at the end
-  # of the hydrological year (in the mass balance vectors,
-  # which include the initial conditions as first element).
-  # The "-1)) + 1" is there because the weather series ends
-  # on Sep 30 (whose weather values are valid for the whole day),
-  # but the hydrological year ends on Oct 1 at 00:00 (the which() would
-  # not find anything without the -1).
-  id_hydro_start <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$hydro_start)
-  id_hydro_end   <- which(year_data$weather_series_annual_cur$timestamp == (year_cur_params$hydro_end - 1)) + 1
-  massbal_hydro_start_values <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_hydro_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
-  massbal_hydro_end_values   <- year_data$mod_output_annual_cur$vec_massbal_cumul[(id_hydro_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
+  # Cumulative mass balance values at 23:59:59 of the last day of the current hydrological year (actually, 00:00 of the next day).
+  massbal_hydro_end_values   <- year_data$mod_output_annual_cur$vec_massbal_cumul[(year_data$id_hydro_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
+  
   massbal_hydro_map          <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], massbal_hydro_end_values - massbal_hydro_start_values)
   massbal_hydro_map_masked   <- mask(massbal_hydro_map, data_dems$elevation[[year_data$dem_grid_id]])
   
-  swe_hydro_start_values <- year_data$mod_output_annual_cur$vec_swe_all[(id_hydro_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
-  swe_hydro_end_values   <- year_data$mod_output_annual_cur$vec_swe_all[(id_hydro_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
+  # SWE values at 00:00 of the first day of the current hydrological year.
+  swe_hydro_start_values <- year_data$mod_output_annual_cur$vec_swe_all[(year_data$id_hydro_start - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
+  
+  # SWE values at 23:59:59 of the last day of the current hydrological year (actually, 00:00 of the next day).
+  swe_hydro_end_values   <- year_data$mod_output_annual_cur$vec_swe_all[(year_data$id_hydro_end - 1) * run_params$grid_ncells + 1:run_params$grid_ncells]
   swe_hydro_start_map    <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], swe_hydro_start_values)
   swe_hydro_end_map      <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], swe_hydro_end_values)
   

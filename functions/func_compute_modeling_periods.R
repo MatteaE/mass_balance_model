@@ -11,10 +11,12 @@
 # modeling period, and same for the winter modeling period.
 
 # ANNUAL modeling period starts at the beginning of the observation
-# period with the earliest start (i.e. the annual stake which was surveyed first
+# period with the earliest start (i.e. the stake which was surveyed first
 # on the previous year), but no later than Oct 1 (to include the whole hydrological year).
 # Annual modeling period ends at the end of the observation period with the latest end
 # (i.e. the annual stake which was surveyed last on the current year), but no earlier than Sep 30 (hydro year).
+# Note: annual modeling period also includes the full winter modeling period, since there are plots
+# detailing the winter stakes within the final (i.e., annual) simulation.
 # WINTER modeling period starts at the beginning of the observation period with the earliest start
 # (among the winter ones), but no later than Oct 1, so that there can be enough
 # snowfall to have a proper snowpack (thus, realistic avalanches) even if

@@ -22,6 +22,21 @@ func_process_annual <- function(year_data,
   year_data$weather_series_annual_cur <- data_weather[which(data_weather$timestamp == year_data$model_time_bounds[1]):(which(data_weather$timestamp == year_data$model_time_bounds[2])),]
   year_data$model_annual_days_n       <- nrow(year_data$weather_series_annual_cur)
   
+  # Set ids of hydrological year bounds within the simulation, used in multiple locations.
+  
+  # Indices: in the weather series index 1 refers to the whole first day,
+  # in the mass balance series index 1 refers to the instant mass balance at the *beginning* of that same first day,
+  # index 2 refers to the instant mass balance at the *end* of that same first day.
+  # Mass balance vectors have one more element compared to the weather series.
+  
+  # The "-1)) + 1" is there because the weather series ends
+  # on Sep 30 (whose weather values are valid for the whole day),
+  # but the hydrological year ends on Oct 1 (as Date object) even
+  # though it is at 00:00 - then, the which() would
+  # not find anything without the -1).
+  year_data$id_hydro_start <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$hydro_start)
+  year_data$id_hydro_end   <- which(year_data$weather_series_annual_cur$timestamp == (year_cur_params$hydro_end - 1)) + 1
+  
   
   # Different processing in case we have or not annual mass balance measurements.
   # If we have mass balance data ------------------------------------------------------------------

@@ -25,7 +25,7 @@ func_plot_overview <- function(overview_annual,
   single_year <- nrow(overview_annual$summary_df) == 1
   
   
-  # Corrected measurement-period annual MB -----------------------------------------
+  # Corrected measurement-period annual MB --------------------------------------------------------
   # Also horizontal line with mean over the period.
   # If we model just one year, add point plot so that something is visible.
   # We do this only if all years have mass balance measurements, else it is confusing.
@@ -45,20 +45,17 @@ func_plot_overview <- function(overview_annual,
   }
   
   
-  # Other annual MBs (uncorrected and hydrological) --------------------------------
+  # Other annual MBs (uncorrected and hydrological) -----------------------------------------------
   # over the measurement period with no correction,
   # over the hydrological year,
-  # [DISABLED] over a fixed (user-defined) period.
   # If we model just one year, add point plot so that something is visible.
   # Add point plot of MB over measurement period also if there are any isolated
   # years with available mass balance measurements, else they are invisible.
   single_year_point1 <- NULL
   single_year_point2 <- NULL
-  # single_year_point3 <- NULL
   if (single_year) {
     single_year_point1 <- geom_point(aes(x = year, y = mb_annual_meas), color = "#FF00FF")
     single_year_point2 <- geom_point(aes(x = year, y = mb_annual_hydro), color = "#0000FF")
-    # single_year_point3 <- geom_point(aes(x = year, y = mb_annual_fixed), color = "#00FFFF")
   }
   year_has_data_rle <- rle(overview_annual$summary_df$year_has_data)
   if (any((year_has_data_rle$values == TRUE) & (year_has_data_rle$lengths == 1))) {
@@ -67,10 +64,8 @@ func_plot_overview <- function(overview_annual,
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
     {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_line(aes(x = year, y = mb_annual_meas), color = "#FF00FF", linewidth = 1)} +
     geom_line(aes(x = year, y = mb_annual_hydro), color = "#0000FF", linewidth = 1) +
-    # geom_line(aes(x = year, y = mb_annual_fixed), color = "#00FFFF", linewidth = 1) +
     {if (any(overview_annual$summary_df$year_has_data) == TRUE) single_year_point1} +
     single_year_point2 +
-    # single_year_point3 +
     ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
     scale_y_continuous(expand = expansion(0.3, 0)) +
     scale_x_continuous(breaks = x_breaks) +
@@ -82,7 +77,7 @@ func_plot_overview <- function(overview_annual,
     theme_overview_plots
   
   
-  # Winter MBs ---------------------------------------------------------------------
+  # Winter MBs ------------------------------------------------------------------------------------
   # over a fixed (user-defined) winter period,
   # over the measurement period (only if winter measurements are available).
   # If we model just one year, add point plot so that something is visible.
@@ -110,7 +105,7 @@ func_plot_overview <- function(overview_annual,
     theme_overview_plots
   
   
-  # ELA ----------------------------------------------------------------------------
+  # ELA -------------------------------------------------------------------------------------------
   # If we model just one year, add point plot so that something is visible.
   single_year_point <- NULL
   if (single_year) {single_year_point <- geom_point(aes(x = year, y = ela))}
@@ -118,13 +113,13 @@ func_plot_overview <- function(overview_annual,
     geom_line(aes(x = year, y = ela), linewidth = 1) +
     single_year_point +
     ylab("Equilibrium Line Altitude [m a.s.l.]") +
-    scale_y_continuous(expand = expansion(0.5, 0)) +
+    scale_y_continuous(expand = expansion(2, 0)) +
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("Equilibrium Line Altitude") +
     theme_overview_plots
   
   
-  # AAR ----------------------------------------------------------------------------
+  # AAR -------------------------------------------------------------------------------------------
   # If we model just one year, add point plot so that something is visible.
   single_year_point <- NULL
   if (single_year) {single_year_point <- geom_point(aes(x = year, y = aar))}
@@ -138,7 +133,7 @@ func_plot_overview <- function(overview_annual,
     theme_overview_plots
   
   
-  # RMSE ---------------------------------------------------------------------------
+  # RMSE ------------------------------------------------------------------------------------------
   # If we model just one year, add point plot so that something is visible.
   # Also in case there are isolated years with mass balance measurements,
   # else they are not visible (geom_line of a single point).
@@ -175,7 +170,7 @@ func_plot_overview <- function(overview_annual,
   }
   
   
-  # Melt parameters ------------------------------------------------------------
+  # Melt parameters -------------------------------------------------------------------------------
   # If we model just one year, add point plot so that something is visible.
   single_year_point1 <- NULL
   single_year_point2 <- NULL
@@ -205,7 +200,7 @@ func_plot_overview <- function(overview_annual,
     theme_overview_plots
   
   
-  # Precipitation correction ---------------------------------------------------
+  # Precipitation correction ----------------------------------------------------------------------
   # We use a slightly more complex formula for the
   # y-axis limits so that when we have a single value
   # the limits still make sense.
@@ -223,7 +218,7 @@ func_plot_overview <- function(overview_annual,
   
   
   
-  # Hydrological year mass balance --------------------------------------
+  # Hydrological year mass balance ----------------------------------------------------------------
   x_breaks_cumul <- seq(overview_annual$summary_df$year[1]-1, overview_annual$summary_df$year[length(overview_annual$summary_df$year)], by = max(1, floor((length(overview_annual$summary_df$year)+1) / 4)))
   df_lines <- data.frame(year_start = overview_annual$summary_df$year - 1,
                          year_end   = overview_annual$summary_df$year,
@@ -278,7 +273,7 @@ func_plot_overview <- function(overview_annual,
     theme_mbcumul_legend
   
   
-  # Cumulative hydrological year mass balance with also daily line -----------------
+  # Cumulative hydrological year mass balance with also daily line --------------------------------
   # We also add modeling period boundaries.
   # Vertical blue lines: hydrological year boundaries.
   # Vertical dashed purple lines: measurement period start.
@@ -343,7 +338,7 @@ func_plot_overview <- function(overview_annual,
   
   
   
-  # AWS daily air temperature ------------------------------------------------------
+  # AWS daily air temperature ---------------------------------------------------------------------
   # Full weather series of daily mean air temperature at
   # the AWS, using the same time bounds as previous plot.
   # Compute numbers for the air temperature red/blue ribbon.
@@ -389,7 +384,7 @@ func_plot_overview <- function(overview_annual,
   
   
   
-  # AWS daily and monthly precipitation --------------------------------------------
+  # AWS daily and monthly precipitation -----------------------------------------------------------
   # Full weather series of daily and monthly precipitation at
   # the AWS, using the same time bounds as previous plot.
   dat_precip <- overview_annual$data_weather[,c(1,7)]
@@ -423,7 +418,7 @@ func_plot_overview <- function(overview_annual,
   
   
   
-  # AWS PDD sum --------------------------------------------
+  # AWS PDD sum -----------------------------------------------------------------------------------
   # If we model just one year, add point plot so that something is visible.
   single_year_point <- NULL
   if (single_year) {single_year_point <- geom_point(aes(x = year, y = pdd_sum_hydro_aws))}
@@ -431,9 +426,33 @@ func_plot_overview <- function(overview_annual,
     geom_line(aes(x = year, y = pdd_sum_hydro_aws), linewidth = 1) +
     single_year_point +
     ylab("PDD sum [\u00B0C d]") +
-    scale_y_continuous(expand = expansion(0.5, 0)) +
+    scale_y_continuous(expand = expansion(2, 0)) +
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("PDD sum at the AWS (hydrological year)") +
+    theme_overview_plots
+  
+  
+  # Snow cover duration on glacier ----------------------------------------------------------------
+  # If we model just one year, add point plot so that something is visible.
+  single_year_point1 <- NULL
+  single_year_point2 <- NULL
+  if (single_year) {
+    single_year_point1 <- geom_point(aes(x = year, y = snowcover_days_min), color = "#00FFFF")
+    single_year_point2 <- geom_point(aes(x = year, y = snowcover_days_mean), color = "#0000FF")
+  }
+  plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
+    geom_line(aes(x = year, y = snowcover_days_min), color = "#00FFFF", linewidth = 1) +
+    geom_line(aes(x = year, y = snowcover_days_mean), color = "#0000FF", linewidth = 1) +
+    single_year_point1 +
+    single_year_point2 +
+    annotation_custom(grobTree(textGrob("Mean duration", x=0.05, y = 0.12, hjust = 0,
+                                        gp=gpar(col="#0000FF", fontsize = base_size * 1., fontface="bold")))) +
+    annotation_custom(grobTree(textGrob("Minimum duration", x=0.05, y = 0.05, hjust = 0,
+                                        gp=gpar(col="#00FFFF", fontsize = base_size * 1., fontface="bold")))) +
+    ylab("Duration [d]") +
+    scale_y_continuous(expand = expansion(0.5, 0)) +
+    scale_x_continuous(breaks = x_breaks) +
+    ggtitle("On-glacier snow cover duration") +
     theme_overview_plots
   
   

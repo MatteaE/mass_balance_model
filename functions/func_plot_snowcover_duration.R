@@ -45,16 +45,6 @@ func_plot_snowcover_duration <- function(year_data,
   y_line4 <- 1 + (0.00 / y_line_mult)
   
   
-  # Prepare the actual data
-  id_hydro_start      <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$hydro_start)
-  id_hydro_end        <- which(year_data$weather_series_annual_cur$timestamp == (year_cur_params$hydro_end - 1)) # No +1 here, we want a 365 (or 366) days period.
-  
-  # 1 row per modeled day, 1 column per DHM cell
-  mat_snowcover_logi_hydro <- matrix(year_data$mod_output_annual_cur$vec_surftype_all == 2,
-                                     nrow = year_data$model_annual_days_n + 1,
-                                     byrow = TRUE)[id_hydro_start:id_hydro_end,]
-  snowcover_days_n_vec <- colSums(mat_snowcover_logi_hydro)
-  
   
   palette_cur <- c("#FFFFD9", "#EDF8B1", "#C7E9B4", "#7FCDBB", "#41B6C4", "#1D91C0", "#225EA8", "#2024A4", "#A30688")
   val_breaks <- c(0,seq(245,365,15))
@@ -67,14 +57,14 @@ func_plot_snowcover_duration <- function(year_data,
   
   plots <- list()
   
-  plot_df <- plot_df_base
-  plot_df$snowcover_days <- snowcover_days_n_vec
-  snowcover_onglacier_lab_mean <- sprintf("%.1f", mean(plot_df$snowcover_days[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]))
-  snowcover_onglacier_lab_min  <- as.character(min(plot_df$snowcover_days[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]))
+  plot_df                      <- plot_df_base
+  plot_df$snowcover_days       <- year_data$snowcover_days_n_vec
+  snowcover_onglacier_lab_mean <- sprintf("%.1f", year_data$snowcover_mean)
+  snowcover_onglacier_lab_min  <- as.character(year_data$snowcover_min)
   
   
   plots[[length(plots)+1]] <- ggplot(plot_df) +
-    geom_raster(aes(x = x, y = y, fill = snowcover_days)) +
+    geom_raster(aes(x = x, y = y, fill = snowcover_days+0.01)) + # +0.01 because we want to have color bins to be open on the right.
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
     coord_sf(clip = "off") +
     {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
@@ -83,7 +73,7 @@ func_plot_snowcover_duration <- function(year_data,
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(paste0("Snow cover duration (hydrological year)"),
                                         x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(bquote(bold("On-glacier: mean = "*.(snowcover_onglacier_lab_mean)*" "*"days, min = "*.(snowcover_onglacier_lab_min)*" "*"days")),
+    annotation_custom(grobTree(textGrob(bquote(bold("On glacier: mean = "*.(snowcover_onglacier_lab_mean)*" "*"days, min = "*.(snowcover_onglacier_lab_min)*" "*"days")),
                                         x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
     labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
          subtitle = " ") +

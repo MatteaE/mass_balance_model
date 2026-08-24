@@ -15,14 +15,13 @@ func_compile_df_runs_smb <- function(year_cur_params,
                                      corr_fact,
                                      run_type) {
   
-  id_hydro_start      <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$hydro_start)
-  id_hydro_end        <- which(year_data$weather_series_annual_cur$timestamp == (year_cur_params$hydro_end - 1)) + 1
+
   id_measperiod_start <- min(mod_output_cur$stakes_start_ids_corr)
   id_measperiod_end   <- max(mod_output_cur$stakes_end_ids)
   df_runs_smb         <- data.frame(run_id               = run_id,
                                     corr_fact            = corr_fact,
                                     run_type             = run_type,
-                                    mb_annual_hydro      = mod_output_cur$gl_massbal_cumul[id_hydro_end] - mod_output_cur$gl_massbal_cumul[id_hydro_start],
+                                    mb_annual_hydro      = mod_output_cur$gl_massbal_cumul[year_data$id_hydro_end] - mod_output_cur$gl_massbal_cumul[year_data$id_hydro_start],
                                     mb_annual_measperiod = mod_output_cur$gl_massbal_cumul[id_measperiod_end] - mod_output_cur$gl_massbal_cumul[id_measperiod_start])
   
   # Generate stake names such as s01 etc., with appropriate number of 0s to support the number of stakes.

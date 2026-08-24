@@ -33,10 +33,13 @@ func_setup_initial_snow_cover <- function(year_data,
       (swe_prev_available[year_data$year_id])  &&
       (year_data_prev$year_cur == year_data$year_cur - 1)) {
     
+    cat("Initial SWE set from model result of the previous year.\n")
+    
     # NOTE: we retrieve the weather_series_annual_cur
     # and mod_output_annual_cur of the PREVIOUS year!
     swe_prev_annual_day_id         <- which.min(abs(year_data_prev$weather_series_annual_cur$timestamp - year_data$model_time_bounds[1]))
     year_data$snowdist_init_annual <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]], year_data_prev$mod_output_annual_cur$vec_swe_all[(swe_prev_annual_day_id - 1) * run_params$grid_ncells + 1:run_params$grid_ncells])
+    
     
     if (year_data$process_winter) {
       swe_prev_winter_day_id         <- which.min(abs(year_data_prev$weather_series_annual_cur$timestamp - year_data$model_time_bounds[3]))
@@ -46,6 +49,9 @@ func_setup_initial_snow_cover <- function(year_data,
     # Here instead estimate the initial snow cover from snow line elevation,
     # topography, avalanches and snow probes if available.
   } else {
+    
+    cat("Initial SWE estimated from given parameters.\n")
+    
     year_data$snowdist_init_annual <- func_compute_initial_snow_cover(run_params,
                                                                       data_dhms,
                                                                       data_dems,

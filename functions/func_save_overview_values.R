@@ -19,6 +19,8 @@ func_save_overview_values <- function(year_data,
   df_overview$mb_winter_fixed[year_data$year_id]      <- year_data$massbal_winter_values[["fixed.mean"]] * run_params$output_mult / 1e3
   df_overview$ela[year_data$year_id]                  <- year_data$ela_aar[["ela"]]
   df_overview$aar[year_data$year_id]                  <- year_data$ela_aar[["aar"]] * 100
+  df_overview$snowcover_days_min[year_data$year_id]   <- year_data$snowcover_min
+  df_overview$snowcover_days_mean[year_data$year_id]  <- year_data$snowcover_mean
   df_overview$melt_factor[year_data$year_id]          <- year_cur_params$melt_factor + year_data$optim_corr_annual$melt_factor
   df_overview$rad_fact_ice[year_data$year_id]         <- year_cur_params$rad_fact_ice + year_data$optim_corr_annual$rad_fact_ice
   df_overview$rad_fact_snow[year_data$year_id]        <- year_cur_params$rad_fact_snow + year_data$optim_corr_annual$rad_fact_ice * year_cur_params$rad_fact_ratio_snow_ice

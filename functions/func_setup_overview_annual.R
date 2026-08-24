@@ -27,11 +27,12 @@ func_setup_overview_annual <- function(run_params) {
                                            mb_annual_meas_corr         = NA_real_,
                                            mb_annual_meas              = NA_real_,
                                            mb_annual_hydro             = NA_real_,
-                                           # mb_annual_hydro_corr        = NA_real_,
                                            mb_winter_meas              = NA_real_, # This stays NA unless winter measurements are available.
                                            mb_winter_fixed             = NA_real_,
                                            ela                         = NA_real_,
                                            aar                         = NA_real_,
+                                           snowcover_days_min          = NA_real_, # Minimum duration of snow cover on glacier
+                                           snowcover_days_mean         = NA_real_, # Mean duration of snow cover on glacier
                                            rmse                        = NA_real_,
                                            loo_rmse                    = NA_real_,
                                            melt_factor                 = NA_real_,
@@ -45,6 +46,7 @@ func_setup_overview_annual <- function(run_params) {
   # Here we will put daily data for the overview plot
   # of cumulative daily glacierwide mass balance.
   overview_annual$daily_data_list <- list()
+  
 
   return(overview_annual)
 }

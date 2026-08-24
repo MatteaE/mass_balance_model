@@ -38,6 +38,7 @@ func_process_year <- function(year_data,
   year_data <- func_compute_modeling_periods(year_data,
                                              run_params,
                                              year_cur_params)
+  
   # Stop with an error in case we don't have all
   # weather data we need for the simulation period.
   model_time_bounds_range <- range(year_data$model_time_bounds, na.rm = T)
