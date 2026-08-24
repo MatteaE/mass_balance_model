@@ -54,7 +54,6 @@ func_plot_scaf <- function(year_data,
           text = element_text(face = "bold"),
           panel.grid = element_blank())
   
-  # Generate plot of mass balance alone.
   plot_scaf <- ggplot(scaf_df) +
     annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
     # geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.5) +
@@ -67,8 +66,6 @@ func_plot_scaf <- function(year_data,
     ylab(paste0("Snow-covered area fraction [%]")) +
     theme_scaf_plot
   
-  plot_scaf_out <- plot_grid(plotlist = list(plot_scaf), align = "hv", ncol = 1, nrow = 3)
   
-  
-  return(plot_scaf_out)
+  return(plot_scaf)
 }

@@ -39,26 +39,6 @@ func_customlog <- function(..., level = c("basic", "warning", "fatal", "success"
   # Concatenate input into a single character.
   txt <- paste(sapply(list(...), as.character), collapse = "")
   
-  # Select OS-specific function to write to console.
-  # RStudio on Windows uses an ugly red text for message(),
-  # so we use cat() and ANSI bold text instead.
-  if (Sys.info()["sysname"] == "Windows") {
-    
-    func_consolewrite <- function(prefix, txt) {
-      cat(paste0(prefix,
-                 "\033[1m", txt, "\033[0m", "\n"))
-    }
-    
-    # On other systems use message(): RStudio uses a nice grey background.
-  } else {
-    
-    func_consolewrite <- function(prefix, txt) {
-      message(paste0(prefix,
-                     txt))
-    }
-  }
-  
-  
   # Temporarily suspend the split sink(), since we need to write to the log file and not to the console.
   flush(logcon)
   sink()

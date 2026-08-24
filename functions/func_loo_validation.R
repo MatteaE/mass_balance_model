@@ -139,7 +139,8 @@ func_loo_validation <- function(run_params, year_cur_params, year_data,
                                         year_data$points_dxdy[["annual"]][[1]], year_data$points_dxdy[["annual"]][[2]],
                                         year_data$points_dxdy[["annual"]][[3]], year_data$points_dxdy[["annual"]][[4]],
                                         year_data$nstakes_annual, year_data$model_annual_days_n,
-                                        year_data$massbal_annual_meas_cur, year_data$annual_stakes_cells, verbose_logi = FALSE)
+                                        year_data$massbal_annual_meas_cur, year_data$annual_stakes_cells,
+                                        store_melt_logi = FALSE, verbose_logi = FALSE)
     
     
     year_data$df_runs_smb    <- rbind(year_data$df_runs_smb,

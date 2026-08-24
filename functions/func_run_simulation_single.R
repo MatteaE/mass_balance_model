@@ -16,7 +16,8 @@ func_run_simulation_single <- function(year_param_corrections,
                                        snowdist_init, data_radiation, weather_series_cur, dist_topographic_values_red,
                                        dist_probes_norm_values_red, grids_avalanche_cur,
                                        grid_ice_albedo_fact_cur_values, dx1, dx2, dy1, dy2,
-                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells, verbose_logi) {
+                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells,
+                                       store_melt_logi, verbose_logi) {
   
   # verbose_logi can be used to mute the output (used for LOO validation)
   
@@ -35,6 +36,39 @@ func_run_simulation_single <- function(year_param_corrections,
   # Compute radiation factor for snow, using the
   # fixed (initial) ratio of the radiation factors.
   year_cur_params_corr$rad_fact_snow <- year_cur_params_corr$rad_fact_ice * year_cur_params_corr$rad_fact_ratio_snow_ice
+  
+  
+  
+  # Find indices of the days corresponding to the stake measurements.
+  # We match w.r.t. weather_series_cur whose index is off by ~0.5 with the
+  # mass balance (mb_model_out$gl_massbal_cumul[1] is the initial condition
+  # (i.e. value 0.0) at 00:00 of the first day, then the index of the weather series
+  # corresponds to the full following 24 hours, then gl_massbal_cumul[2] is the
+  # cumulative mass balance by the end of that same day.
+  # So it would be equally correct to also shift all the day indices by one (little to no change).
+  # We find the indices here already so that we can pass their bounds to the mass balance model
+  # in order to store and accumulate melt over the annual measurement period.
+  stakes_start_ids      <- pmatch(massbal_meas_cur$start_date,
+                                  weather_series_cur$timestamp,
+                                  duplicates.ok = TRUE)
+  stakes_end_ids        <- pmatch(massbal_meas_cur$end_date,
+                                  weather_series_cur$timestamp,
+                                  duplicates.ok = TRUE)
+  
+  # Shall we store the cumulative melt amounts over the measurement period?
+  # This is used to evaluate the role of radiation in the total melt.
+  # Here we do not yet know the starting date of stakes with NA; we ignore
+  # them but if there are only them (no known starting date) we take the first
+  # day of the simulation.
+  if (store_melt_logi) {
+    if (all(is.na(stakes_start_ids))) {
+      store_melt_ids <- c(1, max(stakes_end_ids))
+    } else {
+      store_melt_ids <- c(min(stakes_start_ids, na.rm = T), max(stakes_end_ids))
+    }
+  } else {
+    store_melt_ids <- NULL
+  }
   
   if (verbose_logi) {
     cat("melt_factor =",  round(year_cur_params_corr$melt_factor, 3),  "\n")
@@ -55,6 +89,7 @@ func_run_simulation_single <- function(year_param_corrections,
                                         dist_probes_norm_values_red,
                                         grids_avalanche_cur,
                                         grid_ice_albedo_fact_cur_values,
+                                        store_melt_ids,
                                         verbose_level = min(verbose_logi, 1)) # Keep verbosity from received parameter
   
   
@@ -68,20 +103,7 @@ func_run_simulation_single <- function(year_param_corrections,
                                                        stakes_cells)
   
   
-  # Find indices of the days corresponding to the stake measurements.
-  # We match w.r.t. weather_series_cur whose index is off by ~0.5 with the
-  # mass balance (mb_model_out$gl_massbal_cumul[1] is the initial condition
-  # (i.e. value 0.0) at 00:00 of the first day, then the index of the weather series
-  # corresponds to the full following 24 hours, then gl_massbal_cumul[2] is the
-  # cumulative mass balance by the end of that same day.
-  # So it would be equally correct to also shift all the day indices by one (little to no change).
   # We also find the start date for stakes set to NA (i.e. start date = date of mass balance minimum).
-  stakes_start_ids      <- pmatch(massbal_meas_cur$start_date,
-                                  weather_series_cur$timestamp,
-                                  duplicates.ok = TRUE)
-  stakes_end_ids        <- pmatch(massbal_meas_cur$end_date,
-                                  weather_series_cur$timestamp,
-                                  duplicates.ok = TRUE)
   stakes_start_ids_corr <- func_compute_unknown_stakes_start_ids(run_params,
                                                                  stakes_start_ids,
                                                                  weather_series_cur,
@@ -121,6 +143,7 @@ func_run_simulation_single <- function(year_param_corrections,
   run_output <- list(vec_swe_all           = mb_model_output$vec_swe_all,
                      vec_surftype_all      = mb_model_output$vec_surftype_all,
                      vec_massbal_cumul     = mb_model_output$vec_massbal_cumul,
+                     melt_cumul_mat        = mb_model_output$melt_cumul_mat,
                      avalanche_net         = mb_model_output$avalanche_net,
                      gl_massbal_cumul      = mb_model_output$gl_massbal_cumul,
                      gl_melt_daily         = mb_model_output$gl_melt_daily,

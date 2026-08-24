@@ -56,7 +56,6 @@ func_plot_snowcover_duration <- function(year_data,
   snowcover_days_n_vec <- colSums(mat_snowcover_logi_hydro)
   
   
-  # palette_RdPu_adj <- c(RColorBrewer::brewer.pal(9, "RdPu")[c(2:8)], "#310063")
   palette_cur <- c("#FFFFD9", "#EDF8B1", "#C7E9B4", "#7FCDBB", "#41B6C4", "#1D91C0", "#225EA8", "#2024A4", "#A30688")
   val_breaks <- c(0,seq(245,365,15))
   val_labels <- as.character(val_breaks)

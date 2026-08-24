@@ -27,8 +27,16 @@ func_run_model <- function(run_params) {
   }
   
   
+  # Check that we have at least the name of the glacier in the parameters.
+  if (is.null(run_params$name_glacier)) {
+    txt <- "Parameter name_glacier is not defined. Please check your file set_params.R."
+    func_consolewrite("\033[1;48;5;196;38;5;231m FATAL \033[0m ", txt)
+    fatal_char <<- append(fatal_char, txt)
+    func_stop()
+  }
+  
   # Set main output directory, where the output and logs will be stored.
-  run_params$output_dirname <- file.path("output", run_params$name_glacier)
+  run_params$output_dirname  <- file.path("output", run_params$name_glacier)
   run_params$dir_output_logs <- file.path(run_params$output_dirname, "logs")
   dir.create(run_params$dir_output_logs, showWarnings = FALSE, recursive = TRUE)
   
@@ -100,25 +108,24 @@ func_run_model <- function(run_params) {
   
   func_customlog("Setting up the model.", level = 4)
   
-  # Find out whether we are North or South of the Equator.
-  # This is used in multi-annual runs for the firnification routine,
-  # which is called on March 1 in the Northern hemisphere and on
-  # September 1 in the Southern one.
-  # The assumption is that the minimum mass balance has been reached at each
-  # cell by that date (should rather be already by ~end of September in the Northern
-  # hemisphere!)
-  # NOTE: it is quite important that the first winter avalanche of the year takes
-  # place later than firnification, otherwise some old snow could be mobilized
-  # which is not very realistic and could interfere with the winter/annual simulations.
+  
+  
+  # . Process Northern/Southern Hemisphere parameters ---------------------------------------------
   ext_cur     <- ext(data_all$data_dems$elevation[[1]])[1:4]
   crds_center <- cbind(mean(ext_cur[1:2]), mean(ext_cur[3:4]))
   lat_center  <- terra::project(crds_center, run_params$grids_crs_epsg, "EPSG:4326")[,2]
   if (lat_center >= 0) {
-    run_params$north_south <- "North"
+    run_params$north_south        <- "North"
     run_params$firnification_date <- "03/01"
+    if (is.na(run_params$massbal_fixed_winter_start))  run_params$massbal_fixed_winter_start   <- "10/01"
+    if (is.na(run_params$massbal_fixed_winter_end))    run_params$massbal_fixed_winter_end     <- "04/30"
+    if (is.na(run_params$stakes_unknown_latest_start)) run_params$stakes_unknown_latest_start  <- "02/28"
   } else {
-    run_params$north_south <- "South"
+    run_params$north_south        <- "South"
     run_params$firnification_date <- "09/01"
+    if (is.na(run_params$massbal_fixed_winter_start))  run_params$massbal_fixed_winter_start   <- "04/01"
+    if (is.na(run_params$massbal_fixed_winter_end))    run_params$massbal_fixed_winter_end     <- "10/31"
+    if (is.na(run_params$stakes_unknown_latest_start)) run_params$stakes_unknown_latest_start  <- "08/31"
   }
   
   
@@ -166,6 +173,8 @@ func_run_model <- function(run_params) {
   dir.create(file.path(run_params$output_dirname, "annual_results"), recursive = TRUE, showWarnings = FALSE)
   
   func_customlog("Finished model setup.", level = 4)
+  
+  
   
   # Main loop -------------------------------------------------------------------------------------
   # Here year_data is a list which is gradually built and

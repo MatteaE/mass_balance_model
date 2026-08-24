@@ -42,7 +42,7 @@ func_extract_modeled_points <- function(run_params,
     # ((cell 2) + (ncol - 1)), because raster cells
     # start at 1 from top-left and go row by row.
     # Repeated cells (i.e. if the point lies at
-    # the same x and/or y as a cell center) CAUSE A BUG!!!!
+    # the same x and/or y as a cell center) cause a bug!
     # Observed if dy1 is 0: we have just two cells (1 and 2 in the square above),
     # points_cells is sorted; only cell_series3 and cell_series4 contribute due to dy1 = 0,
     # but these are derived from a same cell (weighted with two different weights).

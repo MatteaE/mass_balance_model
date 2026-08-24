@@ -97,6 +97,16 @@ func_plot_year <- function(year_data,
   plots_year <- append(plots_year, list(plot_scaf))
   
   
+  # Plot model bias at the stakes vs fraction of melt from radiation ------------------------------
+  if (year_data$nstakes_annual > 0) {
+    cat("  Bias vs radiation melt...\n")
+    plot_bias_rad <- func_plot_bias_vs_rad(year_data,
+                                           run_params)
+    # Combine with SCAF plot, on same page.
+    plots_year[[length(plots_year)]] <- plot_grid(plotlist = list(plots_year[[length(plots_year)]], plot_bias_rad),
+                                                  align = "v", ncol = 1, nrow = 3)
+  }
+  
   
   # Plot mass balance versus elevation ------------------------------------------------------------
   cat("  Mass balance altitudinal gradient...\n")

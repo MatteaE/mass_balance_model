@@ -9,14 +9,21 @@
 
 
 func_stop <- function() {
-  
   # Write end time to log file --------------------------------------------------------------------
-  flush(logcon)
-  sink()
   t_end <- Sys.time()
-  writeLines(paste0("Run failed at ", format(t_end), " (", Sys.timezone(), ")", "\n"), con = logcon, sep = "")
-  flush(logcon)
-  close(logcon)
+  
+  if (tryCatch({
+    isOpen(logcon)
+  },
+  error = function(e) {
+    FALSE
+  })) {
+    flush(logcon)
+    sink()
+    writeLines(paste0("Run failed at ", format(t_end), " (", Sys.timezone(), ")", "\n"), con = logcon, sep = "")
+    flush(logcon)
+    close(logcon)
+  }
   
   
   # Send notification -----------------------------------------------------------------------------
