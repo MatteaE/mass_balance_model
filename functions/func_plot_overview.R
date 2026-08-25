@@ -300,25 +300,29 @@ func_plot_overview <- function(overview_annual,
     }
     date_breaks_by <- "6 months"
   }
-  if (run_params$n_years > 2) {
-    date_labels_cur <- "%Y"
-    date_breaks_by <- "1 year"
+  if (run_params$n_years > 3) {
+    date_labels_cur <- "%Y/%m"
+    date_breaks_by  <- "1 year"
   }
-  if (run_params$n_years > 10) {
-    date_breaks_extend_before <- 0
-    date_breaks_by <- paste0(run_params$n_years %/% 6, " years")
+  if (run_params$n_years > 5) {
+    date_labels_cur <- "%Y"
+  }
+  if (run_params$n_years > 6) {
+    date_breaks_by <- paste0(diff(x_breaks_cumul)[1], " years")
   }
   
-  date_breaks_cur <- seq.Date(from = as.Date(paste0(run_params$first_year - date_breaks_extend_before, "/01/01")),
-                              to   = as.Date(paste0(run_params$last_year + 1, "/12/31")),
-                              by = date_breaks_by)
   
   mb_all_lengths <- sapply(mb_series_all, FUN = length) # Length of each annual simulation [days].
-  mb_all_df <- data.frame(day = as.Date(unlist(overview_annual$daily_data_list$mb_series_all_dates), origin = as.Date("1970/1/1")),
-                          mb = unlist(mb_series_all)/1e3,
+  mb_all_df <- data.frame(day     = as.Date(unlist(overview_annual$daily_data_list$mb_series_all_dates), origin = as.Date("1970/1/1")),
+                          mb      = unlist(mb_series_all)/1e3,
                           year_id = as.factor(rep(1:length(mb_series_all), mb_all_lengths)))
   
-  mb_cumul_df <- data.frame(year = as.Date(paste0(c(overview_annual$summary_df$year[1]-1, overview_annual$summary_df$year), "/", run_params$hydro_start_mmdd)),
+  date_breaks_cur <- seq.Date(from = as.Date(paste0(run_params$first_year - date_breaks_extend_before, "/01/01")),
+                              to   = mb_all_df$day[nrow(mb_all_df)] + 95*min(3, run_params$n_years), # Extend to the right by 95 days per modeled year up to 285 days.
+                              by   = date_breaks_by)
+  
+  
+  mb_cumul_df <- data.frame(year     = as.Date(paste0(c(overview_annual$summary_df$year[1]-1, overview_annual$summary_df$year), "/", run_params$hydro_start_mmdd)),
                             mb_cumul = c(0, overview_annual$summary_df$mb_cumul))
   plots[[length(plots)+1]] <- ggplot() +
     geom_vline(xintercept = as.Date(paste0(c(run_params$years[1]-1,run_params$years), "/", run_params$hydro_start_mmdd)), color = "#0000FF", linewidth = point_size/6) +
@@ -329,7 +333,7 @@ func_plot_overview <- function(overview_annual,
     geom_line(data = mb_cumul_df,  aes(x = year, y = mb_cumul), color = "#FF0000", linewidth = 1) +
     geom_point(data = mb_cumul_df, aes(x = year, y = mb_cumul), color = "#FF0000", shape = 2, size = point_size, stroke = point_size/2.5) +
     scale_y_continuous(breaks = pretty(c(0, max(mb_all_df$mb), overview_annual$summary_df$mb_cumul))) +
-    scale_x_date(breaks = date_breaks_cur,
+    scale_x_date(breaks      = date_breaks_cur,
                  date_labels = date_labels_cur) +
     ylab(paste0("Cumulative mass balance [", run_params$output_unit, " w.e.]")) +
     ggtitle("Cumulative mass balance (hydrological years)") +

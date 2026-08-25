@@ -28,9 +28,9 @@ DMBSim is a tool to calculate and homogenize glacier surface mass balance from p
 
 **Main features:**
 
-* Calculation of annual glacier-wide mass balance at regular intervals (the hydrological year)
+* Calculation of annual glacier-wide mass balance homogenized to regular intervals (such as the hydrological year)
 
-* Leave-one-out validation of the point measurements
+* Leave-one-out validation with point measurements
 
 * Calculations over multiple years (conventional or reference-surface mass balance, cumulative change)
 
@@ -103,7 +103,11 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
 
     * In-depth [documentation](/doc)
     
-    * Graphical tools to assist the preparation of input data
+    * Common file formats such as GeoTiff, Shapefile, Geopackage, CSV
+    
+    * Graphical tools to easily prepare the input data from different sources
+    
+    * Full support for locations in both the Northern and Southern Hemisphere, with specific definitions of seasonal boundaries and automatic handling of geographic projections
 
     * Comprehensive handling of exceptions, errors, and unexpected inputs
     
@@ -166,6 +170,24 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
     * A set of points where daily mass balance should be written to CSV files
 
     
+<br>
+
+# <a name="limitations"></a>Known limitations
+
+* The physical routines only simulate surface mass balance - subsurface processes are ignored
+
+* Measured points are considered spatially fixed during their observation period - intra-annual displacement due to ice flow is ignored
+
+* The simulation is performed year by year - point measurements collected at intervals of two or more years are not supported
+
+* The melt model is a simple Enhanced Temperature Index formula based on daily mean air temperature - potentially unsuitable at very high altitude sites with a radiation-dominated melting regime
+
+* Melt of a debris-covered ice surface is rather simplified, with a uniform reduction factor
+
+* Only a limited number of geographic projections are supported: Universal Transverse Mercator (UTM) is strongly preferred, other projected coordinate systems might also work
+
+
+
 
 <br>
 
