@@ -22,6 +22,7 @@ logs/
 # Data used to develop the input preparation app #
 utils/data/
 utils/make_input.log
+utils/mass_balance_point.csv
 
 # Old procedures superseded by functions #
 procedures/*.old
