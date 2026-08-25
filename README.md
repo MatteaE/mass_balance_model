@@ -105,7 +105,7 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
 
     * In-depth [documentation](/doc)
     
-    * Common file formats such as GeoTiff, Shapefile, Geopackage, CSV
+    * Common file formats such as GeoTiff, Shapefile, GeoPackage, CSV
     
     * Graphical tools to easily prepare the input data from different sources
     
