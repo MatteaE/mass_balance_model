@@ -43,7 +43,7 @@ func_plot_weather_series <- function(year_data,
   # So, we only draw month labels if they have at least a few days
   # worth of space between the label center (middle of the month)
   # and the margin.
-  months_labels_ids <- months_labels_ids[which((months_labels_ids >= 11) & (months_labels_ids <= year_data$model_annual_days_n-11))]
+  months_labels_ids <- months_labels_ids[which((months_labels_ids >= 12) & (months_labels_ids <= year_data$model_annual_days_n-12))]
   months_labels_df  <- data.frame(day_id = date_df$day_id[months_labels_ids],
                                   label  = months_labels_all[months_labels_ids])
   months_labels_df$date <- date_df$date[match(months_labels_df$day_id, date_df$day_id)]
