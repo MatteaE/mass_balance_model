@@ -226,8 +226,8 @@ func_write_year_output <- function(year_data,
               row.names = FALSE)
     
   }
-  
-  
+
+    
   # Glacier-wide mass balance of all model realizations -------------------------------------------
   df_smb_all_out                      <- year_data$df_runs_smb[,c("run_id", "corr_fact", "run_type", "mb_annual_hydro", "mb_annual_measperiod")]
   df_smb_all_out$mb_annual_hydro      <- sprintf(run_params$output_fmt4, df_smb_all_out$mb_annual_hydro * run_params$output_mult/1e3)

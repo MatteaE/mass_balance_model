@@ -32,20 +32,20 @@ func_plot_weather_series <- function(year_data,
   
   
   # Setup month labels.
-  # browser()
+  # They are placed at the middle of each month.
+  # They are skipped at the start/end if the label would end up partially outside the margin.
   months_labels_all <- format(date_df$date, "%b")
   months_doy <- c(15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349)
   
+  
   months_labels_ids <- which(as.integer(format(date_df$date, "%j")) %in% months_doy)
-  months_labels_df <- data.frame(day_id = date_df$day_id[months_labels_ids],
-                                 label  = months_labels_all[months_labels_ids])
-  months_cur_rle <- rle(as.integer(format(date_df$date, "%m")))
-  if ((months_cur_rle$lengths[1] < 28) && (as.integer(format(date_df$date[1], "%d")) < 15)) { 
-    months_labels_df <- months_labels_df[-1,]
-  }
-  if ((months_cur_rle$lengths[length(months_cur_rle$lengths)] < 28) && (as.integer(format(date_df$date[nrow(date_df)], "%d")) > 15)) { # Same, for last month.
-    months_labels_df <- months_labels_df[-nrow(months_labels_df),]
-  }
+  # In the weather plots, there is no added margin to the sides.
+  # So, we only draw month labels if they have at least a few days
+  # worth of space between the label center (middle of the month)
+  # and the margin.
+  months_labels_ids <- months_labels_ids[which((months_labels_ids >= 11) & (months_labels_ids <= year_data$model_annual_days_n-11))]
+  months_labels_df  <- data.frame(day_id = date_df$day_id[months_labels_ids],
+                                  label  = months_labels_all[months_labels_ids])
   months_labels_df$date <- date_df$date[match(months_labels_df$day_id, date_df$day_id)]
   months_labels_df$date_posixct <- as.POSIXct(months_labels_df$date)
   
@@ -58,14 +58,14 @@ func_plot_weather_series <- function(year_data,
   while (i <= nrow(dat_Tair)) {
     
     if (dat_Tair$t2m_mean[i-1] * dat_Tair$t2m_mean[i] < 0) {
-     
+      
       crossing_point <- abs(dat_Tair$t2m_mean[i-1]) / (abs(dat_Tair$t2m_mean[i-1]) + abs(dat_Tair$t2m_mean[i]))
       dat_Tair <- rbind(dat_Tair[1:(i-1),],
                         data.frame(timestamp = dat_Tair$timestamp[i-1] + (dat_Tair$timestamp[i] - dat_Tair$timestamp[i-1]) * crossing_point,
                                    timestamp_posixct = dat_Tair$timestamp_posixct[i-1] + (dat_Tair$timestamp_posixct[i] - dat_Tair$timestamp_posixct[i-1]) * crossing_point,
                                    t2m_mean = 0),
                         dat_Tair[i:nrow(dat_Tair),])
-       
+      
     }
     i <- i + 1
   }
@@ -81,19 +81,19 @@ func_plot_weather_series <- function(year_data,
                           as.Date(paste0(format(year_data$model_time_bounds[2], "%Y"), "/01/01")))
   
   month_starts_posixct <- as.POSIXct(setdiff(intersect(dat_Tair$timestamp_posixct,
-                                            seq.POSIXt(from = as.POSIXct(paste0(format(year_data$model_time_bounds[1], "%Y/%m"), "/01"), tz = "UTC"),
-                                                       to   = as.POSIXct(paste0(format(year_data$model_time_bounds[2], "%Y/%m"), "/01"),  tz = "UTC"),
-                                                     by   = "1 month")),
-                                  as.POSIXct(paste0(format(year_data$model_time_bounds[2], "%Y"), "/01/01"), tz = "UTC")),
-                                  tz = "UTC",
-                                  origin = "1970-01-01 00:00.00 UTC")
+                                                       seq.POSIXt(from = as.POSIXct(paste0(format(year_data$model_time_bounds[1], "%Y/%m"), "/01"), tz = "UTC"),
+                                                                  to   = as.POSIXct(paste0(format(year_data$model_time_bounds[2], "%Y/%m"), "/01"),  tz = "UTC"),
+                                                                  by   = "1 month")),
+                                             as.POSIXct(paste0(format(year_data$model_time_bounds[2], "%Y"), "/01/01"), tz = "UTC")),
+                                     tz = "UTC",
+                                     origin = "1970-01-01 00:00.00 UTC")
   
   plots[[1]] <- ggplot(dat_Tair) +
     geom_ribbon(aes(x = timestamp_posixct, ymin = 0, ymax = Tair_pos), fill = "#FF0000") +
     geom_ribbon(aes(x = timestamp_posixct, ymin = Tair_neg, ymax = 0), fill = "#0000FF") +
     geom_vline(xintercept = date_df$date_posixct[date_df$day_id == 0], linetype = "dashed", linewidth = 0.5) +
     {if (run_params$show_month_lines) geom_vline(xintercept = month_starts_posixct, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
-    annotate("text", x = months_labels_df$date_posixct, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
+    annotate("text", x = months_labels_df$date_posixct, y = -Inf, label = months_labels_df$label, hjust = 0.45, vjust = -1, fontface = "bold", size = 5) +
     scale_x_datetime(expand = expansion(0,0)) +
     ylab(bquote(bold("AWS daily mean"~T["air"]~"[\u00B0C]"))) +
     theme_weather_plot
@@ -129,7 +129,7 @@ func_plot_weather_series <- function(year_data,
     geom_col(aes(x = timestamp, y = precip), fill = "#000088", color = "#00004400") +
     geom_vline(xintercept = date_df$date[date_df$day_id == 0], linetype = "dashed", linewidth = 0.5) +
     {if (run_params$show_month_lines) geom_vline(xintercept = month_starts, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
-    annotate("text", x = months_labels_df$date, y = Inf, label = months_labels_df$label, vjust = 2, fontface = "bold", size = 5) +
+    annotate("text", x = months_labels_df$date, y = Inf, label = months_labels_df$label, hjust = 0.45, vjust = 2, fontface = "bold", size = 5) +
     scale_y_continuous(limits = c(0, NA), expand = expansion(mult = c(0, 0.05))) +
     scale_x_date(expand = expansion(0,0)) +
     ylab("AWS precipitation [mm]") +
@@ -144,7 +144,7 @@ func_plot_weather_series <- function(year_data,
     geom_vline(xintercept = date_df$date[date_df$day_id == 0], linetype = "dashed", linewidth = 0.5) +
     {if (run_params$show_month_lines) geom_vline(xintercept = month_starts, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
     geom_line(aes(x = timestamp, y = precip_mult), linetype = "solid", linewidth = 0.7) +
-    annotate("text", x = months_labels_df$date, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
+    annotate("text", x = months_labels_df$date, y = -Inf, label = months_labels_df$label, hjust = 0.45, vjust = -1, fontface = "bold", size = 5) +
     scale_y_continuous(limits = c(0, max(1, max(dat_precip_mult$precip_mult))), expand = expansion(mult = c(0, 0.05))) +
     scale_x_date(expand = expansion(0,0)) +
     ylab("Precipitation multiplier [-]") +

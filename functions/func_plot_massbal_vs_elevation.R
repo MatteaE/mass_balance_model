@@ -189,7 +189,9 @@ func_plot_massbal_vs_elevation <- function(year_data,
       {if (!is.na(year_data$abl_grad_mod)) annotation_custom(grobTree(linesGrob(x=c(0.02,0.4055), y = 0.681,
                                                                                  gp=gpar(col = "#ff0000", lty = "longdash", lwd=2.0))))} +
       coord_flip() +
-      scale_x_continuous(breaks = pretty(df_scatterplot$ele),
+      scale_x_continuous(limits = range(df_scatterplot$ele),
+                         oob = scales::oob_keep,
+                         breaks = pretty(df_scatterplot$ele),
                          expand = expansion(mult = 0.05)) +
       scale_y_continuous(limits = c(min(c(df_scatterplot$mb, df_stakes$meas)),
                                     max(c(df_scatterplot$mb, df_stakes$meas)))/1e3,

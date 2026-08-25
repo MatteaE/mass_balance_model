@@ -29,24 +29,15 @@ func_plot_scaf <- function(year_data,
   # the first item of months_labels_ids refers to the second
   # month of the simulation.
   months_labels_ids <- which(as.integer(format(scaf_df$date, "%j")) %in% months_doy)
+  # In the SCAF plot, there is a little margin added to the sides.
+  # So, we only draw month labels if they have at least a few days
+  # worth of space between the label center (middle of the month)
+  # and the margin.
+  months_labels_ids <- months_labels_ids[which((months_labels_ids >= 4) & (months_labels_ids <= year_data$model_annual_days_n-3))]
   months_labels_df  <- data.frame(day_id = scaf_df$day_id[months_labels_ids],
                                   label  = months_labels_all[months_labels_ids])
-  # Don't add label for first month unless it is
-  # represented by at least 28 days, and same for last month.
-  # To do this, we remove the first label if the first month
-  # of the data frame has fewer than 28 days and the first day
-  # of the simulation is before the 15th of the month
-  # (else the month is already not present, since we use the
-  # middle of the month).
-  months_cur_rle <- rle(as.integer(format(scaf_df$date, "%m")))
-  if ((months_cur_rle$lengths[1] < 28) && (as.integer(format(scaf_df$date[1], "%d")) < 15)) { 
-    months_labels_df <- months_labels_df[-1,]
-  }
-  if ((months_cur_rle$lengths[length(months_cur_rle$lengths)] < 28) && (as.integer(format(scaf_df$date[nrow(scaf_df)], "%d")) > 15)) { # Same, for last month.
-    months_labels_df <- months_labels_df[-nrow(months_labels_df),]
-  }
-  
-  
+
+    
   base_size <- 16 # For the plots
   theme_scaf_plot <- theme_bw(base_size = base_size) +
     theme(axis.title.x = element_blank(),
@@ -55,14 +46,15 @@ func_plot_scaf <- function(year_data,
           panel.grid = element_blank())
   
   plot_scaf <- ggplot(scaf_df) +
-    annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = 5) +
+    annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, hjust = 0.45, vjust = -1, fontface = "bold", size = 5) +
     # geom_hline(yintercept = 0, linetype = "dashed", linewidth = 0.5) +
     geom_vline(xintercept = 0, linetype = "longdash", linewidth = 0.5) +
     {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", linewidth = 0.4)} +
     geom_line(aes(x = day_id, y = scaf), linewidth = 0.7) +
     scale_x_continuous(expand = expansion(mult = 0.02)) +
     scale_y_continuous(limits = c(0, 100),
-                       breaks = seq(0,100,25)) +
+                       breaks = seq(0,100,25),
+                       expand = expansion(mult = c(0.10,0.05))) +
     ylab(paste0("Snow-covered area fraction [%]")) +
     theme_scaf_plot
   

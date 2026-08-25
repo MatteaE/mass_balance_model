@@ -122,8 +122,11 @@ func_process_annual <- function(year_data,
     
     # . Simulate year with a single model run -----------------------------------------------------
     # The run uses unmodified year_cur_params.
-    year_data$mod_output_annual_cur <- func_simulate_mb_without_data(run_params, year_cur_params, year_data,
-                                                                     data_dhms, data_dems, data_surftype, data_radiation)
+    sim_res_cur <- func_simulate_mb_without_data(run_params, year_cur_params, year_data,
+                                                 data_dhms, data_dems, data_surftype, data_radiation)
+    year_data$mod_output_annual_cur <- sim_res_cur$mod_output_cur
+    year_data$df_runs_smb           <- sim_res_cur$df_runs_smb
+    
     # No corrections are computed.
     year_data$optim_corr_annual <- list(melt_factor  = 0,
                                         rad_fact_ice = 0,
