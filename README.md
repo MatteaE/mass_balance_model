@@ -13,11 +13,13 @@
 
 3. [Additional features](#features)
 
-4. [Published works with DMBSim applications](#publications)
+4. [Known limitations](#limitations)
 
-5. [Acknowledgments](#acknowledgments)
+5. [Published works with DMBSim applications](#publications)
 
-6. [References](#references)
+6. [Acknowledgments](#acknowledgments)
+
+7. [References](#references)
 
 
 <br>
