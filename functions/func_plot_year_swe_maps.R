@@ -93,7 +93,7 @@ func_plot_year_swe_maps <- function(year_data,
     {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(paste0("Hydrological year start: ", year_data$year_cur-1, "/10/01"),
+    annotation_custom(grobTree(textGrob(paste0("Hydrological year start: ", year_data$year_cur-1, "/", run_params$hydro_start_mmdd),
                                         x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(bquote(bold("Mean on-glacier SWE"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                         x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
@@ -124,7 +124,7 @@ func_plot_year_swe_maps <- function(year_data,
     {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(paste0("Hydrological year end: ", year_data$year_cur, "/09/30"),
+    annotation_custom(grobTree(textGrob(paste0("Hydrological year end: ", year_data$year_cur, "/", run_params$hydro_end_mmdd),
                                         x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(bquote(bold("Mean on-glacier SWE"*" = "*.(swe_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                         x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +

@@ -50,9 +50,6 @@ func_plot_weather_series <- function(year_data,
   
   #### . Air temperature red/blue ribbon ####
   # We linearly estimate the time of crossing of the 0 °C threshold.
-  
-  # dat_Tair <- year_data$weather_series_annual_cur[,c(1,6)] # OLD DELETEME
-  
   dat_Tair <- year_data$mod_output_annual_cur$weather_series[,c("timestamp", "t2m_mean")]
   
   dat_Tair$timestamp_posixct <- as.POSIXct(dat_Tair$timestamp, tz = "UTC")
@@ -105,8 +102,6 @@ func_plot_weather_series <- function(year_data,
   
   #### . Daily and monthly precipitation ####
   months_cur_rle_new <- rle(as.integer(format(date_df$date[2:nrow(date_df)], "%m")))
-  
-  # dat_precip <- year_data$weather_series_annual_cur[,c(1,7)] # OLD DELETEME
   
   dat_precip <- year_data$mod_output_annual_cur$weather_series[,c("timestamp", "precip")]
   

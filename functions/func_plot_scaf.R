@@ -29,8 +29,8 @@ func_plot_scaf <- function(year_data,
   # the first item of months_labels_ids refers to the second
   # month of the simulation.
   months_labels_ids <- which(as.integer(format(scaf_df$date, "%j")) %in% months_doy)
-  months_labels_df <- data.frame(day_id = scaf_df$day_id[months_labels_ids],
-                                 label  = months_labels_all[months_labels_ids])
+  months_labels_df  <- data.frame(day_id = scaf_df$day_id[months_labels_ids],
+                                  label  = months_labels_all[months_labels_ids])
   # Don't add label for first month unless it is
   # represented by at least 28 days, and same for last month.
   # To do this, we remove the first label if the first month

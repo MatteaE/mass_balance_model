@@ -55,8 +55,12 @@ func_select_year_data <- function(data_all,
   
   
   # Select mass balance measurements of the current year ------------------------------------------
-  massbal_annual_ids                        <- func_select_year_mb_measurements(data_all$data_massbalance_annual, year_data$year_cur)
-  massbal_winter_ids                        <- func_select_year_mb_measurements(data_all$data_massbalance_winter, year_data$year_cur)
+  massbal_annual_ids                        <- func_select_year_mb_measurements(data_all$data_massbalance_annual,
+                                                                                year_data$year_cur,
+                                                                                run_params)
+  massbal_winter_ids                        <- func_select_year_mb_measurements(data_all$data_massbalance_winter,
+                                                                                year_data$year_cur,
+                                                                                run_params)
   year_data$massbal_annual_meas_cur         <- data_all$data_massbalance_annual[massbal_annual_ids,] # Empty if we have no annual stakes for the year.
   year_data$massbal_winter_meas_cur         <- data_all$data_massbalance_winter[massbal_winter_ids,] # Empty if we have no winter stakes for the year.
   

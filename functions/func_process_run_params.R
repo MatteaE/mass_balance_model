@@ -76,6 +76,12 @@ func_process_run_params <- function(run_params) {
     stake_cluster_distance             = 20,          # [m]: threshold distance for clustering stakes together. This is used to ensure a more uniform distribution of the stakes: if measurements are very dense in one place they can induce a bias in the optimization, so we average stakes in clusters. This can reduce the total number of stakes. Only stakes measured on the same days can be clustered. A value of 0 corresponds to no clustering.
     stakes_unknown_latest_start        = NA,          # [month/day]: in the automatic search of the start date for snow pits and depth probings without a measured start date, we search no later than this day of year. The starting date will be set to the day of the minimum cumulative mass balance between the start of the simulation and the date set here. If NA, it is set to 28 February in the Northern Hemisphere and 31 August in the Southern Hemisphere.
     
+    # These are used in the selection of mass balance measurements of the current year (func_select_year_mb_measurements).
+    # They are customizable so that survey dates can be flexibly included/excluded (e.g., monthly stakes).
+    # They should be set differently between the Northern and Southern Hemispheres (see func_check_north_south()).
+    stake_end_earliest                 = NA,          # [month/day]: a mass balance measurement is included in the set of the current year if the end date of its observation period is at or later than stake_end_earliest. In the Northern Hemisphere, stake_end_earliest with month in [10,12] is interpreted as YYYY-1, else YYYY; in the Southern Hemisphere it is [4,12] YYYY-1. Default value: "12/01" in the North, "06/01" in the South (i.e., a winter stake could be measured already 2 months into the hydrological year).
+    stake_end_latest                   = NA,          # [month/day]: a mass balance measurement is included in the set of the current year if the end date of its observation period is at or earlier than stake_end_latest. In the Northern Hemisphere, stake_end_latest is always interpreted as YYYY; in the Southern Hemisphere, stake_end_latest with month in [7,12] is interpreted as YYYY-1, else YYYY. Default value: "11/30" in the North, "05/31" in the South (i.e., an annual stake could be measured up to 2 months after the end of the hydrological year).
+    
     
     # . (4) Topographic snow distribution parameters ----------
     curvature_dhm_smooth               = 1.0,         # [cells]: amount of Gaussian smoothing applied before computing curvature (which is very sensitive to DEM noise, unlike slope). Can be non-integer. 1.0 is good for a normal 20 m DEM.
@@ -128,7 +134,7 @@ func_process_run_params <- function(run_params) {
     
     
     # . (9) Additional melt model parameters ------------------
-    debris_red_fac                     = 0.6,
+    debris_red_fac                     = 0.6,         # [-]: reduction factor of melt over debris-covered ice.
     albedo_ice_decrease_elev           = 0.,          # [m asl]: below this altitude, the ice albedo decreases linearly with altitude (darker ice).
     albedo_ice_decrease_fact           = 0.014,       # [m-1]: rate of increase above 1 (with decreasing altitude) of the ice albedo factor (multiplying ice melt).
     

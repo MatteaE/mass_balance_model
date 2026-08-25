@@ -280,7 +280,7 @@ func_plot_overview <- function(overview_annual,
   # Vertical blue lines: hydrological year boundaries.
   # Vertical dashed purple lines: measurement period start.
   # Vertical dotted purple lines: measurement period end.
-  first_year_hydro_start_id <- pmatch(as.Date(paste0(run_params$first_year-1, "/10/1")), table = overview_annual$daily_data_list$mb_series_all_dates[[1]])
+  first_year_hydro_start_id <- pmatch(as.Date(paste0(run_params$first_year-1, "/", run_params$hydro_start_mmdd)), table = overview_annual$daily_data_list$mb_series_all_dates[[1]])
   mb_first_year_hydro_start <- overview_annual$daily_data_list$mb_series_all_raw[[1]][first_year_hydro_start_id]
   mb_series_all <- overview_annual$daily_data_list$mb_series_all_raw
   mb_series_all[[1]] <- mb_series_all[[1]] - mb_first_year_hydro_start
@@ -292,8 +292,8 @@ func_plot_overview <- function(overview_annual,
     for (year_id in 2:run_params$n_years) {
       # Note: the two ids below are used to align the two
       # hydrological year values (YYYY-1 end with YYYY start).
-      year_prev_hydro_end_id <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/10/1")), table = overview_annual$daily_data_list$mb_series_all_dates[[year_id-1]])
-      year_cur_hydro_start_id <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/10/1")), table = overview_annual$daily_data_list$mb_series_all_dates[[year_id]])
+      year_prev_hydro_end_id <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/", run_params$hydro_start_mmdd)), table = overview_annual$daily_data_list$mb_series_all_dates[[year_id-1]])
+      year_cur_hydro_start_id <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/", run_params$hydro_start_mmdd)), table = overview_annual$daily_data_list$mb_series_all_dates[[year_id]])
       year_prev_mb <- mb_series_all[[year_id-1]][year_prev_hydro_end_id]
       year_cur_mb <- mb_series_all[[year_id]][year_cur_hydro_start_id]
       mb_series_all[[year_id]] <- mb_series_all[[year_id]] + year_prev_mb - year_cur_mb
@@ -318,10 +318,10 @@ func_plot_overview <- function(overview_annual,
                           mb = unlist(mb_series_all)/1e3,
                           year_id = as.factor(rep(1:length(mb_series_all), mb_all_lengths)))
   
-  mb_cumul_df <- data.frame(year = as.Date(paste0(c(overview_annual$summary_df$year[1]-1, overview_annual$summary_df$year), "/10/1")),
+  mb_cumul_df <- data.frame(year = as.Date(paste0(c(overview_annual$summary_df$year[1]-1, overview_annual$summary_df$year), "/", run_params$hydro_start_mmdd)),
                             mb_cumul = c(0, overview_annual$summary_df$mb_cumul))
   plots[[length(plots)+1]] <- ggplot() +
-    geom_vline(xintercept = as.Date(paste0(c(run_params$years[1]-1,run_params$years), "/10/1")), color = "#0000FF", linewidth = point_size/6) +
+    geom_vline(xintercept = as.Date(paste0(c(run_params$years[1]-1,run_params$years), "/", run_params$hydro_start_mmdd)), color = "#0000FF", linewidth = point_size/6) +
     {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 1), color = "#FF00FF", linetype = "dashed", linewidth = point_size/6)} +
     {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 2), color = "#FF00FF", linetype = "dotted", linewidth = point_size/6)} +
     geom_line(data = mb_all_df, aes(x = day, y = mb, group = year_id), linewidth = point_size/6) +
