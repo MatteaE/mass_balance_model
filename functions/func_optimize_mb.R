@@ -55,6 +55,8 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
     model_days_n       <- year_data$model_winter_days_n
     massbal_meas_cur   <- year_data$massbal_winter_meas_cur
     stakes_cells       <- year_data$winter_stakes_cells
+    df_runs_smb        <- NULL # Dummy, for return value
+    df_runs_biases     <- NULL # Dummy, for return value
   } else {
     snowdist_init      <- year_data$snowdist_init_annual
     weather_series_cur <- year_data$weather_series_annual_cur
@@ -90,8 +92,10 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
   # to store the result of each run (including uncalibrated and LOO ones),
   # so we extract them here for each run, from the gl_massbal_cumul vector.
   # It is a cheap calculation and enables writing the CSV file with per-run information.
-  df_runs_smb    <- func_compile_df_runs_smb(year_cur_params, year_data, mod_output_cur, 1, corr_fact_prev, "main_optim_dummy")
-  df_runs_biases <- func_compile_df_runs_biases(year_data, mod_output_cur, 1, corr_fact_prev, "main_optim_dummy")
+  if (optimization_period == "annual") {
+    df_runs_smb    <- func_compile_df_runs_smb(year_cur_params, year_data, mod_output_cur, 1, corr_fact_prev, "main_optim_dummy")
+    df_runs_biases <- func_compile_df_runs_biases(year_data, mod_output_cur, 1, corr_fact_prev, "main_optim_dummy")
+  }
   
   
   cat("\n* Optimization run # 2\n")
@@ -113,10 +117,12 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells,
                                       verbose_logi = TRUE)
   bias_cur <- mod_output_cur$global_bias
-  df_runs_smb    <- rbind(df_runs_smb,
-                          func_compile_df_runs_smb(year_cur_params, year_data, mod_output_cur, 2, corr_fact_cur, "main_optim_dummy"))
-  df_runs_biases <- rbind(df_runs_biases,
-                          func_compile_df_runs_biases(year_data, mod_output_cur, 2, corr_fact_cur, "main_optim_dummy"))
+  if (optimization_period == "annual") {
+    df_runs_smb    <- rbind(df_runs_smb,
+                            func_compile_df_runs_smb(year_cur_params, year_data, mod_output_cur, 2, corr_fact_cur, "main_optim_dummy"))
+    df_runs_biases <- rbind(df_runs_biases,
+                            func_compile_df_runs_biases(year_data, mod_output_cur, 2, corr_fact_cur, "main_optim_dummy"))
+  }
   
   
   niter <- 2
@@ -138,15 +144,19 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                         nstakes, model_days_n, massbal_meas_cur, stakes_cells,
                                         verbose_logi = TRUE)
     bias_cur <- mod_output_cur$global_bias
-    df_runs_smb    <- rbind(df_runs_smb,
-                            func_compile_df_runs_smb(year_cur_params, year_data, mod_output_cur, niter, corr_fact_cur, "main_optim"))
-    df_runs_biases <- rbind(df_runs_biases,
-                            func_compile_df_runs_biases(year_data, mod_output_cur, niter, corr_fact_cur, "main_optim"))
+    if (optimization_period == "annual") {
+      df_runs_smb    <- rbind(df_runs_smb,
+                              func_compile_df_runs_smb(year_cur_params, year_data, mod_output_cur, niter, corr_fact_cur, "main_optim"))
+      df_runs_biases <- rbind(df_runs_biases,
+                              func_compile_df_runs_biases(year_data, mod_output_cur, niter, corr_fact_cur, "main_optim"))
+    }
   }
   # The last (highest-id) iteration is the one which converged to zero global bias.
   # We mark it as such.
-  df_runs_smb$run_type[nrow(df_runs_smb)]       <- "main_optim_final"
-  df_runs_biases$run_type[nrow(df_runs_biases)] <- "main_optim_final"
+  if (optimization_period == "annual") {
+    df_runs_smb$run_type[nrow(df_runs_smb)]       <- "main_optim_final"
+    df_runs_biases$run_type[nrow(df_runs_biases)] <- "main_optim_final"
+  }
   
   
   

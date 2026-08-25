@@ -32,8 +32,8 @@ func_print_mb_points_df <- function(points_df,
     line_cur <- c(substr(points_df$id[i], 1, 20),
                   start_date_cur_str,
                   format(points_df$end_date[i], "%F"),
-                  as.character(points_df$x[i]),
-                  as.character(points_df$y[i]),
+                  as.character(round(points_df$x[i])),
+                  as.character(round(points_df$y[i])),
                   as.character(round(points_df$z_dem[i])),
                   sprintf(run_params$output_fmt1, points_df$massbal[i]*run_params$output_mult/1000))
     if ("avalanche_net" %in% names(points_df)) {
