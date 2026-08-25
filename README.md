@@ -3,7 +3,7 @@
 
 # Contents
 
-1. [DMBSim 3.0](#intro)
+1. [Introduction](#intro)
 
 2. [Quick start](#quickstart)
 
@@ -24,9 +24,9 @@
 
 <br>
 
-# <a name="intro"></a>DMBSim 3.0
+# <a name="intro"></a>Introduction
 
-DMBSim is a tool to calculate and homogenize glacier surface mass balance from point measurements. It works by running a gridded model of daily accumulation and melt, based on topographical and meteorological data. The main parameters are optimized to match the average mass balance of the provided point measurements [[1]](#ref1). DMBSim is suitable for research, teaching, and operational mass balance monitoring. It is currently used to support the glaciological programs of countries in Central Asia: Kazakhstan, Kyrgyzstan, Tajikistan, and Uzbekistan.
+DMBSim 3.0 is a tool to calculate and homogenize glacier surface mass balance from point measurements. It works by running a gridded model of daily accumulation and melt, based on topographical and meteorological data. The main parameters are optimized to match the average mass balance of the provided point measurements [[1]](#ref1). DMBSim is suitable for research, teaching, and operational mass balance monitoring. It is currently used to support the glaciological programs of countries in Central Asia: Kazakhstan, Kyrgyzstan, Tajikistan, and Uzbekistan.
 
 **Main features:**
 
