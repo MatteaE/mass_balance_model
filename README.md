@@ -180,7 +180,7 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
 
 * Measured points are considered spatially fixed during their observation period - intra-annual displacement due to ice flow is ignored
 
-* The simulation is performed year by year - point measurements collected at intervals of two or more years are not supported
+* The simulation is performed year by year - point measurements collected at intervals of two or more years are not supported for model calibration
 
 * The melt model is a simple Enhanced Temperature Index formula based on daily mean air temperature - potentially unsuitable at very high altitude sites with a radiation-dominated melting regime
 
