@@ -309,6 +309,11 @@ func_plot_overview <- function(overview_annual,
   }
   if (run_params$n_years > 6) {
     date_breaks_by <- paste0(diff(x_breaks_cumul)[1], " years")
+    # Make sure to have the first label as early as possible.
+    # Only if North (South is already good thanks to its hydrological year boundaries).
+    if (run_params$north_south == "North") {
+      date_breaks_extend_before <- 0
+    }
   }
   
   
@@ -320,6 +325,11 @@ func_plot_overview <- function(overview_annual,
   date_breaks_cur <- seq.Date(from = as.Date(paste0(run_params$first_year - date_breaks_extend_before, "/01/01")),
                               to   = mb_all_df$day[nrow(mb_all_df)] + 95*min(3, run_params$n_years), # Extend to the right by 95 days per modeled year up to 285 days.
                               by   = date_breaks_by)
+  
+  # With 6 modeled years, the last label would end up too far to the right (outside the page).
+  if ((run_params$n_years == 6) && (run_params$north_south == "North")) {
+    date_breaks_cur <- date_breaks_cur[-length(date_breaks_cur)]
+  }
   
   
   mb_cumul_df <- data.frame(year     = as.Date(paste0(c(overview_annual$summary_df$year[1]-1, overview_annual$summary_df$year), "/", run_params$hydro_start_mmdd)),
@@ -456,7 +466,8 @@ func_plot_overview <- function(overview_annual,
     annotation_custom(grobTree(textGrob("Minimum duration", x=0.05, y = 0.05, hjust = 0,
                                         gp=gpar(col="#00FFFF", fontsize = base_size * 1., fontface="bold")))) +
     ylab("Duration [d]") +
-    scale_y_continuous(expand = expansion(0.5, 0)) +
+    scale_y_continuous(limits = c(NA, 370),
+                       expand = expansion(mult = c(0.5, 0))) +
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("On-glacier snow cover duration") +
     theme_overview_plots
