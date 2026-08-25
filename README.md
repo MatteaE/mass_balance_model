@@ -119,7 +119,7 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
 
     * A typical run takes one to a few seconds per simulated year on a consumer laptop
     
-    * High-resolution simulations with > 10<sup>5</sup> grid cells can fit within < 10 GB of RAM
+    * High-resolution simulations with > 10<sup>5</sup> grid cells can fit within ~10 GB of RAM
     
     * Memory release is optimized - centennial-scale simulations are possible with no additional RAM penalty
     
