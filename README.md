@@ -114,6 +114,16 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
     * Comprehensive handling of exceptions, errors, and unexpected inputs
     
     * Detailed logging in RStudio console, log files, and modal dialogs
+    
+* **High performance:**
+
+    * A typical run takes one to a few seconds per simulated year on a consumer laptop
+    
+    * High-resolution simulations with > 10^6 grid cells are possible with < 10 GB of RAM
+    
+    * Memory release is optimized - centennial-scale simulations are possible with no additional RAM penalty
+    
+    * Advanced leave-one-out validation minimizes the number of model runs
 
 * **Accumulation routines:**
 
@@ -145,9 +155,11 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
     
 * **For developers:**
 
-    * Modular, well-commented, cross-platform codebase
+    * Modular (100+ function files), well-commented, cross-platform codebase
     
     * Custom multi-level logging engine
+    
+    * Designed to work with a standard modern installation of R
         
 * **Minimal input data:**
 
