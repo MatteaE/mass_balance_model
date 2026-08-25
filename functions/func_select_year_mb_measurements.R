@@ -66,10 +66,10 @@ func_select_year_mb_measurements <- function(data_massbal,
   }
   
   
-  
+  # Make a sequence of allowed observation-end dates and check which measurements belong to it.
   end_dates_allowed <- seq.Date(as.Date(paste0(end_earliest_year, "/", run_params$stake_end_earliest)),
-                            as.Date(paste0(end_latest_year, "/", run_params$stake_end_latest)),
-                            "1 day")
+                                as.Date(paste0(end_latest_year, "/", run_params$stake_end_latest)),
+                                "1 day")
   
   ids_year <- which(data_massbal$end_date %in% end_dates_allowed)
   

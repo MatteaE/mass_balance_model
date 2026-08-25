@@ -17,7 +17,7 @@ func_check_north_south <- function(raster_blueprint,
   lat_center  <- terra::project(crds_center, run_params$grids_crs_epsg, "EPSG:4326")[,2]
   
   # Note: it is very important that the day specified within stakes_unknown_latest_start is simulated only once
-  # (i.e, during YYYY for Northern locations, and during YYYY-1 for southern locations).
+  # (i.e, during YYYY for Northern locations, and during YYYY-1 for Southern locations).
   if (lat_center >= 0) {
     cat("Setting up date parameters for the Northern Hemisphere.\n")
     run_params$north_south        <- "North"

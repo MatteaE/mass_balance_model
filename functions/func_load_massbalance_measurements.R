@@ -133,12 +133,12 @@ func_load_massbalance_measurements <- function(run_params,
       cat("\n")
       func_customlog("Discarding ", ids_bad_n - stake_coords_rescued_n, " mass balance entries with wrong coordinates, which could not be recovered.", level = 1)
       func_customlog("          Please investigate and correct these manually. Maybe X and Y are swapped?", level = 0)
-      stake_bad_first <- data_massbalance[ids_df_bad[1],]
+      stake_bad_first            <- data_massbalance[ids_df_bad[1],]
       stake_bad_first$start_date <- format(stake_bad_first$start_date, "%d.%m.%Y")
-      stake_bad_first$end_date <- format(stake_bad_first$end_date, "%d.%m.%Y")
+      stake_bad_first$end_date   <- format(stake_bad_first$end_date, "%d.%m.%Y")
       func_customlog("          The first problematic entry is:", level = 0)
       func_customlog("          ", paste0(stake_bad_first[,1:(ncol(stake_bad_first)-1)], collapse = " | "), level = 0)
-      data_massbalance <- data_massbalance[-ids_df_bad,]
+      data_massbalance           <- data_massbalance[-ids_df_bad,]
     } else {
       func_customlog("          All problematic entries were successfully recovered by reprojection.", level = 0)
     }

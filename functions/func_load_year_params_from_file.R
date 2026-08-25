@@ -79,7 +79,8 @@ func_load_year_params_from_file <- function(year_data,
         # For the other parameters, we simply load them as numeric.
         
         
-        # Parameter mb_corr_ele_bands - must be comma-separated numbers.
+        # Parameter mb_corr_ele_bands -------------------------------------------------------------
+        # It must be a character (2 or more comma-separated numbers).
         if (params_names_all[param_id_year_cur] == "mb_corr_ele_bands") {
           
           if (typeof(params_raw[param_id_raw,1]) != "character") {
@@ -87,7 +88,7 @@ func_load_year_params_from_file <- function(year_data,
             func_customlog(paste0("Value(s) provided: ", params_raw[param_id_raw,1]), level = 0)
             func_stop()
           }
-            
+          
           val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
           if (any(is.na(val_tmp)) || (length(val_tmp) < 2)) {
             func_customlog("Year ", year_data$year_cur, ": file-based parameter mb_corr_ele_bands is malformed. Please fix it.", level = 2)
@@ -110,7 +111,8 @@ func_load_year_params_from_file <- function(year_data,
           
           
           
-          # Parameter prec_summer_fact - can be numeric or character (12 comma-separated numbers),
+          # Parameter prec_summer_fact ------------------------------------------------------------
+          # It can be numeric or character (12 comma-separated numbers),
           # if numeric it has a special processing.
         } else if (params_names_all[param_id_year_cur] == "prec_summer_fact") {
           if (typeof(params_raw[param_id_raw,1]) == "character") {
@@ -124,12 +126,20 @@ func_load_year_params_from_file <- function(year_data,
             func_stop()
           }
           
-          # If a single value is provided, we apply it from May to September (default behavior).
+          # If a single value is provided, it is applied by default:
+          # from May to September (Northern Hemisphere),
+          # from November to March (Southern Hemisphere)
           if (length(val_tmp) == 1) {
-            year_cur_params[[param_id_year_cur]] <- c(rep(1.0, 4),
-                                                      rep(val_tmp, 5),
-                                                      rep(1.0, 3))
-            # Otherwise we use all the provided monthly values.
+            if (run_params$north_south == "North") {
+              year_cur_params[[param_id_year_cur]] <- c(rep(1.0, 4),
+                                                        rep(val_tmp, 5),
+                                                        rep(1.0, 3))
+            } else {
+              year_cur_params[[param_id_year_cur]] <- c(rep(val_tmp, 3),
+                                                        rep(1.0, 7),
+                                                        rep(val_tmp, 2))
+            }
+            # Otherwise use all the provided monthly values
           } else if (length(val_tmp) == 12) {
             year_cur_params[[param_id_year_cur]] <- val_tmp
           } else {
@@ -140,7 +150,8 @@ func_load_year_params_from_file <- function(year_data,
           
           
           
-          # Parameters temp_elegrad and prec_elegrad - can be numeric or character (12 comma-separated).
+          # Parameters temp_elegrad and prec_elegrad ----------------------------------------------
+          # They can be numeric or character (12 comma-separated values).
         } else if (params_names_all[param_id_year_cur] %in% c("temp_elegrad", "prec_elegrad")) {
           if (typeof(params_raw[param_id_raw,1]) == "character") {
             val_tmp <- as.numeric(unlist(strsplit(params_raw[param_id_raw,1], ",")))
@@ -165,13 +176,15 @@ func_load_year_params_from_file <- function(year_data,
           
           
           
-          # Parameter probes_snowdist_filename - a character.
+          # Parameter probes_snowdist_filename ----------------------------------------------------
+          # It is a character.
         } else if (params_names_all[param_id_year_cur] == "probes_snowdist_filename") {
           year_cur_params[[param_id_year_cur]] <- as.character(params_raw[param_id_raw,1])
           
           
           
-          # All other parameters - must be a single numeric.
+          # All other parameters  -----------------------------------------------------------------
+          # Each must be a single numeric.
         } else {
           val_tmp <- as.numeric(params_raw[param_id_raw,1])
           if (is.na(val_tmp)) {
@@ -183,13 +196,14 @@ func_load_year_params_from_file <- function(year_data,
         }
       }
       
-      # else: params_available_n is not > 0
+      # Else: params_available_n is not > 0
     } else {
       
       func_customlog("Year ", year_data$year_cur, ": params file was specified, but no valid parameter was found within it. Will use default values.", level = 1)
       
     }
-    # No params file found for the current year.
+    
+    # Else: no params file found for the current year.
   } else {
     
     cat(paste0("Year ", year_data$year_cur, ": no year-specific parameters defined\n"))

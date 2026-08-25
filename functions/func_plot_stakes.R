@@ -13,7 +13,7 @@ func_plot_stakes <- function(year_data,
   plots_stakes <- list()
   
   day_id_offset <- (year_data$model_annual_days_n + 1 - as.integer(format(year_data$model_time_bounds[2], "%j"))) + 1
-  day_ids <- 1:(year_data$model_annual_days_n+1) - day_id_offset # So that day_id = 0 is Jan 1.
+  day_ids       <- 1:(year_data$model_annual_days_n+1) - day_id_offset # So that day_id = 0 is Jan 1.
   
   month_starts <- seq.Date(from = as.Date(paste0(format(year_data$model_time_bounds[1], "%Y/%m"), "/01")),
                            to   = as.Date(paste0(format(year_data$model_time_bounds[2], "%Y/%m"), "/01")),
@@ -46,8 +46,8 @@ func_plot_stakes <- function(year_data,
   months_doy <- c(15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349)
   
   months_labels_ids <- which(as.integer(format(days, "%j")) %in% months_doy) # Select the day at the middle of each month.
-  months_labels_df <- data.frame(day_id = day_ids[months_labels_ids],
-                                 label = months_labels_all[months_labels_ids])
+  months_labels_df  <- data.frame(day_id = day_ids[months_labels_ids],
+                                  label = months_labels_all[months_labels_ids])
   # Don't add label for the first month unless it is
   # represented by at least 28 days, and same for the last month.
   # Also see func_plot_massbal_cumul for an explanation of the if() conditions.

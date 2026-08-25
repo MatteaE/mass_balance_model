@@ -178,13 +178,13 @@ func_process_run_params <- function(run_params) {
     plot_daily_maps_winter_freq        = 1,          # [days]: produce "daily" plots of surface type and SWE from winter simulation only at a given interval, to speed up their generation.
     write_daily_grids_winter           = FALSE,      # [TRUE/FALSE]: at the end of each year, write daily geotiff grids of SWE from winter simulation (useful for debugging)
     write_daily_grids_winter_freq      = 1,          # [days]: write "daily" grids of SWE from winter simulation only at a given interval, to speed up processing
-    daily_massbal_winter_refdate       = "11/01",    # [month/day] or "": use this day as reference for the winter cumulative mass balance grids. The grid of that day will be subtracted from all others. If set to "", no subtraction takes place (i.e., it will be the first grid of cumulative mass balance to have 0.0 everywhere). Dates from 1 July are assumed to refer to YYYY-1, before 1 July refer to YYYY.
+    daily_massbal_winter_refdate       = "11/01",    # [month/day] or "": use this day as reference for the winter cumulative mass balance grids. The grid of that day will be subtracted from all others. If set to "", no subtraction takes place (i.e., it will be the first grid of cumulative mass balance to have 0.0 everywhere). In the Northern Hemisphere, dates from 1 July are interpreted as YYYY-1, before that as YYYY. In the Southern Hemisphere, always as YYYY-1.
     
     plot_daily_maps_annual             = FALSE,      # [TRUE/FALSE]: at the end of each year, produce plots of daily surface type and SWE from the annual simulation (slow, but useful for debug or visualization).
     plot_daily_maps_annual_freq        = 1,          # [days]: produce "daily" plots of surface type and SWE from annual simulation only at a given interval, to speed up their generation.
     write_daily_grids_annual           = FALSE,      # [TRUE/FALSE]: at the end of each year, write daily geotiff grids of SWE from annual simulation (useful for debugging)
     write_daily_grids_annual_freq      = 1,          # [days]: write "daily" grids of SWE from annual simulation only at a given interval, to speed up processing
-    daily_massbal_annual_refdate       = "11/01"     # [month/day] or "": use this day as reference for the summer cumulative mass balance grids. The grid of that day will be subtracted from all others. If set to "", no subtraction takes place (i.e., it will be the first grid of cumulative mass balance to have 0.0 everywhere). Dates from 1 July are assumed to refer to YYYY-1, before 1 July refer to YYYY.
+    daily_massbal_annual_refdate       = "11/01"     # [month/day] or "": use this day as reference for the summer cumulative mass balance grids. The grid of that day will be subtracted from all others. If set to "", no subtraction takes place (i.e., it will be the first grid of cumulative mass balance to have 0.0 everywhere). In the Northern Hemisphere, dates from 1 July are interpreted as YYYY-1, before that as YYYY. In the Southern Hemisphere, always as YYYY-1.
     
   )
   
@@ -199,6 +199,7 @@ func_process_run_params <- function(run_params) {
   } else {
     func_customlog("All optional parameters were defined.", level = 0)
   }
+  cat("\n")
   
   
   # Define fixed INPUT FILES parameters -----------------------------------------------------------
@@ -286,7 +287,12 @@ func_process_run_params <- function(run_params) {
   run_params$elevation_equal_threshold   <- 1e-3 # [m]: threshold for considering two elevation values equal when we look for problematic flat patches
   run_params$avalanche_effect_threshold  <- 1e-9 # [mm w.e.]: threshold for considering nonzero avalanche effect
   
-  run_params$model_avalanche_dates       <- format(as.Date(run_params$model_avalanche_dates, format = "%m/%d"), format = "%m/%d") # Add leading zeroes to single-digit values if needed.
+  run_params$model_avalanche_dates       <- format(as.Date(paste0("2000/", run_params$model_avalanche_dates), format = "%Y/%m/%d"), format = "%m/%d") # Add leading zeroes to single-digit values if needed. Use 2000 as dummy year for that (but it is not recommended to set avalanches on 29 February!).
+  if (any(is.na(run_params$model_avalanche_dates))) {
+    func_customlog("Invalid value(s) for parameter model_avalanche_dates in set_params.R. Please check it.", level = 2)
+    func_stop()
+  }
+  
   
   run_params$stakes_unknown_latest_start <- format(as.Date(run_params$stakes_unknown_latest_start, format = "%m/%d"), format = "%m/%d") # Same.
   

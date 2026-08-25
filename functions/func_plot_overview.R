@@ -142,7 +142,7 @@ func_plot_overview <- function(overview_annual,
   if (any(overview_annual$summary_df$year_has_data) == TRUE) {
     single_year_point1 <- NULL # For RMSE
     single_year_point2 <- NULL # For LOO RMSE
-    year_has_data_rle <- rle(overview_annual$summary_df$year_has_data)
+    year_has_data_rle  <- rle(overview_annual$summary_df$year_has_data)
     if (single_year || any((year_has_data_rle$values == TRUE) & (year_has_data_rle$lengths == 1))) {
       single_year_point1 <- geom_point(aes(x = year, y = rmse, color = "rmse"))
       if (!all(is.na(overview_annual$summary_df$loo_rmse))) {
@@ -292,10 +292,10 @@ func_plot_overview <- function(overview_annual,
     for (year_id in 2:run_params$n_years) {
       # Note: the two ids below are used to align the two
       # hydrological year values (YYYY-1 end with YYYY start).
-      year_prev_hydro_end_id <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/", run_params$hydro_start_mmdd)), table = overview_annual$daily_data_list$mb_series_all_dates[[year_id-1]])
-      year_cur_hydro_start_id <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/", run_params$hydro_start_mmdd)), table = overview_annual$daily_data_list$mb_series_all_dates[[year_id]])
-      year_prev_mb <- mb_series_all[[year_id-1]][year_prev_hydro_end_id]
-      year_cur_mb <- mb_series_all[[year_id]][year_cur_hydro_start_id]
+      year_prev_hydro_end_id   <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/", run_params$hydro_start_mmdd)), table = overview_annual$daily_data_list$mb_series_all_dates[[year_id-1]])
+      year_cur_hydro_start_id  <- pmatch(as.Date(paste0(run_params$years[year_id]-1, "/", run_params$hydro_start_mmdd)), table = overview_annual$daily_data_list$mb_series_all_dates[[year_id]])
+      year_prev_mb             <- mb_series_all[[year_id-1]][year_prev_hydro_end_id]
+      year_cur_mb              <- mb_series_all[[year_id]][year_cur_hydro_start_id]
       mb_series_all[[year_id]] <- mb_series_all[[year_id]] + year_prev_mb - year_cur_mb
     }
     date_breaks_by <- "6 months"

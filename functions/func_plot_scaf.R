@@ -10,15 +10,15 @@ func_plot_scaf <- function(year_data,
                            run_params) {
   
   # Prepare the data for plotting.
-  scaf_df <- data.frame(date  = seq.Date(year_data$model_time_bounds[1]-1, year_data$model_time_bounds[2], by = "1 day"),
-                        scaf    = year_data$gl_scaf_daily)
-  day_id_offset <- (length(scaf_df$date) - as.integer(format(scaf_df$date[length(scaf_df$date)], "%j"))) + 1
+  scaf_df        <- data.frame(date    = seq.Date(year_data$model_time_bounds[1]-1, year_data$model_time_bounds[2], by = "1 day"),
+                               scaf    = year_data$gl_scaf_daily)
+  day_id_offset  <- (length(scaf_df$date) - as.integer(format(scaf_df$date[length(scaf_df$date)], "%j"))) + 1
   scaf_df$day_id <- seq_along(scaf_df$date) - day_id_offset # So that day_id = 0 is Jan 1.
   
   # Setup vertical lines dividing months.
-  month_starts <- seq.Date(from = as.Date(paste0(format(year_data$model_time_bounds[1], "%Y/%m"), "/01")),
-                           to   = as.Date(paste0(format(year_data$model_time_bounds[2], "%Y/%m"), "/01")),
-                           by   = "1 month")
+  month_starts    <- seq.Date(from = as.Date(paste0(format(year_data$model_time_bounds[1], "%Y/%m"), "/01")),
+                              to   = as.Date(paste0(format(year_data$model_time_bounds[2], "%Y/%m"), "/01")),
+                              by   = "1 month")
   month_start_ids <- setdiff(as.integer(month_starts[2:length(month_starts)] - year_data$model_time_bounds[1]) + 2 - day_id_offset, 0)
   
   # Setup month labels.

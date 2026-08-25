@@ -112,20 +112,20 @@ func_write_year_output <- function(year_data,
   # Modeled glacier-wide daily mass balance, for hydrological year only ---------------------------
   # This enables comparison of the output files of years with and without measurements
   # and of years with inconsistent measurement date.
-  # The cumulative time series are reset to 0 on <YYYY-1>-10-01.
+  # The cumulative time series are reset to 0 at the start of the hydrological year.
   # If the modeled period is exactly the hydrological year (i.e. year without data or
   # perfect survey dates), this file is the same as mb_daily_series_glacier_<yyyy>.csv".
-  date_form <- format(df_annual_daily$date, "%Y%m%d")
-  ids_sel <- which(date_form == paste0((year_data$year_cur-1), "1001")):which(date_form == paste0((year_data$year_cur), "1001"))
+  date_form <- format(df_annual_daily$date, "%Y/%m/%d")
+  ids_sel <- which(date_form == paste0((year_data$year_cur-1), "/", run_params$hydro_start_mmdd)):which(date_form == paste0((year_data$year_cur), "/", run_params$hydro_start_mmdd))
   
   df_annual_daily_hydro <- df_annual_daily[ids_sel,]
   
   # Reset cumulative time series, for comparability with years where the modeled period is exactly the hydrological year.
   df_annual_daily_hydro$gl_massbal_cumul_bandcorr <- df_annual_daily_hydro$gl_massbal_cumul_bandcorr - df_annual_daily_hydro$gl_massbal_cumul_bandcorr[1]
-  df_annual_daily_hydro$gl_massbal_cumul <- df_annual_daily_hydro$gl_massbal_cumul - df_annual_daily_hydro$gl_massbal_cumul[1]
-  df_annual_daily_hydro$gl_accum_cumul <- df_annual_daily_hydro$gl_accum_cumul - df_annual_daily_hydro$gl_accum_cumul[1]
-  df_annual_daily_hydro$gl_melt_cumul <- df_annual_daily_hydro$gl_melt_cumul - df_annual_daily_hydro$gl_melt_cumul[1]
-  df_annual_daily_hydro$gl_melt_cumul_bandcorr <- df_annual_daily_hydro$gl_melt_cumul_bandcorr - df_annual_daily_hydro$gl_melt_cumul_bandcorr[1]
+  df_annual_daily_hydro$gl_massbal_cumul          <- df_annual_daily_hydro$gl_massbal_cumul - df_annual_daily_hydro$gl_massbal_cumul[1]
+  df_annual_daily_hydro$gl_accum_cumul            <- df_annual_daily_hydro$gl_accum_cumul - df_annual_daily_hydro$gl_accum_cumul[1]
+  df_annual_daily_hydro$gl_melt_cumul             <- df_annual_daily_hydro$gl_melt_cumul - df_annual_daily_hydro$gl_melt_cumul[1]
+  df_annual_daily_hydro$gl_melt_cumul_bandcorr    <- df_annual_daily_hydro$gl_melt_cumul_bandcorr - df_annual_daily_hydro$gl_melt_cumul_bandcorr[1]
   
   df_annual_daily_hydro_form <- func_format_df_daily(df_annual_daily_hydro,
                                                      run_params = run_params)
@@ -158,7 +158,7 @@ func_write_year_output <- function(year_data,
   # Modeled daily mass balance series at the stakes, for hydrological year only -------------------
   # This enables comparison of the output files of years with and without measurements
   # and of years with inconsistent measurement date.
-  # The cumulative time series are reset to 0 on <YYYY-1>-10-01.
+  # The cumulative time series are reset to 0 at the start of the hydrological year.
   if (year_data$nstakes_annual > 0) {
     
     df_stakes_daily_hydro_form <- df_stakes_daily[ids_sel,]

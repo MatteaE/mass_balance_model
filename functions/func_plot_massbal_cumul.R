@@ -40,8 +40,8 @@ func_plot_massbal_cumul <- function(year_data,
   # the first item of months_labels_ids refers to the second
   # month of the simulation.
   months_labels_ids <- which(as.integer(format(massbal_cumul_df$date, "%j")) %in% months_doy)
-  months_labels_df <- data.frame(day_id = massbal_cumul_df$day_id[months_labels_ids],
-                                 label  = months_labels_all[months_labels_ids])
+  months_labels_df  <- data.frame(day_id = massbal_cumul_df$day_id[months_labels_ids],
+                                  label  = months_labels_all[months_labels_ids])
   # Don't add label for first month unless it is
   # represented by at least 28 days, and same for last month.
   # To do this, we remove the first label if the first month
@@ -57,8 +57,8 @@ func_plot_massbal_cumul <- function(year_data,
     months_labels_df <- months_labels_df[-nrow(months_labels_df),]
   }
   
-  day_id_hydro1 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == paste0(format(massbal_cumul_df$date[1], "%Y"), "-10-01"))] # day_id of the hydrological year start.
-  day_id_hydro2 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == paste0(as.integer(format(massbal_cumul_df$date[1], "%Y")) + 1, "-09-30"))] # day_id of the hydrological year start.
+  day_id_hydro1 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y/%m/%d") == paste0(format(massbal_cumul_df$date[1], "%Y"), "/", run_params$hydro_start_mmdd))] # day_id of the hydrological year start.
+  day_id_hydro2 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y/%m/%d") == paste0(as.integer(format(massbal_cumul_df$date[1], "%Y")) + 1, "/", run_params$hydro_end_mmdd))] # day_id of the hydrological year start.
   
   if (year_data$nstakes_annual > 0) {
     day_id_meas1 <- massbal_cumul_df$day_id[which(format(massbal_cumul_df$date, "%Y-%m-%d") == year_data$massbal_annual_meas_period[1])] # day_id of the first annual stake start.

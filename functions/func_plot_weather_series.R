@@ -32,6 +32,7 @@ func_plot_weather_series <- function(year_data,
   
   
   # Setup month labels.
+  # browser()
   months_labels_all <- format(date_df$date, "%b")
   months_doy <- c(15, 45, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349)
   

@@ -34,6 +34,7 @@ func_process_annual <- function(year_data,
   # but the hydrological year ends on Oct 1 (as Date object) even
   # though it is at 00:00 - then, the which() would
   # not find anything without the -1).
+  # Same for Southern locations (Apr/Mar instead of Oct/Sep).
   year_data$id_hydro_start <- which(year_data$weather_series_annual_cur$timestamp == year_cur_params$hydro_start)
   year_data$id_hydro_end   <- which(year_data$weather_series_annual_cur$timestamp == (year_cur_params$hydro_end - 1)) + 1
   
@@ -76,8 +77,8 @@ func_process_annual <- function(year_data,
     # If yes, emit a warning
     if (all(!is.na(run_params$model_avalanche_dates))) {
       
-      avalanche_r <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]],
-                               year_data$mod_output_annual_cur$avalanche_net)
+      avalanche_r          <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]],
+                                        year_data$mod_output_annual_cur$avalanche_net)
       avalanche_stakes_net <- terra::extract(avalanche_r,
                                              year_data$massbal_annual_meas_cur[,c("x", "y")],
                                              method = "bilinear",

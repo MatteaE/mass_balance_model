@@ -34,6 +34,7 @@ func_write_daily_grids_worker <- function(year_data,
   
   # If the user supplied a reference date for the mass balance grids,
   # we have to decide whether it refers to YYYY-1 or to YYYY.
+  # See description of daily_massbal_winter_refdate and daily_massbal_annual_refdate in func_process_run_params().
   if (run_params[[paste0("daily_massbal_", period_sel, "_refdate")]] != "") {
     date_ref <- c(as.Date(paste0(year_data$year_cur-1, "/", run_params[[paste0("daily_massbal_", period_sel, "_refdate")]])),
                   as.Date(paste0(year_data$year_cur, "/", run_params[[paste0("daily_massbal_", period_sel, "_refdate")]])))
@@ -41,15 +42,21 @@ func_write_daily_grids_worker <- function(year_data,
       func_customlog("Wrong value for parameter ", paste0("daily_massbal_", period_sel, "_refdate"), " - please check.", level = 2)
       func_stop()
     } else {
-      if (as.integer(format(date_ref[which(!is.na(date_ref))[1]], "%m")) < 7) {
-        date_ref <- date_ref[2]
-      } else {
+      # In the Southern Hemisphere, reference date is always interpreted as YYYY-1.
+      if (run_params$north_south == "South") {
         date_ref <- date_ref[1]
+        # In the Northern Hemisphere, it is interpreted as YYYY-1 between 1 Jul and 31 Dec, otherwise YYYY.
+      } else {
+        if (as.integer(format(date_ref[which(!is.na(date_ref))[1]], "%m")) < 7) {
+          date_ref <- date_ref[2]
+        } else {
+          date_ref <- date_ref[1]
+        }
       }
-      # This case below can only happen with leap days (if the user has
+      # This case below can only happen with leap years (if the user has
       # selected 02/29 as reference and the year does not have it).
       if (is.na(date_ref)) {
-        func_customlog("Wrong value for parameter ", paste0("daily_massbal_", period_sel, "_refdate"), " - please check.", level = 2)
+        func_customlog("Year ", year_data$year_cur, ": wrong value for parameter ", paste0("daily_massbal_", period_sel, "_refdate"), " - please check it.", level = 2)
         func_stop()
       }
     }
@@ -57,6 +64,13 @@ func_write_daily_grids_worker <- function(year_data,
     dates_all <- c(weather_series_cur$timestamp,
                    weather_series_cur$timestamp[model_days_n] + 1)
     date_ref_id <- match(date_ref, dates_all)
+    
+    if (is.na(date_ref_id)) {
+      func_customlog("Year ", year_data$year_cur, ": reference date ", paste0("daily_massbal_", period_sel, "_refdate"), " does not belong to the simulation period. Please check it.", level = 2)
+      func_customlog("The wrong value was: ", format(date_ref, "%Y/%m/%d"), level = 0)
+      func_stop()
+    }
+    
     cells_ref_ids <- (date_ref_id-1) * run_params$grid_ncells + 1:(run_params$grid_ncells)
     massbal_ref_r <- setValues(data_dems$elevation[[year_data$dem_grid_id]],
                                mod_output_cur$vec_massbal_cumul[cells_ref_ids])
@@ -72,7 +86,7 @@ func_write_daily_grids_worker <- function(year_data,
   
   
   
-  # Daily loop to produce the plots.
+  # Daily loop to produce the plots ---------------------------------------------------------------
   # Optionally reduced frequency (e.g. weekly).
   for (day_id in 1:(model_days_n + 1)) {
     
