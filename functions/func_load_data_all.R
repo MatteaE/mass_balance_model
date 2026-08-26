@@ -24,6 +24,7 @@ func_load_data_all <- function(run_params) {
   data_all$data_outlines              <-   func_load_outlines(run_params)
   data_all$data_dhms                  <-   func_load_elevation_grids(run_params)
   
+  
   # Check and if needed resample the elevation / surface type grids, for alignment.
   data_all$raster_blueprint           <-   func_compute_blueprint_grid(run_params, data_all$data_surftype, data_all$data_dhms)
   data_all                            <-   func_check_resample_grids(run_params, data_all)

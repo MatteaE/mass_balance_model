@@ -102,7 +102,10 @@ func_setup_winter_probes_dist <- function(year_data,
       # "od" = "offglacier_distance"
       od_th1 <- 100
       od_th2 <- 500
-      offglacier_dist <- distance(dist_probes_norm_r, vect(data_outlines$outlines[[year_data$outline_id]]))
+      
+      outl_v          <- vect(data_outlines$outlines[[year_data$outline_id]])
+      crs(outl_v)     <- crs(dist_probes_norm_r) # Ensure that the CRS is the same - a different definition could kill the distance() call.
+      offglacier_dist <- distance(dist_probes_norm_r, outl_v)
       od1 <- classify(offglacier_dist, rbind(c(-Inf, od_th1, od_th1),
                                              c(od_th2, Inf, od_th2)))
       

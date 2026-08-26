@@ -91,9 +91,9 @@ func_load_massbalance_measurements <- function(run_params,
   data_massbalance$massbal <- data_massbalance$dh_cm * data_massbalance$density * 10 # 10: cm w.e. to mm w.e.
   
   # Are there any mass balance points with coordinates outside the DHM?
-  # If yes, first try to rescue them by assuming they have a wrong CRS
-  # (test adjacent UTM zones as well as lon/lat).
-  # If that fails, drop them.
+  # If yes and the project uses UTM, first try to rescue them by assuming they have a wrong CRS
+  # (test adjacent UTM zones as well as lon/lat). If that fails, drop them.
+  # If the project does not use UTM, drop them.
   # We check over the combined extent of all DHMs.
   ext_limits <- ext(sprc(data_dhms$elevation))
   ids_df_bad <- which((data_massbalance$x < xmin(ext_limits)) |
@@ -101,23 +101,37 @@ func_load_massbalance_measurements <- function(run_params,
                         (data_massbalance$y < ymin(ext_limits)) |
                         (data_massbalance$y > ymax(ext_limits)))
   ids_bad_n <- length(ids_df_bad)
+  
   if (ids_bad_n > 0) {
     func_customlog("The ", load_what, " mass balance file contains ", ids_bad_n, " entries which fall outside all the elevation grids.", level = 1)
-    func_customlog("          Checking whether they have the wrong reference system (wrong UTM zone or lon/lat)...", level = 0)
+    
+    # This will be populated in case any stakes can be rescued.
     stake_coords_rescued_ids <- NULL
-    for (i in 1:ids_bad_n) {
-      stake_coords_fixed <- func_fix_stake_coordinates(data_massbalance$id[ids_df_bad[i]],
-                                                       c(data_massbalance$x[ids_df_bad[i]], data_massbalance$y[ids_df_bad[i]]),
-                                                       ext_limits,
-                                                       c(run_params$grids_crs + c(-2, -1, 1, 2), 4326),
-                                                       run_params$grids_crs)
-      # Successfully rescued the current pair by changing coordinates system.
-      if (all(!is.na(stake_coords_fixed))) {
-        data_massbalance$x[ids_df_bad[i]] <- stake_coords_fixed[1]
-        data_massbalance$y[ids_df_bad[i]] <- stake_coords_fixed[2]
-        stake_coords_rescued_ids <- c(stake_coords_rescued_ids, ids_df_bad[i])
-      }
+    
+    # If the project uses UTM, check adjacent UTM zones.
+    if (run_params$grids_crs_epsg %in% paste0("EPSG:", c(32601:32660, 32701:32760))) {
+      
+      func_customlog("          Checking whether they have the wrong reference system (wrong UTM zone or lon/lat)...", level = 0)
+      utm_test_allowed <- run_params$grids_crs + c(-2, -1, 1, 2)
+      utm_test_allowed <- utm_test_allowed[utm_test_allowed %in% c(32601:32660, 32701:32760)]
+      
+      for (i in 1:ids_bad_n) {
+        stake_coords_fixed <- func_fix_stake_coordinates(data_massbalance$id[ids_df_bad[i]],
+                                                         c(data_massbalance$x[ids_df_bad[i]], data_massbalance$y[ids_df_bad[i]]),
+                                                         ext_limits,
+                                                         c(utm_test_allowed, 4326),
+                                                         run_params$grids_crs)
+        # Successfully rescued the current pair by changing coordinates system.
+        if (all(!is.na(stake_coords_fixed))) {
+          data_massbalance$x[ids_df_bad[i]] <- stake_coords_fixed[1]
+          data_massbalance$y[ids_df_bad[i]] <- stake_coords_fixed[2]
+          stake_coords_rescued_ids <- c(stake_coords_rescued_ids, ids_df_bad[i])
+        } # End if successfully rescued a stake.
+      } # End loop on the bad stakes.
+    } else { # End if the project uses UTM - else, don't try to guess adjacent UTM zones.
+      func_customlog("          The project is not in UTM projection - it is not possible to guess an adjacent UTM zone.", level = 0)
     }
+    
     stake_coords_rescued_n <- length(stake_coords_rescued_ids)
     if (stake_coords_rescued_n > 0) {
       func_customlog("          Successfully recovered ", stake_coords_rescued_n, " entries with a wrong coordinate system.", level = 0)

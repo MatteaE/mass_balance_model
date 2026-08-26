@@ -109,9 +109,11 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
     
     * Graphical tools to easily prepare the input data from different sources
     
-    * Full support for locations in both the Northern and Southern Hemisphere, with specific definitions of seasonal boundaries and automatic handling of geographic projections
-
-    * Comprehensive handling of exceptions, errors, and unexpected inputs
+    * Wide support for different geographic projections, including all EPSG-defined reference systems
+    
+    * Ad-hoc processing for locations in the Northern and Southern Hemisphere, with specific definitions of seasonal boundaries
+    
+    * Robust and informative handling of exceptions, errors, and unexpected inputs
     
     * Detailed logging in RStudio console, log files, and modal dialogs
     
