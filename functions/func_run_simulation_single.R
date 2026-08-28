@@ -104,21 +104,48 @@ func_run_simulation_single <- function(year_param_corrections,
   # Bias of each stake (numeric vector, one element per stake).
   stakes_bias <- stakes_mb_mod - stakes_mb_meas
   
-  global_bias <- mean(stakes_bias)
-  global_rms  <- sqrt(mean(stakes_bias^2))
+  # Global arithmetic mean bias.
+  global_bias   <- mean(stakes_bias)
+  global_rms    <- sqrt(mean(stakes_bias^2))
   
-  # Align digits of BIAS and RMS with ad-hoc whitespace padding.
+  # Global area-weighted bias.
+  # This is used as target (< 1 mm) for the optimization.
+  # If run_params$optim_winter_areaweight_fact is 0.0, then for the winter
+  # runs this is the same as the global_bias.
+  # If run_params$optim_annual_areaweight_fact is 0.0, then for the annual
+  # runs this is the same as the global bias.
+  weighted_bias <- mean(stakes_bias * massbal_meas_cur$area_weight)
+  # Global area-weighted RMS. Same comments as above for the case of uniform weights.
+  weighted_rms <- sqrt(mean(massbal_meas_cur$area_weight * (stakes_bias^2)))
+  
+  # Print weighted BIAS, BIAS and RMS, with aligned digits ----------------------------------------
   if (verbose_logi) {
-    bias_val_txt <- sprintf("%+.2f", global_bias)
-    rms_val_txt  <- sprintf("%.2f", global_rms)
-    pad_rms  <- nchar(bias_val_txt) - nchar(rms_val_txt) + 1
-    pad_bias <- 0
-    if (pad_rms < 0) {
-      pad_bias <- -pad_rms
-      pad_rms <- 0
+    
+    print_wstats_logi <- FALSE
+    wbias_val_txt     <- ""
+    wrms_val_txt      <- ""
+    if (any(massbal_meas_cur$area_weight != 1.0)) {
+      print_wstats_logi <- TRUE
+      wbias_val_txt     <- sprintf("%+.2f", weighted_bias)
+      wrms_val_txt      <- sprintf("%.2f", weighted_rms)
     }
-    cat(paste0("BIAS:", paste0(rep(" ", pad_bias), collapse = "")), bias_val_txt, "mm w.e.\n")
-    cat(paste0("RMS:",  paste0(rep(" ", pad_rms), collapse = "")), rms_val_txt,  "mm w.e.\n")
+    
+    bias_val_txt  <- sprintf("%+.2f", global_bias)
+    rms_val_txt   <- sprintf("%.2f", global_rms)
+    
+    nchar_max <- max(nchar(wbias_val_txt), nchar(bias_val_txt), nchar(wrms_val_txt), nchar(rms_val_txt))
+    
+    wbias_val_txt <- str_pad(wbias_val_txt, width = nchar_max, side = "left")
+    bias_val_txt  <- str_pad(bias_val_txt, width = nchar_max, side = "left")
+    wrms_val_txt  <- str_pad(wrms_val_txt, width = nchar_max, side = "left")
+    rms_val_txt   <- str_pad(rms_val_txt, width = nchar_max, side = "left")
+    
+    cat(paste0("Global BIAS:        ", bias_val_txt, " mm w.e.\n"))
+    cat(paste0("Global RMS:         ", rms_val_txt,  " mm w.e.\n"))
+    if (print_wstats_logi) {
+      cat(paste0("Area-weighted BIAS: ", wbias_val_txt, " mm w.e.\n"))
+      cat(paste0("Area-weighted RMS:  ", wrms_val_txt, " mm w.e.\n"))
+    }
   }
   
   # Compile output with everything we may need
@@ -141,7 +168,9 @@ func_run_simulation_single <- function(year_param_corrections,
                      stakes_mb_meas        = stakes_mb_meas,
                      stakes_bias           = stakes_bias,
                      global_bias           = global_bias,
-                     global_rms            = global_rms)
+                     global_rms            = global_rms,
+                     weighted_bias         = weighted_bias,
+                     weighted_rms          = weighted_rms)
   
   return(run_output)
   

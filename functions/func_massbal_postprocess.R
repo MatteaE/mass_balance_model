@@ -98,9 +98,11 @@ func_massbal_postprocess <- function(year_data,
       
     }
     
-    # Now compute global BIAS and RMS of winter stakes.
-    year_data$mod_output_annual_cur$global_bias_winter <- mean(year_data$mod_output_annual_cur$stakes_winter_bias)
-    year_data$mod_output_annual_cur$global_rms_winter <- sqrt(mean(year_data$mod_output_annual_cur$stakes_winter_bias^2))
+    # Now compute BIAS and RMS of winter stakes.
+    year_data$mod_output_annual_cur$global_bias_winter     <- mean(year_data$mod_output_annual_cur$stakes_winter_bias)
+    year_data$mod_output_annual_cur$global_rms_winter      <- sqrt(mean(year_data$mod_output_annual_cur$stakes_winter_bias^2))
+    year_data$mod_output_annual_cur$weighted_bias_winter   <- mean(year_data$massbal_winter_meas_cur$area_weight * year_data$mod_output_annual_cur$stakes_winter_bias)
+    year_data$mod_output_annual_cur$weighted_rms_winter    <- sqrt(mean(year_data$massbal_winter_meas_cur$area_weight * (year_data$mod_output_annual_cur$stakes_winter_bias^2)))
     
   }
   

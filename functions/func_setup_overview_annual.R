@@ -33,8 +33,12 @@ func_setup_overview_annual <- function(run_params) {
                                            aar                         = NA_real_,
                                            snowcover_days_min          = NA_real_, # Minimum duration of snow cover on glacier
                                            snowcover_days_mean         = NA_real_, # Mean duration of snow cover on glacier
-                                           rmse                        = NA_real_,
-                                           loo_rmse                    = NA_real_,
+                                           rmse                        = NA_real_, # This is the weighted one if weights are not uniform
+                                           loo_rmse                    = NA_real_, # This is the weighted one if weights are not uniform
+                                           rmse_unweighted             = NA_real_, # This is always the unweighted one
+                                           loo_rmse_unweighted         = NA_real_, # This is always the unweighted one
+                                           winter_rmse                 = NA_real_, # This is the weighted one if weights are not uniform
+                                           winter_rmse_unweighted      = NA_real_, # This is always the unweighted one
                                            melt_factor                 = NA_real_,
                                            rad_fact_ice                = NA_real_,
                                            rad_fact_snow               = NA_real_,

@@ -77,6 +77,9 @@ func_plot_year_swe_maps <- function(year_data,
   plot_df_base <- data.frame(crds(data_dhms$elevation[[year_data$dhm_grid_id]], na.rm = FALSE))
   elevation_df <- data.frame(plot_df_base, z = values(data_dhms$elevation[[year_data$dhm_grid_id]], mat = F))
   
+  xlim <- ext(data_dhms$elevation[[year_data$dhm_grid_id]])[1:2]
+  ylim <- ext(data_dhms$elevation[[year_data$dhm_grid_id]])[3:4]
+  
   plots <- list()
 
     
@@ -88,7 +91,9 @@ func_plot_year_swe_maps <- function(year_data,
   plots[[length(plots)+1]] <- ggplot(plot_df) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult/1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
-    coord_sf(clip = "off") +
+    coord_sf(clip = "off",
+             xlim = xlim,
+             ylim = ylim) +
     {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
     {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
@@ -119,7 +124,9 @@ func_plot_year_swe_maps <- function(year_data,
   plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult/1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
-    coord_sf(clip = "off") +
+    coord_sf(clip = "off",
+             xlim = xlim,
+             ylim = ylim) +
     {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
     {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
@@ -155,7 +162,9 @@ func_plot_year_swe_maps <- function(year_data,
     plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
       geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
-      coord_sf(clip = "off") +
+      coord_sf(clip = "off",
+               xlim = xlim,
+               ylim = ylim) +
       {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
       {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
       annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
@@ -186,7 +195,9 @@ func_plot_year_swe_maps <- function(year_data,
     plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
       geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
-      coord_sf(clip = "off") +
+      coord_sf(clip = "off",
+               xlim = xlim,
+               ylim = ylim) +
       {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
       {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
       annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
@@ -219,7 +230,9 @@ func_plot_year_swe_maps <- function(year_data,
   plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
     geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
-    coord_sf(clip = "off") +
+    coord_sf(clip = "off",
+             xlim = xlim,
+             ylim = ylim) +
     {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
     {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),

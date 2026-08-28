@@ -31,6 +31,17 @@ func_plot_year <- function(year_data,
                                        data_outlines)
   
   
+  # Plot the stake weights (Voronoi cells) --------------------------------------------------------
+  if (year_data$nstakes_annual > 0) {
+    cat("  Mass balance weights...\n")
+    plots_weights <- func_plot_voronoi(year_data,
+                                       run_params,
+                                       data_dems,
+                                       data_outlines)
+    plots_year <- append(plots_year, plots_weights)
+  }
+  
+  
   # Plot the SWE maps -----------------------------------------------------------------------------
   cat("  SWE maps...\n")
   plots_swe <- func_plot_year_swe_maps(year_data,

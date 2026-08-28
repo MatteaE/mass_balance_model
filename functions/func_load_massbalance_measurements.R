@@ -109,7 +109,7 @@ func_load_massbalance_measurements <- function(run_params,
     stake_coords_rescued_ids <- NULL
     
     # If the project uses UTM, check adjacent UTM zones.
-    if (run_params$grids_crs_epsg %in% paste0("EPSG:", c(32601:32660, 32701:32760))) {
+    if (run_params$grids_crs %in% c(32601:32660, 32701:32760)) {
       
       func_customlog("          Checking whether they have the wrong reference system (wrong UTM zone or lon/lat)...", level = 0)
       utm_test_allowed <- run_params$grids_crs + c(-2, -1, 1, 2)

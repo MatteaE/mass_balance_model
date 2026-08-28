@@ -62,11 +62,10 @@ func_process_year <- function(year_data,
                                              run_params)
   
   
-  # Calculate and print PDD sum for the hydrological year period ----------------------------------
+  # Calculate PDD sum for the hydrological year period --------------------------------------------
   pdd_id1 <- which(data_all$data_weather$timestamp == year_cur_params$hydro_start)
   pdd_id2 <- which(data_all$data_weather$timestamp == (year_cur_params$hydro_end-1)) # -1 because hydro end id is already Oct 1 or Apr 1 (at 00:00).
   year_data$pdd_sum_hydro <- sum(pmax(0.0, data_all$data_weather$t2m_mean[pdd_id1:pdd_id2]))
-  cat("PDD sum at the AWS over the hydrological year:", round(year_data$pdd_sum_hydro), "\u00B0C d\n")
   
   
   # Simulate winter mass balance (only if measurements available) ---------------------------------
@@ -77,6 +76,7 @@ func_process_year <- function(year_data,
                                    data_all$data_dems,
                                    data_all$data_surftype,
                                    data_all$data_radiation,
+                                   data_all$data_outlines,
                                    data_all$data_weather)
   
   
@@ -90,6 +90,7 @@ func_process_year <- function(year_data,
                                    data_all$data_dems,
                                    data_all$data_surftype,
                                    data_all$data_radiation,
+                                   data_all$data_outlines,
                                    data_all$data_weather)
   
   # After an annual model run we have SWE information

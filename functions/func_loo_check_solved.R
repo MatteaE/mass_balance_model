@@ -16,7 +16,12 @@ func_loo_check_solved <- function(run_params,
                                   target_stake_id = NULL,
                                   verbose_logi = FALSE) {
   
+  
   loo_set_biases_sel_mat <- loo_set_biases_mat[rows_to_check, , drop = FALSE]
+  
+  if (verbose_logi && !is.null(target_stake_id)) {
+    cat("LOO bias of the target stake:", sprintf("%+.2f", loo_set_biases_sel_mat[1,target_stake_id]), "mm w.e.\n\n")
+  }
   
   
   # Check if there are any lucky/fortuitous/opportunistic early solves.
@@ -48,8 +53,9 @@ func_loo_check_solved <- function(run_params,
   
   stakes_loo_bias <- stake_biases_mat[cbind(solved_runs_id, solved_stakes_id)]
   
+  
   df_loo_out$stake_loo_bias[solved_stakes_id]   <- stakes_loo_bias
-  df_loo_out$loo_run_id[solved_stakes_id]       <- df_runs_biases$run_id[solved_runs_id]
+  df_loo_out$loo_run_id[solved_stakes_id]       <- df_runs_biases$run_id[solved_runs_id] # Since the runs are sorted, this is just equal to solved_runs_id, but it is kept to potentially support unsorted runs if ever needed.
   df_loo_out$loo_corr_fact[solved_stakes_id]    <- df_runs_biases$corr_fact[solved_runs_id]
   # We initially assume that all current solves are opportunistic, then we set
   # the proper number of iterations for the point which was our actual target.

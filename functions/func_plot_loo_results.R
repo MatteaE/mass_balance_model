@@ -33,7 +33,8 @@ func_plot_loo_results <- function(year_data,
   # (in all model realizations, vs correction factor)
   plot_df                <- year_data$df_runs_smb
   stakes_col_ids         <- grep("^s[0-9]+$", names(plot_df)) # Only the stakes values, which are called like s01, s123, etc.
-  plot_df$stakes_average <- rowMeans(plot_df[,stakes_col_ids])
+  # Compute the weighted average of the SMB at the stakes (same weights as for the bias).
+  plot_df$stakes_average <- rowMeans(plot_df[,stakes_col_ids] * rep(year_data$massbal_annual_meas_cur$area_weight, each = nrow(plot_df)))
   
   plot_df_melt1          <- melt(plot_df,
                                  id.vars = c("run_id", "corr_fact", "run_type"),
@@ -49,9 +50,19 @@ func_plot_loo_results <- function(year_data,
   
   plots_loo_results[[1]] <- ggplot(plot_df_melt1) +
     
-    # Add horizontal line with arithmetic mean of stakes (back-calculated as mean model result - global bias: this is an arithmetic mean over potentially inconsistent time periods, used for the LOO plot only).
+    # Add horizontal dashed line with weighted mean of stakes
+    # (back-calculated as weighted mean model result minus weighted bias: 
+    # this is a mean over potentially inconsistent time periods if
+    # stakes have different survey dates, it is used for the LOO plot only).
     geom_hline(aes(linetype = "hline_stakes_measured_avg",
-                   yintercept = (run_params$output_mult/1e3)*(plot_df$stakes_average[which(plot_df$run_type == "main_optim_final")] - year_data$mod_output_annual_cur$global_bias))) +
+                   yintercept = (run_params$output_mult/1e3)*(plot_df$stakes_average[which(plot_df$run_type == "main_optim_final")] - year_data$mod_output_annual_cur$weighted_bias))) +
+    
+    # If the stakes are weighted, also add horizontal dotted line
+    # with arithmetic (unweighted) mean of stakes (back-calculated as arithmetic
+    # mean model result minus weighted (global) bias: this is a mean over
+    # potentially inconsistent time periods if stakes have different survey dates, it is used for the LOO plot only).
+    {if (year_data$annual_bias_weighted_logi) geom_hline(aes(linetype = "hline_stakes_measured_avg_unweighted",
+                                                             yintercept = (run_params$output_mult/1e3)*(rowMeans(plot_df[which(plot_df$run_type == "main_optim_final"),stakes_col_ids]) - year_data$mod_output_annual_cur$global_bias)))} +
     
     # Draw the individual stakes
     geom_line(aes(x = 1+corr_fact, y = value*run_params$output_mult/1e3, group = variable, color = "stakes_single"), alpha = 0.4, linewidth = 0.5) +
@@ -67,17 +78,21 @@ func_plot_loo_results <- function(year_data,
     geom_point(data = plot_df, aes(x = 1+corr_fact, y = stakes_average*run_params$output_mult/1e3, color = "stakes_average", shape = run_type), size = 5, stroke = 0.5) +
     
     scale_color_manual(values = c("hline_stakes_measured_avg" = "black",
+                                  "hline_stakes_measured_avg_unweighted" = "black",
                                   "stakes_average" = "black",
                                   "mb_annual_hydro" = "#FF9000",
                                   "mb_annual_measperiod" = "#FF0000",
                                   "stakes_single" = "#404040"),
                        labels = c("hline_stakes_measured_avg" = "Measured stake average",
+                                  "hline_stakes_measured_avg_unweighted" = "Measured stake average (unweighted)",
                                   "stakes_average" = "Modeled stake average",
                                   "mb_annual_hydro" = "Glacier-wide, hydrological year",
                                   "mb_annual_measperiod" = "Glacier-wide, annual measurement period",
                                   "stakes_single" = "Individual stakes")) +
-    scale_linetype_manual(values = c("hline_stakes_measured_avg" ="dashed"),
-                          labels = c("hline_stakes_measured_avg" = "Measured stake average")) +
+    scale_linetype_manual(values = c("hline_stakes_measured_avg" ="dashed",
+                                     "hline_stakes_measured_avg_unweighted" = "dotted"),
+                          labels = c("hline_stakes_measured_avg" = "Measured stake average",
+                                     "hline_stakes_measured_avg_unweighted" = "Measured stake average (unweighted)")) +
     scale_shape_manual(values = c("main_optim_dummy" = 1,
                                   "main_optim" = 1,
                                   "main_optim_final" = 19,
@@ -105,7 +120,7 @@ func_plot_loo_results <- function(year_data,
     geom_point(data = data.frame(type = c("mb_measperiod", "mb_hydro"),
                                  mb   = c(year_data$massbal_annual_values$meas_period.mean,
                                           year_data$massbal_annual_values$hydro.mean)),
-                                 aes(x = type, y = mb*run_params$output_mult/1e3, color = type),
+               aes(x = type, y = mb*run_params$output_mult/1e3, color = type),
                shape = 8) +
     scale_x_discrete(labels = c("mb_measperiod" = "Measurement period (annual)",
                                 "mb_hydro"      = "Hydrological year")) +

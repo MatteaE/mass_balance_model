@@ -102,8 +102,8 @@ func_plot_massbal_vs_elevation <- function(year_data,
     ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
     theme_elebands_plot
   
-  
-  
+
+    
   #### Plot #2: scatterplot of annual mass balance ------------------------------------------------
   # We plot the not-band-corrected model result over the measurement period, and the stakes standardized over the same period.
   # Do this only if we have stake measurements, else it's useless.
@@ -115,8 +115,10 @@ func_plot_massbal_vs_elevation <- function(year_data,
     # Like this, there is consistency between the map and profile plots, and also,
     # the stake is compared to the proper cells (stakes at the edges use
     # nearest-neighbor instead of bilinear).
-    stakes_bias <- year_data$mod_output_annual_cur$global_bias / 1e3
-    stakes_rms <- year_data$mod_output_annual_cur$global_rms / 1e3
+    # NOTE: the two numbers below are weighted, but if the
+    # run is unweighted then the weights are uniform 1.0 i.e. correct.
+    stakes_bias <- year_data$mod_output_annual_cur$weighted_bias / 1e3
+    stakes_rms  <- year_data$mod_output_annual_cur$weighted_rms / 1e3
     
     
     # This data.frame contains only the mass balance values on glacierized cells.
@@ -160,10 +162,10 @@ func_plot_massbal_vs_elevation <- function(year_data,
                                     y2 = 0)
     }
     
-    # RMS label with also LOO RMS if available.
+    # RMS label (main RMS, either weighted or unweighted, and LOO if available).
     rms_txt <- paste0("RMS: ", sprintf(run_params$output_fmt1, stakes_rms*run_params$output_mult), " ", run_params$output_unit, " w.e.")
     if (!is.null(year_data$global_loo_rms)) {
-      rms_txt <- paste0(rms_txt, " (LOO: ", sprintf(run_params$output_fmt1, year_data$global_loo_rms*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.)")
+      rms_txt <- paste0(rms_txt, " (LOO: ", sprintf(run_params$output_fmt1, year_data$weighted_loo_rms*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.)")
     }
     
     plots_mb_vs_ele[[2]] <- ggplot(df_scatterplot) +
@@ -224,8 +226,8 @@ func_plot_massbal_vs_elevation <- function(year_data,
     # Like this, there is consistency between the map and profile plots.
     # And also, the stake is compared to the proper cells (stakes at the edges use
     # nearest-neighbor instead of bilinear).
-    stakes_bias <- year_data$mod_output_annual_cur$global_bias_winter / 1e3
-    stakes_rms  <- year_data$mod_output_annual_cur$global_rms_winter / 1e3
+    stakes_bias <- year_data$mod_output_annual_cur$weighted_bias_winter / 1e3
+    stakes_rms  <- year_data$mod_output_annual_cur$weighted_rms_winter / 1e3
     
     # Computed within func_massbal_postprocess().
     stakes_mod_massbal_meas_period <- year_data$mod_output_annual_cur$stakes_winter_measperiod_mb

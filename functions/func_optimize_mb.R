@@ -82,7 +82,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                       dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells,
                                       verbose_logi = TRUE)
-  bias_prev <- mod_output_cur$global_bias
+  bias_prev <- mod_output_cur$weighted_bias
   
   # Create output data frames.
   # Note: we also extract and store the glacier-wide hydrological and measurement period mass balances.
@@ -116,7 +116,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                       dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
                                       nstakes, model_days_n, massbal_meas_cur, stakes_cells,
                                       verbose_logi = TRUE)
-  bias_cur <- mod_output_cur$global_bias
+  bias_cur <- mod_output_cur$weighted_bias
   if (optimization_period == "annual") {
     df_runs_smb    <- rbind(df_runs_smb,
                             func_compile_df_runs_smb(year_cur_params, year_data, mod_output_cur, 2, corr_fact_cur, "main_optim_dummy"))
@@ -143,7 +143,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
                                         dxdy[[1]], dxdy[[2]], dxdy[[3]], dxdy[[4]],
                                         nstakes, model_days_n, massbal_meas_cur, stakes_cells,
                                         verbose_logi = TRUE)
-    bias_cur <- mod_output_cur$global_bias
+    bias_cur <- mod_output_cur$weighted_bias
     if (optimization_period == "annual") {
       df_runs_smb    <- rbind(df_runs_smb,
                               func_compile_df_runs_smb(year_cur_params, year_data, mod_output_cur, niter, corr_fact_cur, "main_optim"))

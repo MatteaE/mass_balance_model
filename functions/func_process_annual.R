@@ -13,6 +13,7 @@ func_process_annual <- function(year_data,
                                 data_dems,
                                 data_surftype,
                                 data_radiation,
+                                data_outlines,
                                 data_weather) {
   
   
@@ -50,6 +51,29 @@ func_process_annual <- function(year_data,
       year_data$run_loo_logi <- FALSE
     }
     
+    
+    
+    # . Compute weights for the point biases ------------------------------------------------------
+    # This also handles the case when there is a single measurement.
+    year_data <- func_compute_massbal_weights(run_params,
+                                              "annual",
+                                              year_data,
+                                              data_dhms,
+                                              data_outlines,
+                                              compute_loo = year_data$run_loo_logi)
+    
+    
+    
+    # In the end, is there any weight which is not 1.0 in the main annual run?
+    # If yes, store a logical value which will affect plot appearance (how the bias is written).
+    year_data$annual_bias_weighted_logi <- FALSE
+    if (any(year_data$massbal_annual_meas_cur$area_weight != 1.0)) {
+      year_data$annual_bias_weighted_logi <- TRUE
+    }
+    
+    
+    # Print PDD sum at the AWS, just before running the optimization.
+    cat("PDD sum at the AWS over the hydrological year:", round(year_data$pdd_sum_hydro), "\u00B0C d\n")
     
     # . Run optimization --------------------------------------------------------------------------    
     # The return value is a list with everything we need.
@@ -121,6 +145,8 @@ func_process_annual <- function(year_data,
   } else {
     
     # . Simulate year with a single model run -----------------------------------------------------
+    cat("PDD sum at the AWS over the hydrological year:", round(year_data$pdd_sum_hydro), "\u00B0C d\n")
+    
     # The run uses unmodified year_cur_params.
     sim_res_cur <- func_simulate_mb_without_data(run_params, year_cur_params, year_data,
                                                  data_dhms, data_dems, data_surftype, data_radiation)

@@ -142,6 +142,8 @@ func_process_run_params <- function(run_params) {
     # . (10) Optimization parameters ---------------------------
     optim_bias_threshold               = 1,           # [mm w.e.]: optimization stops when abs(global bias) is below this threshold
     optim_max_iter                     = 20,          # [-]: force mass balance optimization to stop after this number of iterations, even if bias is not within threshold. This is useful in case the optimization is not converging due to avalanches barely reaching a stake, thus a small change in the snow amounts changes a stake's simulated mass balance by a lot, thus bias keeps jumping around 0. In normal conditions, the model converges much faster than 20 iterations.
+    optim_winter_areaweight_fact       = 0.0,         # [-]: area weighting of each mass balance point in the winter optimization. 0 (default): uniform weight; 1: weight is the area of the Voronoi cell of each point. Between 0 and 1: linear interpolation.
+    optim_annual_areaweight_fact       = 0.0,         # [-]: area weighting of each mass balance point in the annual optimization. 0 (default): uniform weight; 1: weight is the area of the Voronoi cell of each point. Between 0 and 1: linear interpolation.
     
     
     # . (11) Mass balance postprocessing parameters -------

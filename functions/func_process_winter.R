@@ -14,6 +14,7 @@ func_process_winter <- function(year_data,
                                 data_dems,
                                 data_surftype,
                                 data_radiation,
+                                data_outlines,
                                 data_weather) {
   
   # We set this here so that there is no correction
@@ -32,6 +33,24 @@ func_process_winter <- function(year_data,
     # Select weather series period.
     year_data$weather_series_winter_cur <- data_weather[which(data_weather$timestamp == year_data$model_time_bounds[3]):(which(data_weather$timestamp == year_data$model_time_bounds[4])),]
     year_data$model_winter_days_n       <- nrow(year_data$weather_series_winter_cur)
+    
+    
+    # Compute weights for the point biases. The function also handles the case where there is a single measurement.
+    year_data <- func_compute_massbal_weights(run_params,
+                                              "winter",
+                                              year_data,
+                                              data_dhms,
+                                              data_outlines,
+                                              compute_loo = FALSE)
+    
+    
+    # In the end, is there any weight which is not 1.0 in the main annual run?
+    # If yes, store a logical value which will affect plot appearance (how the bias is written).
+    year_data$winter_bias_weighted_logi <- FALSE
+    if (any(year_data$massbal_winter_meas_cur$area_weight != 1.0)) {
+      year_data$winter_bias_weighted_logi <- TRUE
+    }
+    
     
     # The NA is for the optimized corr_fact_winter (which we are
     # determining here, so we don't use a previous value: it is ignored).

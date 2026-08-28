@@ -116,11 +116,31 @@ func_plot_year_mb_maps <- function(year_data,
     
     
     #### MEASUREMENT PERIOD - ANNUAL, WITH STAKES ####
-    # Also RMS, with LOO RMS in addition if available
-    rms_txt <- paste0("RMS: ", sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.")
-    if (!is.null(year_data$global_loo_rms)) {
-      rms_txt <- paste0(rms_txt, " (LOO: ", sprintf(run_params$output_fmt1, year_data$global_loo_rms*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.)")
+    # Also RMS, with LOO RMS in addition if available and unweighted
+    # (arithmetic) RMS if the main one is area-weighted
+    if (year_data$annual_bias_weighted_logi) {
+      if (!is.null(year_data$global_loo_rms)) { # Weighted, LOO and unweighted RMS
+        rms_txt <- paste0("RMS (", run_params$output_unit, " w.e.): ",
+                          sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$weighted_rms*run_params$output_mult/1e3),
+                          " (LOO: ", sprintf(run_params$output_fmt1, year_data$weighted_loo_rms*run_params$output_mult/1e3), " -",
+                          " Unweighted: ", sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms*run_params$output_mult/1e3), ")")
+      } else { # Weighted and unweighted RMS
+        rms_txt <- paste0("RMS (", run_params$output_unit, " w.e.): ",
+                          sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$weighted_rms*run_params$output_mult/1e3),
+                          " (Unweighted: ", sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms*run_params$output_mult/1e3), ")")
+      }
+    } else { # Unweighted and LOO RMS (in this case, weighted and unweighted are the same because weights of 1.0 are used for all stakes).
+      if (!is.null(year_data$global_loo_rms)) {
+        rms_txt <- paste0("RMS (", run_params$output_unit, " w.e.): ",
+                          sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms*run_params$output_mult/1e3),
+                          " (LOO: ", sprintf(run_params$output_fmt1, year_data$global_loo_rms*run_params$output_mult/1e3), ")")
+      } else { # Unweighted RMS only
+        rms_txt <- paste0("RMS: ",
+                          sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.")
+      }
     }
+    
+    
     plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult / 1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -173,7 +193,16 @@ func_plot_year_mb_maps <- function(year_data,
     
     
     #### MEASUREMENT PERIOD - ANNUAL CORRECTED, WITH STAKES ####
-    rmse_bandcorr <- sqrt(mean((year_data$massbal_annual_meas_cur$massbal_meas_standardized - extract(year_data$massbal_annual_maps$meas_period_corr, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear")[,1])^2))
+    global_rmse_bandcorr   <- sqrt(mean((year_data$massbal_annual_meas_cur$massbal_meas_standardized - extract(year_data$massbal_annual_maps$meas_period_corr, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear")[,1])^2))
+    weighted_rmse_bandcorr <- sqrt(mean(year_data$massbal_annual_meas_cur$area_weight*((year_data$massbal_annual_meas_cur$massbal_meas_standardized - extract(year_data$massbal_annual_maps$meas_period_corr, cbind(year_data$massbal_annual_meas_cur$x, year_data$massbal_annual_meas_cur$y), method = "bilinear")[,1])^2)))
+    if (year_data$annual_bias_weighted_logi) {
+      rms_txt <- paste0("RMS (", run_params$output_unit, " w.e.): ",
+                        sprintf(run_params$output_fmt1, weighted_rmse_bandcorr*run_params$output_mult/1e3),
+                        " (Unweighted: ", sprintf(run_params$output_fmt1, global_rmse_bandcorr*run_params$output_mult/1e3), ")")
+    } else {
+      rms_txt <- paste0("RMS: ",
+                        sprintf(run_params$output_fmt1, global_rmse_bandcorr*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.")
+    }
     plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult / 1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -188,7 +217,7 @@ func_plot_year_mb_maps <- function(year_data,
                                           x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
       annotation_custom(grobTree(textGrob(bquote(bold(b[n]*" = "*.(mb_meas_corr_annual_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                           x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-      annotation_custom(grobTree(textGrob(paste0("RMS: ", sprintf(run_params$output_fmt1, rmse_bandcorr * run_params$output_mult/1e3), " ", run_params$output_unit, " w.e."),
+      annotation_custom(grobTree(textGrob(rms_txt,
                                           x = 0.05, y=y_line4, hjust = 0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
       labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
            subtitle = " ") +
@@ -253,8 +282,15 @@ func_plot_year_mb_maps <- function(year_data,
     
     
     
-    
     #### MEASUREMENT PERIOD - WINTER, WITH WINTER STAKES ####
+    if (year_data$winter_bias_weighted_logi) {
+      rms_txt <- paste0("RMS (", run_params$output_unit, " w.e.): ",
+                        sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$weighted_rms_winter*run_params$output_mult/1e3),
+                        " (Unweighted: ", sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms_winter*run_params$output_mult/1e3), ")")
+    } else {
+      rms_txt <- paste0("RMS: ",
+                        sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms_winter*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.")
+    }
     plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult/1000)) +
       geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
@@ -269,7 +305,7 @@ func_plot_year_mb_maps <- function(year_data,
                                           x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
       annotation_custom(grobTree(textGrob(bquote(bold(b[w]*" = "*.(mb_meas_winter_lab)*" "*.(run_params$output_unit)*" w.e.")),
                                           x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-      annotation_custom(grobTree(textGrob(paste0("RMS: ", sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms_winter*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e."),
+      annotation_custom(grobTree(textGrob(rms_txt,
                                           x = 0.05, y=y_line4, hjust = 0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
       labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
            subtitle = " ") +
