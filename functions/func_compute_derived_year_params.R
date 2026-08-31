@@ -18,7 +18,6 @@ func_compute_derived_year_params <- function(year_data, year_cur_params, run_par
   
   
   
-  
   # Compute start and end of current hydrological year.
   # In the Northern Hemisphere the hydrological year starts on 01 Oct YYYY-1 at 00:00 and ends on 01 Oct YYYY at 00:00.
   # In the Southern Hemisphere the hydrological year starts on 01 Apr YYYY-1 at 00:00 and ends on 01 Apr YYYY at 00:00.
@@ -40,10 +39,17 @@ func_compute_derived_year_params <- function(year_data, year_cur_params, run_par
   }
   
   
+  
+  # Pick year to start the data.frame of the daily parameter values.
+  # EXPERIMENTAL WIP DEV: that df does not cover just the two calendar years
+  # (YYYY-1 to YYYY), but supports a multi-year stake.
+  daily_df_start_year <- min(c(year_data$year_cur-1,
+                               as.integer(format(year_data$massbal_annual_meas_cur$start_date, "%Y"))), na.rm = T)
+  
   # Compute daily precipitation summer factor following the user-selected method.
-  # We compute it over the full, actual period (YYYY-1/01/01 to YYYY/12/31), which is sure
+  # We compute it over the full, actual period (<daily_df_start_year>/01/01 to YYYY/12/31), which is sure
   # to include the full simulation period and also takes care of leap years.
-  days_seq <- seq.Date(as.Date(paste(year_data$year_cur-1, "01", "01", sep = "/")),
+  days_seq <- seq.Date(as.Date(paste(daily_df_start_year, "01", "01", sep = "/")),
                        as.Date(paste(year_data$year_cur, "12", "31", sep = "/")),
                        by = "1 day")
   year_cur_params$params_daily_df <- data.frame(date             = days_seq,
@@ -63,16 +69,16 @@ func_compute_derived_year_params <- function(year_data, year_cur_params, run_par
     # . With daily linear interpolation from one month midpoint to the next.
   } else {
     
-    # In a single line we compute the DOY of each month mid-point, for two
-    # consecutive years (DOYs do not reset, so they go up to ~730).
-    month_dmid <- as.integer(format(c(as.Date(paste(year_data$year_cur-1, sprintf("%02d", 1:12), c(15,14,rep(15,10)), sep = "/")),
-                                      as.Date(paste(year_data$year_cur, sprintf("%02d", 1:12), c(15,14,rep(15,10)), sep = "/"))), "%j")) +
-      c(rep(0, 12), rep(as.integer(format(as.Date(paste0(year_data$year_cur-1, "/12/31")), "%j")), 12))
+    # Compute the id of each month mid-point.
+    month_dmid <- which(format(days_seq, "%m/%d") %in% c("01/15", "02/14", "03/15",
+                                                         "04/15", "05/15", "06/15",
+                                                         "07/15", "08/15", "09/15",
+                                                         "10/15", "11/15", "12/15"))
     
-    # Prepare the series to be interpolated (over the two years that we pick).
-    prec_summer_fact <- rep(year_cur_params$prec_summer_fact, 2)
-    prec_elegrad     <- rep(year_cur_params$prec_elegrad, 2)
-    temp_elegrad     <- rep(year_cur_params$temp_elegrad, 2)
+    # Prepare the series to be interpolated (over the number of years that we pick, usually 2 except when there are multi-anual stakes).
+    prec_summer_fact <- rep(year_cur_params$prec_summer_fact, year_data$year_cur-daily_df_start_year+1)
+    prec_elegrad     <- rep(year_cur_params$prec_elegrad, year_data$year_cur-daily_df_start_year+1)
+    temp_elegrad     <- rep(year_cur_params$temp_elegrad, year_data$year_cur-daily_df_start_year+1)
     
     
     # Do the linear interpolation. rule = 2 means the values at the ends

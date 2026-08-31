@@ -145,7 +145,9 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
 
     * Support for multiple measurements throughout the year
     
-    * Optional clustering of measurements to improve spatial representativity
+    * Support for multi-annual observation intervals
+    
+    * Optional calculations to improve spatial representativity of the measured points: (1) distance-based clustering, (2) Voronoi-based area weighting
 
     * Support for accumulation measurements with no reference surface (unknown starting date)
     
@@ -194,13 +196,11 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
 
 * Measured points are considered spatially fixed during their observation period - intra-annual displacement due to ice flow is ignored
 
-* The simulation is performed year by year - point measurements collected at intervals of two or more years are not supported for model calibration
-
 * The melt model is a simple Enhanced Temperature Index formula based on daily mean air temperature - potentially unsuitable at very high altitude sites with a radiation-dominated melting regime
 
 * Melt of a debris-covered ice surface is rather simplified, with a uniform reduction factor
 
-* Only a limited number of geographic projections are supported: Universal Transverse Mercator (UTM) is strongly preferred, other projected coordinate systems might also work
+* The workflow is organized around annual mass balance - calculations may fail for glaciers with no well-defined accumulation and ablation seasons (e.g., close to the Equator)
 
 
 

@@ -46,7 +46,7 @@ func_massbal_model <- function(run_params,
   
   # Select the correct date range for the data.frame with the daily-interpolated parameters:
   # prec_summer_fact, prec_elegrad, and temp_elegrad.
-  # params_daily_df_sel is temporally aligned with weather_series_cur
+  # params_daily_df_sel is temporally aligned with weather_series_cur.
   id_summer_fact_bounds <- match(weather_series_cur$timestamp[c(1, nrow(weather_series_cur))], year_cur_params$params_daily_df$date)
   params_daily_df_sel   <- year_cur_params$params_daily_df[id_summer_fact_bounds[1]:id_summer_fact_bounds[2],]
   

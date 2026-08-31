@@ -4,11 +4,17 @@
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
 #                 This file contains the loading routine for the glacier vector outlines.         #
-#                 At the moment only XYZN and SHP outlines are supported.                         #
+#                 This supports all formats handled by GDAl, plus the custom XYZN format.         #
 #                 Each outline is loaded only once and recycled as needed in the closest years    #
 #                 which don't have their own outline.                                             #
-#                 Vector outlines are used only for the plots, not for the processing.            #
 ###################################################################################################
+
+
+# Vector outlines are used:
+# (1) to extract the DEM (glacierized area) from the DHM
+# (2) for Voronoi weights calculation
+# (3) to create the smooth mask of snow distribution which converges to 1.0 far from the glacier
+# (4) for map plots
 
 func_load_outlines <- function(run_params) {
   

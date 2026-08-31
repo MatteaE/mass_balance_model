@@ -128,6 +128,13 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
   niter <- 2
   while ((abs(bias_cur) > run_params$optim_bias_threshold) && (niter < run_params$optim_max_iter)) {
     bias_slope <- (bias_cur - bias_prev) / (corr_fact_cur - corr_fact_prev)
+    
+    if (bias_slope == 0) {
+      func_customlog("Year ", year_data$year_cur, ": encountered zero gradient in the mass balance optimization.", level = 2)
+      func_customlog("This is highly unusual, please check the input data carefully.", level = 0)
+      func_stop()
+    }
+    
     bias_prev <- bias_cur
     corr_fact_prev <- corr_fact_cur
     corr_fact_cur <- corr_fact_cur - (bias_cur / bias_slope) # Apply linear correction with the computed derivative.
