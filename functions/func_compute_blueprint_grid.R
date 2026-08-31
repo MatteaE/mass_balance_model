@@ -12,16 +12,40 @@ func_compute_blueprint_grid <- function(run_params,
                                         data_dhms) {
   
   # Find largest extent and most common resolution.
+  res_all    <- func_get_mode(c(sapply(data_surftype$grids, "xres"), sapply(data_dhms$elevation, "xres")))
+  res_ndec   <- func_count_decimals(res_all)
+  
+  if (res_ndec > 3) {
+    func_customlog("The computed grid resolution is ", sprintf(paste0("%.", res_ndec, "f"), res_all), " which has more than three decimal places.", level = 1)
+    func_customlog("This can produce errors in the grid calculations. Resolution will be rounded to three decimal places.", level = 0)
+    res_all <- round(res_all, 3)
+  }
+  
+  crs_all    <- run_params$grids_crs_epsg
+  
   xmin_all   <- min(c(sapply(data_surftype$grids, "xmin"), sapply(data_dhms$elevation, "xmin")))
   xmax_all   <- max(c(sapply(data_surftype$grids, "xmax"), sapply(data_dhms$elevation, "xmax")))
   ymin_all   <- min(c(sapply(data_surftype$grids, "ymin"), sapply(data_dhms$elevation, "ymin")))
   ymax_all   <- max(c(sapply(data_surftype$grids, "ymax"), sapply(data_dhms$elevation, "ymax")))
-  extent_all <- ext(xmin_all, xmax_all, ymin_all, ymax_all)
-  res_all    <- func_get_mode(c(sapply(data_surftype$grids, "xres"), sapply(data_dhms$elevation, "xres")))
-  crs_all    <- run_params$grids_crs_epsg
   
-  # This grid will be used as reference for extent and resolution.
+  # In case of inconsistent extent vs resolution (e.g. extent from 0 to 10
+  # and resolution of 3), rast() will give priority to the resolution, and compute
+  # the closest matching extent - thus, the output extent could sometimes be smaller thanù
+  # expected (e.g., with resolution = 3, an extent of 0 to 10 would become 0 to 9).
+  # So, we compute the proper matching extent here.
+  xmax_all   <- xmin_all + ceiling((xmax_all-xmin_all)/res_all)*res_all
+  ymax_all   <- ymin_all + ceiling((ymax_all-ymin_all)/res_all)*res_all
+  extent_all <- ext(xmin_all, xmax_all, ymin_all, ymax_all)
+  
+  # This blueprint grid will be used as reference for extent and resolution.
   raster_blueprint <- rast(ext = extent_all, resolution = res_all, crs = crs_all)
   
-  return(raster_blueprint)
-} 
+  # Compute final grid parameters for the current model run.
+  run_params$grid_nrow       <- nrow(raster_blueprint)
+  run_params$grid_ncol       <- ncol(raster_blueprint)
+  run_params$grid_cell_size  <- xres(raster_blueprint)
+  run_params$grid_ncells     <- run_params$grid_nrow * run_params$grid_ncol 
+  
+  return(list(raster_blueprint = raster_blueprint,
+              run_params       = run_params))
+}

@@ -20,13 +20,16 @@ func_load_data_all <- function(run_params) {
   
   data_all <- list()
   
+  # Load gridded data.
   data_all$data_surftype              <-   func_load_surftype_grids(run_params)
   data_all$data_outlines              <-   func_load_outlines(run_params)
   data_all$data_dhms                  <-   func_load_elevation_grids(run_params)
   
   
-  # Check and if needed resample the elevation / surface type grids, for alignment.
-  data_all$raster_blueprint           <-   func_compute_blueprint_grid(run_params, data_all$data_surftype, data_all$data_dhms)
+  # Check and if needed resample the elevation / surface type grids, for consistent processing over a same grid.
+  blueprint_l                         <-   func_compute_blueprint_grid(run_params, data_all$data_surftype, data_all$data_dhms)
+  data_all$raster_blueprint           <-   blueprint_l$raster_blueprint
+  run_params                          <-   blueprint_l$run_params # Updated with the grid parameters of the computed blueprint.
   data_all                            <-   func_check_resample_grids(run_params, data_all)
   
   # Check whether the model domain is in the Northern or Southern Hemisphere.
@@ -35,6 +38,7 @@ func_load_data_all <- function(run_params) {
   run_params                          <-   func_check_north_south(data_all$raster_blueprint,
                                                                   run_params)
   
+  # Load meteorological data.
   data_all$data_weather               <-   func_load_weather(run_params)
   
   # Compute DEMs from DHMs and outlines.
@@ -43,7 +47,10 @@ func_load_data_all <- function(run_params) {
   # Fix surface type in case it is inconsistent with the DEM.
   data_all$data_surftype              <-   func_repair_surface_type(run_params, data_all$data_dems, data_all$data_surftype)
   
+  # Load radiation grids (or from RData file).
   data_all$data_radiation             <-   func_load_radiation_grids(run_params, data_all$raster_blueprint)
+  
+  # Load mass balance measurements.
   data_all$data_massbalance_annual    <-   func_load_massbalance_measurements(run_params, "annual", data_all$data_dhms)
   data_all$data_massbalance_winter    <-   func_load_massbalance_measurements(run_params, "winter", data_all$data_dhms)
   

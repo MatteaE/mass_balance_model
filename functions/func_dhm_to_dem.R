@@ -14,6 +14,10 @@
 # This means that elevation_grid_id is no longer enough,
 # we need to have dhm_grid_id and dem_grid_id.
 
+# The function also checks if any DEM has glacierized cells on
+# the grid borders - if any found, issue a warning (anomalies in
+# the mass balance are possible in this case, due to avalanche routing).
+
 func_dhm_to_dem <- function(run_params,
                             data_dhms,
                             data_outlines) {
@@ -26,7 +30,7 @@ func_dhm_to_dem <- function(run_params,
                     no_glacier_cell_ids  = list(),
                     elevation_bands_ela  = list(),
                     elevation_bands_plot = list())
-
+  
   # Algorithm:
   #   find all unique combinations of dhms/outlines which are actually present:
   #     unique(paste(data_dhms$grid_year_id, data_outlines$outline_year_id))
@@ -48,6 +52,17 @@ func_dhm_to_dem <- function(run_params,
     dhm_id                                            <- as.integer(str_split(dhm_outline_combinations_unique[dem_id], fixed(" "))[[1]][1])
     outline_id                                        <- as.integer(str_split(dhm_outline_combinations_unique[dem_id], fixed(" "))[[1]][2])
     dem_cur                                           <- mask(data_dhms$elevation[[dhm_id]], vect(data_outlines$outlines[[outline_id]]), touches = FALSE)
+    
+    # Check for glacierized cells on the border.
+    dem_border_values <- dem_cur[c(1:run_params$grid_ncol,
+                                  run_params$grid_ncells - run_params$grid_ncol + 1:run_params$grid_ncol,
+                                  seq(1,run_params$grid_ncells,run_params$grid_ncol),
+                                  seq(run_params$grid_ncol,run_params$grid_ncells,run_params$grid_ncol))][,1]
+    if (!all(is.na(dem_border_values))) {
+      func_customlog("DEM grid ", dem_id, " (DHM id ", dhm_id, ", outline id ", outline_id, "): the glacier touches the grid border.", level = 1)
+      func_customlog("This is strongly not recommended and could lead to unexpected mass balance values. Consider extending the border area of the elevation grid.", level = 0)
+    }
+    
     data_dems$elevation[[dem_id]]                     <- dem_cur
     dem_cur_values                                    <- values(dem_cur)
     cur_combination_year_ids                          <- which(dhm_outline_combinations == dhm_outline_combinations_unique[dem_id])
@@ -62,7 +77,7 @@ func_dhm_to_dem <- function(run_params,
     # and also a re-classified raster with elevation
     # classified in user-defined elevation bands (useful for
     # the calculation of the equilibrium line altitude).
-      
+    
     # Glacierized and non-glacierized cells.
     glacier_ids_logi                        <- is.na(dem_cur_values)
     data_dems$glacier_cell_ids[[dem_id]]    <- which(!glacier_ids_logi)

@@ -130,7 +130,7 @@ func_setup_winter_probes_dist <- function(year_data,
   
   
   # Here we possibly reduce variability of large-scale variability from winter probes
-  # (probes_snowdist_fact < 1; it makes sense if there are probes affected by avalanches).
+  # (if probes_snowdist_fact < 1; it makes sense if there are probes affected by avalanches).
   dist_probes_mean <- mean(values(dist_probes_r, mat = F))
   if (is.na(dist_probes_mean)) {
     func_customlog("There are still NA values in the map of snow distribution, please investigate.", level = 2)

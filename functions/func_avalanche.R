@@ -31,7 +31,12 @@ func_avalanche <- function(run_params, grids_avalanche_cur, mass_initial_values,
   # for performance (about 5000 times faster than pure R).
   # An R version is in file "func_avalanche_gruber.R",
   # to use it set run_params$avalanche_routine_cpp to FALSE.
-  transport_deposit_mass_chosen <- ifelse(run_params$avalanche_routine_cpp == TRUE, transport_deposit_mass, transport_deposit_mass_R)
+  if (run_params$avalanche_routine_cpp == TRUE) {
+    transport_deposit_mass_chosen <- transport_deposit_mass
+  } else {
+    transport_deposit_mass_chosen <- transport_deposit_mass_R
+  }
+  
   values(deposition) <- transport_deposit_mass_chosen(grids_avalanche_cur$elevation_sorted_ids,
                                                       run_params$grid_ncol,
                                                       as.numeric(values(deposition)),

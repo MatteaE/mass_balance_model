@@ -40,9 +40,17 @@ func_massbal_postprocess <- function(year_data,
     # including the bias correction in elevation bands.
     # We assign the correction to the melt component,
     # accumulation stays the same.
-    mb_band_bias <- year_data$massbal_annual_values[["meas_period.mean"]] - year_data$massbal_annual_values[["meas_period_corr.mean"]]
+    mb_band_bias      <- year_data$massbal_annual_values[["meas_period.mean"]] - year_data$massbal_annual_values[["meas_period_corr.mean"]]
     mb_band_corr_fact <- (year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[2]] - year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[1]] + mb_band_bias) / (year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[2]] - year_data$mod_output_annual_cur$gl_melt_cumul[year_data$massbal_annual_meas_period_ids[1]])
-    year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr <- year_data$mod_output_annual_cur$gl_melt_cumul * mb_band_corr_fact
+    
+    # mb_band_corr_fact could theoretically be NaN/Inf in
+    # edge cases with zero melt over the whole period.
+    # In that case, we force it to 1.0 with a warning.
+    if (!is.finite(mb_band_corr_fact)) {
+      mb_band_corr_fact <- 1.0
+      func_customlog("Year ", year_data$year_cur, ": encountered non-finite factor in the elevation band correction. Falling back to no correction...", level = 1)
+    }
+    year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr    <- year_data$mod_output_annual_cur$gl_melt_cumul * mb_band_corr_fact
     year_data$mod_output_annual_cur$gl_massbal_cumul_bandcorr <- year_data$mod_output_annual_cur$gl_accum_cumul - year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr
   }
   
@@ -156,7 +164,7 @@ func_massbal_postprocess <- function(year_data,
   #### (8) Calculate vertical ablation gradients ####
   # Conditions to do this:
   # - there are at least 2 annual stakes which have negative measured-period mass balance in both measurements (standardized) and model
-  # - those stakes have at least 50 m vertical elevation span (z_dem)
+  # - those stakes have at least 20 m vertical elevation span (z_dem)
   # Units are m w.e. / m asl
   year_data$abl_grad_meas <- NA_real_
   year_data$abl_grad_mod  <- NA_real_
@@ -167,7 +175,7 @@ func_massbal_postprocess <- function(year_data,
     if (length(stakes_cand_ids) > 1) {
       
       # Require at least 1 m vertical coverage of stakes to compute gradients.
-      if (diff(range(year_data$massbal_annual_meas_cur$z_dem[stakes_cand_ids])) > 1) {
+      if (diff(range(year_data$massbal_annual_meas_cur$z_dem[stakes_cand_ids])) > 20) {
         
         meas_lm <- lm(formula = massbal_meas_standardized~z_dem,
                       data = year_data$massbal_annual_meas_cur)
@@ -186,11 +194,11 @@ func_massbal_postprocess <- function(year_data,
           func_customlog("Modeled gradient: ", sprintf("%.4f", year_data$abl_grad_mod), " m w.e. / m asl", level = 0)
         }
         
-      } else { # End if there is a vertical range of at least 50 m in the selected ablation stakes. Else warning.
+      } else { # End if there is a vertical range of at least 20 m in the selected ablation stakes. Else warning.
         
         func_customlog("Year ", year_data$year_cur, ": point measurements are insufficient to calculate ablation gradients.", level = 1) 
         
-      } # End else there is not a 50 m vertical range in the selected ablation stakes
+      } # End else there is not a 20 m vertical range in the selected ablation stakes
       
     } # End if there are at least 2 stakes with actual ablation (modeled and measured)
   } # End if there are at least 2 annual mass balance values

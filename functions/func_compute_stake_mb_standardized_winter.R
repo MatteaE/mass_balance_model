@@ -46,7 +46,7 @@ func_compute_stake_mb_standardized_winter <- function(year_data,
     # NOTE: massbal_winter_meas_period_ids are the ids
     # of the overall winter measurement period w.r.t.
     # the annual time series, we have computed those
-    # within func_extract_massbal_maps_winter().
+    # within func_extract_model_maps_winter().
     stake_mod_mb_measperiod_start <- stakes_winter_mod[year_data$massbal_winter_meas_period_ids[1], stake_id]
     stake_mod_mb_stake_start      <- stakes_winter_mod[stakes_winter_start_ids_wrt_annual[stake_id], stake_id]
     stake_mod_mb_stake_end        <- stakes_winter_mod[stakes_winter_end_ids_wrt_annual[stake_id], stake_id]

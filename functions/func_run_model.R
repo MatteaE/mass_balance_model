@@ -27,6 +27,13 @@ func_run_model <- function(run_params) {
   }
   
   
+  # Load the notifier package early, on its own, so that func_stop()
+  # can attempt a notification even if it is triggered by one of the
+  # very first checks below (before func_load_packages() runs).
+  # If notifier is missing, func_load_packages() will catch and report that properly later.
+  suppressPackageStartupMessages(try(require(notifier, character.only = FALSE, quietly = TRUE), silent = TRUE))
+  
+  
   # Check that we have at least the name of the glacier in the parameters.
   if (is.null(run_params$name_glacier)) {
     txt <- "Parameter name_glacier is not defined. Please check your file set_params.R."
@@ -71,7 +78,7 @@ func_run_model <- function(run_params) {
   if (length(setdiff(output_lf, "logs")) > 0) {
     if (!is.null(run_params$overwrite_output) && (run_params$overwrite_output == FALSE)) {
       func_customlog("Output destination already exists. Please move, remove or rename it before running the model.", level = 2)
-      fsm()
+      func_stop()
     } else {
       func_customlog("Output destination already exists. Old files will be overwritten.", level = 1)
     }
@@ -131,16 +138,13 @@ func_run_model <- function(run_params) {
                                                                                       run_params)
   }
   run_params$mb_colorscale_breaks <- run_params$mb_colorscale_breaks * run_params$mb_colorscale_multiplier
-  
-  # Compute global grid parameters (numbers of cells and cell size).
-  run_params <- func_compute_grid_parameters(run_params, data_all$data_dhms)
-  
+
+    
   # Estimate (if missing) three parameters which depend on the DEM:
   # weather_max_precip_ele, elevation_effect_threshold and initial_snowline_elevation.
   run_params <- func_compute_altitude_params(run_params, data_all$data_dems)
   
-  # Estimate (if missing) the max avalanche deposition (kg m-2),
-  # it depends somewhat on the amounts of accumulation.
+  # Estimate (if missing) the max avalanche deposition (kg m-2).
   if (is.na(run_params$deposition_mass_lim)) {
     run_params <- func_compute_deposition_lim(run_params, data_all$data_dems, data_all$data_weather)
   }
@@ -286,13 +290,16 @@ func_run_model <- function(run_params) {
   cat("\n\n")
   
   
-  # Stop logger -------------------------------------------------------------------------------------
+  # Stop logger -----------------------------------------------------------------------------------
   sink()
   close(logcon)
   
-  notify("Run finished successfully ✅",
-         title = paste0("DMBSim ", run_params$dmbsim_version),
-         image = normalizePath("icons/icon64.png"))
+  
+  # Send success notification ---------------------------------------------------------------------
+  try(notify("Run finished successfully ✅",
+           title = paste0("DMBSim ", run_params$dmbsim_version),
+           image = normalizePath("icons/icon64.png")),
+      silent = TRUE)
   
   
   

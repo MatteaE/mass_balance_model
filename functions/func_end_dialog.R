@@ -42,13 +42,13 @@ func_end_dialog <- function(run_params,
         
         # There are 2-10 warnings.
         if (warnings_n > 1) {
-        msg_txt <- paste0(msg_txt,
-                          "<p><b>⚠️ There were ", warnings_n, " warnings:</b></p>",
-                          "<p>(1) ", warnings_char[1],
-                          paste0(paste0("</p><p>(", 2:warnings_n, ") "), warnings_char[2:warnings_n], collapse = ""),
-                          "</p>")
-        
-        # There is exactly 1 warning.
+          msg_txt <- paste0(msg_txt,
+                            "<p><b>⚠️ There were ", warnings_n, " warnings:</b></p>",
+                            "<p>(1) ", warnings_char[1],
+                            paste0(paste0("</p><p>(", 2:warnings_n, ") "), warnings_char[2:warnings_n], collapse = ""),
+                            "</p>")
+          
+          # There is exactly 1 warning.
         } else {
           msg_txt <- paste0(msg_txt,
                             "<p><b>⚠️ There was ", warnings_n, " warning:</b></p>",
@@ -74,11 +74,18 @@ func_end_dialog <- function(run_params,
     msg_txt <- "<p><b>❌ Run failed</b></p>"
     # This should be always TRUE, but let's be careful.
     if (length(fatal_char) > 0) {
-      msg_txt <- paste0(msg_txt,
-                        "<p><b>The raised error was:</b></p>",
-                        "<p>", fatal_char[1], "</p>",
-                        "<p><b>Check out the log file for full information:</b></p>",
-                        "<p>", logfile, "</p>")
+      if (!is.null(logfile)) {
+        msg_txt <- paste0(msg_txt,
+                          "<p><b>The raised error was:</b></p>",
+                          "<p>", fatal_char[1], "</p>",
+                          "<p><b>Check out the log file for full information:</b></p>",
+                          "<p>", logfile, "</p>")
+      } else {
+        msg_txt <- paste0(msg_txt,
+                          "<p><b>The raised error was:</b></p>",
+                          "<p>", fatal_char[1], "</p>",
+                          "<p><b>No log file was generated</b></p>")
+      }
     }
     
   }
