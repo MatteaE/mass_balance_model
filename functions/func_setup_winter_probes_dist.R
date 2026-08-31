@@ -27,6 +27,8 @@ func_setup_winter_probes_dist <- function(year_data,
   year_data$process_winter <- (year_data$nstakes_winter > 0)
   
   
+  # This is TRUE if the snow distribution is computed now and is not uniformly 1.0.
+  snowdist_computed_logi <- FALSE
   
   # Did the user instruct to use an external map of snow distribution?
   # If yes, try to load it and project it to the current DHM grid.
@@ -55,14 +57,14 @@ func_setup_winter_probes_dist <- function(year_data,
     cat("Resampling snow distribution map to the current grid...\n")
     tryCatch({
       dist_probes_r <- project(dist_probes_raw_r,
-                             data_dhms$elevation[[year_data$dhm_grid_id]],
-                             method = "bilinear")
-      },
-      error = function(err) {
-        func_customlog("Year ", year_data$year_cur, ": error resampling the user-defined map of snow distribution: ", probes_fp, level = 2)
-        func_stop()
-      })
-             
+                               data_dhms$elevation[[year_data$dhm_grid_id]],
+                               method = "bilinear")
+    },
+    error = function(err) {
+      func_customlog("Year ", year_data$year_cur, ": error resampling the user-defined map of snow distribution: ", probes_fp, level = 2)
+      func_stop()
+    })
+    
     
     
     dist_probes_val <- values(dist_probes_r, mat = F)
@@ -79,8 +81,6 @@ func_setup_winter_probes_dist <- function(year_data,
       dist_probes_r <- subst(dist_probes_r, NA, 1.0)
     }
     
-    
-    
     # Else: was not provided an external map of snow distribution.
   } else {
     
@@ -92,28 +92,9 @@ func_setup_winter_probes_dist <- function(year_data,
       dist_probes_raw_r <- func_snowdist_from_probes(year_data, run_params, data_dhms)
       
       # Normalize to arithmetic average = 1 on glacier.
-      dist_probes_norm_r <- dist_probes_raw_r / mean(dist_probes_raw_r[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
+      dist_probes_r <- dist_probes_raw_r / mean(dist_probes_raw_r[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
       
-      # Apply a smooth mask to transition to uniform (1.0) distribution away from glacier
-      # (the snow probes do not give information on what is happening away from the glacier;
-      # this only has a second-order effect via the avalanches).
-      # We leave the probes distribution untouched within 100 m of the glacier outline.
-      # We then arrive at uniform distribution 500 m away from the glacier outline.
-      # "od" = "offglacier_distance"
-      od_th1 <- 100
-      od_th2 <- 500
-      
-      # Ensure that the CRS is the same - a different definition could kill the distance() call.
-      outl_v          <- set.crs(vect(data_outlines$outlines[[year_data$outline_id]]), crs(dist_probes_norm_r))
-      offglacier_dist <- distance(dist_probes_norm_r, outl_v)
-      od1 <- classify(offglacier_dist, rbind(c(-Inf, od_th1, od_th1),
-                                             c(od_th2, Inf, od_th2)))
-      
-      # This is the weight of the constant value we use (1.0):
-      # 1.0 farther than od_th2, 0.0 (no weight) within od_th1,
-      # sinusoidally interpolated in between.
-      od2 <- sin((od1 - od_th1) * (pi/2) / (od_th2 - od_th1))
-      dist_probes_r <- 1.0 * od2 + dist_probes_norm_r * (1-od2)
+      snowdist_computed_logi <- TRUE
       
       # If not, apply uniform snow distribution (for large-scale
       # variability only - then there is still the topographic distribution!)    
@@ -126,21 +107,58 @@ func_setup_winter_probes_dist <- function(year_data,
   } # End else was not provided an external map of snow distribution.
   
   
-  # Here we do have a map of snow distribution in dist_probes_r.
-  
-  
-  # Here we possibly reduce variability of large-scale variability from winter probes
-  # (if probes_snowdist_fact < 1; it makes sense if there are probes affected by avalanches).
-  dist_probes_mean <- mean(values(dist_probes_r, mat = F))
-  if (is.na(dist_probes_mean)) {
+  # Now we do have a map of snow distribution in dist_probes_r.
+  if (global(dist_probes_r, "anyNA")[1,1]) {
     func_customlog("There are still NA values in the map of snow distribution, please investigate.", level = 2)
     func_stop()
   }
+  
+  # Here we possibly reduce variability of large-scale distribution from winter probes
+  # (if probes_snowdist_fact < 1; it makes sense if there are probes affected by avalanches).
+  # We reduce it in a way such that the on-glacier change is independent of the extent of the
+  # off-glacier grid (otherwise, runs with different DHM extents would give different results).
+  # So, we reduce it towards the on-glacier mean. This is a real variability reduction on-glacier,
+  # but potentially introduces net biases off-glacier (if the off-glacier mean is different from
+  # the on-glacier mean, then the off-glacier cells are rather pulled towards the on-glacier mean).
+  # But the on-glacier effect is more important to get right.
+  # This calculation preserves the on-glacier mean.
   if ((is.na(run_params$probes_snowdist_fact)) || (run_params$probes_snowdist_fact < 0)) {
     func_customlog("Parameter probes_snowdist_fact must be >= 0. Provided value: ", run_params$probes_snowdist_fact, level = 2)
     func_stop()
   }
-  dist_probes_red_r <- dist_probes_mean + run_params$probes_snowdist_fact * (dist_probes_r - dist_probes_mean)
+  dist_probes_gl_mean <- mean(dist_probes_r[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
+  dist_probes_red_r   <- dist_probes_gl_mean + run_params$probes_snowdist_fact * (dist_probes_r - dist_probes_gl_mean)
+  
+  
+  # Now, if the snow distribution was computed and was not uniform 1.0, apply a smooth mask
+  # to transition the snow distribution towards 1.0 away from the glacier
+  # (the snow probes do not give information on what is happening away from the glacier;
+  # this prevents large areas with values significantly away from 1.0, which would be
+  # unjustified.
+  # This only has a second-order effect via the avalanches).
+  # We leave the probes distribution untouched within 100 m of the glacier outline.
+  # We then arrive at uniform distribution 500 m away from the glacier outline.
+  # "od" = "offglacier_distance"
+  if (snowdist_computed_logi == TRUE) {
+    
+    od_th1 <- 100
+    od_th2 <- 500
+    
+    # Ensure that the CRS is the same - a different definition could kill the distance() call.
+    outl_v          <- set.crs(vect(data_outlines$outlines[[year_data$outline_id]]), crs(dist_probes_red_r))
+    offglacier_dist <- distance(dist_probes_red_r, outl_v)
+    od1 <- classify(offglacier_dist, rbind(c(-Inf, od_th1, od_th1),
+                                           c(od_th2, Inf, od_th2)))
+    
+    # This is the weight of the constant value we use (1.0):
+    # 1.0 farther than od_th2, 0.0 (no weight) within od_th1,
+    # sinusoidally interpolated in between.
+    od2 <- sin((od1 - od_th1) * (pi/2) / (od_th2 - od_th1))
+    dist_probes_red_r <- 1.0 * od2 + dist_probes_red_r * (1-od2)
+    
+  } # End apply smooth mask to snow distribution outside glacier.
+  
+  
   
   # Normalize again to arithmetic average = 1 on glacier.
   dist_probes_norm_red_r <- dist_probes_red_r / mean(dist_probes_red_r[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
