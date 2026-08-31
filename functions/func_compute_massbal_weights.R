@@ -21,8 +21,8 @@ func_compute_massbal_weights <- function(run_params,
                                          data_dhms,
                                          data_outlines,
                                          compute_loo) {
-
-    
+  
+  
   cat("Computing weights of the", massbal_type, "mass balance points...\n")
   
   # Select winter vs annual mass balance measurements.
@@ -50,9 +50,9 @@ func_compute_massbal_weights <- function(run_params,
   ext_cur   <- ext(data_dhms$elevation[[year_data$dhm_grid_id]])
   
   # These have the same ordering as the input mass balance points.
-  voronoi_cells_main_v    <- func_compute_voronoi_cells(massbal_v,
-                                                        ext_cur,
-                                                        outl_v)
+  voronoi_cells_main_v <- func_compute_voronoi_cells(massbal_v,
+                                                     ext_cur,
+                                                     outl_v)
   # Compute areas.
   areas_main <- expanse(voronoi_cells_main_v)
   

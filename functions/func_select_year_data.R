@@ -12,7 +12,7 @@ func_select_year_data <- function(data_all,
                                   grids_static_list,
                                   year_id,
                                   run_params) {
-                                  
+  
   # Here we put all this year's data,
   # and we return this list at the end of the function.
   year_data                                 <- list()
@@ -80,7 +80,7 @@ func_select_year_data <- function(data_all,
   # Add DEM elevation of the stakes, we use it
   # instead of reported stake elevation.
   year_data$massbal_annual_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,c("x", "y")]), method = "bilinear")[,1]
-
+  
   
   stakes_winter_cells_ids <- cellFromXY(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,c("x", "y")]))
   stakes_winter_dem_values <- data_all$data_dems$elevation[[year_data$dem_grid_id]][stakes_winter_cells_ids]
@@ -96,6 +96,19 @@ func_select_year_data <- function(data_all,
   
   year_data$nstakes_annual   <- nrow(year_data$massbal_annual_meas_cur)
   year_data$nstakes_winter   <- nrow(year_data$massbal_winter_meas_cur)
+  
+  
+  # Generate unique ids for the stakes, of the form sa01 and sw01 etc., with appropriate 0-padding.
+  # These will be used internally for matching operations; it is anyway bad practice to
+  # have duplicate stake names.
+  if (year_data$nstakes_annual > 0) {
+    year_data$massbal_annual_meas_cur$id_unique <- paste0("sa", sprintf(paste0("%0", nchar(year_data$nstakes_annual), "d"),
+                                                                       1:year_data$nstakes_annual))
+  }
+  if (year_data$nstakes_winter > 0) {
+    year_data$massbal_winter_meas_cur$id_unique <- paste0("sw", sprintf(paste0("%0", nchar(year_data$nstakes_winter), "d"),
+                                                                       1:year_data$nstakes_winter))
+  }
   
   cat("Mass balance measurements available:", year_data$nstakes_annual, "annual,", year_data$nstakes_winter, "winter.\n")
   

@@ -32,7 +32,7 @@ func_plot_loo_results <- function(year_data,
   # Line and point plot of mass balance of individual stakes --------------------------------------
   # (in all model realizations, vs correction factor)
   plot_df                <- year_data$df_runs_smb
-  stakes_col_ids         <- grep("^s[0-9]+$", names(plot_df)) # Only the stakes values, which are called like s01, s123, etc.
+  stakes_col_ids         <- grep("^sa[0-9]+$", names(plot_df)) # Only the stakes values, whose columns use the unique ids: e.g. sa01, sa123, etc.
   # Compute the weighted average of the SMB at the stakes (same weights as for the bias).
   plot_df$stakes_average <- rowMeans(plot_df[,stakes_col_ids] * rep(year_data$massbal_annual_meas_cur$area_weight, each = nrow(plot_df)))
   

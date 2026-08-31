@@ -12,7 +12,7 @@ func_compute_voronoi_cells <- function(massbal_cur_v,
                                        ext_cur,
                                        outl_v) {
 
-    
+  
   # This does not keep the same ordering as massbal_cur_v,
   # so we need to use match() later.
   voronoi_cur   <- voronoi(massbal_cur_v, bnd = ext_cur)
@@ -20,8 +20,8 @@ func_compute_voronoi_cells <- function(massbal_cur_v,
   # Crop to glacierized extent.
   cells_cur     <- terra::intersect(voronoi_cur, outl_v)
   
-  cells_ids     <- match(massbal_cur_v$id,
-                         cells_cur$id)
+  cells_ids     <- match(massbal_cur_v$id_unique,
+                         cells_cur$id_unique)
   
   return(cells_cur[cells_ids,])
   

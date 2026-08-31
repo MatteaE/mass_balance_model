@@ -31,10 +31,9 @@ func_compile_df_runs_smb <- function(year_cur_params,
                                     mb_annual_hydro      = mod_output_cur$gl_massbal_cumul[year_data$id_hydro_end] - mod_output_cur$gl_massbal_cumul[year_data$id_hydro_start],
                                     mb_annual_measperiod = mb_annual_measperiod)
   
-  # Generate stake names such as s01 etc., with appropriate number of 0s to support the number of stakes.
-  stake_id_names      <- paste0("s", sprintf(paste0("%0", nchar(year_data$nstakes_annual), "d"),
-                                             1:year_data$nstakes_annual))
-  df_runs_smb[stake_id_names] <- mod_output_cur$stakes_mb_mod
+  
+  # Use the unique stake indices to refer to stakes.
+  df_runs_smb[year_data$massbal_annual_meas_cur$id_unique] <- mod_output_cur$stakes_mb_mod
   
   return(df_runs_smb)
   

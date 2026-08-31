@@ -18,10 +18,8 @@ func_compile_df_runs_biases <- function(year_data,
                                        corr_fact = corr_fact,
                                        run_type  = run_type)
   
-  # Generate stake names such as s01 etc., with appropriate number of 0s to support the number of stakes.
-  stake_id_names      <- paste0("s", sprintf(paste0("%0", nchar(year_data$nstakes_annual), "d"),
-                                             1:year_data$nstakes_annual))
-  df_runs_biases[stake_id_names] <- mod_output_cur$stakes_bias
+  # Use the unique stake indices to refer to stakes.
+  df_runs_biases[year_data$massbal_annual_meas_cur$id_unique] <- mod_output_cur$stakes_bias
   
   return(df_runs_biases)
   

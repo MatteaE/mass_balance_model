@@ -19,7 +19,7 @@ func_select_year_mb_measurements <- function(data_massbal,
   # which can be either YYYY or YYYY-1 depending on the month and the location
   # (Northern or Southern).
   end_earliest_month <- as.integer(unlist(strsplit(run_params$stake_end_earliest, "/", fixed = TRUE))[1])
-  end_latest_month   <- as.integer(unlist(strsplit(run_params$stake_end_earliest, "/", fixed = TRUE))[1])
+  end_latest_month   <- as.integer(unlist(strsplit(run_params$stake_end_latest, "/", fixed = TRUE))[1])
   
   
   # In the Northern Hemisphere, stake_end_earliest with month
