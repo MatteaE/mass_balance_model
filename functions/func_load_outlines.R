@@ -4,7 +4,7 @@
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
 #                 This file contains the loading routine for the glacier vector outlines.         #
-#                 This supports all formats handled by GDAl, plus the custom XYZN format.         #
+#                 This supports all formats handled by GDAL, plus the custom XYZN format.         #
 #                 Each outline is loaded only once and recycled as needed in the closest years    #
 #                 which don't have their own outline.                                             #
 ###################################################################################################

@@ -41,10 +41,10 @@ func_compute_derived_year_params <- function(year_data, year_cur_params, run_par
   
   
   # Pick year to start the data.frame of the daily parameter values.
-  # EXPERIMENTAL WIP DEV: that df does not cover just the two calendar years
-  # (YYYY-1 to YYYY), but supports a multi-year stake.
   daily_df_start_year <- min(c(year_data$year_cur-1,
-                               as.integer(format(year_data$massbal_annual_meas_cur$start_date, "%Y"))), na.rm = T)
+                               as.integer(format(year_data$massbal_annual_meas_cur$start_date, "%Y")),
+                               as.integer(format(year_data$massbal_winter_meas_cur$start_date, "%Y"))),
+                             na.rm = T)
   
   # Compute daily precipitation summer factor following the user-selected method.
   # We compute it over the full, actual period (<daily_df_start_year>/01/01 to YYYY/12/31), which is sure

@@ -31,7 +31,7 @@ func_compute_unknown_stakes_start_ids <- function(run_params,
     # The hydrological year always starts during calendar year YYYY-1 where YYYY
     # is the current target year.
     # In case there are multi-annual stakes, this restricts the search to the latest year.
-    stake_start_earliest_id <- max(1, which(format(weather_series_cur$timestamp, "%Y/%m/%d") == paste0(max(weather_series_cur$year)-1, "/", run_params$hydro_start_mmdd))-90)
+    stakes_start_earliest_id <- max(1, which(format(weather_series_cur$timestamp, "%Y/%m/%d") == paste0(max(weather_series_cur$year)-1, "/", run_params$hydro_start_mmdd))-90)
     
     # User-defined latest possible day for the search of
     # the start of the stake observation period, i.e. for the mass balance minimum,
@@ -42,7 +42,7 @@ func_compute_unknown_stakes_start_ids <- function(run_params,
     stakes_start_latest_id <- max(which(format(weather_series_cur$timestamp, "%m/%d") == run_params$stakes_unknown_latest_start))
     
     
-    if (!is.finite(stake_start_earliest_id) || !is.finite(stakes_start_latest_id) || (stakes_start_latest_id < stake_start_earliest_id)) {
+    if (!is.finite(stakes_start_earliest_id) || !is.finite(stakes_start_latest_id) || (stakes_start_latest_id < stakes_start_earliest_id)) {
       func_customlog("There was a problem setting the search range for the date of stakes with unknown start.", level = 2)
       func_customlog("Please check the time bounds of the simulation and the value of run_params$stakes_unknown_latest_start", level = 0)
       func_stop()
@@ -50,7 +50,8 @@ func_compute_unknown_stakes_start_ids <- function(run_params,
     
     for (stake_cur_id in stakes_start_unknown_ids) {
       # cat("Finding start date for stake", stake_cur_id, "...\n")
-      annual_stakes_start_ids_corr[stake_cur_id] <- which.min(stakes_series_mod_all[stake_start_earliest_id:stakes_start_latest_id, stake_cur_id])
+      # stakes_start_earliest_id - 1 because we do which.min() on a subset starting on stakes_start_earliest_id
+      annual_stakes_start_ids_corr[stake_cur_id] <- stakes_start_earliest_id - 1 + which.min(stakes_series_mod_all[stakes_start_earliest_id:stakes_start_latest_id, stake_cur_id])
     }
     
   }

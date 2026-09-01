@@ -65,8 +65,8 @@ func_select_year_data <- function(data_all,
   year_data$massbal_winter_meas_cur         <- data_all$data_massbalance_winter[massbal_winter_ids,] # Empty if we have no winter stakes for the year.
   
   
-  # If a stake falls outside the DEM (glacierized)
-  # cells, discard it with a warning.
+  # . Spatial bounds check ------------------------------------------------------------------------
+  # If a stake falls outside the DEM (glacierized) cells, discard it with a warning.
   stakes_annual_cells_ids   <- cellFromXY(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_annual_meas_cur[,c("x", "y")]))
   stakes_annual_dem_values  <- data_all$data_dems$elevation[[year_data$dem_grid_id]][stakes_annual_cells_ids]
   stakes_annual_outside_ids <- which(is.na(stakes_annual_dem_values))
@@ -93,6 +93,22 @@ func_select_year_data <- function(data_all,
     year_data$massbal_winter_meas_cur <- year_data$massbal_winter_meas_cur[-stakes_winter_outside_ids,]
   }
   year_data$massbal_winter_meas_cur$z_dem   <- extract(data_all$data_dems$elevation[[year_data$dem_grid_id]], as.matrix(year_data$massbal_winter_meas_cur[,c("x", "y")]), method = "bilinear")[,1]
+  
+  
+  # . Temporal bounds check for winter measurements -----------------------------------------------
+  # A winter measurement shall not span more than 365 days
+  # (the purpose of winter measurements is to calibrate
+  # the precipitation correction against a period with
+  # little to no melt - a full year is already too long).
+  ids_winter_bad <- which((year_data$massbal_winter_meas_cur$end_date - year_data$massbal_winter_meas_cur$start_date) > 365)
+  if (length(ids_winter_bad) > 0) {
+    func_customlog("Year ", year_data$year_cur, ": there are ", length(ids_winter_bad), " winter measurements with a wrong observation period (> 1 year).", level = 2)
+    func_customlog("Please fix them manually. They are:", level = 0)
+    func_print_mb_points_df(year_data$massbal_winter_meas_cur[ids_winter_bad,c("id", "start_date", "end_date", "x", "y", "z_dem", "massbal")],
+                            run_params)
+    func_stop()
+  }
+  
   
   year_data$nstakes_annual   <- nrow(year_data$massbal_annual_meas_cur)
   year_data$nstakes_winter   <- nrow(year_data$massbal_winter_meas_cur)
