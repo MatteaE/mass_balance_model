@@ -33,8 +33,11 @@ func_load_points_daily_out <- function(run_params,
     func_stop()
   }
   
-  # Read file, assign column names.
-  tryCatch({data_points_daily_out <- read.table(points_daily_path, header = FALSE, stringsAsFactors = FALSE)},
+  # Read file, assign column names ----------------------------------------------------------------
+  tryCatch({data_points_daily_out <- read.table(points_daily_path,
+                                                header = FALSE,
+                                                stringsAsFactors = FALSE,
+                                                colClasses = c("character", "character", "character"))},
            error = function(err) {
              func_customlog("Error reading file with points of daily output: ", points_daily_path, level = 2)
              func_stop()
@@ -48,6 +51,24 @@ func_load_points_daily_out <- function(run_params,
     func_stop()
   }
   names(data_points_daily_out) <- points_cols
+  
+  
+  # Validate coordinates --------------------------------------------------------------------------
+  x_orig <- data_points_daily_out$x
+  y_orig <- data_points_daily_out$y
+  
+  data_points_daily_out$x <- suppressWarnings(as.numeric(data_points_daily_out$x))
+  data_points_daily_out$y <- suppressWarnings(as.numeric(data_points_daily_out$y))
+  
+  ids_coords_bad <- which(is.na(data_points_daily_out$x) | is.na(data_points_daily_out$y))
+  if (length(ids_coords_bad) > 0) {
+    func_customlog("Found ", length(ids_coords_bad), " wrong (non-numeric) coordinate values in the file with points of daily output.", level = 2)
+    func_customlog("        Please fix the file manually: ", points_daily_path, level = 0)
+    func_customlog("        The first wrong value is: ", x_orig[ids_coords_bad[1]], " | ", y_orig[ids_coords_bad[1]],
+                   " (point id ", data_points_daily_out$id[ids_coords_bad[1]], " at line ", ids_coords_bad[1], ")", level = 0)
+    func_stop()
+  }
+  
   
   # Check if any point is outside the combined DHM extent.
   # If yes, hard stop since these are user-defined points and

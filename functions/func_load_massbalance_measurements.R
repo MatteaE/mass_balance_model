@@ -17,6 +17,7 @@ func_load_massbalance_measurements <- function(run_params,
   
   cat("  Loading", load_what, "mass balance measurements...\n")
   
+  # Check whether a mass balance data file was supplied at all ------------------------------------
   if (load_what == "annual") {
     
     # No annual measurements. Return dummy data frame for them.
@@ -62,10 +63,18 @@ func_load_massbalance_measurements <- function(run_params,
   }
   
   
-  # Read file, assign column names.
+  # Read file, assign column names ----------------------------------------------------------------
   tryCatch({data_massbalance <- read.table(massbalance_path,
                                            header = FALSE,
-                                           stringsAsFactors = FALSE)},
+                                           stringsAsFactors = FALSE,
+                                           colClasses = c("character",    # Id is a character
+                                                          "character",    # Dates start out as characters, to check their format
+                                                          "character",    # Dates start out as characters, to check their format
+                                                          "character",    # Coordinates start out as characters, to check their format
+                                                          "character",    # Coordinates start out as characters, to check their format
+                                                          "numeric",      # Provided z value can be converted to numeric, it is not used anyway
+                                                          "character",    # dh starts out as character, to check its format
+                                                          "character"))}, # density starts out as character, to check its format
            error = function(err) {
              func_customlog("Error reading the ", load_what, " mass balance file: ", massbalance_path, level = 2)
              func_stop()
@@ -74,22 +83,91 @@ func_load_massbalance_measurements <- function(run_params,
   
   massbal_cols <- c("id", "start_date", "end_date", "x", "y", "z", "dh_cm", "density")
   if (ncol(data_massbalance) != 8) {
-    func_customlog("The ", load_what, " mass balance file does not have eight columns. Please fix it: ", massbalance_path, level = 2)
-    func_customlog("Expected columns (no titles): ", paste0(massbal_cols, collapse = " | "), level = 0)
+    func_customlog("The ", load_what, " mass balance file does not have eight columns.", level = 2)
+    func_customlog("        Please fix the file manually: ", massbalance_path, level = 0)
+    func_customlog("        Expected columns (no titles): ", paste0(massbal_cols, collapse = " | "), level = 0)
     func_stop()
   }
   names(data_massbalance) <- massbal_cols
   
-  # Id should be a character.
-  data_massbalance$id <- as.character(data_massbalance$id)
-  
+  # Process columns -------------------------------------------------------------------------------
   # Convert timestamps to Date objects.
+  # Careful checks on NA - it is allowed as start date
+  # (means "automatically determine mass balance minimum"),
+  # but anything else should parse correctly.
+  # . Validate start date -------------------------------------------------------------------------
+  ids_start_date_na_before    <- which(is.na(data_massbalance$start_date))
+  start_date_orig             <- data_massbalance$start_date
   data_massbalance$start_date <- as.Date(data_massbalance$start_date, format = "%d.%m.%Y")
+  ids_start_date_na_after     <- which(is.na(data_massbalance$start_date))
+  if (length(ids_start_date_na_after) != length(ids_start_date_na_before)) {
+    wrong_ids      <- sort(setdiff(ids_start_date_na_after, ids_start_date_na_before))
+    func_customlog("Found ", length(wrong_ids), " wrong start dates in the ", load_what, " mass balance file.", level = 2)
+    func_customlog("        Please fix the file manually: ", massbalance_path, level = 0)
+    func_customlog("        The first wrong value is: ", start_date_orig[wrong_ids[1]],
+                   " (point id ", data_massbalance$id[wrong_ids[1]], " at line ", wrong_ids[1], ")", level = 0)
+    func_stop()
+  }
+  
+  # . Validate end date ---------------------------------------------------------------------------
+  end_date_orig             <- data_massbalance$end_date
   data_massbalance$end_date <- as.Date(data_massbalance$end_date, format = "%d.%m.%Y")
+  ids_end_date_na           <- which(is.na(data_massbalance$end_date))
+  if (length(ids_end_date_na) > 0) {
+    func_customlog("Found ", length(ids_end_date_na), " wrong end dates in the ", load_what, " mass balance file.", level = 2)
+    func_customlog("        Please fix the file manually: ", massbalance_path, level = 0)
+    func_customlog("        The first wrong value is: ", end_date_orig[ids_end_date_na[1]],
+                   " (point id ", data_massbalance$id[ids_end_date_na[1]], " at line ", ids_end_date_na[1], ")", level = 0)
+    func_stop()
+  }
   
-  # Compute mass balance.
-  data_massbalance$massbal <- data_massbalance$dh_cm * data_massbalance$density * 10 # 10: cm w.e. to mm w.e.
   
+  # . Validate coordinates ------------------------------------------------------------------------
+  x_orig <- data_massbalance$x
+  y_orig <- data_massbalance$y
+  
+  data_massbalance$x <- suppressWarnings(as.numeric(data_massbalance$x))
+  data_massbalance$y <- suppressWarnings(as.numeric(data_massbalance$y))
+  
+  ids_coords_bad <- which(is.na(data_massbalance$x) | is.na(data_massbalance$y))
+  if (length(ids_coords_bad) > 0) {
+    func_customlog("Found ", length(ids_coords_bad), " wrong (non-numeric) coordinate values in the ", load_what, " mass balance file.", level = 2)
+    func_customlog("        Please fix the file manually: ", massbalance_path, level = 0)
+    func_customlog("        The first wrong value is: ", x_orig[ids_coords_bad[1]], " | ", y_orig[ids_coords_bad[1]],
+                   " (point id ", data_massbalance$id[ids_coords_bad[1]], " at line ", ids_coords_bad[1], ")", level = 0)
+    func_stop()
+  }
+  
+  # . Validate altitude change and density --------------------------------------------------------
+  dh_orig <- data_massbalance$dh_cm
+  data_massbalance$dh_cm <- suppressWarnings(as.numeric(data_massbalance$dh_cm))
+  ids_dh_bad <- which(is.na(data_massbalance$dh_cm))
+  if (length(ids_dh_bad) > 0) {
+    func_customlog("Found ", length(ids_dh_bad), " wrong (non-numeric) mass balance values in the ", load_what, " mass balance file.", level = 2)
+    func_customlog("        Please fix the file manually: ", massbalance_path, level = 0)
+    func_customlog("        The first wrong value is: ", dh_orig[ids_dh_bad[1]],
+                   " (point id ", data_massbalance$id[ids_dh_bad[1]], " at line ", ids_dh_bad[1], ")", level = 0)
+    func_stop()
+  }
+  density_orig <- data_massbalance$density
+  data_massbalance$density <- suppressWarnings(as.numeric(data_massbalance$density))
+  ids_density_bad <- which(is.na(data_massbalance$density))
+  if (length(ids_density_bad) > 0) {
+    func_customlog("Found ", length(ids_density_bad), " wrong (non-numeric) density values in the ", load_what, " mass balance file.", level = 2)
+    func_customlog("        Please fix the file manually: ", massbalance_path, level = 0)
+    func_customlog("        The first wrong value is: ", density_orig[ids_density_bad[1]],
+                   " (point id ", data_massbalance$id[ids_density_bad[1]], " at line ", ids_density_bad[1], ")", level = 0)
+    func_stop()
+  }
+  
+  
+  
+  
+  # . Compute mass balance ------------------------------------------------------------------------
+  data_massbalance$massbal <- data_massbalance$dh_cm * data_massbalance$density * 10 # 10: go from cm w.e. to mm w.e.
+  
+  
+  # Spatial check on mass balance point coordinates -----------------------------------------------
   # Are there any mass balance points with coordinates outside the DHM?
   # If yes and the project uses UTM, first try to rescue them by assuming they have a wrong CRS
   # (test adjacent UTM zones as well as lon/lat). If that fails, drop them.
@@ -159,7 +237,8 @@ func_load_massbalance_measurements <- function(run_params,
   }
   
   
-  # Cluster measurements according to a user-defined distance.
+  # Cluster measurements according to a user-defined distance -------------------------------------
+  # This to improve the spatial distribution / representativity.
   # We skip this step in case we have only one measurement
   # (can be the case if we have a dummy file for winter stakes).
   if ((nrow(data_massbalance) > 1) && (run_params$stake_cluster_distance > 0)) {

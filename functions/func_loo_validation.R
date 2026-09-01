@@ -70,7 +70,7 @@ func_loo_validation <- function(run_params, year_cur_params, year_data,
   # Store this for later - number of main iterations.
   iter_prev_n <- nrow(year_data$df_runs_biases)
   
-  biases_cols_ids   <- grep("^s[0-9]+$", names(year_data$df_runs_biases))
+  biases_cols_ids   <- grep("^sa[0-9]+$", names(year_data$df_runs_biases))
   stake_biases_mat  <- as.matrix(year_data$df_runs_biases[,biases_cols_ids])
   
   # Skeleton of the output data frame with the LOO results.

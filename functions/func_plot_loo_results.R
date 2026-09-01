@@ -10,7 +10,7 @@
 func_plot_loo_results <- function(year_data,
                                   run_params) {
   plots_loo_results <- list()
-  
+  browser()
   
   base_size <- 16 # For the plot
   theme_loo_plot <- theme_bw(base_size = base_size) +
@@ -24,7 +24,8 @@ func_plot_loo_results <- function(year_data,
           legend.box.background = element_blank(),
           legend.title = element_blank(),
           legend.spacing.y = unit(0, "pt"),
-          legend.margin=margin(0,0,0,0,"pt"))
+          legend.margin=margin(0,0,0,0,"pt"),
+          legend.key = element_rect(fill = NA))
   
   
   
@@ -100,7 +101,7 @@ func_plot_loo_results <- function(year_data,
     guides(color = guide_legend(order = 1),
            linetype = guide_legend(order = 2),
            shape = guide_none()) +
-    scale_y_continuous(expand = expansion(mult = c(0.25,0.05),0)) +
+    scale_y_continuous(expand = expansion(mult = c(0.33,0.05),0)) +
     xlab("Optimization factor [-]") +
     ylab(paste0("LOO mass balance [", run_params$output_unit, " w.e.]")) +
     theme_loo_plot

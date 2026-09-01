@@ -47,7 +47,22 @@ func_process_run_params <- function(run_params) {
     func_customlog("There are ", length(run_params_required_wrongtype), " required parameters which have wrong type. Please check them in set_params.R. They are: ", paste0(run_params_required_wrongtype, collapse = ", "), level = 2)
     func_stop()
   }
+
+    
+  # Check finite values.
+  params_required_numeric_ids <- 3:length(run_params_required)
+  ids_val_bad <- which(!is.finite(unlist(run_params[run_params_required[params_required_numeric_ids]])))
+  if (length(ids_val_bad) > 0) {
+    func_customlog("There are ", length(ids_val_bad), " required parameters which have a wrong value. Please check them in set_params.R. They are: ", paste0(run_params_required[params_required_numeric_ids][ids_val_bad], collapse = ", "), level = 2)
+    func_stop()
+  }
   
+  # Check that first year is not greater than last year.
+  if (run_params$first_year > run_params$last_year) {
+    func_customlog("Parameter first_year (value: ", run_params$first_year,
+                   ") must not be greater than parameter last_year (value: ", run_params$last_year, ")", level = 2)
+    func_stop()
+  }
   
   
   # Check and set OPTIONAL parameters -------------------------------------------------------------

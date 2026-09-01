@@ -53,11 +53,9 @@ func_load_radiation_grids <- function(run_params,
                                                        run_params$filename_radiation_suffix,
                                                        "(\\", paste0(grid_exts, collapse = "$)|(\\"), "$)"))
   
-  grid_exts_found <- unique(sapply(strsplit(grid_files, ".", fixed = T), `[[`, 2))
-  if (length(grid_exts_found) > 1) {
-    func_customlog("Inconsistent file types found in the radiation folder: ", rad_abspath, ". Please check it.\n", level = 2)
-    func_stop()
-  }
+  
+
+  # Check number of found grids.
   if (length(grid_files) != 365) {
     if (length(grid_files) == 0) {
       func_customlog("No radiation grids found in the radiation folder: ", rad_abspath, ". Please check parameters dir_data_radiation, filename_radiation_prefix and filename_radiation_suffix.\n", level = 2)
@@ -68,6 +66,13 @@ func_load_radiation_grids <- function(run_params,
     }
   }
   
+  # Check found extensions.
+  ext_regexp <- paste0("(\\", paste0(grid_exts, collapse = "$)|(\\"), "$)")
+  grid_exts_found <- unique(regmatches(grid_files, regexpr(ext_regexp, grid_files)))
+  if (length(grid_exts_found) > 1) {
+    func_customlog("Inconsistent file extensions found in the radiation folder: ", rad_abspath, ". Please check it.\n", level = 2)
+    func_stop()
+  }
   
   
   grid_paths <- file.path(rad_abspath,
@@ -183,7 +188,11 @@ func_load_radiation_grids <- function(run_params,
     cat("    Saving radiation boot file for faster loading next time...\n")
     
     # Save radiation boot file to speed up next model run.
-    save(grids_out, file = radiation_boot_file_path)
+    tryCatch({save(grids_out, file = radiation_boot_file_path)},
+             error = function(err) {
+               func_customlog("Error saving radiation boot file ", radiation_boot_file_path, ": ", conditionMessage(err), level = 1)
+               func_customlog("        Continuing anyway...", level = 0)
+             })
   }
   
   cat("    Radiation grids are ready.\n")
