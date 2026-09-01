@@ -73,53 +73,82 @@ func_load_radiation_grids <- function(run_params,
   grid_paths <- file.path(rad_abspath,
                           grid_files)
   
-  
   # Do we have an RData file to speed up loading of radiation grids?
   # If so, use it if possible!
   if (file.exists(radiation_boot_file_path)) {
     
-    cat("    Radiation boot file found! Checking first grid...\n")
-    load(radiation_boot_file_path)
+    cat("    Radiation boot file found! Loading and checking the first grid...\n")
     
-    tryCatch({grid_day1 <- rast(grid_paths[1])},
-             error = function(err) {
-               func_customlog("Error reading radiation grid: ", grid_paths[1], level = 2)
-               func_stop()
-             })
+    # Careful loading of an RData file.
+    # If force_reload_logi becomes TRUE, then skip straight to reloading
+    # the individual files - skip_loading_logi remains FALSE.
+    force_reload_logi <- tryCatch({
+      suppressWarnings(load(radiation_boot_file_path))
+      FALSE
+    }, error = function(err) {
+      func_customlog("Error reading radiation boot file ", radiation_boot_file_path, ": ", conditionMessage(err), level = 1)
+      func_customlog("          Reloading data from individual files.", level = 0)
+      file.remove(radiation_boot_file_path)
+      TRUE
+    })
     
-    if (!compareGeom(grid_day1,
-                     raster_blueprint,
-                     res = TRUE,
-                     stopOnError = FALSE)) {
-      
-      ext1 <- ext(grid_day1)
-      ext2 <- ext(raster_blueprint)
-      func_customlog("Resampling the first radiation grid to common extent, to check the boot file.", level = 1)
-      func_customlog("Left        ", sprintf("%11.3f", ext1[1]), " --> ", sprintf("%11.3f", ext2[1]), " (", sprintf("%+.3f", ext2[1] - ext1[1]), ")", level = 0)
-      func_customlog("Right       ", sprintf("%11.3f", ext1[2]), " --> ", sprintf("%11.3f", ext2[2]), " (", sprintf("%+.3f", ext2[2] - ext1[2]), ")", level = 0)
-      func_customlog("Bottom      ", sprintf("%11.3f", ext1[3]), " --> ", sprintf("%11.3f", ext2[3]), " (", sprintf("%+.3f", ext2[3] - ext1[3]), ")", level = 0)
-      func_customlog("Top         ", sprintf("%11.3f", ext1[4]), " --> ", sprintf("%11.3f", ext2[4]), " (", sprintf("%+.3f", ext2[4] - ext1[4]), ")", level = 0)
-      func_customlog("Resolution  ", sprintf("%11.3f", xres(grid_day1)), " --> ", sprintf("%11.3f", xres(raster_blueprint)), level = 0)
-      
-      grid_day1 <- resample(grid_day1, raster_blueprint, method = "bilinear")
-    }
-    grid_day1_val <- values(grid_day1)
-    grid_day1_val[is.na(grid_day1_val)] <- 0
-    
-    # If first grid from boot file and from grid files
-    # is the same, then skip loading the other grids
-    # and keep the ones we have from the boot file.
-    if (length(grid_day1_val) == length(grids_out[[1]])) {
-      if (all(abs(grid_day1_val - grids_out[[1]]) < 1e-3)) {
-        cat("    The first grid matches! We can use the boot file.\n")
-        skip_loading_logi <- TRUE
-      } else {
-        func_customlog("    The first grid has the same number of cells but the values do NOT match. Reloading the individual files.", level = 1)
+    # Handle various failure modes of the data from the radiation boot file.
+    if (!force_reload_logi) {
+      if (!exists("grids_out") ||
+          (class(grids_out) != "list") ||
+          (length(grids_out) != 366) ||
+          !all(sapply(grids_out, class) == matrix(c("matrix", "array"), nrow = 2, ncol = 366)) ||
+          (class(unlist(grids_out)) != "numeric")) {
+        func_customlog("Radiation data in the boot file are corrupted - will reload the individual files.", level = 1)
+        force_reload_logi <- TRUE
       }
-    } else {
-      func_customlog("    The first grid does not match, it even has a different number of cells. Reloading the individual files.", level = 1)
     }
-  }
+    
+    # Compare boot file and radiation grids only if the data from the boot file appear correct.
+    if (!force_reload_logi) {
+      tryCatch({grid_day1 <- rast(grid_paths[1])},
+               error = function(err) {
+                 func_customlog("Error reading radiation grid ", grid_paths[1], ": ", conditionMessage(err), level = 2)
+                 func_stop()
+               })
+      
+      
+      if (!compareGeom(grid_day1,
+                       raster_blueprint,
+                       res = TRUE,
+                       stopOnError = FALSE)) {
+        
+        ext1 <- ext(grid_day1)
+        ext2 <- ext(raster_blueprint)
+        func_customlog("Resampling the first radiation grid to common extent, to check the boot file.", level = 1)
+        func_customlog("Left        ", sprintf("%11.3f", ext1[1]), " --> ", sprintf("%11.3f", ext2[1]), " (", sprintf("%+.3f", ext2[1] - ext1[1]), ")", level = 0)
+        func_customlog("Right       ", sprintf("%11.3f", ext1[2]), " --> ", sprintf("%11.3f", ext2[2]), " (", sprintf("%+.3f", ext2[2] - ext1[2]), ")", level = 0)
+        func_customlog("Bottom      ", sprintf("%11.3f", ext1[3]), " --> ", sprintf("%11.3f", ext2[3]), " (", sprintf("%+.3f", ext2[3] - ext1[3]), ")", level = 0)
+        func_customlog("Top         ", sprintf("%11.3f", ext1[4]), " --> ", sprintf("%11.3f", ext2[4]), " (", sprintf("%+.3f", ext2[4] - ext1[4]), ")", level = 0)
+        func_customlog("Resolution  ", sprintf("%11.3f", xres(grid_day1)), " --> ", sprintf("%11.3f", xres(raster_blueprint)), level = 0)
+        
+        grid_day1 <- resample(grid_day1, raster_blueprint, method = "bilinear")
+      }
+      grid_day1_val <- values(grid_day1)
+      grid_day1_val[is.na(grid_day1_val)] <- 0
+      
+      # If first grid from boot file and from grid files
+      # is the same, then skip loading the other grids
+      # and keep the ones we have from the boot file.
+      if (length(grid_day1_val) == length(grids_out[[1]])) {
+        if (all(abs(grid_day1_val - grids_out[[1]]) < 1e-3)) {
+          cat("    The first grid matches! Using the boot file.\n")
+          skip_loading_logi <- TRUE
+        } else {
+          func_customlog("    The first grid has the same number of cells but the values do NOT match. Will reload the individual files.", level = 1)
+        }
+      } else {
+        func_customlog("    The first grid does not match, it even has a different number of cells. Will reload the individual files.", level = 1)
+      }
+    } # End if force_reload_logi is FALSE
+  } # End if radiation boot file exists
+  
+  
   
   if (!skip_loading_logi) {
     

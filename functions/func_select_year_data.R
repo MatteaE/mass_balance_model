@@ -103,7 +103,7 @@ func_select_year_data <- function(data_all,
   ids_winter_bad <- which((year_data$massbal_winter_meas_cur$end_date - year_data$massbal_winter_meas_cur$start_date) > 365)
   if (length(ids_winter_bad) > 0) {
     func_customlog("Year ", year_data$year_cur, ": there are ", length(ids_winter_bad), " winter measurements with a wrong observation period (> 1 year).", level = 2)
-    func_customlog("Please fix them manually. They are:", level = 0)
+    func_customlog("        Please fix them manually. They are:", level = 0)
     func_print_mb_points_df(year_data$massbal_winter_meas_cur[ids_winter_bad,c("id", "start_date", "end_date", "x", "y", "z_dem", "massbal")],
                             run_params)
     func_stop()
