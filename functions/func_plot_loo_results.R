@@ -10,7 +10,6 @@
 func_plot_loo_results <- function(year_data,
                                   run_params) {
   plots_loo_results <- list()
-  browser()
   
   base_size <- 16 # For the plot
   theme_loo_plot <- theme_bw(base_size = base_size) +
