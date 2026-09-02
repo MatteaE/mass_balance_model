@@ -17,12 +17,21 @@ func_write_daily_grids <- function(year_data,
   # Write daily SWE and mass balance grids from the winter simulation.
   if (run_params$write_daily_grids_winter) {
     
-    func_write_daily_grids_worker(year_data,
-                                  run_params,
-                                  data_dems,
-                                  "winter")
-    cat("\n")
-  } # End if write winter grids.
+    # Is there a winter simulation to write?
+    if (year_data$process_winter) {
+      
+      func_write_daily_grids_worker(year_data,
+                                    run_params,
+                                    data_dems,
+                                    "winter")
+      cat("\n")
+      
+    } else {
+      
+      func_customlog("Parameter write_daily_grids_winter is TRUE, but the current year has no winter-only processing - there is nothing to write.", level = 1)
+      
+    }
+  } # End else cannot write winter grids.
   
   
   

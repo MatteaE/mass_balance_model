@@ -16,8 +16,10 @@ func_plot_daily_maps <- function(year_data,
   
   
   # Plot daily maps from the winter simulation?
-  if (run_params$plot_daily_maps_winter == TRUE) {
-    if (year_data$process_winter == TRUE) {
+  if (run_params$plot_daily_maps_winter) {
+    
+    # Is there a winter simulation to plot?
+    if (year_data$process_winter) {
       
       func_plot_daily_maps_worker(year_data,
                                   run_params,
@@ -28,7 +30,9 @@ func_plot_daily_maps <- function(year_data,
       
       # User asked for daily plots of the winter simulation, but none exist (no winter stakes).
     } else {
-      func_customlog("Parameter plot_daily_maps_winter is TRUE, but there is no winter simulation to be plotted.", level = 1)
+      
+      func_customlog("Parameter plot_daily_maps_winter is TRUE, but the current year has no winter-only simulation - there is nothing to plot.", level = 1)
+      
     }
   }
   

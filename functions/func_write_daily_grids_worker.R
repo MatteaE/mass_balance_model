@@ -25,11 +25,13 @@ func_write_daily_grids_worker <- function(year_data,
   dir.create(out_swe_p, recursive = TRUE, showWarnings = FALSE)
   dir.create(out_massbal_p, recursive = TRUE, showWarnings = FALSE)
   
-  plot_df <- data.frame(crds(data_dems$elevation[[year_data$dem_grid_id]], na.rm = FALSE))
-  
   weather_series_cur <- year_data[[paste0("weather_series_", period_sel, "_cur")]] # For the dates.
   mod_output_cur <- year_data[[paste0("mod_output_", period_sel, "_cur")]]
   model_days_n   <- year_data[[paste0("model_", period_sel, "_days_n")]]
+  
+  # Apply unit conversion to respect the given parameter within the written grids.
+  mod_output_cur$vec_swe_all       <- mod_output_cur$vec_swe_all * run_params$output_mult / 1e3
+  mod_output_cur$vec_massbal_cumul <- mod_output_cur$vec_massbal_cumul * run_params$output_mult / 1e3
   
   
   # If the user supplied a reference date for the mass balance grids,

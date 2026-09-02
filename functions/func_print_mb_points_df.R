@@ -11,47 +11,58 @@
 func_print_mb_points_df <- function(points_df,
                                     run_params) {
   
-  id_nchar_max <- max(nchar(points_df$id))
-  field_widths <- c(min(id_nchar_max + 2, 20), 12, 12, 10, 10, 7, 9)
-  
-  if ("avalanche_net" %in% names(points_df)) {
-    field_widths <- c(field_widths, 15)
-  }
-  
-  func_customlog(paste0(str_pad(names(points_df),
-                                field_widths, side = "left", pad = " "), collapse = " "),
-                 level = 0)
-  # Print aligned table with all relevant info on the points with avalanche effects.
-  for (i in 1:nrow(points_df)) {
+  # If the data frame is empty, something seriously wrong happened
+  # (the function should only be called when there are indeed points).
+  if (nrow(points_df) == 0) {
     
-    start_date_cur_str <- format(points_df$start_date[i], "%F")
-    if (is.na(start_date_cur_str)) {
-      start_date_cur_str <- "NA" # Need to set this to character explicitly (as.character(NA) does not work)
-    }
+    func_customlog("Attempted to write an empty set of mass balance points. This is a serious bug that should never happen, please check manually.", level = 2)
+    func_stop()
     
-    line_cur <- c(substr(points_df$id[i], 1, 20),
-                  start_date_cur_str,
-                  format(points_df$end_date[i], "%F"),
-                  as.character(round(points_df$x[i])),
-                  as.character(round(points_df$y[i])),
-                  as.character(round(points_df$z_dem[i])),
-                  sprintf(run_params$output_fmt1, points_df$massbal[i]*run_params$output_mult/1000))
+    # Otherwise print normally.
+  } else {
+    
+    id_nchar_max <- max(nchar(points_df$id))
+    field_widths <- c(min(id_nchar_max + 2, 20), 12, 12, 10, 10, 7, 9)
+    
     if ("avalanche_net" %in% names(points_df)) {
-      line_cur <- c(line_cur,
-                    sprintf(run_params$output_fmt3, points_df$avalanche_net[i]*run_params$output_mult/1000))
+      field_widths <- c(field_widths, 15)
     }
     
-    
-    func_customlog(paste0(str_pad(line_cur,
-                                  field_widths,
-                                  side = "left",
-                                  pad = " "),
-                          collapse = " "),
+    func_customlog(paste0(str_pad(names(points_df),
+                                  field_widths, side = "left", pad = " "), collapse = " "),
                    level = 0)
+    # Print aligned table with all relevant info on the points with avalanche effects.
+    for (i in 1:nrow(points_df)) {
+      
+      start_date_cur_str <- format(points_df$start_date[i], "%F")
+      if (is.na(start_date_cur_str)) {
+        start_date_cur_str <- "NA" # Need to set this to character explicitly (as.character(NA) does not work)
+      }
+      
+      line_cur <- c(substr(points_df$id[i], 1, 20),
+                    start_date_cur_str,
+                    format(points_df$end_date[i], "%F"),
+                    as.character(round(points_df$x[i])),
+                    as.character(round(points_df$y[i])),
+                    as.character(round(points_df$z_dem[i])),
+                    sprintf(run_params$output_fmt1, points_df$massbal[i]*run_params$output_mult/1000))
+      if ("avalanche_net" %in% names(points_df)) {
+        line_cur <- c(line_cur,
+                      sprintf(run_params$output_fmt3, points_df$avalanche_net[i]*run_params$output_mult/1000))
+      }
+      
+      
+      func_customlog(paste0(str_pad(line_cur,
+                                    field_widths,
+                                    side = "left",
+                                    pad = " "),
+                            collapse = " "),
+                     level = 0)
+      
+    } # End loop on the points.
     
-  } # End loop on the points.
-  
-  cat("\n")  
-  
+    cat("\n")  
+    
+  } # End if the data frame has at least one entry.
   
 }
