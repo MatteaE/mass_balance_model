@@ -22,7 +22,7 @@ func_elevation_preprocess <- function(run_params,
   ids_patch_flat <- func_elevation_find_flat_patches(elevation, run_params)
   elevation_mean <- mean(values(elevation_unpatched), na.rm = T) # To add padding at the DEM borders with a value not too far from the DEM itself.
   n_flat_iter <- 1
-  n_flat_max  <- ceiling(min(100, nrow(elevation)/2, ncol(elevation)/2))
+  n_flat_max  <- ceiling(min(100, nrow(elevation)/2, ncol(elevation)/2)) # The smoothing window increases with the number of iterations - do not make it larger than the entire grid.
   
   while ((n_flat_iter <= n_flat_max) && (length(ids_patch_flat) > 0)) {
     
