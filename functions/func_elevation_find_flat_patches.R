@@ -7,7 +7,8 @@
 #                 These are defined as contiguous pixels with exactly the same elevation.         #
 ###################################################################################################
 
-func_find_flat_patches <- function(elevation, run_params) {
+func_elevation_find_flat_patches <- function(elevation,
+                                             run_params) {
   
   grid_ncol <- ncol(elevation)
   grid_nrow <- nrow(elevation)
@@ -28,9 +29,9 @@ func_find_flat_patches <- function(elevation, run_params) {
                                                 c(0,1,0)), expand = FALSE, fillvalue = NA_real_)
   
   ids_patch_flat <- which((abs(values(dz1)) < run_params$elevation_equal_threshold) |
-                          (abs(values(dz2)) < run_params$elevation_equal_threshold) |
-                          (abs(values(dz3)) < run_params$elevation_equal_threshold) |
-                          (abs(values(dz4)) < run_params$elevation_equal_threshold))
+                            (abs(values(dz2)) < run_params$elevation_equal_threshold) |
+                            (abs(values(dz3)) < run_params$elevation_equal_threshold) |
+                            (abs(values(dz4)) < run_params$elevation_equal_threshold))
   
   return(ids_patch_flat)
   

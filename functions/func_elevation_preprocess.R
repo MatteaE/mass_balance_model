@@ -17,7 +17,7 @@ func_elevation_preprocess <- function(run_params, elevation) {
   # We iterate while we enlarge the smoothing window and amount,
   # so that even large flat patches (lakes!) will eventually disappear.
   elevation_unpatched <- elevation # elevation_unpatched will be the output.
-  ids_patch_flat <- func_find_flat_patches(elevation, run_params)
+  ids_patch_flat <- func_elevation_find_flat_patches(elevation, run_params)
   elevation_mean <- mean(values(elevation_unpatched), na.rm = T) # To add padding at the DEM borders with a value not too far from the DEM itself.
   n_flat_iter <- 1
   
