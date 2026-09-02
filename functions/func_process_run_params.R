@@ -90,6 +90,7 @@ func_process_run_params <- function(run_params) {
     # . (3) Mass balance input parameters ---------------------
     stake_cluster_distance             = 20,          # [m]: threshold distance for clustering stakes together. This is used to ensure a more uniform distribution of the stakes: if measurements are very dense in one place they can induce a bias in the optimization, so we average stakes in clusters. This can reduce the total number of stakes. Only stakes measured on the same days can be clustered. A value of 0 corresponds to no clustering.
     stakes_unknown_latest_start        = NA,          # [month/day]: in the automatic search of the start date for snow pits and depth probings without a measured start date, we search no later than this day of year. The starting date will be set to the day of the minimum cumulative mass balance between the start of the simulation and the date set here. If NA, it is set to 28 February in the Northern Hemisphere and 31 August in the Southern Hemisphere.
+    stake_duration_min_n               = 30,          # [days]: stop with error if any stakes (annual or winter) have an observation period shorter than this duration.
     
     # These are used in the selection of mass balance measurements of the current year (func_select_year_mb_measurements).
     # They are customizable so that survey dates can be flexibly included/excluded (e.g., monthly stakes).

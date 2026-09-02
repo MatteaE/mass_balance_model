@@ -93,6 +93,24 @@ func_run_simulation_single <- function(year_param_corrections,
                                                                  stakes_series_mod_all)
   
   
+  # Check duration of stakes observation period now that we have computed it also for NA stakes.
+  # Only NA-starting stakes will be seen here, since the ones with a provided start date were
+  # already validated within the func_load_massbalance_measurements().
+  # It should be greater than the given run_params$stake_duration_min_n (otherwise
+  # there could be an error in the end_date).
+  ids_duration_bad <- which((stakes_end_ids - stakes_start_ids_corr) < run_params$stake_duration_min_n)
+  if (length(ids_duration_bad) > 0) {
+    func_customlog("Too short observation period detected for ", length(ids_duration_bad), " of the mass balance measurements with NA starting date.", level = 2)
+    func_customlog("        The lower duration limit is set to: stake_duration_min_n = ", run_params$stake_duration_min_n, " days.", level = 0)
+    func_customlog("        Please adjust it in set_params or fix the stake end dates in the respective mass balance input file.", level = 0)
+    func_customlog("        The first wrong value is: computed start date ", format(weather_series_cur$timestamp[stakes_start_ids_corr[ids_duration_bad[1]]], "%d.%m.%Y"),
+                   ", provided end date ", format(massbal_meas_cur$end_date[ids_duration_bad[1]], "%d.%m.%Y"),
+                   " (interval of ", stakes_end_ids[ids_duration_bad[1]] - stakes_start_ids_corr[ids_duration_bad[1]],
+                   " days, point id ", massbal_meas_cur$id[ids_duration_bad[1]], ")", level = 0)
+    func_stop()
+  }
+  
+  
   # Cumulative mass balance of each stake
   # over its individual measurement period (numeric vector).
   stakes_mb_mod  <- as.numeric(stakes_series_mod_all)[((1:nstakes)-1)*(model_days_n+1) + stakes_end_ids] -

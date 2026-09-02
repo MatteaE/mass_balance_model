@@ -120,6 +120,22 @@ func_load_massbalance_measurements <- function(run_params,
                    " (point id ", data_massbalance$id[ids_end_date_na[1]], " at line ", ids_end_date_na[1], ")", level = 0)
     func_stop()
   }
+
+  # . Validate stake duration when stake start is not NA ------------------------------------------
+  ids_duration_bad <- which((!is.na(data_massbalance$start_date)) &
+                              ((data_massbalance$end_date - data_massbalance$start_date) < run_params$stake_duration_min_n))
+  if (length(ids_duration_bad) > 0) {
+    func_customlog("Found ", length(ids_duration_bad), " entries with too short observation period in the ", load_what, " mass balance file.", level = 2)
+    func_customlog("        The lower duration limit is set to: stake_duration_min_n = ", run_params$stake_duration_min_n, " days.", level = 0)
+    func_customlog("        Please adjust it in set_params or fix the dates in the mass balance file: ", massbalance_path, level = 0)
+    func_customlog("        The first wrong value is: ", format(data_massbalance$start_date[ids_duration_bad[1]], "%d.%m.%Y"),
+                   " to ", format(data_massbalance$end_date[ids_duration_bad[1]], "%d.%m.%Y"),
+                   " (interval of ", data_massbalance$end_date[ids_duration_bad[1]]-data_massbalance$start[ids_duration_bad[1]],
+                   " days, point id ", data_massbalance$id[ids_duration_bad[1]], " at line ", ids_duration_bad[1], ")", level = 0)
+    func_stop()
+  }
+  
+  
   
   
   # . Validate coordinates ------------------------------------------------------------------------

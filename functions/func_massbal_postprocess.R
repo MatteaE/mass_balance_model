@@ -189,6 +189,7 @@ func_massbal_postprocess <- function(year_data,
         
         year_data$abl_grad_diff_rel <- abs((year_data$abl_grad_mod - year_data$abl_grad_meas) / year_data$abl_grad_meas)
         if (!is.na(year_data$abl_grad_diff_rel) && (year_data$abl_grad_diff_rel > 0.25)) {
+          cat("\n")
           func_customlog("Year ", year_data$year_cur, ": modeled ablation gradient deviates from measured one by more than 25 %. Please check.", level = 1)
           func_customlog("Measured gradient: ", sprintf("%.4f", year_data$abl_grad_meas), " m w.e. / m asl", level = 0)
           func_customlog("Modeled gradient: ", sprintf("%.4f", year_data$abl_grad_mod), " m w.e. / m asl", level = 0)
