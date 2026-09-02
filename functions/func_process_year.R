@@ -128,12 +128,15 @@ func_process_year <- function(year_data,
   # This creates a PDF file for the year
   # and also adds a plot to the overview
   # plots, which are saved to PDF at the end.
+  t1 <- Sys.time()
   year_data$ele_bands_plot_df    <- func_plot_year(year_data,
                                                    year_cur_params,
                                                    run_params,
                                                    data_all$data_dems,
                                                    data_all$data_dhms,
                                                    data_all$data_outlines)
+  t2 <- Sys.time()
+  cat("Year plots produced in", sprintf("%.3f s", t2-t1), "\n")
   
   
   # Write annual model output to files ------------------------------------------------------------

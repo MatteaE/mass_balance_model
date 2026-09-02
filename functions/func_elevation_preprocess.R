@@ -31,7 +31,7 @@ func_elevation_preprocess <- function(run_params,
     elevation_smoothed <- focal(elevation_unpatched, w = smoothing_mat, fun = sum, na.rm = TRUE, expand = FALSE, fillvalue = elevation_mean)
     elevation_unpatched[ids_patch_flat] <- elevation_smoothed[ids_patch_flat][,1]
     n_flat_iter                         <- n_flat_iter + 1
-    ids_patch_flat                      <- func_find_flat_patches(elevation_unpatched, run_params) # Check again for any remaining flat patches.
+    ids_patch_flat                      <- func_elevation_find_flat_patches(elevation_unpatched, run_params) # Check again for any remaining flat patches.
     
   }
   
