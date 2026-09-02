@@ -10,26 +10,35 @@
 #                 cells with the same elevation.                                                  #
 ###################################################################################################
 
-func_elevation_preprocess <- function(run_params, elevation) {
+func_elevation_preprocess <- function(run_params,
+                                      elevation) {
   
   #### REMOVE FLAT PATCHES ####
   # Find flat patches and replace them with smoothed DEM.
   # We iterate while we enlarge the smoothing window and amount,
-  # so that even large flat patches (lakes!) will eventually disappear.
+  # so that even large flat patches (unprocessed lakes in the DEM)
+  # will eventually disappear.
   elevation_unpatched <- elevation # elevation_unpatched will be the output.
   ids_patch_flat <- func_elevation_find_flat_patches(elevation, run_params)
   elevation_mean <- mean(values(elevation_unpatched), na.rm = T) # To add padding at the DEM borders with a value not too far from the DEM itself.
   n_flat_iter <- 1
+  n_flat_max  <- ceiling(min(100, nrow(elevation)/2, ncol(elevation)/2))
   
-  while (length(ids_patch_flat) > 0) {
+  while ((n_flat_iter <= n_flat_max) && (length(ids_patch_flat) > 0)) {
     
     # cat("\nRemoval of flat patches, iteration", n_flat_iter, " --", length(ids_patch_flat), "flat patches remaining...")
-    smoothing_mat <- gaussian.kernel(n_flat_iter, max(5, 2 * n_flat_iter + 1))
+    smoothing_mat      <- gaussian.kernel(n_flat_iter, max(5, 2 * n_flat_iter + 1))
     elevation_smoothed <- focal(elevation_unpatched, w = smoothing_mat, fun = sum, na.rm = TRUE, expand = FALSE, fillvalue = elevation_mean)
     elevation_unpatched[ids_patch_flat] <- elevation_smoothed[ids_patch_flat][,1]
-    n_flat_iter <- n_flat_iter + 1
-    ids_patch_flat <- func_find_flat_patches(elevation_unpatched, run_params) # Check again for any flat patches left.
+    n_flat_iter                         <- n_flat_iter + 1
+    ids_patch_flat                      <- func_find_flat_patches(elevation_unpatched, run_params) # Check again for any remaining flat patches.
     
+  }
+  
+  if (n_flat_iter > n_flat_max) {
+    func_customlog("DEM processing failed: flat patches still present after hitting the iteration cap (n = ", n_flat_iter-1, ").", level = 2)
+    func_customlog("        Please manually fix the flat patches in the DEM, or provide a DEM with correct hydrological (avalanche) routing.", level = 0)
+    func_stop()
   }
   
   cat("    All flat patches gone after", n_flat_iter-1, "iteration(s).\n")
@@ -57,12 +66,13 @@ func_elevation_preprocess <- function(run_params, elevation) {
   elevation_filled_focal_min <- subst(elevation_filled_focal_min, NA, 0.0)
   ids_sink_4neighbors <- which(values(elevation_filled - (elevation_filled_focal_min + 0.01)) < 0)
   
-  sinkfill_iter_count <- 1
+  n_sinkfill_iter <- 1
   cat("    Filling all sinks...\n")
   
-  while (length(ids_sink_4neighbors) > 0) {
+  n_sinkfill_max <- 50
+  while ((n_sinkfill_iter <= n_sinkfill_max) && (length(ids_sink_4neighbors) > 0)) {
     
-    # cat("    Iteration", sinkfill_iter_count, "to fill all sinks...\n")
+    # cat("    Iteration", n_sinkfill_iter, "to fill all sinks...\n")
     
     # Raise isolated 4-connectivity sinks to the mean of the 4-neighbors.
     elevation_filled_mean_nofocal <- focal(elevation_filled, w = rbind(c(0,1/4,0),c(1/4,0,1/4),c(0,1/4,0)))
@@ -77,23 +87,22 @@ func_elevation_preprocess <- function(run_params, elevation) {
     elevation_filled_focal_min <- subst(elevation_filled_focal_min, NA, 0.0)
     ids_sink_4neighbors <- which(values(elevation_filled - (elevation_filled_focal_min + 0.01)) < 0)
     
-    sinkfill_iter_count <- sinkfill_iter_count + 1
+    n_sinkfill_iter <- n_sinkfill_iter + 1
     
+  } # End iteration to fill sinks.
+  
+  if (n_sinkfill_iter > n_sinkfill_max) {
+    func_customlog("DEM processing failed: sinks still present after hitting the iteration cap (n = ", n_sinkfill_iter-1, ").", level = 2)
+    func_customlog("        Please manually fix sinks in the DEM, or provide a DEM with correct hydrological (avalanche) routing.", level = 0)
+    func_stop()
   }
   
-  cat("    All sinks gone after", sinkfill_iter_count-1, "iteration(s).\n")
+  cat("    All sinks gone after", n_sinkfill_iter-1, "iteration(s).\n")
   
   dem_diff <- values(elevation_filled - elevation)
   
   cat("    Altered cells:", length(which(abs(dem_diff) > 1e-9)), "\n")
   cat("    New DEM bias compared to the original: within", paste0("[", round(as.numeric(min(dem_diff)), 3), ", ", round(as.numeric(max(dem_diff)), 3), "]"), "m\n")
-
-  # [LEGACY] (Optionally) add tiny jitter (noise) to the DEM to avoid problematic
-  # cases where cell patches have a constant (flat) value, which disturbes drainage.
-  # jitter_amount <- 1e-4
-  # set.seed(1)
-  # elevation_jitter <- setValues(elevation_cur, elevation_cur[] + rnorm(grid_ncol*grid_nrow, mean = 0, sd = jitter_amount))
-  # elevation_cur <- elevation_jitter [/LEGACY]
 
   return(elevation_filled)
   
