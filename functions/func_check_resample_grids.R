@@ -22,7 +22,8 @@ func_check_resample_grids <- function(run_params,
     if (!compareGeom(data_all$data_surftype$grids[[grid_id]],
                      data_all$raster_blueprint,
                      res = TRUE,
-                     stopOnError = FALSE)) {
+                     stopOnError = FALSE,
+                     tolerance = 1e-6)) {
       
       
       ext1 <- ext(data_all$data_surftype$grids[[grid_id]])
@@ -45,7 +46,8 @@ func_check_resample_grids <- function(run_params,
     if (!compareGeom(data_all$data_dhms$elevation[[grid_id]],
                      data_all$raster_blueprint,
                      res = TRUE,
-                     stopOnError = FALSE)) {
+                     stopOnError = FALSE,
+                     tolerance = 1e-6)) {
       
       
       ext1 <- ext(data_all$data_dhms$elevation[[grid_id]])

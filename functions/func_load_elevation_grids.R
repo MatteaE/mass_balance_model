@@ -132,7 +132,8 @@ func_load_elevation_grids <- function(run_params) {
         if (!compareGeom(grids_out$elevation[[grid_id]],
                          raster_blueprint,
                          res = TRUE,
-                         stopOnError = FALSE)) {
+                         stopOnError = FALSE,
+                         tolerance = 1e-6)) {
           
           ext1 <- ext(grids_out$elevation[[grid_id]])
           ext2 <- ext(raster_blueprint)

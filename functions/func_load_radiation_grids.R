@@ -121,7 +121,8 @@ func_load_radiation_grids <- function(run_params,
       if (!compareGeom(grid_day1,
                        raster_blueprint,
                        res = TRUE,
-                       stopOnError = FALSE)) {
+                       stopOnError = FALSE,
+                       tolerance = 1e-6)) {
         
         ext1 <- ext(grid_day1)
         ext2 <- ext(raster_blueprint)
