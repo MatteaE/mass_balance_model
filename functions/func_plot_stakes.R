@@ -124,7 +124,8 @@ func_plot_stakes <- function(year_data,
   plots_stakes_out <- list()
   n_pages_out <- ceiling(year_data$nstakes_annual / 10)
   for (page_id in 1:n_pages_out) {
-    plots_stakes_out[[page_id]] <- plot_grid(plotlist = plots_stakes[((page_id-1)*10+1):(page_id*10)], align = "hv", ncol = 2)
+    plots_stakes_out[[page_id]] <- plot_grid(plotlist = plots_stakes[((page_id-1)*10+1):(page_id*10)],
+                                             align = "hv", ncol = 2)
   }
   
   time_v[5] <- Sys.time()

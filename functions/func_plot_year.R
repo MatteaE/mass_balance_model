@@ -19,7 +19,7 @@ func_plot_year <- function(year_data,
   
   
   # To check elapsed times.
-  time_v <- as.POSIXct(rep(NA_real_, 17))
+  time_v <- as.POSIXct(rep(NA_real_, 16))
   
   time_v[1] <- Sys.time()
   cat("  Common map elements...\n")
@@ -198,17 +198,13 @@ func_plot_year <- function(year_data,
   
   # Write multi-page PDF for the current year -----------------------------------------------------
   time_v[15] <- Sys.time()
-  cat("  Drawing all plots on A4 pages...\n")
-  plots_year_out <- suppressWarnings(ggarrange(plotlist = plots_year, ncol = 1, nrow = 1, align = "hv"))
+  cat("  Writing PDF file...\n")
+  suppressMessages(suppressWarnings(ggexport(plotlist = plots_year,
+                                             filename = file.path(run_params$output_dirname, "annual_results", paste0("massbalance_", year_data$year_cur, ".pdf")),
+                                             width = 21 * run_params$size_mult,
+                                             height = 29.7 * run_params$size_mult)))
   
   time_v[16] <- Sys.time()
-  cat("  Writing PDF file...\n")
-  suppressMessages(ggexport(plots_year_out,
-                            filename = file.path(run_params$output_dirname, "annual_results", paste0("massbalance_", year_data$year_cur, ".pdf")),
-                            width = 21 * run_params$size_mult,
-                            height = 29.7 * run_params$size_mult))
-  
-  time_v[17] <- Sys.time()
   
   cat("Timings:", sprintf("%.2f", diff(time_v)), "\n")
   

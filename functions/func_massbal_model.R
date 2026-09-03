@@ -32,7 +32,8 @@ func_massbal_model <- function(run_params,
   # verbose_level = 1 is normal output (currently only announcing firnification-related news)
   # verbose_level = 2 is verbose (also announcing avalanches)
   
-  # t1 <- Sys.time()
+  time_v <- as.POSIXct(rep(NA_real_, 3))
+  time_v[1] <- Sys.time()
   
   # Compute here because the snow and ice factors are subject
   # to optimization, this always stays in the middle of them.
@@ -110,6 +111,7 @@ func_massbal_model <- function(run_params,
   
   
   #### MAIN SIMULATION LOOP ####
+  time_v[2] <- Sys.time()
   for (day_id in 1:model_days_n) {
     
     # cat("\r", day_id, "/", model_days_n)
@@ -301,6 +303,8 @@ func_massbal_model <- function(run_params,
     
     
   } # End of daily loop.
+  time_v[3] <- Sys.time()
+  cat("Timings:", sprintf("%.2f", diff(time_v)), "\n")
   
   # Collect output.
   mb_model_output <- list(vec_swe_all       = vec_snow_swe,
@@ -315,8 +319,6 @@ func_massbal_model <- function(run_params,
                           gl_rainfall_daily = gl_rainfall_daily,
                           weather_series    = weather_series_cur)
   
-  # t2 <- Sys.time()
-  # print(t2-t1)
   
   return(mb_model_output)
   
