@@ -44,14 +44,14 @@ func_save_overview_values <- function(year_data,
   }
   
   if (year_data$process_winter) {
-    df_overview$mb_winter_meas[year_data$year_id]       <- year_data$massbal_winter_values[["meas_period.mean"]] * run_params$output_mult / 1e3
-    df_overview$rmse[year_data$year_id]                 <- year_data$mod_output_annual_cur$weighted_rms_winter * run_params$output_mult / 1e3
-    df_overview$rmse_unweighted[year_data$year_id]      <- year_data$mod_output_annual_cur$global_rms_winter * run_params$output_mult / 1e3
+    df_overview$mb_winter_meas[year_data$year_id]         <- year_data$massbal_winter_values[["meas_period.mean"]] * run_params$output_mult / 1e3
+    df_overview$winter_rmse[year_data$year_id]            <- year_data$mod_output_annual_cur$weighted_rms_winter * run_params$output_mult / 1e3
+    df_overview$winter_rmse_unweighted[year_data$year_id] <- year_data$mod_output_annual_cur$global_rms_winter * run_params$output_mult / 1e3
   }
   
   if (year_data$run_loo_logi) {
-    df_overview$loo_rmse[year_data$year_id]             <- year_data$weighted_loo_rms * run_params$output_mult / 1e3
-    df_overview$loo_rmse_unweighted[year_data$year_id]  <- year_data$global_loo_rms * run_params$output_mult / 1e3
+    df_overview$loo_rmse[year_data$year_id]               <- year_data$weighted_loo_rms * run_params$output_mult / 1e3
+    df_overview$loo_rmse_unweighted[year_data$year_id]    <- year_data$global_loo_rms * run_params$output_mult / 1e3
   }
   
   return(df_overview)

@@ -158,8 +158,9 @@ func_run_simulation_single <- function(year_param_corrections,
     wrms_val_txt  <- str_pad(wrms_val_txt, width = nchar_max, side = "left")
     rms_val_txt   <- str_pad(rms_val_txt, width = nchar_max, side = "left")
     
-    cat(paste0("Global BIAS:        ", bias_val_txt, " mm w.e.\n"))
-    cat(paste0("Global RMS:         ", rms_val_txt,  " mm w.e.\n"))
+    whitespace_mult <- 
+    cat(paste0("Global BIAS: ", paste0(rep(" ", 7*print_wstats_logi)), bias_val_txt, " mm w.e.\n"))
+    cat(paste0("Global RMS:  ", paste0(rep(" ", 7*print_wstats_logi)), rms_val_txt,  " mm w.e.\n"))
     if (print_wstats_logi) {
       cat(paste0("Area-weighted BIAS: ", wbias_val_txt, " mm w.e.\n"))
       cat(paste0("Area-weighted RMS:  ", wrms_val_txt, " mm w.e.\n"))

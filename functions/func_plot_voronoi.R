@@ -11,15 +11,11 @@
 func_plot_voronoi <- function(year_data,
                               run_params,
                               data_dems,
-                              data_outlines) {
+                              data_outlines,
+                              plots_map_common_elements) {
   
   
   base_size <- 16 # For the plots.
-  grid_extent <- ext(data_dems$elevation[[year_data$dem_grid_id]])
-  grid_area   <- (grid_extent[2] - grid_extent[1]) * (grid_extent[4] - grid_extent[3])
-  # Empirical multiplier to reduce label and line size when the modeled extent is very big.
-  # Useful for huge glaciers and multi-glacier (e.g. catchment) simulations.
-  extent_size_multiplier <- max(0.1, exp(-(max(0,(grid_area-5e6))^2)/5e17))
   
   # Empirical top margin to keep plots inside page borders
   # when the glacier is tall (aspect ratio > 1.07).
@@ -33,8 +29,6 @@ func_plot_voronoi <- function(year_data,
           legend.text = element_text(face = "bold", size = 12),
           plot.margin = margin(margin_top,0,0,0, unit = "pt"))
   
-  contour_label_textsize <- 4
-  contour_linesize <- 0.4
   outline_linesize <- 0.7 * run_params$outlines_linesize_mult
   y_line_mult <- min(1.5, max(1, (data_outlines$aspect_ratio[[year_data$outline_id]] + 1.5) / 2))
   y_line1 <- 1 + (0.21 / y_line_mult)
@@ -48,10 +42,10 @@ func_plot_voronoi <- function(year_data,
   val_labels <- sprintf("%.1f", val_breaks)
   val_labels[1] <- ""
   
-  plot_df_base <- data.frame(crds(data_dems$elevation[[year_data$dem_grid_id]], na.rm = FALSE))
-  elevation_df <- data.frame(plot_df_base, z = values(data_dems$elevation[[year_data$dem_grid_id]], mat = F))
-  
   plots <- list()
+  
+  # This one will be recycled for each plot.
+  plot_df <- plots_map_common_elements$dem_plot_df_base
   
   
   # Annual point weights --------------------------------------------------------------------------
@@ -61,15 +55,19 @@ func_plot_voronoi <- function(year_data,
   
   mb_meas_period_annual_lab <- paste(format(year_data$massbal_annual_meas_period, "%m/%d"), collapse = " - ")
   
-  plot_df <- plot_df_base
   plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
-    geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+    geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
     geom_sf(data = cells_sf, aes(fill = weight), linewidth = outline_linesize) +
     coord_sf(clip = "off") +
-    {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
+    {if (run_params$show_contours) plots_map_common_elements$dem_ele_contours} +
     geom_point(data = year_data$massbal_annual_meas_cur, aes(x = x, y = y), shape = 3, stroke = 1.5, size = 0) +
-    {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
-    {if (run_params$show_stake_labels) geom_shadowtext(data = year_data$massbal_annual_meas_cur, aes(x = x, y = y, label = sprintf(run_params$output_fmt2, massbal_meas_standardized*run_params$output_mult/1e3)), size = 3*extent_size_multiplier, fontface = "bold", color = "#000000", hjust = -0.12, vjust = -0.12, bg.color = "#FFFFFF")} +
+    {if (run_params$show_contour_labels) plots_map_common_elements$dem_ele_text_contours} +
+    {if (run_params$show_stake_labels) geom_shadowtext(data = year_data$massbal_annual_meas_cur,
+                                                       aes(x = x, y = y,
+                                                           label = sprintf(run_params$output_fmt2,
+                                                                           massbal_meas_standardized*run_params$output_mult/1e3)),
+                                                       size = 3*plots_map_common_elements$dem_extent_size_multiplier,
+                                                       fontface = "bold", color = "#000000", hjust = -0.12, vjust = -0.12, bg.color = "#FFFFFF")} +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(paste0("Measurement period (annual): ", mb_meas_period_annual_lab),
@@ -97,15 +95,19 @@ func_plot_voronoi <- function(year_data,
     
     mb_meas_period_winter_lab <- paste(format(year_data$massbal_winter_meas_period, "%m/%d"), collapse = " - ")
     
-    plot_df <- plot_df_base
     plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
-      geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+      geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
       geom_sf(data = cells_sf, aes(fill = weight), linewidth = outline_linesize) +
       coord_sf(clip = "off") +
-      {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
+      {if (run_params$show_contours) plots_map_common_elements$dem_ele_contours} +
       geom_point(data = year_data$massbal_winter_meas_cur, aes(x = x, y = y), shape = 3, stroke = 1.5, size = 0) +
-      {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
-      {if (run_params$show_stake_labels) geom_shadowtext(data = year_data$massbal_winter_meas_cur, aes(x = x, y = y, label = sprintf(run_params$output_fmt2, massbal_meas_standardized*run_params$output_mult/1e3)), size = 3*extent_size_multiplier, fontface = "bold", color = "#000000", hjust = -0.12, vjust = -0.12, bg.color = "#FFFFFF")} +
+      {if (run_params$show_contour_labels) plots_map_common_elements$dem_ele_text_contours} +
+      {if (run_params$show_stake_labels) geom_shadowtext(data = year_data$massbal_winter_meas_cur,
+                                                         aes(x = x, y = y,
+                                                             label = sprintf(run_params$output_fmt2,
+                                                                             massbal_meas_standardized*run_params$output_mult/1e3)),
+                                                         size = 3*plots_map_common_elements$dem_extent_size_multiplier,
+                                                         fontface = "bold", color = "#000000", hjust = -0.12, vjust = -0.12, bg.color = "#FFFFFF")} +
       annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
                                           x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
       annotation_custom(grobTree(textGrob(paste0("Measurement period (winter): ", mb_meas_period_winter_lab),

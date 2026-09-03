@@ -23,18 +23,19 @@ func_compute_blueprint_grid <- function(run_params,
   
   crs_all    <- run_params$grids_crs_epsg
   
-  xmin_all   <- min(c(sapply(data_surftype$grids, "xmin"), sapply(data_dhms$elevation, "xmin")))
-  xmax_all   <- max(c(sapply(data_surftype$grids, "xmax"), sapply(data_dhms$elevation, "xmax")))
-  ymin_all   <- min(c(sapply(data_surftype$grids, "ymin"), sapply(data_dhms$elevation, "ymin")))
-  ymax_all   <- max(c(sapply(data_surftype$grids, "ymax"), sapply(data_dhms$elevation, "ymax")))
+  # Compute intersection of all grids - like this, all resampled grids will have data.
+  xmin_all   <- max(c(sapply(data_surftype$grids, "xmin"), sapply(data_dhms$elevation, "xmin")))
+  xmax_all   <- min(c(sapply(data_surftype$grids, "xmax"), sapply(data_dhms$elevation, "xmax")))
+  ymin_all   <- max(c(sapply(data_surftype$grids, "ymin"), sapply(data_dhms$elevation, "ymin")))
+  ymax_all   <- min(c(sapply(data_surftype$grids, "ymax"), sapply(data_dhms$elevation, "ymax")))
   
   # In case of inconsistent extent vs resolution (e.g. extent from 0 to 10
   # and resolution of 3), rast() will give priority to the resolution, and compute
-  # the closest matching extent - thus, the output extent could sometimes be smaller thanù
-  # expected (e.g., with resolution = 3, an extent of 0 to 10 would become 0 to 9).
-  # So, we compute the proper matching extent here.
-  xmax_all   <- xmin_all + ceiling((xmax_all-xmin_all)/res_all)*res_all
-  ymax_all   <- ymin_all + ceiling((ymax_all-ymin_all)/res_all)*res_all
+  # the closest matching extent - thus, the output extent could sometimes be unexpected
+  # (e.g., with extent (0,11) and resolution 3, the output extent will be (0,12)).
+  # So, we compute a proper extent here, not exceeding the computed bounds.
+  xmax_all   <- xmin_all + floor((xmax_all-xmin_all)/res_all)*res_all
+  ymax_all   <- ymin_all + floor((ymax_all-ymin_all)/res_all)*res_all
   extent_all <- ext(xmin_all, xmax_all, ymin_all, ymax_all)
   
   # This blueprint grid will be used as reference for extent and resolution.

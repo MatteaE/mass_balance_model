@@ -10,6 +10,9 @@
 func_plot_stakes <- function(year_data,
                              run_params) {
   
+  time_v <- as.POSIXct(rep(NA_real_, 4))
+  
+  time_v[1] <- Sys.time()
   plots_stakes <- list()
   
   day_id_offset <- (year_data$model_annual_days_n + 1 - as.integer(format(year_data$model_time_bounds[2], "%j"))) + 1
@@ -29,6 +32,8 @@ func_plot_stakes <- function(year_data,
   for (annual_stake_id in 1:year_data$nstakes_annual) {
     stake_offset[annual_stake_id] <- (year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id],annual_stake_id])
   }
+  
+  time_v[2] <- Sys.time()
   
   # Compute plot ranges. Same for all plots.
   # We have to extend the range to include all
@@ -60,7 +65,20 @@ func_plot_stakes <- function(year_data,
   }
   
   
+  # Fixed theme elements
+  base_size <- 12
+  theme_stakes_plots <- theme_bw(base_size = base_size) +
+    theme(axis.title.x = element_blank(),
+          axis.text.x = element_blank(),
+          axis.ticks.x = element_blank(),
+          axis.ticks.length.x = unit(0, "pt"),
+          plot.title = element_text(hjust = 0.5),
+          text = element_text(face = "bold"),
+          panel.grid = element_blank(),
+          plot.margin = margin(0.2,0.2,0.2,0.2,"cm"))
+  
   # Loop to plot all stakes.
+  time_v[3] <- Sys.time()
   for (annual_stake_id in 1:year_data$nstakes_annual) {
     
     stake_mod_series        <- year_data$mod_output_annual_cur$stakes_series_mod_all[,annual_stake_id] * run_params$output_mult/1e3
@@ -78,17 +96,6 @@ func_plot_stakes <- function(year_data,
                                       " ", run_params$output_unit, " w.e. from avalanches")
     }
     
-    
-    base_size <- 12 # For the plots
-    theme_stakes_plots <- theme_bw(base_size = base_size) +
-      theme(axis.title.x = element_blank(),
-            axis.text.x = element_blank(),
-            axis.ticks.x = element_blank(),
-            axis.ticks.length.x = unit(0, "pt"),
-            plot.title = element_text(hjust = 0.5),
-            text = element_text(face = "bold"),
-            panel.grid = element_blank(),
-            plot.margin = margin(0.2,0.2,0.2,0.2,"cm"))
     
     plots_stakes[[annual_stake_id]] <-
       ggplot(stake_mod_df) +
@@ -108,6 +115,9 @@ func_plot_stakes <- function(year_data,
       theme_stakes_plots
   }
   
+  time_v[4] <- Sys.time()
+  
+  
   # Each element of this list holds up to
   # 10 aligned plots (i.e. one full page
   # of the output PDF).
@@ -116,6 +126,10 @@ func_plot_stakes <- function(year_data,
   for (page_id in 1:n_pages_out) {
     plots_stakes_out[[page_id]] <- plot_grid(plotlist = plots_stakes[((page_id-1)*10+1):(page_id*10)], align = "hv", ncol = 2)
   }
+  
+  time_v[5] <- Sys.time()
+  
+  cat("Timings:", sprintf("%.2f", diff(time_v)), "\n")
   
   return(plots_stakes_out)
   

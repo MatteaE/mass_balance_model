@@ -136,7 +136,7 @@ func_process_year <- function(year_data,
                                                    data_all$data_dhms,
                                                    data_all$data_outlines)
   t2 <- Sys.time()
-  cat("Year plots produced in", sprintf("%.3f s", t2-t1), "\n")
+  cat("Year plots produced in", sprintf("%.3f s", difftime(t2, t1, units = "secs")), "\n")
   
   
   # Write annual model output to files ------------------------------------------------------------

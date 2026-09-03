@@ -25,19 +25,14 @@ func_plot_year_swe_maps <- function(year_data,
                                     run_params,
                                     data_dhms,
                                     data_dems,
-                                    data_outlines) {
+                                    data_outlines,
+                                    plots_map_common_elements) {
   
   base_size <- 16 # For the plots.
-  grid_extent <- ext(data_dhms$elevation[[year_data$dhm_grid_id]])
-  grid_area   <- (grid_extent[2] - grid_extent[1]) * (grid_extent[4] - grid_extent[3])
-  grid_aspect_ratio <- (grid_extent[4] - grid_extent[3]) / (grid_extent[2] - grid_extent[1])
-  # Empirical multiplier to reduce label and line size when the modeled extent is very big.
-  # Useful for huge glaciers and multi-glacier (e.g. catchment) simulations.
-  extent_size_multiplier <- max(0.1, exp(-(max(0,(grid_area-5e6))^2)/5e17))
   
   # Empirical top margin to keep plots inside page borders
   # when the glacier is tall (aspect ratio > 1.07).
-  margin_top <- min(80, max(0, (grid_aspect_ratio - 1.05) * 1200))
+  margin_top <- min(80, max(0, (plots_map_common_elements$dhm_grid_aspect_ratio - 1.05) * 1200))
   theme_map_swe <- theme_void(base_size = base_size) +
     theme(legend.position = "bottom",
           legend.key.width = unit(3, "cm"),
@@ -52,10 +47,8 @@ func_plot_year_swe_maps <- function(year_data,
   # palette_cur <- palette_RdPu_adj
   palette_cur <- palette_swe
   
-  contour_label_textsize <- 4
-  contour_linesize <- 0.25
   outline_linesize <- 0.7 * run_params$outlines_linesize_mult
-  y_line_mult <- min(1.5, max(1, (grid_aspect_ratio + 1.5) / 2))
+  y_line_mult <- min(1.5, max(1, (plots_map_common_elements$dhm_grid_aspect_ratio + 1.5) / 2))
   y_line1 <- 1 + (0.21 / y_line_mult)
   y_line2 <- 1 + (0.12 / y_line_mult)
   y_line3 <- 1 + (0.06 / y_line_mult)
@@ -74,28 +67,26 @@ func_plot_year_swe_maps <- function(year_data,
   swe_labels <- sprintf(run_params$output_fmt2, swe_breaks)
   swe_labels[length(swe_labels)] <- ""
   
-  plot_df_base <- data.frame(crds(data_dhms$elevation[[year_data$dhm_grid_id]], na.rm = FALSE))
-  elevation_df <- data.frame(plot_df_base, z = values(data_dhms$elevation[[year_data$dhm_grid_id]], mat = F))
-  
   xlim <- ext(data_dhms$elevation[[year_data$dhm_grid_id]])[1:2]
   ylim <- ext(data_dhms$elevation[[year_data$dhm_grid_id]])[3:4]
+  
+  plot_df <- plots_map_common_elements$dhm_plot_df_base # This gets reused in subsequent SWE plots.
   
   plots <- list()
 
     
   #### HYDROLOGICAL YEAR START ####
-  plot_df <- plot_df_base
   plot_df$swe <- values(year_data$swe_annual_maps$hydro_start, mat = F)
   swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]], na.rm = T) * run_params$output_mult / 1000.)
   plot_df$swe[which(plot_df$swe == 0)] <- NA_real_
   plots[[length(plots)+1]] <- ggplot(plot_df) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult/1000)) +
-    geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+    geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
     coord_sf(clip = "off",
              xlim = xlim,
              ylim = ylim) +
-    {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
-    {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
+    {if (run_params$show_contours) plots_map_common_elements$dhm_ele_contours} +
+    {if (run_params$show_contour_labels) plots_map_common_elements$dhm_ele_text_contours} +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(paste0("Hydrological year start: ", year_data$year_cur-1, "/", run_params$hydro_start_mmdd),
@@ -117,18 +108,17 @@ func_plot_year_swe_maps <- function(year_data,
   
   
   #### HYDROLOGICAL YEAR END ####
-  plot_df <- plot_df_base
   plot_df$swe <- values(year_data$swe_annual_maps$hydro_end, mat = F)
   swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
   plot_df$swe[which(plot_df$swe == 0)] <- NA_real_
   plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult/1000)) +
-    geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+    geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
     coord_sf(clip = "off",
              xlim = xlim,
              ylim = ylim) +
-    {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
-    {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
+    {if (run_params$show_contours) plots_map_common_elements$dhm_ele_contours} +
+    {if (run_params$show_contour_labels) plots_map_common_elements$dhm_ele_text_contours} +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(paste0("Hydrological year end: ", year_data$year_cur, "/", run_params$hydro_end_mmdd),
@@ -155,18 +145,17 @@ func_plot_year_swe_maps <- function(year_data,
     
     #### ANNUAL MEASUREMENT PERIOD START ####
     meas_period_annual_start_lab <- format(year_data$massbal_annual_meas_period[1], "%Y/%m/%d")
-    plot_df <- plot_df_base
     plot_df$swe <- values(year_data$swe_annual_maps$meas_period_start, mat = F)
     swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
     plot_df$swe[which(plot_df$swe == 0)] <- NA_real_
     plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
       geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
-      geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+      geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
       coord_sf(clip = "off",
                xlim = xlim,
                ylim = ylim) +
-      {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
-      {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
+      {if (run_params$show_contours) plots_map_common_elements$dhm_ele_contours} +
+      {if (run_params$show_contour_labels) plots_map_common_elements$dhm_ele_text_contours} +
       annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
                                           x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
       annotation_custom(grobTree(textGrob(paste0("Annual measurement period start: ", meas_period_annual_start_lab),
@@ -188,18 +177,17 @@ func_plot_year_swe_maps <- function(year_data,
     
     #### ANNUAL MEASUREMENT PERIOD END ####
     meas_period_annual_end_lab <- format(year_data$massbal_annual_meas_period[2], "%Y/%m/%d")
-    plot_df <- plot_df_base
     plot_df$swe <- values(year_data$swe_annual_maps$meas_period_end, mat = F)
     swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
     plot_df$swe[which(plot_df$swe == 0)] <- NA_real_
     plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
       geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
-      geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+      geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
       coord_sf(clip = "off",
                xlim = xlim,
                ylim = ylim) +
-      {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
-      {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
+      {if (run_params$show_contours) plots_map_common_elements$dhm_ele_contours} +
+      {if (run_params$show_contour_labels) plots_map_common_elements$dhm_ele_text_contours} +
       annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
                                           x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
       annotation_custom(grobTree(textGrob(paste0("Annual measurement period end: ", meas_period_annual_end_lab),
@@ -223,18 +211,17 @@ func_plot_year_swe_maps <- function(year_data,
   
   #### WINTER FIXED PERIOD END ####
   fixed_winter_end_lab <- format(year_data$massbal_winter_fixed_period[2], "%Y/%m/%d")
-  plot_df <- plot_df_base
   plot_df$swe <- values(year_data$swe_winter_maps$fixed_end, mat = F)
   swe_lab <- sprintf(run_params$output_fmt1, mean(plot_df$swe[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
   plot_df$swe[which(plot_df$swe == 0)] <- NA_real_
   plots[[length(plots)+1]] <- ggplot(plot_df[which(plot_df$swe > 0),]) +
     geom_raster(aes(x = x, y = y, fill = swe * run_params$output_mult / 1000)) +
-    geom_sf(data = as(data_outlines$outlines[[year_data$outline_id]], "sf"), fill = NA, color = "#202020", linewidth = outline_linesize) +
+    geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
     coord_sf(clip = "off",
              xlim = xlim,
              ylim = ylim) +
-    {if (run_params$show_contours) geom_contour(data = elevation_df, aes(x = x, y = y, z = z), color = "#202020", linewidth = contour_linesize)} +
-    {if (run_params$show_contour_labels) geom_text_contour(data = elevation_df, aes(x = x, y = y, z = z), check_overlap = TRUE, stroke = 0.1*extent_size_multiplier, stroke.color = "#FFFFFF", size = contour_label_textsize*extent_size_multiplier, min.size = 15, fontface = "bold")} +
+    {if (run_params$show_contours) plots_map_common_elements$dhm_ele_contours} +
+    {if (run_params$show_contour_labels) plots_map_common_elements$dhm_ele_text_contours} +
     annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
                                         x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
     annotation_custom(grobTree(textGrob(paste0("Winter fixed period end: ", fixed_winter_end_lab),
