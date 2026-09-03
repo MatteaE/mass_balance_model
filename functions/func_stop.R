@@ -13,19 +13,17 @@ func_stop <- function() {
   # Send notification -----------------------------------------------------------------------------
   # Wrapped in two tryCatch statements:
   # (1) notification might fail and then mask the actual error, we handle this
-  # (2)
+  # (2) logging might not yet be set up, if the error happens at the start of the processing, we also handle this.
   tryCatch({
     notify("Run failed ❌", 
-           title = paste0("DMBSim ", run_params$dmbsim_version),
+           title = paste0("DMBSim ", dmbsim_version),
            image = normalizePath("icons/icon64.png"))
   }, error = function(e) {
     tryCatch({
     func_customlog("Could not send desktop notification (", conditionMessage(e), ").", level = 0)
-    },  error = function(e2) {
-      cat("Could not send desktop notification (", conditionMessage(e), ").\n")
     }, error = function(e2) {
-      cat("Could not send desktop notification (", conditionMessage(e), 
-          "). Logging also failed (", conditionMessage(e2), ").\n")
+      cat(paste0("Could not send desktop notification (\"", conditionMessage(e), 
+          "\"). Logging also failed (\"", conditionMessage(e2), "\").\n"))
     })
   })
   
@@ -52,8 +50,7 @@ func_stop <- function() {
     logfile <- NULL
   }
   if (rstudioapi::isAvailable()) {
-    func_end_dialog(run_params,
-                    logfile,
+    func_end_dialog(logfile,
                     exit_state = "failure")
   }
   

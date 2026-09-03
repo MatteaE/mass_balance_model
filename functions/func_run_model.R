@@ -8,8 +8,6 @@
 
 func_run_model <- function(run_params) {
   
-  # Model version.
-  run_params$dmbsim_version <<- "3.0"
   
   # Character vectors with all emitted warnings and errors.
   # They are updated by func_customlog() and used
@@ -58,7 +56,7 @@ func_run_model <- function(run_params) {
   
   func_customlog("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|")
   func_customlog("|++++++++++++++++                          ++++++++++++++++|")
-  func_customlog("|+++++++++               DMBSim v", run_params$dmbsim_version, "              +++++++++|")
+  func_customlog("|+++++++++               DMBSim v", dmbsim_version, "              +++++++++|")
   func_customlog("|++++++++++++++++                          ++++++++++++++++|")
   func_customlog("|++++++++++++++++++++++++++++++++++++++++++++++++++++++++++|\n\n")
   
@@ -297,7 +295,7 @@ func_run_model <- function(run_params) {
   
   # Send success notification ---------------------------------------------------------------------
   try(notify("Run finished successfully ✅",
-           title = paste0("DMBSim ", run_params$dmbsim_version),
+           title = paste0("DMBSim ", dmbsim_version),
            image = normalizePath("icons/icon64.png")),
       silent = TRUE)
   
@@ -305,8 +303,7 @@ func_run_model <- function(run_params) {
   
   # Show modal dialog -----------------------------------------------------------------------------
   if (rstudioapi::isAvailable()) {
-    func_end_dialog(run_params,
-                    logfile,
+    func_end_dialog(logfile,
                     exit_state = "success")
   }
   

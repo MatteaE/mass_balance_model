@@ -8,8 +8,7 @@
 ################################################################################################### 
 
 
-func_end_dialog <- function(run_params,
-                            logfile,
+func_end_dialog <- function(logfile,
                             exit_state) {
   
   # If the model run managed to finish, write it.
@@ -91,7 +90,7 @@ func_end_dialog <- function(run_params,
   }
   
   rstudioapi::showDialog(
-    paste0("DMBSim ", run_params$dmbsim_version),
+    paste0("DMBSim ", dmbsim_version),
     msg_txt
   )
   
