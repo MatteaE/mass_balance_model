@@ -16,9 +16,11 @@ func_compute_blueprint_grid <- function(run_params,
   res_ndec   <- func_count_decimals(res_all)
   
   if (res_ndec > 3) {
-    func_customlog("The computed grid resolution is ", sprintf(paste0("%.", res_ndec, "f"), res_all), " which has more than three decimal places.", level = 1)
-    func_customlog("This can produce errors in the grid calculations. Resolution will be rounded to three decimal places.", level = 0)
-    res_all <- round(res_all, 3)
+    res_all_out <- round(res_all, 3)
+    func_customlog("The computed grid resolution is ", sprintf(paste0("%.", res_ndec, "f"), res_all), " m which has more than three decimal places.", level = 1)
+    func_customlog("This can produce errors in the grid calculations. Resolution will be rounded to three decimal places: ", sprintf("%.3f", res_all_out), " m", level = 0)
+  } else {
+    res_all_out <- res_all
   }
   
   crs_all    <- run_params$grids_crs_epsg
