@@ -10,9 +10,9 @@
 func_plot_stakes <- function(year_data,
                              run_params) {
   
-  time_v <- as.POSIXct(rep(NA_real_, 4))
+  # time_v <- as.POSIXct(rep(NA_real_, 5)) # To measure plotting performance.
   
-  time_v[1] <- Sys.time()
+  # time_v[1] <- Sys.time()
   plots_stakes <- list()
   
   day_id_offset <- (year_data$model_annual_days_n + 1 - as.integer(format(year_data$model_time_bounds[2], "%j"))) + 1
@@ -33,7 +33,7 @@ func_plot_stakes <- function(year_data,
     stake_offset[annual_stake_id] <- (year_data$mod_output_annual_cur$stakes_series_mod_all[year_data$mod_output_annual_cur$stakes_start_ids_corr[annual_stake_id],annual_stake_id])
   }
   
-  time_v[2] <- Sys.time()
+  # time_v[2] <- Sys.time()
   
   # Compute plot ranges. Same for all plots.
   # We have to extend the range to include all
@@ -77,8 +77,14 @@ func_plot_stakes <- function(year_data,
           panel.grid = element_blank(),
           plot.margin = margin(0.2,0.2,0.2,0.2,"cm"))
   
+  
+  # All stakes plots have the same vertical lines, they are precomputed here.
+  month_gridlines_layer <- if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", linewidth = 0.2) else NULL
+  month_names_layer     <- annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = base_size * 0.2)
+    
+  
   # Loop to plot all stakes.
-  time_v[3] <- Sys.time()
+  # time_v[3] <- Sys.time()
   for (annual_stake_id in 1:year_data$nstakes_annual) {
     
     stake_mod_series        <- year_data$mod_output_annual_cur$stakes_series_mod_all[,annual_stake_id] * run_params$output_mult/1e3
@@ -101,8 +107,8 @@ func_plot_stakes <- function(year_data,
       ggplot(stake_mod_df) +
       geom_hline(yintercept = 0, linetype = "longdash", linewidth = 0.3) +
       geom_vline(xintercept = c(stake_start_id, stake_end_id) - day_id_offset, linetype = "longdash", color = "#FF00FF", linewidth = 0.4) +
-      {if (run_params$show_month_lines) geom_vline(xintercept = month_start_ids, linetype = "dashed", color = "#C0C0C0", linewidth = 0.2)} +
-      annotate("text", x = months_labels_df$day_id, y = -Inf, label = months_labels_df$label, vjust = -1, fontface = "bold", size = base_size * 0.2) +
+      month_gridlines_layer + # NULL if run_params$show_month_lines is FALSE.
+      month_names_layer +
       annotation_custom(grobTree(textGrob(paste0(year_data$massbal_annual_meas_cur$id[annual_stake_id], ": model bias ", sprintf(run_params$output_fmt3, year_data$mod_output_annual_cur$stakes_bias[annual_stake_id] * run_params$output_mult/1e3), " ", run_params$output_unit, " w.e."), x=0.05, y = 0.3, hjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
       geom_line(aes(x = day_id, y = mb)) +
@@ -115,7 +121,7 @@ func_plot_stakes <- function(year_data,
       theme_stakes_plots
   }
   
-  time_v[4] <- Sys.time()
+  # time_v[4] <- Sys.time()
   
   
   # Each element of this list holds up to
@@ -128,9 +134,9 @@ func_plot_stakes <- function(year_data,
                                              align = "hv", ncol = 2)
   }
   
-  time_v[5] <- Sys.time()
+  # time_v[5] <- Sys.time()
   
-  cat("Timings:", sprintf("%.2f", diff(time_v)), "\n")
+  # cat("Timings:", sprintf("%.2f", diff(time_v)), "\n")
   
   return(plots_stakes_out)
   

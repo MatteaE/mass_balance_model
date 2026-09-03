@@ -27,13 +27,13 @@ func_massbal_model <- function(run_params,
                                grid_ice_albedo_fact_cur_values,
                                verbose_level = 1) {
   
-
+  
   # verbose_level = 0 is fully quiet
   # verbose_level = 1 is normal output (currently only announcing firnification-related news)
   # verbose_level = 2 is verbose (also announcing avalanches)
   
-  time_v <- as.POSIXct(rep(NA_real_, 3))
-  time_v[1] <- Sys.time()
+  # time_v <- as.POSIXct(rep(NA_real_, 3))
+  # time_v[1] <- Sys.time()
   
   # Compute here because the snow and ice factors are subject
   # to optimization, this always stays in the middle of them.
@@ -109,18 +109,39 @@ func_massbal_model <- function(run_params,
   # It gets updated at every avalanche.
   avalanche_cumul_effect <- rep(0.0, run_params$grid_ncells)
   
+  # . Precompute some vectorized variables for performance ----------------------------------------
+  avalanche_day_logi       <- format(weather_series_cur$timestamp, "%m/%d") %in% run_params$model_avalanche_dates
   
+  # This can have length zero (highly unlikely, possible only in a winter simulation with
+  # end_date very early in the season - before the firnification date which is 1 March in the Northern Hemisphere),
+  # length one (usual case), or length > 1 (rare, in case of multi-year annual stakes).
+  firnification_day_logi   <- format(weather_series_cur$timestamp, "%m/%d") == run_params$firnification_date
+  
+  # Extracting from the data frames first saves some access time.
+  t2m_mean_vec             <- weather_series_cur$t2m_mean
+  precip_corr_vec          <- weather_series_cur$precip_corr
+  doy_vec                  <- weather_series_cur$doy
+  temp_elegrad_vec         <- params_daily_df_sel$temp_elegrad
+  prec_elegrad_vec         <- params_daily_df_sel$prec_elegrad
+  
+  prec_elegrid_thresholded <- pmin(run_params$weather_max_precip_ele, dhm_values) - run_params$weather_aws_elevation
+  temp_elegrid             <- (dhm_values - run_params$weather_aws_elevation) / 100
+  
+  snowdist_combined        <- snowdist_probes_norm_values_red * snowdist_topographic_values_red
+  
+
+    
   #### MAIN SIMULATION LOOP ####
-  time_v[2] <- Sys.time()
+  # time_v[2] <- Sys.time()
   for (day_id in 1:model_days_n) {
     
     # cat("\r", day_id, "/", model_days_n)
     
     #### .  COMPUTE GRIDDED WEATHER OF THE DAY ####
     # Temperature in °C, snowfall in mm w.e.
-    temp_cur            <- weather_series_cur$t2m_mean[day_id] + params_daily_df_sel$temp_elegrad[day_id] * (dhm_values - run_params$weather_aws_elevation) / 100
+    temp_cur            <- t2m_mean_vec[day_id] + temp_elegrad_vec[day_id] * temp_elegrid
     solid_prec_frac_cur <- clamp(((1 + run_params$weather_snowfall_temp) - temp_cur) / 2, 0, 1)
-    precip_cur          <- snowdist_probes_norm_values_red * snowdist_topographic_values_red * weather_series_cur$precip_corr[day_id] * pmax((1 + (pmin(run_params$weather_max_precip_ele, dhm_values) - run_params$weather_aws_elevation) * params_daily_df_sel$prec_elegrad[day_id] / 1e4 ), 0.0) # 1e4: gradient is in [% / 100 m], we want [fraction / m]. The pmax() is there because precipitation should not be allowed to go below 0 if the AWS is higher than the glacier.
+    precip_cur          <- snowdist_combined * precip_corr_vec[day_id] * pmax((1 + prec_elegrid_thresholded * prec_elegrad_vec[day_id] / 1e4 ), 0.0) # 1e4: gradient is in [% / 100 m], we want [fraction / m]. The pmax() is there because precipitation should not be allowed to go below 0 if the AWS is higher than the glacier.
     accumulation_cur    <- precip_cur * solid_prec_frac_cur
     # We assume that the spatial distribution of rainfall
     # is the same as the distribution of snowfall.
@@ -128,10 +149,10 @@ func_massbal_model <- function(run_params,
     # controls the distribution of *total* precipitation,
     # which then is split into a solid and a liquid part
     # for each cell.
-    rainfall_cur        <- precip_cur * (1 - solid_prec_frac_cur)
+    rainfall_cur        <- precip_cur - accumulation_cur
     
     #### .  SETUP INDICES ####
-    doy <- weather_series_cur$doy[day_id]
+    doy <- doy_vec[day_id]
     
     radiation_cur <- radiation_values_list[[doy]]
     
@@ -141,10 +162,6 @@ func_massbal_model <- function(run_params,
     
     
     #### .  AVALANCHE ROUTINE ####
-    avalanche_condition <- FALSE
-    if (format(weather_series_cur$timestamp[day_id], "%m/%d") %in% run_params$model_avalanche_dates) {
-      avalanche_condition <- TRUE
-    }
     # If we are to have an avalanche today, make it so
     # (first thing of the day, before melt and accumulation).
     # Algorithm:
@@ -153,7 +170,7 @@ func_massbal_model <- function(run_params,
     # compute the new swe (sum of avalanche deposit and previous non-avalanched mass)
     # update cumulative mass balance, swe, surface type
     # NOTE: to update the vectors we use the cells_prev indices, since those are used as input to the melt model just below. This means that the mass balance change due to the avalanche is assigned to the day BEFORE the avalanche.
-    if (avalanche_condition) {
+    if (avalanche_day_logi[day_id]) {
       
       if (verbose_level >= 2) {
         cat("Avalanche on", format(weather_series_cur$timestamp[day_id], "%Y/%m/%d"), "\n")
@@ -165,8 +182,6 @@ func_massbal_model <- function(run_params,
                                                       avalanche_input_values,
                                                       deposition_max_multiplier = 1.0,
                                                       preserve_edges = TRUE)
-      
-      # writeRaster(setValues(data_dhms$elevation[[1]], avalanche_output), "avalanche_output.tif", overwrite = T)
       
       # Store net avalanche effect
       avalanche_cumul_effect <- avalanche_cumul_effect + (avalanche_output - avalanche_input_values)
@@ -186,10 +201,8 @@ func_massbal_model <- function(run_params,
     
     
     #### .  MELT MODEL ####
-    # Set the entire melt_cur to NA before computing,
-    # to avoid any possible problems from values of the
-    # previous iteration.
-    melt_cur[1:run_params$grid_ncells] <- NA_real_
+    # Set the entire melt_cur to 0.0 before computing values.
+    melt_cur[1:run_params$grid_ncells] <- 0.0
     # Melt ice, firn and debris-covered cells.
     # We take the surf type from the previous
     # timestep to find out which cells to consider.
@@ -209,7 +222,6 @@ func_massbal_model <- function(run_params,
     melt_cur[cells_snow]   <- (year_cur_params$melt_factor + 24 * year_cur_params$rad_fact_snow / 1000. * radiation_cur[cells_snow]) * temp_cur[cells_snow]
     melt_cur[cells_debris] <- run_params$debris_red_fac * (year_cur_params$melt_factor + 24  * year_cur_params$rad_fact_ice / 1000. * radiation_cur[cells_debris]) * temp_cur[cells_debris]
     
-    melt_cur[is.na(melt_cur)] <- 0.0 # Don't melt rock, but never go into the NAs (we care about the SWE over rock, for avalanches!)
     melt_cur <- pmax(0.0, melt_cur)  # Clamp to positive values: negative PDDs do not add mass.
     
     
@@ -218,10 +230,11 @@ func_massbal_model <- function(run_params,
     # NOTE: the "mixed" melting regime (on days where snow cover
     # gets depleted, thus having partly snow and partly ice) is ignored
     # (radiation factor should in principle be partly snow, partly ice or firn or debris).
-    ids_swe_depleted <- which(melt_cur[cells_snow] >= vec_snow_swe[cells_prev][cells_snow])
-    vec_snow_swe[cells_cur] <- pmax(0, vec_snow_swe[cells_prev] - melt_cur)
+    ids_swe_depleted         <- which(melt_cur[cells_snow] >= vec_snow_swe[cells_prev][cells_snow])
+    vec_snow_swe[cells_cur]  <- pmax(0, vec_snow_swe[cells_prev] - melt_cur)
     vec_surf_type[cells_cur] <- vec_surf_type[cells_prev]
-    vec_surf_type[cells_cur][cells_snow][ids_swe_depleted] <- surftype_init_values[cells_snow][ids_swe_depleted]
+    idx                      <- cells_cur[cells_snow][ids_swe_depleted]
+    vec_surf_type[idx]       <- surftype_init_values[cells_snow][ids_swe_depleted]
     
     
     #### .  ACCUMULATION and MASS BALANCE ####
@@ -249,7 +262,7 @@ func_massbal_model <- function(run_params,
     # start and the firnification date; in general this minimum happens at a different
     # date for each cell).
     # Minimum SWE is exactly the leftover snow from the previous winter.
-    # We do this on 1 Apr because we want to have some new (current winter's) snow
+    # We do this close to the expected mass balance maximum because we want to have some new (current winter's) snow
     # everywhere, to not impact the surface type (snow becoming firn happens below the snowpack).
     # Since we subtract the minimum SWE, there is no risk of sending SWE into the negatives,
     # but we still check whether we are removing all the SWE of a cell; in this case,
@@ -261,15 +274,25 @@ func_massbal_model <- function(run_params,
     # For consistency, we remove initial SWE in any case, not only when
     # the initial snow distribution is taken from the previous year's model.
     # NOTE: this SWE removal does NOT modify the base grid of surface type, which is static.
-    # Thus, SWE lost to firn does not actually become "firn" in the model. For that, we would
-    # need to keep track of annual firn thickness, which is not done.
+    #       Thus, SWE lost to firn does not actually become "firn" in the model. For that, we would
+    #       need to keep track of annual firn thickness, which is not done.
     # NOTE2: this means that total SWE (and specifically SWE in the accumulation area) has
-    # a jump on the firnification date. We have to live with it.
-    if (format(weather_series_cur$timestamp[day_id], "%m/%d") == run_params$firnification_date) {
-      
+    #        a jump on the firnification date. We have to live with it.
+    # NOTE3: when there are multi-annual stakes, the firnification date
+    #        happens more than once (in successive years). Thus, a simple colMins()
+    #        on the whole matrix would always remove the minimum SWE seen SO FAR - not
+    #        the leftover snow at the end of each respective ablation season.
+    #        Thus, we build the swe_so_far_mat matrix only with the data of maximum 365 days back
+    #        from the current condition (which is on day_id+1) (i.e., we include the period
+    #        from the previous estimated accumulation maximum to the current one).
+    #        This ensures that firnification removes the proper amount of SWE.
+    if (firnification_day_logi[day_id]) {
       # This matrix has daily SWE as one column per grid cell and
-      # one row per day from the start to the current day.
-      swe_so_far_mat  <- matrix(vec_snow_swe, ncol = run_params$grid_ncells, byrow = TRUE)
+      # one row per day, from the start (but not earlier than 365 days
+      # before the current day) to the end of the current day.
+      swe_so_far_mat  <- matrix(vec_snow_swe[max(1,offset_cur+1-364*run_params$grid_ncells):(offset_cur+run_params$grid_ncells)],
+                                ncol = run_params$grid_ncells,
+                                byrow = TRUE)
       swe_min_vec     <- Rfast::colMins(swe_so_far_mat, value = TRUE)
       ids_swe_nonzero <- which(swe_min_vec > 0)
       ids_swe_nonzero_n <- length(ids_swe_nonzero)
@@ -303,8 +326,8 @@ func_massbal_model <- function(run_params,
     
     
   } # End of daily loop.
-  time_v[3] <- Sys.time()
-  cat("Timings:", sprintf("%.2f", diff(time_v)), "\n")
+  # time_v[3] <- Sys.time()
+  # cat("Timings:", sprintf("%.2f", diff(time_v)), "\n")
   
   # Collect output.
   mb_model_output <- list(vec_swe_all       = vec_snow_swe,

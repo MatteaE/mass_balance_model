@@ -18,6 +18,7 @@ func_check_north_south <- function(raster_blueprint,
   
   
   if (lat_center >= 0) {
+    
     cat("Setting up date parameters for the Northern Hemisphere.\n")
     run_params$north_south        <- "North"
     run_params$firnification_date <- "03/01"
