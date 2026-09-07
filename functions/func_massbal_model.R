@@ -129,8 +129,8 @@ func_massbal_model <- function(run_params,
   
   snowdist_combined        <- snowdist_probes_norm_values_red * snowdist_topographic_values_red
   
-
-    
+  
+  
   #### MAIN SIMULATION LOOP ####
   # time_v[2] <- Sys.time()
   for (day_id in 1:model_days_n) {
@@ -161,6 +161,15 @@ func_massbal_model <- function(run_params,
     cells_prev <- cells_cur - run_params$grid_ncells    # Indices of all the grid cells with values at the beginning of the current day.
     
     
+    # Extract previous daily status, for faster processing.
+    # Note: compared to working on vec_snow_swe[cells_prev] all the time,
+    # this means that the SWE change after avalanches is not attributed to the cells_prev.
+    # This new version is actually more correct (SWE of avalanches was made earlier by one day
+    # when working on vec_snow_swe).
+    snow_swe_prev      <- vec_snow_swe[cells_prev]
+    surf_type_prev     <- vec_surf_type[cells_prev]
+    massbal_cumul_prev <- vec_massbal_cumul[cells_prev]
+    
     #### .  AVALANCHE ROUTINE ####
     # If we are to have an avalanche today, make it so
     # (first thing of the day, before melt and accumulation).
@@ -169,14 +178,16 @@ func_massbal_model <- function(run_params,
     # run avalanche on it
     # compute the new swe (sum of avalanche deposit and previous non-avalanched mass)
     # update cumulative mass balance, swe, surface type
-    # NOTE: to update the vectors we use the cells_prev indices, since those are used as input to the melt model just below. This means that the mass balance change due to the avalanche is assigned to the day BEFORE the avalanche.
+    # NOTE: we update the _prev status vectors, since those are used as input to the melt model just below.
+    # However, at the end of the iteration we paste the _cur status vectors within the large full-year vectors,
+    # so the accounting is correct.
     if (avalanche_day_logi[day_id]) {
       
       if (verbose_level >= 2) {
         cat("Avalanche on", format(weather_series_cur$timestamp[day_id], "%Y/%m/%d"), "\n")
       }
       
-      avalanche_input_values        <- pmax(0.0, vec_snow_swe[cells_prev] - swe_post_previous_avalanche)
+      avalanche_input_values        <- pmax(0.0, snow_swe_prev - swe_post_previous_avalanche)
       avalanche_output              <- func_avalanche(run_params,
                                                       grids_avalanche_cur,
                                                       avalanche_input_values,
@@ -187,16 +198,17 @@ func_massbal_model <- function(run_params,
       avalanche_cumul_effect <- avalanche_cumul_effect + (avalanche_output - avalanche_input_values)
       
       # Update to current avalanche result.
-      swe_post_previous_avalanche   <- avalanche_output + (vec_snow_swe[cells_prev] - avalanche_input_values)
+      swe_post_previous_avalanche   <- avalanche_output + (snow_swe_prev - avalanche_input_values)
       
-      vec_massbal_cumul[cells_prev] <- vec_massbal_cumul[cells_prev] + swe_post_previous_avalanche - vec_snow_swe[cells_prev]
-      gl_accum_daily[day_id] <- gl_accum_daily[day_id] + mean(swe_post_previous_avalanche[glacier_cell_ids] - vec_snow_swe[cells_prev][glacier_cell_ids]) # Update accumulation after avalanche.
+      massbal_cumul_prev     <- massbal_cumul_prev + swe_post_previous_avalanche - snow_swe_prev
+      gl_accum_daily[day_id] <- gl_accum_daily[day_id] + mean(swe_post_previous_avalanche[glacier_cell_ids] - snow_swe_prev[glacier_cell_ids]) # Update accumulation after avalanche.
       
-      vec_snow_swe[cells_prev]      <- swe_post_previous_avalanche
+      # Update - previous SWE becomes the one after the avalanche at the start of the day.
+      snow_swe_prev                  <- swe_post_previous_avalanche
       
-      ids_snow_logi                             <- vec_snow_swe[cells_prev] > 0
-      vec_surf_type[cells_prev][ids_snow_logi]  <- 2
-      vec_surf_type[cells_prev][!ids_snow_logi] <- surftype_init_values[!ids_snow_logi]
+      ids_snow_logi                  <- snow_swe_prev > 0
+      surf_type_prev[ids_snow_logi]  <- 2
+      surf_type_prev[!ids_snow_logi] <- surftype_init_values[!ids_snow_logi]
     }
     
     
@@ -209,7 +221,6 @@ func_massbal_model <- function(run_params,
     # The result is a vector of cell indices
     # directly applicable to the melt_cur vector
     # (i.e. indices starting at 1).
-    surf_type_prev <- vec_surf_type[cells_prev]
     cells_ice      <- which(surf_type_prev == 0)
     cells_firn     <- which(surf_type_prev == 1)
     cells_snow     <- which(surf_type_prev == 2)
@@ -230,19 +241,19 @@ func_massbal_model <- function(run_params,
     # NOTE: the "mixed" melting regime (on days where snow cover
     # gets depleted, thus having partly snow and partly ice) is ignored
     # (radiation factor should in principle be partly snow, partly ice or firn or debris).
-    ids_swe_depleted         <- which(melt_cur[cells_snow] >= vec_snow_swe[cells_prev][cells_snow])
-    vec_snow_swe[cells_cur]  <- pmax(0, vec_snow_swe[cells_prev] - melt_cur)
-    vec_surf_type[cells_cur] <- vec_surf_type[cells_prev]
-    idx                      <- cells_cur[cells_snow][ids_swe_depleted]
-    vec_surf_type[idx]       <- surftype_init_values[cells_snow][ids_swe_depleted]
+    ids_swe_depleted         <- which(melt_cur[cells_snow] >= snow_swe_prev[cells_snow])
+    snow_swe_cur             <- pmax(0, snow_swe_prev - melt_cur)
+    surf_type_cur            <- surf_type_prev
+    surf_type_cur[cells_snow][ids_swe_depleted] <- surftype_init_values[cells_snow][ids_swe_depleted]
+    
     
     
     #### .  ACCUMULATION and MASS BALANCE ####
     # Add accumulation and update cumulative mass balance.
-    vec_snow_swe[cells_cur]      <- vec_snow_swe[cells_cur] + accumulation_cur
-    vec_massbal_cumul[cells_cur] <- vec_massbal_cumul[cells_prev] - melt_cur + accumulation_cur
-    vec_surf_type[cells_cur][which(accumulation_cur > 0.0)] <- 2 # Mark surface as snow after snowfall.
-    gl_massbal_cumul[day_id + 1] <- mean(vec_massbal_cumul[offset_cur + glacier_cell_ids])
+    snow_swe_cur                 <- snow_swe_cur + accumulation_cur
+    massbal_cumul_cur            <- massbal_cumul_prev - melt_cur + accumulation_cur
+    surf_type_cur[accumulation_cur > 0.0] <- 2
+    gl_massbal_cumul[day_id + 1] <- mean(massbal_cumul_cur[glacier_cell_ids])
     gl_melt_daily[day_id]        <- mean(melt_cur[glacier_cell_ids])
     gl_accum_daily[day_id]       <- gl_accum_daily[day_id] + mean(accumulation_cur[glacier_cell_ids]) # We use the sum because we may already have a non-zero value here in case there has been an avalanche.
     gl_rainfall_daily[day_id]    <- mean(rainfall_cur[glacier_cell_ids])
@@ -290,19 +301,28 @@ func_massbal_model <- function(run_params,
       # This matrix has daily SWE as one column per grid cell and
       # one row per day, from the start (but not earlier than 365 days
       # before the current day) to the end of the current day.
-      swe_so_far_mat  <- matrix(vec_snow_swe[max(1,offset_cur+1-364*run_params$grid_ncells):(offset_cur+run_params$grid_ncells)],
-                                ncol = run_params$grid_ncells,
-                                byrow = TRUE)
+      # We use rbind because vec_snow_swe[cells_cur] has not yet been updated
+      # with the values of snow_swe_cur. So the matrix itself (before rbind) only
+      # goes to offset_cur, i.e. the previous day's end.
+      swe_so_far_mat  <- rbind(matrix(vec_snow_swe[max(1,offset_cur+1-364*run_params$grid_ncells):offset_cur],
+                                      ncol = run_params$grid_ncells,
+                                      byrow = TRUE),
+                               snow_swe_cur)
       swe_min_vec     <- Rfast::colMins(swe_so_far_mat, value = TRUE)
       ids_swe_nonzero <- which(swe_min_vec > 0)
       ids_swe_nonzero_n <- length(ids_swe_nonzero)
+      
+      # If there is any snow right now at all, let's see what becomes firn.
       if (ids_swe_nonzero_n > 0) {
         if (verbose_level >= 1) {
           cat(paste0(format(weather_series_cur$timestamp[day_id], "%Y-%m-%d"), ": transforming leftover snow from previous year into firn on ", ids_swe_nonzero_n, " cells (mean SWE subtracted from them: ", round(mean(swe_min_vec[ids_swe_nonzero])), " mm w.e.)\n"))
         }
         
-        ids_swe_depleted_to_firn            <- which((vec_snow_swe[cells_cur] > 0) &
-                                                       (vec_snow_swe[cells_cur] <= swe_min_vec))
+        # The second condition should actually read == since the
+        # swe_min_vec always includes the snow_swe_cur when it is
+        # calculated, but we leave it as <= to account for potential
+        # floating point inaccuracies.
+        ids_swe_depleted_to_firn            <- which((snow_swe_cur > 0) & (snow_swe_cur <= swe_min_vec))
         ids_swe_depleted_to_firn_on_glacier <- intersect(ids_swe_depleted_to_firn, glacier_cell_ids)
         swe_depleted_to_firn_n              <- length(ids_swe_depleted_to_firn)
         swe_depleted_to_firn_on_glacier_n   <- length(ids_swe_depleted_to_firn_on_glacier)
@@ -312,16 +332,23 @@ func_massbal_model <- function(run_params,
                            swe_depleted_to_firn_n, " cells, ",
                            swe_depleted_to_firn_on_glacier_n, " of them on glacier! This is extremely unlikely (it means that the date of firnification is the date of minimum mass balance for each of those cells). Please check the meteorological series! This total removal might introduce second-order biases in the mass balance.", level = 1)
           }
-          vec_surf_type[cells_cur][ids_swe_depleted_to_firn] <- surftype_init_values[ids_swe_depleted_to_firn]
-        }
-        vec_snow_swe[cells_cur] <- pmax(0, vec_snow_swe[cells_cur] - swe_min_vec)
+          surf_type_cur[ids_swe_depleted_to_firn] <- surftype_init_values[ids_swe_depleted_to_firn]
+        } # End if there is any cell where firnification removes the entire snow cover (i.e. today is minimum-SWE day)
+        snow_swe_cur <- pmax(0, snow_swe_cur - swe_min_vec)
         
+        # Else: there is no leftover snow which becomes firn
       } else {
         if (verbose_level >= 1) {
           cat("There is no leftover snow from previous year, which would have become firn\n")
         }
-      }
-    }
+      } # End else there is no leftover snow which becomes firn
+    } # End if it is firnification day
+    
+    
+    # Update full surface type vector with today's end status.
+    vec_surf_type[cells_cur]     <- surf_type_cur
+    vec_snow_swe[cells_cur]      <- snow_swe_cur
+    vec_massbal_cumul[cells_cur] <- massbal_cumul_cur
     
     
     

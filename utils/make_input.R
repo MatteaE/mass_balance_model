@@ -42,8 +42,8 @@ func_recover_utm_crs <- function(wkt_malformed) {
   # N or S
   regexp_utm <- "((?:universal)|U){1}[ _-]{0,2}((?:transverse)|T){1}[ _-]{0,2}((?:mercator)|M){1}(?:[^0-9])*([0-9]{1,2})[ _-]*([NS]{1})"
   
-  utm_match <- regmatches(wkt_line_first,regexec(regexp_utm, wkt_line_first, ignore.case = TRUE))
-  if (length(utm_match) == 1) {
+  utm_match <- regmatches(wkt_line_first, regexec(regexp_utm, wkt_line_first, ignore.case = TRUE))
+  if (length(utm_match[[1]]) > 1) {
     utm_match <- utm_match[[1]][2:length(utm_match[[1]])]
     utm_zone <- as.integer(utm_match[4])
     utm_ns <- utm_match[5]
@@ -64,8 +64,9 @@ func_repair_rast_crs <- function(rast_cur) {
       dem_crs_epsg <- paste0("EPSG:", dem_crs_tentative_code)
       terra::crs(rast_cur) <- terra::crs(dem_crs_epsg)
       message("WARNING! Coordinates system of a grid was malformed, but I was able to fix it as ", dem_crs_epsg, ". I will continue.")
+      return(rast_cur)
     } else {
-      stop(NULL)
+      return(NULL)
     }
   } else {
     return(rast_cur)
@@ -113,20 +114,41 @@ func_compute_day_rad <- function(dem_mat,
   
   Iglobal <- array(0, dim = dim(dem_mat))
   
+  # This is c(sunrise h, sunset h, duration h)
+  # if there are sunrise and sunset.
+  # If there is no sunrise nor sunset (polar night),
+  # this is c(NA, NA, 0).
+  # If there is no sunrise nor sunset (midnight sun),
+  # this is c(NaN, NaN, NaN).
   dayl <- daylength(lat, lon, jd_cur, 0)
   
-  for (hour_cur in seq(dayl[1], dayl[2], delta_t)) {
-    
-    jd_cur <- JDymd(year_cur, month_cur, day_cur, hour_cur)
-    sun_vec <- sunvector(jd_cur, lat, lon, 0)
-    hillshade_cur <- hillshading(norm_mat, sun_vec)
-    shaded <- doshade(dem_mat, sun_vec, dem_res)
-    sun_zenith <- degrees(acos(sun_vec[,3]))
-    # Compute direct radiation modified by terrain + diffuse irradiation (sky-view factor ignored).
-    Idirdif = insolation(sun_zenith, jd_cur, ele_ref, visibility, rh, tempK, O3, alphag)
-    Iglobal = Iglobal + (Idirdif[,1] * hillshade_cur + Idirdif[,2] ) * delta_t / 24 # Values in W m^-2
-    
+  # Always sunny - just run a full day.
+  # This is very slightly inaccurate because it does not
+  # consider the actual 24 hour window of the appropriate time zone
+  # (which could be e.g. -6 to 18), but the difference is tiny and
+  # self-limited (radiation sum over several days of full sun will
+  # converge towards correct values.
+  if (!is.finite(dayl[3])) {
+    dayl <- c(0, 24, 24)
   }
+  
+  # If no sun at all, keep Iglobal at 0.0.
+  if (dayl[3] > 0) {
+    
+    for (hour_cur in seq(dayl[1], dayl[2], delta_t)) {
+      
+      jd_cur <- JDymd(year_cur, month_cur, day_cur, hour_cur)
+      sun_vec <- sunvector(jd_cur, lat, lon, 0)
+      hillshade_cur <- hillshading(norm_mat, sun_vec)
+      shaded <- doshade(dem_mat, sun_vec, dem_res)
+      sun_zenith <- degrees(acos(sun_vec[,3]))
+      # Compute direct radiation modified by terrain + diffuse irradiation (sky-view factor ignored).
+      Idirdif = insolation(sun_zenith, jd_cur, ele_ref, visibility, rh, tempK, O3, alphag)
+      Iglobal = Iglobal + (Idirdif[,1] * hillshade_cur + Idirdif[,2] ) * delta_t / 24 # Values in W m^-2
+      
+    } # End loop on the timesteps
+    
+  } # End if day length is > 0
   
   return(Iglobal)
 }
@@ -341,8 +363,40 @@ func_do_processing <- function(dem_filepath,
   ndems <- length(dem_filepath)
   if (ndems > 1) {
     cat("You provided more than one DEM, I am merging them before proceeding...")
-    dems <- sapply(as.list(dem_filepath), rast)
-    dem_l1 <- do.call(terra::merge, dems)
+    
+    # Attempt loading, stop with informative message if error.
+    loading_result <- tryCatch({
+      dems     <- lapply(dem_filepath, rast)
+      NULL
+    }, error = function(e) {
+      return(paste0("Error loading the DEM file(s): ", conditionMessage(e), ". Please CHECK MANUALLY and run the program again."))
+    })
+    if (!is.null(loading_result)) {
+      cat("\n*** ERROR:", loading_result, "***\n")
+      return(loading_result)
+    }
+    
+    # Require same CRS for all provided DEMs.
+    dems_crs      <- sapply(dems, crs)
+    crs_same_logi <- sapply(dems_crs, same.crs, dems_crs[1])
+    if (any(!crs_same_logi)) {
+      err_msg <- paste0("The DEM files must all have the same coordinates system. Please FIX THEM MANUALLY and run the program again.")
+      cat("\n*** ERROR:", err_msg, "***\n")
+      return(err_msg)
+    }
+    
+    # Attempt merging, stop with informative message if error.
+    merging_result <- tryCatch({
+      dem_l1 <- do.call(terra::merge, dems, algo = 1, resample = TRUE, method = "bilinear")
+      NULL
+    }, error = function(e) {
+      return(paste0("Error merging the DEM file(s): ", conditionMessage(e), ". Please CHECK MANUALLY and run the program again."))
+    })
+    if (!is.null(merging_result)) {
+      cat("\n*** ERROR:", merging_result, "***\n")
+      return(merging_result)
+    }
+    
     cat(" Done.\n")
   } else {
     dem_l1 <- rast(dem_filepath)
@@ -350,23 +404,38 @@ func_do_processing <- function(dem_filepath,
   
   cat("Reading glacier outline...\n")
   outline_l1 <- st_zm(st_read(outline_filepath, quiet = TRUE))
+  if (nrow(outline_l1) == 0) {
+    err_msg <- "The outline shapefile is empty. Please FIX IT MANUALLY and run the program again."
+    cat("\n*** ERROR:", err_msg, "***\n")
+    return(err_msg)
+  }
   if (any(!st_is_valid(outline_l1))) {
-    cat("Glacier outline has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
+    cat("The glacier outline has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
     st_geometry(outline_l1) <- lwgeom_make_valid(st_geometry(outline_l1))
   }
   
   if (has_firn) {
     firn_l1 <- st_zm(st_read(firn_filepath, quiet = TRUE))
+    if (nrow(firn_l1) == 0) {
+      err_msg <- "The firn shapefile is empty. Please FIX IT MANUALLY and run the program again."
+      cat("\n*** ERROR:", err_msg, "***\n")
+      return(err_msg)
+    }
     if (any(!st_is_valid(firn_l1))) {
-      cat("Firn shapefile has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
+      cat("The firn shapefile has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
       st_geometry(firn_l1) <- lwgeom_make_valid(st_geometry(firn_l1))
     }
   }
   
   if (has_debris) {
     debris_l1 <- st_zm(st_read(debris_filepath, quiet = TRUE))
+    if (nrow(debris_l1) == 0) {
+      err_msg <- "The debris shapefile is empty. Please FIX IT MANUALLY and run the program again."
+      cat("\n*** ERROR:", err_msg, "***\n")
+      return(err_msg)
+    }
     if (any(!st_is_valid(debris_l1))) {
-      cat("Debris shapefile has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
+      cat("The debris shapefile has one or more invalid geometries. I am fixing it automatically, but you should investigate.\n")
       st_geometry(debris_l1) <- lwgeom_make_valid(st_geometry(debris_l1))
     }
   }
@@ -429,7 +498,7 @@ func_do_processing <- function(dem_filepath,
   
   # Find which UTM zone we should be using here in principle.
   # Also works if the outline is in some weird CRS.
-  if (outline_crs == wgs84_crs) {
+  if (same.crs(outline_crs, wgs84_crs)) {
     outline_centroid   <- suppressWarnings(st_coordinates(st_centroid(outline_l1)))
   } else {
     outline_wgs84      <- st_transform(outline_l1, "EPSG:4326")
@@ -454,18 +523,32 @@ func_do_processing <- function(dem_filepath,
     if (reference_crs == "") {
       crs(reference_l1) <- utm_crs
     } else {
+      if (is.lonlat(reference_l1,
+                    perhaps = TRUE)) {
+        err_msg <- "The provided reference grid uses a longitude/latitude coordinate system. This is not supported, the grid should use projected metric coordinates. Please FIX IT MANUALLY and run the program again."
+        cat("\n*** ERROR:", err_msg, "***\n")
+        return(err_msg)
+      }
+      
       reference_l1 <- func_repair_rast_crs(reference_l1)
       if (is.null(reference_l1)) {
-        err_msg <- "Coordinates system of the reference grid is not recognized. Please FIX IT MANUALLY and run the program again."
+        err_msg <- "The coordinate system of the provided reference grid is not recognized. Please FIX IT MANUALLY and run the program again."
         cat("\n*** ERROR:", err_msg, "***\n")
         return(err_msg)
       }
     }
     
+    if (abs(xres(reference_l1) - yres(reference_l1)) > 1e-5) {
+      err_msg <- "The provided reference grid has non-square cells. This is not supported. Please FIX IT MANUALLY and run the program again."
+      cat("\n*** ERROR:", err_msg, "***\n")
+      return(err_msg)
+    }
+    
     target_crs    <- reference_crs
     
-    if (dem_crs     != reference_crs) reproj_dem     <- TRUE
-    if (outline_crs != reference_crs) reproj_outline <- TRUE
+    if (!(same.crs(dem_crs, reference_crs))) reproj_dem     <- TRUE
+    if (!(same.crs(outline_crs, reference_crs))) reproj_outline <- TRUE
+    
     
     # We also want square cells.
     if (abs(xres(dem_l1) - yres(dem_l1)) > 1e-5)        reproj_dem     <- TRUE
@@ -473,7 +556,7 @@ func_do_processing <- function(dem_filepath,
     # If there is no reference grid supplied for alignment.
   } else {
     
-    if ((dem_crs == outline_crs) && (dem_crs != wgs84_crs)) {
+    if (same.crs(dem_crs, outline_crs) && !same.crs(dem_crs, wgs84_crs)) {
       
       cat("DEM and shapefile are already in the same projected coordinates.\n")
       target_crs <- dem_crs
@@ -484,7 +567,7 @@ func_do_processing <- function(dem_filepath,
         target_crs <- dem_crs
       }
       
-    } else if ((dem_crs == outline_crs) && (dem_crs == wgs84_crs)) {
+    } else if (same.crs(dem_crs, outline_crs) && same.crs(dem_crs, wgs84_crs)) {
       
       message(paste0("DEM and shapefile are both in WGS84 (EPSG:4326). I am reprojecting them to UTM (zone ", utm_crs_number, utm_ns, ") before proceeding."))
       # message("This can take some minutes if the DEM is big.\n")
@@ -493,7 +576,7 @@ func_do_processing <- function(dem_filepath,
       reproj_outline   <- TRUE
       target_crs       <- utm_crs 
       
-    } else if (dem_crs != outline_crs) {
+    } else if (!same.crs(dem_crs, outline_crs)) {
       
       message("DEM and shapefile do not have the same coordinate system.")
       utm_crs_allowed  <- sapply(paste0("EPSG:", 32600 + utm_crs_number + utm_offset + -1:1), function(x) terra::crs(x, proj = TRUE)) # Allow a 1-zone tolerance, for glaciers near the UTM zone borders.
@@ -554,6 +637,15 @@ func_do_processing <- function(dem_filepath,
       resolution_proj_raster <- cellsizes_allowed[which.min(abs(((outline_extent_area / (cellsizes_allowed^2)) / ncells_target) - 1))]
       cat("Cell size selected:", resolution_proj_raster, "m\n")
     } else {
+      
+      if (!(is.finite(cell_size) &&
+            (cell_size >= 1) &&
+            (cell_size <= 10000))) {
+        err_msg <- paste0("Invalid value supplied for the cell size. Please use a valid number in meters (1 to 10000) or leave blank for automatic estimation.")
+        cat("\n*** ERROR:", err_msg, "***\n")
+        return(err_msg)
+      }
+      
       resolution_proj_raster <- cell_size
       cat("Cell size supplied:", resolution_proj_raster, "m\n")
     }
@@ -572,6 +664,13 @@ func_do_processing <- function(dem_filepath,
   # extent, target CRS and resolution, 
   # and use it as template, reprojecting DEM if needed.
   if (!(has_reference)) {
+    if (!(is.finite(dem_buffer) &&
+          (dem_buffer >= 1) &&
+          (dem_buffer <= 100000))) {
+      err_msg <- paste0("Invalid value for the margin size around the outline. Please use a valid number in meters: 1 to 100000, recommended here: ", round(resolution_proj_raster*10))
+      cat("\n*** ERROR:", err_msg, "***\n")
+      return(err_msg)
+    }
     
     ext_out <- ext(st_bbox(outline_l2) + dem_buffer * c(-1,-1,1,1))
     reference_l1 <- rast(crs = target_crs,
@@ -584,7 +683,17 @@ func_do_processing <- function(dem_filepath,
     ref_ext_proj <- project(ext(reference_l1),
                             terra::crs(reference_l1, proj = TRUE),
                             terra::crs(dem_l1, proj = TRUE))
-    dem_l2 <- crop(dem_l1, ref_ext_proj, snap = "out")
+    crop_result <- tryCatch({
+      dem_l2 <- crop(dem_l1, ref_ext_proj, snap = "out")
+      NULL
+    }, error = function(e) {
+      return(paste0("Error cropping the DEM file(s): ", conditionMessage(e), ". Please CHECK MANUALLY and run the program again."))
+    })
+    if (!is.null(crop_result)) {
+      cat("\n*** ERROR:", crop_result, "***\n")
+      return(crop_result)
+    }
+    
     dem_l2 <- terra::project(dem_l2, reference_l1, method = "bilinear")
     dhm_out <- dem_l2
   }
@@ -621,11 +730,22 @@ func_do_processing <- function(dem_filepath,
   # Instead, if we give a reference DEM we may have to resample (bilinear filter) ours, because
   # resolution/origin/extent could be different (even after adjusting projection, which we have done above).
   cat("\nPreparing output...\n")
-  
-  dem_out <- mask(dhm_out, outline_l2)
+  dem_out      <- mask(dhm_out, outline_l2)
   surftype_out <- 4*is.na(dem_out) # This is the base rock/ice mask.
-  if (has_firn)   surftype_out <- mask(surftype_out, firn_l2, inverse = TRUE, updatevalue = 1)   # Add firn if we have it.
-  if (has_debris) surftype_out <- mask(surftype_out, debris_l2, inverse = TRUE, updatevalue = 5) # Add debris if we have them.
+  
+  # Add firn if we have it, but intersect with glacier outline first!
+  # If this produces an empty intersection, there is a warning from the call to mask() but no crash.
+  if (has_firn) {
+    firn_l3      <- st_intersection(firn_l2, outline_l2)
+    surftype_out <- mask(surftype_out, firn_l3, inverse = TRUE, updatevalue = 1)
+  }
+  
+  # Add debris if we have them, but intersect with glacier outline first!
+  # If this produces an empty intersection, there is a warning from the call to mask() but no crash.
+  if (has_debris) {
+    debris_l3    <- st_intersection(debris_l2, outline_l2)
+    surftype_out <- mask(surftype_out, debris_l3, inverse = TRUE, updatevalue = 5)
+  }
   
   
   #### Write grids to output ####
@@ -649,12 +769,12 @@ func_do_processing <- function(dem_filepath,
   
   # Errors? Show them!
   if (any(is.na(values(dhm_out)))) {
-    err_msg <- "There are NA values in the ouput DEM. Please check that the input DEMs cover the full area of interest. Also check the parameter \"margin size\"."
+    err_msg <- "There are NA values in the output DEM. Please check that the input DEMs cover the full area of interest. Also check the parameter \"margin size\"."
     cat("\n*** ERROR:", err_msg, "***\n")
     return(err_msg)
   }
   if (any(is.na(values(surftype_out)))) {
-    err_msg <- "There are NA values in the ouput surface type grid. Please check the input shapefiles."
+    err_msg <- "There are NA values in the output surface type grid. Please check the input shapefiles."
     cat("\n*** ERROR:", err_msg, "***\n")
     return(err_msg)
   }
@@ -744,7 +864,7 @@ ui <- fluidPage(useShinyjs(),
                              label = "Choose margin size around the outline, in meters:",
                              value = 500,
                              min = 1,
-                             max = 10000,
+                             max = 100000,
                              width = "60%"),
                 p(),
                 
