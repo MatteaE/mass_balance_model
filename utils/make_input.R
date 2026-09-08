@@ -51,7 +51,7 @@ func_validate_vect <- function(vect_cur,
   # All valid.
   if (valid_geom == 1) {
     
-    return(aggregate(vect_cur))
+    return(terra::aggregate(vect_cur))
     
     # Invalid, but repair can be attempted (is.valid and makeValid do not throw error).
   } else if (valid_geom == 0) {
@@ -60,7 +60,7 @@ func_validate_vect <- function(vect_cur,
     
     # Repaired successfully.
     if (all(is.valid(vect_cur_fix))) {
-      return(aggregate(vect_cur_fix))
+      return(terra::aggregate(vect_cur_fix))
       
       # Failed to repair.
     } else {
@@ -96,9 +96,9 @@ func_utm_grep <- function(input_line,
   utm_matches <- regmatches(input_line, regexec(regexp_utm, input_line, ignore.case = TRUE))
   if (length(utm_matches[[1]]) == 6) {
     utm_match <- utm_matches[[1]][2:length(utm_matches[[1]])]
-    utm_zone <- as.integer(utm_match[4])
-    utm_ns <- utm_match[5]
-    utm_code <- 32600 + utm_zone + c(0,100)[2 - (utm_ns == "N")]
+    utm_zone  <- as.integer(utm_match[4])
+    utm_ns    <- utm_match[5]
+    utm_code  <- 32600 + utm_zone + c(0,100)[2 - (utm_ns == "N")]
     return(utm_code)
     
   } else {
@@ -366,11 +366,11 @@ func_getvolumes <- function(exclude = NULL) {
       volNames <- paste0(volNames, " (", gsub(":/$", ":",
                                               volumes), ")")
     } else {
-      volumes <- system(paste(wmic, "logicaldisk get Caption"),
-                        intern = TRUE, ignore.stderr = TRUE)
-      volumes <- sub(" *\\r$", "", volumes)
-      keep <- !tolower(volumes) %in% c("caption", "")
-      volumes <- volumes[keep]
+      volumes  <- system(paste(wmic, "logicaldisk get Caption"),
+                         intern = TRUE, ignore.stderr = TRUE)
+      volumes  <- sub(" *\\r$", "", volumes)
+      keep     <- !tolower(volumes) %in% c("caption", "")
+      volumes  <- volumes[keep]
       volNames <- system(paste(wmic, "/FAILFAST:1000 logicaldisk get VolumeName"),
                          intern = TRUE, ignore.stderr = TRUE)
       
@@ -673,7 +673,7 @@ func_do_processing <- function(dem_filepath,
   cat("\nCoordinate system is checked...\n")
   
   # Find which UTM zone we should be using here in principle.
-  outline_centroid     <- suppressWarnings(crds(project(centroids(outline_l1), "EPSG:4326")))
+  outline_centroid     <- suppressWarnings(crds(terra::project(terra::centroids(outline_l1), "EPSG:4326")))
   utm_crs_number       <- func_long2utmzonenumber(outline_centroid[1])
   utm_ns_id            <- 2 - as.integer(outline_centroid[2] > 0) # 1 for North, 2 for South.
   utm_offset           <- c(0,100)[utm_ns_id] # Zones below the Equator start at 32700.
@@ -786,7 +786,7 @@ func_do_processing <- function(dem_filepath,
   # compute cell size.
   dem_l2                          <- dem_l1
   outline_l2                      <- outline_l1
-  if (reproj_outline) outline_l2  <- project(outline_l1, target_crs)
+  if (reproj_outline) outline_l2  <- terra::project(outline_l1, target_crs)
   
   
   # If a reference grid was supplied, check that it has enough distance
@@ -867,8 +867,8 @@ func_do_processing <- function(dem_filepath,
   
   
   # Always reproject firn and debris shapefiles. Easier than doing all comparisons of the projection.
-  if (has_firn)   firn_l2   <- project(firn_l1, terra::crs(outline_l2, proj = TRUE))
-  if (has_debris) debris_l2 <- project(debris_l1, terra::crs(outline_l2, proj = TRUE))
+  if (has_firn)   firn_l2   <- terra::project(firn_l1, terra::crs(outline_l2, proj = TRUE))
+  if (has_debris) debris_l2 <- terra::project(debris_l1, terra::crs(outline_l2, proj = TRUE))
   gc()
   
   
@@ -932,7 +932,7 @@ func_do_processing <- function(dem_filepath,
   # First crop it to the projected extent of the output grid on the current
   # grid (with a little buffer), such that the full grid is not reprojected but only the needed region.
   if (reproj_dem) {
-    ref_ext_proj <- project(ext(reference_l1) + xres(reference_l1),
+    ref_ext_proj <- terra::project(ext(reference_l1) + xres(reference_l1),
                             terra::crs(reference_l1, proj = TRUE),
                             terra::crs(dem_l1, proj = TRUE))
     crop_result <- tryCatch({

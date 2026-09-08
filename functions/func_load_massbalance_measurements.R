@@ -232,7 +232,7 @@ func_load_massbalance_measurements <- function(run_params,
     } else {
       func_customlog("          No entries could be recovered. Please check them manually.", level = 0)
       if (ids_bad_n == nrow(data_massbalance)) {
-        func_customlog("        All mass balance points are not usable. Please fix the mass balance file and run again.", level = 2)
+        func_customlog("  All mass balance points are not usable. Please fix the mass balance file and run again.", level = 2)
         func_stop()
       }
     }

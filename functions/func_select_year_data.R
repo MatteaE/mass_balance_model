@@ -72,7 +72,7 @@ func_select_year_data <- function(data_all,
   stakes_annual_outside_ids <- which(is.na(stakes_annual_dem_values))
   stakes_annual_outside_n   <- length(stakes_annual_outside_ids)
   if (stakes_annual_outside_n > 0) {
-    func_customlog(paste0("Found ", stakes_annual_outside_n, " annual measurement(s) which are outside the glacier outline. They will be discarded, but you should investigate."), level = 1)
+    func_customlog(paste0("Year ", year_data$year_cur, ": found ", stakes_annual_outside_n, " annual measurement(s) which are outside the glacier outline. They will be discarded, but you should investigate."), level = 1)
     func_customlog("They are:")
     func_customlog(paste0(year_data$massbal_annual_meas_cur$id[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$x[stakes_annual_outside_ids], " | ", year_data$massbal_annual_meas_cur$y[stakes_annual_outside_ids], "\n"))
     year_data$massbal_annual_meas_cur <- year_data$massbal_annual_meas_cur[-stakes_annual_outside_ids,]

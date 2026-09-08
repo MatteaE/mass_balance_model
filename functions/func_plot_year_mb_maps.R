@@ -38,8 +38,6 @@ func_plot_year_mb_maps <- function(year_data,
           legend.text = element_text(face = "bold", size = 12),
           plot.margin = margin(margin_top,0,0,0, unit = "pt"))
   
-  # contour_label_textsize <- 4
-  # contour_linesize <- 0.4
   outline_linesize <- 0.7 * run_params$outlines_linesize_mult
   y_line_mult <- min(1.5, max(1, (data_outlines$aspect_ratio[[year_data$outline_id]] + 1.5) / 2))
   y_line1 <- 1 + (0.21 / y_line_mult)
