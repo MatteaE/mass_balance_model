@@ -89,9 +89,9 @@ func_plot_massbal_vs_elevation <- function(year_data,
                          pattern_angle = 35, pattern_size = 0.1, pattern_spacing = 0.02, pattern_density = 0.05) +
     geom_hline(yintercept = 0, linewidth = 0.4) +
     geom_line(aes(x = ele, y = value, color = variable), linewidth = 1) +
-    scale_color_manual(breaks = c("mb_annual_meas", "mb_annual_hydro", "mb_winter_fixed", "mb_winter_meas", "mb_annual_meas_corr"), # DEV NOTE: first one would have been "mb_annual_fixed", but we have disabled that period.
-                       values = c("#FF0000", "#FF9000", "#0000FF", "#8080FF", "#000000"), # "#8C00D4" was the first color, for mb_annual_fixed.
-                       labels = c("Annual, measurement period", "Annual, hydrological year", # DEV NOTE: first one would have been "Annual, fixed dates", but we have disabled that period.
+    scale_color_manual(breaks = c("mb_annual_meas", "mb_annual_hydro", "mb_winter_fixed", "mb_winter_meas", "mb_annual_meas_corr"),
+                       values = c("#FF0000", "#FF9000", "#0000FF", "#8080FF", "#000000"),
+                       labels = c("Annual, measurement period", "Annual, hydrological year",
                                   "Winter, fixed dates", "Winter, measurement period", "Annual, measurement period + contour-line")) +
     scale_y_continuous(breaks = pretty(ele_bands_plot_df_melt$value), expand = expansion(mult = c(0,0.05),0)) +
     # Optional: secondary horizontal axis with the number of cells for each elevation band (not strictly necessary).
