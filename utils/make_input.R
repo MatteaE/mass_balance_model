@@ -118,6 +118,13 @@ func_utm_grep <- function(input_line,
 # Else return NA and (eventually) throw an error.
 func_recover_utm_crs <- function(wkt_malformed) {
   
+  # Is the wkt_malformed empty or NA? Then there is nothing to recover.
+  if (!nzchar(wkt_malformed) ||
+      is.na(wkt_malformed) ||
+      (wkt_malformed == "NA")) {
+    return(NA)
+  }
+  
   # We initialize the output as NA, it will be
   # updated to an actual UTM code if this is possible,
   # otherwise returned as is (signalling error).
@@ -812,7 +819,7 @@ func_do_processing <- function(dem_filepath,
     }
     
     # Now check the border.
-    ref_gl <- mask(setValues(reference_l1, 0), outline_l2, updatevalue = 1, inverse = TRUE)
+    ref_gl <- terra::mask(setValues(reference_l1, 0), outline_l2, updatevalue = 1, inverse = TRUE)
     val_border <- ref_gl[c(1:ncol(ref_gl),
                            ncell(ref_gl) - ncol(ref_gl) + 1:ncol(ref_gl),
                            seq(1,ncell(ref_gl),ncol(ref_gl)),
@@ -875,7 +882,7 @@ func_do_processing <- function(dem_filepath,
   # . Check intersection of firn and debris with outline. -----------------------------------------
   # If no intersection, the result will be unexpected, so stop with error.
   if (has_firn) {
-    firn_l3 <- intersect(firn_l2, outline_l2)
+    firn_l3 <- terra::intersect(firn_l2, outline_l2)
     if ((nrow(firn_l3) == 0) ||
         (!is.polygons(firn_l3))) {
       err_msg <- paste0("Firn shapefile does not intersect the glacier outline.")
@@ -884,7 +891,7 @@ func_do_processing <- function(dem_filepath,
     }
   }
   if (has_debris) {
-    debris_l3 <- intersect(debris_l2, outline_l2)
+    debris_l3 <- terra::intersect(debris_l2, outline_l2)
     if ((nrow(debris_l3) == 0) ||
         (!is.polygons(debris_l3))) {
       err_msg <- paste0("Debris shapefile does not intersect the glacier outline.")
@@ -933,8 +940,8 @@ func_do_processing <- function(dem_filepath,
   # grid (with a little buffer), such that the full grid is not reprojected but only the needed region.
   if (reproj_dem) {
     ref_ext_proj <- terra::project(ext(reference_l1) + xres(reference_l1),
-                            terra::crs(reference_l1, proj = TRUE),
-                            terra::crs(dem_l1, proj = TRUE))
+                                   terra::crs(reference_l1, proj = TRUE),
+                                   terra::crs(dem_l1, proj = TRUE))
     crop_result <- tryCatch({
       dem_l2 <- crop(dem_l1, ref_ext_proj, snap = "out")
       NULL
@@ -984,17 +991,17 @@ func_do_processing <- function(dem_filepath,
   # Instead, if we give a reference DEM we may have to resample (bilinear filter) ours, because
   # resolution/origin/extent could be different (even after adjusting projection, which we have done above).
   cat("\nPreparing output...\n")
-  dem_out      <- mask(dhm_out, outline_l2)
+  dem_out      <- terra::mask(dhm_out, outline_l2)
   surftype_out <- 4*is.na(dem_out) # This is the base rock/ice mask.
   
   # Add firn if we have it.
   if (has_firn) {
-    surftype_out <- mask(surftype_out, firn_l3, inverse = TRUE, updatevalue = 1)
+    surftype_out <- terra::mask(surftype_out, firn_l3, inverse = TRUE, updatevalue = 1)
   }
   
   # Add debris if we have them.
   if (has_debris) {
-    surftype_out <- mask(surftype_out, debris_l3, inverse = TRUE, updatevalue = 5)
+    surftype_out <- terra::mask(surftype_out, debris_l3, inverse = TRUE, updatevalue = 5)
   }
   
   
