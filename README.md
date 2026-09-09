@@ -9,9 +9,9 @@
 
 3. [Quick start](#quickstart)
 
-    2.1. [Minimal installation instructions](#installation)
+    3.1. [Minimal installation instructions](#installation)
 
-    2.2. [Minimal usage instructions](#usage)
+    3.2. [Minimal usage instructions](#usage)
 
 4. [Additional features](#features)
 
