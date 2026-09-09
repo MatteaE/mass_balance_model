@@ -7,21 +7,21 @@
 
 2. [Gallery](#gallery)
 
-2. [Quick start](#quickstart)
+3. [Quick start](#quickstart)
 
     2.1. [Minimal installation instructions](#installation)
 
     2.2. [Minimal usage instructions](#usage)
 
-3. [Additional features](#features)
+4. [Additional features](#features)
 
-4. [Known limitations](#limitations)
+5. [Known limitations](#limitations)
 
-5. [Published works with DMBSim applications](#publications)
+6. [Published works with DMBSim applications](#publications)
 
-6. [Acknowledgments](#acknowledgments)
+7. [Acknowledgments](#acknowledgments)
 
-7. [References](#references)
+8. [References](#references)
 
 
 <br>
@@ -48,12 +48,15 @@ DMBSim 3.0 is a tool to calculate and homogenize glacier surface mass balance fr
 DMBSim is implemented in R (with some C++ routines for performance), is fully cross-platform (Windows / Mac OS / Linux), and is designed to be run within RStudio. Several graphical tools are provided to easily prepare the input data in a consistent format.
 
 
+
+# <a name="gallery"></a>Gallery
+
 <br>
 
 <table>
   <tr>
     <td align="center" width="33%">
-      <a href="screenshots/full/mb_map_hydro.png">
+      <a href="screenshots/full/mb_map_hydro.png" target="_blank">
         <img src="screenshots/thumbs/mb_map_hydro.png"
              width="100%"
              alt="Mass balance map over the hydrological year">
@@ -63,7 +66,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       Main application dashboard</sub>
     </td>
     <td align="center" width="33%">
-      <a href="screenshots/full/mb_vs_ele.png">
+      <a href="screenshots/full/mb_vs_ele.png" target="_blank">
         <img src="screenshots/thumbs/mb_vs_ele.png"
              width="100%"
              alt="Mass balance elevation profile">
@@ -73,7 +76,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       Application configuration</sub>
     </td>
     <td align="center" width="33%">
-      <a href="screenshots/full/overview_smb_t2m.png">
+      <a href="screenshots/full/overview_smb_t2m.png" target="_blank">
         <img src="screenshots/thumbs/overview_smb_t2m.png"
              width="100%"
              alt="Multi-year cumulative mass balance and air temperature">
