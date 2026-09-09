@@ -58,7 +58,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
     <td align="center" width="33%">
       <a href="screenshots/full/mb_map_hydro.png">
         <img src="screenshots/thumbs/mb_map_hydro.png"
-             width="90%"
+             width="100%"
              alt="Mass balance maps over selected periods">
       </a>
       <br>
@@ -67,7 +67,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
         <td align="center" width="33%">
       <a href="screenshots/full/swe_map.png">
         <img src="screenshots/thumbs/swe_map.png"
-             width="90%"
+             width="100%"
              alt="Maps of snow-water equivalent">
       </a>
       <br>
@@ -76,7 +76,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
     <td align="center" width="33%">
       <a href="screenshots/full/snowdist_map.png">
         <img src="screenshots/thumbs/snowdist_map.png"
-             width="90%"
+             width="100%"
              alt="Snow distribution multiplier">
       </a>
       <br>
@@ -88,7 +88,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
     <td align="center" width="33%">
       <a href="screenshots/full/avalanche_map.png">
         <img src="screenshots/thumbs/avalanche_map.png"
-             width="90%"
+             width="100%"
              alt="Map of net avalanche effect">
       </a>
       <br>
@@ -97,7 +97,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       <td align="center" width="33%">
       <a href="screenshots/full/snowcover_duration_map.png">
         <img src="screenshots/thumbs/snowcover_duration_map.png"
-             width="90%"
+             width="100%"
              alt="Map of snow cover duration">
       </a>
       <br>
@@ -106,7 +106,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       <td align="center" width="33%">
       <a href="screenshots/full/mb_catchment.png">
         <img src="screenshots/thumbs/mb_catchment.png"
-             width="90%"
+             width="100%"
              alt="Glacier mass balance of a full catchment">
       </a>
       <br>
@@ -118,7 +118,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       <td align="center" width="33%">
       <a href="screenshots/full/overview_smb_t2m.png">
         <img src="screenshots/thumbs/overview_smb_t2m.png"
-             width="90%"
+             width="100%"
              alt="Multi-annual cumulative plots">
       </a>
       <br>
@@ -127,7 +127,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       <td align="center" width="33%">
       <a href="screenshots/full/mb_vs_ele.png">
         <img src="screenshots/thumbs/mb_vs_ele.png"
-             width="90%"
+             width="100%"
              alt="Altitudinal profiles of mass balance">
       </a>
       <br>
@@ -136,7 +136,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       <td align="center" width="33%">
       <a href="screenshots/full/mb_stakes_plots.png">
         <img src="screenshots/thumbs/mb_stakes_plots.png"
-             width="90%"
+             width="100%"
              alt="Modeled time series of individual stakes">
       </a>
       <br>
@@ -150,7 +150,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       <td align="center" width="33%">
       <a href="screenshots/full/massbal_waterfluxes.png">
         <img src="screenshots/thumbs/massbal_waterfluxes.png"
-             width="90%"
+             width="100%"
              alt="Daily water fluxes">
       </a>
       <br>
@@ -159,7 +159,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
     <td align="center" width="33%">
       <a href="screenshots/full/make_input.png">
         <img src="screenshots/thumbs/make_input.png"
-             width="90%"
+             width="100%"
              alt="Graphical input preparation tool">
       </a>
       <br>
@@ -168,7 +168,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
     <td align="center" width="33%">
       <a href="screenshots/full/overview_multi.png">
         <img src="screenshots/thumbs/overview_multi.png"
-             width="90%"
+             width="100%"
              alt="Multi-annual result overview">
       </a>
       <br>
