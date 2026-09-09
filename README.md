@@ -190,7 +190,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
 
 ## <a name="installation"></a>Minimal installation instructions
 
-1. Setup R via [the official installer](https://cran.r-project.org/) or from your package manager. It is recommended to use the latest version: DMBSim was developed using R version 4.2.x and newer, but the full functionality is currently maintained for version 4.5.x.
+1. Setup R via [the official installer](https://cran.r-project.org/) or from your package manager. It is recommended to use the latest version: DMBSim was developed using R version 4.2.x and newer, but the full functionality is currently maintained for version 4.5.x. If you already have R installed, you should update your packages to the latest version - in particular, make sure to use at least version 1.9.12 of the `terra` package.
 
 2. Setup RStudio via [the official installer](https://docs.posit.co/ide/user/#rstudio-ide-oss-downloads) or from your package manager.
 
@@ -383,14 +383,14 @@ DMBSim 3.0 uses the following R packages:
 | ggpubr | 0.6.2 | Kassambara A (2025). [*ggpubr: 'ggplot2' Based Publication Ready Plots*](https://doi.org/10.32614/CRAN.package.ggpubr). |
 | ggtext | 0.1.2 | Wilke C, Wiernik B (2022). [*ggtext: Improved Text Rendering Support for 'ggplot2'*](https://doi.org/10.32614/CRAN.package.ggtext). |
 | grid | 4.5.2 | R Core Team. 2025. [*R: A Language and Environment for Statistical Computing*](https://www.R-project.org/). R Foundation for Statistical Computing. |
-| gstat | 2.1-3 | Pebesma, E.J., 2004. [*Multivariable geostatistics in S: the gstat package*](https://doi.org/10.1016/j.cageo.2004.03.012). Computers & Geosciences, 30: 683-691.<br>Benedikt Gräler, Edzer Pebesma and Gerard Heuvelink, 2016. [*Spatio-Temporal Interpolation using gstat*](https://journal.r-project.org/articles/RJ-2016-014/). The R Journal 8(1), 204-218. |
+| gstat | 2.1.3 | Pebesma, E.J., 2004. [*Multivariable geostatistics in S: the gstat package*](https://doi.org/10.1016/j.cageo.2004.03.012). Computers & Geosciences, 30: 683-691.<br>Benedikt Gräler, Edzer Pebesma and Gerard Heuvelink, 2016. [*Spatio-Temporal Interpolation using gstat*](https://journal.r-project.org/articles/RJ-2016-014/). The R Journal 8(1), 204-218. |
 | insol2 | 1.0.0 | Corripio, Javier G., and Enrico Mattea. 2023. [*Insol2: Solar Radiation*](https://github.com/MatteaE/insol2).<br>Corripio, Javier G. 2020. [*Insol: Solar Radiation*](https://www.meteoexploration.com/R/insol/). |
 | lwgeom | 0.2.15 | Pebesma, Edzer. 2026. [*lwgeom: Bindings to Selected "liblwgeom" Functions for Simple Features*](https://doi.org/10.32614/CRAN.package.lwgeom). |
 | metR | 0.18.3 | Campitelli, Elio. 2025. [*metR: Tools for Easier Analysis of Meteorological Fields*](https://doi.org/10.32614/CRAN.package.metR). |
 | notifier | 1.0.0 | Csárdi G (2017). [*notifier: Cross Platform Desktop Notifications*](https://cran.r-project.org/package=notifier). |
 | qpdf | 1.3.4 | Ooms J (2024). [*qpdf: Split, Combine and Compress PDF Files*](https://doi.org/10.32614/CRAN.package.qpdf). |
 | RColorBrewer | 1.1.3 | Neuwirth, Erich. 2022. [*RColorBrewer: ColorBrewer Palettes*](https://doi.org/10.32614/CRAN.package.RColorBrewer). |
-| Rcpp | 1.1.1-1.1 | Eddelbuettel D, Francois R, Allaire J, Ushey K, Kou Q, Russell N, Ucar I, Bates D, Chambers J (2026). [*Rcpp: Seamless R and C++ Integration*](https://doi.org/10.32614/CRAN.package.Rcpp).<br>Eddelbuettel D, François R (2011). [*Rcpp: Seamless R and C++ Integration*](https://doi.org/10.18637/jss.v040.i08). Journal of Statistical Software 40(8), 1-18.<br>Eddelbuettel D (2013). [*Seamless R and C++ Integration with Rcpp*](https://doi.org/10.1007/978-1-4614-6868-4). Springer, New York, ISBN 978-1-4614-6867-7.<br>Eddelbuettel D, Balamuta J (2018). [*Extending R with C++: A Brief Introduction to Rcpp.*](https://doi.org/10.1080/00031305.2017.1375990) The American Statistician 72(1), 28-36. |
+| Rcpp | 1.1.2 | Eddelbuettel D, Francois R, Allaire J, Ushey K, Kou Q, Russell N, Ucar I, Bates D, Chambers J (2026). [*Rcpp: Seamless R and C++ Integration*](https://doi.org/10.32614/CRAN.package.Rcpp).<br>Eddelbuettel D, François R (2011). [*Rcpp: Seamless R and C++ Integration*](https://doi.org/10.18637/jss.v040.i08). Journal of Statistical Software 40(8), 1-18.<br>Eddelbuettel D (2013). [*Seamless R and C++ Integration with Rcpp*](https://doi.org/10.1007/978-1-4614-6868-4). Springer, New York, ISBN 978-1-4614-6867-7.<br>Eddelbuettel D, Balamuta J (2018). [*Extending R with C++: A Brief Introduction to Rcpp.*](https://doi.org/10.1080/00031305.2017.1375990) The American Statistician 72(1), 28-36. |
 | readxl | 1.4.5 | Wickham H, Bryan J (2025). [*readxl: Read Excel Files*](https://doi.org/10.32614/CRAN.package.readxl). |
 | remotes | 2.5.0 | Csárdi, Gábor, Jim Hester, Hadley Wickham, Winston Chang, Martin Morgan, and Dan Tenenbaum. 2024. [*remotes: R Package Installation from Remote Repositories, Including "GitHub"*](https://doi.org/10.32614/CRAN.package.remotes). |
 | reshape2 | 1.4.5 | Wickham H (2007). [*Reshaping Data with the reshape Package*](https://www.jstatsoft.org/v21/i12/) Journal of Statistical Software 21(12), 1-20. |
@@ -401,11 +401,11 @@ DMBSim 3.0 uses the following R packages:
 | shiny | 1.10.0 | Chang W, Cheng J, Allaire J, Sievert C, Schloerke B, Xie Y, Allen J, McPherson J, Dipert A, Borges B (2024). [*shiny: Web Application Framework for R*](https://doi.org/10.32614/CRAN.package.shiny). |
 | shinyFiles | 0.9.3 | Pedersen, Thomas Lin, Vincent Nijs, Thomas Schaffner, and Eric Nantz. 2022. [*shinyFiles: A Server-Side File System Viewer for Shiny*](https://doi.org/10.32614/CRAN.package.shinyFiles). |
 | shinyjs | 2.1.0 | Attali, Dean. 2021. [*shinyjs: Easily Improve the User Experience of Your Shiny Apps in Seconds*](https://doi.org/10.32614/CRAN.package.shinyjs). |
-| sp | 2.2-1 | Pebesma E, Bivand R (2005). [*Classes and methods for spatial data in R*](https://journal.r-project.org/articles/RN-2005-014/RN-2005-014.pdf). R News, 5(2), 9-13.<br>Bivand R, Pebesma E, Gomez-Rubio V (2013). [*Applied spatial data analysis with R*](https://asdar-book.org/), Second edition. Springer, NY. |
-| spatialEco | 2.0-3 | Evans, Jeffrey S, and Murphy, Melanie A (2025). [*spatialEco: Spatial Analysis and Modelling Utilities*](https://doi.org/10.32614/CRAN.package.spatialEco). |
+| sp | 2.2.1 | Pebesma E, Bivand R (2005). [*Classes and methods for spatial data in R*](https://journal.r-project.org/articles/RN-2005-014/RN-2005-014.pdf). R News, 5(2), 9-13.<br>Bivand R, Pebesma E, Gomez-Rubio V (2013). [*Applied spatial data analysis with R*](https://asdar-book.org/), Second edition. Springer, NY. |
+| spatialEco | 2.0.3 | Evans, Jeffrey S, and Murphy, Melanie A (2025). [*spatialEco: Spatial Analysis and Modelling Utilities*](https://doi.org/10.32614/CRAN.package.spatialEco). |
 | stats | 4.5.2 | R Core Team. 2025. [*R: A Language and Environment for Statistical Computing*](https://www.R-project.org/). R Foundation for Statistical Computing. |
 | stringr | 1.6.0 | Wickham H (2025). [*stringr: Simple, Consistent Wrappers for Common String Operations*](https://doi.org/10.32614/CRAN.package.stringr). |
-| terra | 1.9.11 | Hijmans, Robert J., Andrew Brown, and Márcia Barbosa. 2026. [*terra: Spatial Data Analysis*](https://doi.org/10.32614/CRAN.package.terra). |
+| terra | 1.9.46 | Hijmans, Robert J., Andrew Brown, and Márcia Barbosa. 2026. [*terra: Spatial Data Analysis*](https://doi.org/10.32614/CRAN.package.terra). |
 | tidyverse | 2.0.0 | Wickham, Hadley, Mara Averick, Jennifer Bryan, et al. 2019. [*Welcome to the tidyverse.*](https://doi.org/10.21105/joss.01686) Journal of Open Source Software 4 (43): 1686. |
 | timeSeries | 4052.112 | Wuertz D, Setz T, Chalabi Y, Boshnakov GN (2025). [*timeSeries: Financial Time Series Objects (Rmetrics)*](https://doi.org/10.32614/CRAN.package.timeSeries). |
 | tools | 4.5.2 | R Core Team. 2025. [*R: A Language and Environment for Statistical Computing*](https://www.R-project.org/). R Foundation for Statistical Computing. |
