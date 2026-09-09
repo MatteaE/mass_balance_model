@@ -5,6 +5,8 @@
 
 1. [Introduction](#intro)
 
+2. [Gallery](#gallery)
+
 2. [Quick start](#quickstart)
 
     2.1. [Minimal installation instructions](#installation)
@@ -46,7 +48,43 @@ DMBSim 3.0 is a tool to calculate and homogenize glacier surface mass balance fr
 DMBSim is implemented in R (with some C++ routines for performance), is fully cross-platform (Windows / Mac OS / Linux), and is designed to be run within RStudio. Several graphical tools are provided to easily prepare the input data in a consistent format.
 
 
-<img src="cover_image.png" width="500">
+<br>
+
+<table>
+  <tr>
+    <td align="center" width="33%">
+      <a href="screenshots/full/mb_map_hydro.png">
+        <img src="screenshots/thumbs/mb_map_hydro.png"
+             width="100%"
+             alt="Mass balance map over the hydrological year">
+      </a>
+      <br>
+      <sub><strong>Dashboard</strong><br>
+      Main application dashboard</sub>
+    </td>
+    <td align="center" width="33%">
+      <a href="screenshots/full/mb_vs_ele.png">
+        <img src="screenshots/thumbs/mb_vs_ele.png"
+             width="100%"
+             alt="Mass balance elevation profile">
+      </a>
+      <br>
+      <sub><strong>Settings</strong><br>
+      Application configuration</sub>
+    </td>
+    <td align="center" width="33%">
+      <a href="screenshots/full/overview_smb_t2m.png">
+        <img src="screenshots/thumbs/overview_smb_t2m.png"
+             width="100%"
+             alt="Multi-year cumulative mass balance and air temperature">
+      </a>
+      <br>
+      <sub><strong>Reports</strong><br>
+      Data and analytics</sub>
+    </td>
+  </tr>
+</table>
+</table>
 
 
 <br>
