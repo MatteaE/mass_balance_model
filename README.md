@@ -59,12 +59,10 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       <a href="screenshots/full/mb_map_hydro.png">
         <img src="screenshots/thumbs/mb_map_hydro.png"
              width="90%"
-             alt="Mass balance map over the hydrological year">
+             alt="Mass balance maps over selected periods">
       </a>
       <br>
-      <div style="text-align: left; line-height: 1.2;">
-        <sub>Mass balance map over the hydrological year</sub>
-      </div>
+        <sub>Mass balance maps over selected periods</sub>
     </td>
         <td align="center" width="33%">
       <a href="screenshots/full/swe_map.png">
@@ -73,9 +71,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Map of snow-water equivalent">
       </a>
       <br>
-      <div style="text-align: left; line-height: 1.2;">
         <sub>Map of snow-water equivalent</sub>
-      </div>
     </td>
     <td align="center" width="33%">
       <a href="screenshots/full/snowdist_map.png">
@@ -84,9 +80,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Snow distribution multiplier">
       </a>
       <br>
-      <div style="text-align: left; line-height: 1.2;">
         <sub>Snow distribution multiplier</sub>
-      </div>
     </td>
   </tr>
   
@@ -98,9 +92,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Map of net avalanche effect">
       </a>
       <br>
-      <div style="text-align: left; line-height: 1.2;">
         <sub>Map of net avalanche effect</sub>
-      </div>
     </td>
       <td align="center" width="33%">
       <a href="screenshots/full/snowcover_duration_map.png">
@@ -109,9 +101,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Map of snow cover duration">
       </a>
       <br>
-      <div style="text-align: left; line-height: 1.2;">
         <sub>Map of snow cover duration</sub>
-      </div>
     </td>
       <td align="center" width="33%">
       <a href="screenshots/full/mb_catchment.png">
@@ -120,9 +110,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Glacier mass balance of a full catchment">
       </a>
       <br>
-      <div style="text-align: left; line-height: 1.2;">
         <sub>Glacier mass balance of a full catchment</sub>
-      </div>
     </td>
   </tr>
   
@@ -131,10 +119,10 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       <a href="screenshots/full/overview_smb_t2m.png">
         <img src="screenshots/thumbs/overview_smb_t2m.png"
              width="90%"
-             alt="Multi-year cumulative mass balance and air temperature">
+             alt="Multi-annual cumulative plots">
       </a>
       <br>
-      <sub>Multi-year cumulative mass balance and air temperature</sub>
+      <sub>Multi-annual cumulative plots</sub>
     </td>
       <td align="center" width="33%">
       <a href="screenshots/full/mb_vs_ele.png">
@@ -181,10 +169,10 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       <a href="screenshots/full/overview_multi.png">
         <img src="screenshots/thumbs/overview_multi.png"
              width="90%"
-             alt="Multi-annual overview of the main parameters">
+             alt="Multi-annual result overview">
       </a>
       <br>
-      <sub>Multi-annual overview of the main parameters</sub>
+      <sub>Multi-annual result overview</sub>
     </td>
 
   </tr>
