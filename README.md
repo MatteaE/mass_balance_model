@@ -62,7 +62,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Mass balance map over the hydrological year">
       </a>
       <br>
-      <div style="text-align: left;">
+      <div style="text-align: left; line-height: 1.2;">
         <sub>Mass balance map over the hydrological year</sub>
       </div>
     </td>
@@ -73,7 +73,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Map of snow-water equivalent">
       </a>
       <br>
-      <div style="text-align: left;">
+      <div style="text-align: left; line-height: 1.2;">
         <sub>Map of snow-water equivalent</sub>
       </div>
     </td>
@@ -84,7 +84,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Snow distribution multiplier">
       </a>
       <br>
-      <div style="text-align: left;">
+      <div style="text-align: left; line-height: 1.2;">
         <sub>Snow distribution multiplier</sub>
       </div>
     </td>
@@ -98,7 +98,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Map of net avalanche effect">
       </a>
       <br>
-      <div style="text-align: left;">
+      <div style="text-align: left; line-height: 1.2;">
         <sub>Map of net avalanche effect</sub>
       </div>
     </td>
@@ -109,7 +109,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Map of snow cover duration">
       </a>
       <br>
-      <div style="text-align: left;">
+      <div style="text-align: left; line-height: 1.2;">
         <sub>Map of snow cover duration</sub>
       </div>
     </td>
@@ -120,7 +120,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Glacier mass balance of a full catchment">
       </a>
       <br>
-      <div style="text-align: left;">
+      <div style="text-align: left; line-height: 1.2;">
         <sub>Glacier mass balance of a full catchment</sub>
       </div>
     </td>
