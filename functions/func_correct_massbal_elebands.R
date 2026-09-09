@@ -53,7 +53,7 @@ func_correct_massbal_elebands <- function(year_data,
       meas_period_corr[gl_cells_cur] <- (meas_period_corr[gl_cells_cur] - band_biases[band_id - 1] - (band_biases[band_id] - band_biases[band_id - 1]) * ((dem_values_cur[gl_cells_cur] - band_midpoints[band_id - 1]) / (band_midpoints[band_id] - band_midpoints[band_id - 1])))[,1]
     }
     
-    # If we have not enough bands to do the correction.
+    # If we have not enough bands to do the correction, leave as is.
   } else {
     
     meas_period_corr <- year_data$massbal_annual_maps$meas_period

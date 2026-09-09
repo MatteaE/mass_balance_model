@@ -60,7 +60,7 @@ func_dhm_to_dem <- function(run_params,
                                   seq(run_params$grid_ncol,run_params$grid_ncells,run_params$grid_ncol))][,1]
     if (!all(is.na(dem_border_values))) {
       func_customlog("DEM grid ", dem_id, " (DHM id ", dhm_id, ", outline id ", outline_id, "): the glacier touches the grid border.", level = 1)
-      func_customlog("This is strongly not recommended and could lead to unexpected mass balance values. Consider extending the border area of the elevation grid.", level = 0)
+      func_customlog("          This is strongly not recommended and could lead to unexpected mass balance values. Consider extending the border area of the elevation grid.", level = 0)
     }
     
     data_dems$elevation[[dem_id]]                     <- dem_cur

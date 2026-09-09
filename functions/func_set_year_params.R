@@ -66,7 +66,13 @@ func_set_year_params <- function(year_data,
           year_cur_params[[param_id]] <- func_compute_ele_bands_from_stakes(year_data$massbal_annual_meas_cur$z_dem, run_params)
           elebands_bounds <- round(year_cur_params[[param_id]])
           elebands_diff <- diff(elebands_bounds)
-          cat("Established", length(elebands_bounds)-1, "elevation bands for mass balance correction:", paste0(paste(elebands_bounds[-length(elebands_bounds)], elebands_diff, collapse = ") ", sep = " (+"), ") ", elebands_bounds[length(elebands_bounds)]), "\n")
+          # NA if there are no elevation bands (insufficient stakes)
+          if (!is.na(year_cur_params[[param_id]])) {
+            cat("Established", length(elebands_bounds)-1, "elevation bands for mass balance correction:", paste0(paste(elebands_bounds[-length(elebands_bounds)], elebands_diff, collapse = ") ", sep = " (+"), ") ", elebands_bounds[length(elebands_bounds)]), "\n")
+          } else {
+            func_customlog("Year ", year_data$year_cur, ": could not establish elevation bands for mass balance correction.", level = 1)
+            func_customlog("          Mass balance correction in elevation bands will not be performed.", level = 0)
+          }
           
           # Parameter probes_snowdist_filename - keep it as "" to signal that we do not take snowdist
         } else if (params_names_all[param_id] == "probes_snowdist_filename") {
