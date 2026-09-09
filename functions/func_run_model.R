@@ -142,11 +142,6 @@ func_run_model <- function(run_params) {
   # weather_max_precip_ele, elevation_effect_threshold and initial_snowline_elevation.
   run_params <- func_compute_altitude_params(run_params, data_all$data_dems)
   
-  # Estimate (if missing) the max avalanche deposition (kg m-2).
-  if (is.na(run_params$deposition_mass_lim)) {
-    run_params <- func_compute_deposition_lim(run_params, data_all$data_dems, data_all$data_weather)
-  }
-  
   # Compute static grids (avalanches, topographic snow distribution, variable ice albedo).
   grids_static_list <- func_compute_all_static_grids(run_params, data_all$data_dhms, data_all$data_dems)
   

@@ -328,7 +328,7 @@ func_process_run_params <- function(run_params) {
   
   
   
-  #### . Process parameters which can be monthly or annual ----------------------------------------
+  # . Process parameters which can be monthly or annual -------------------------------------------
   # If we have just 1 value for the summer precipitation coefficient,
   # apply it for May to September. Otherwise, use the 12 supplied values.
   if (!(length(run_params$default_prec_summer_fact) %in% c(1,12))) {
@@ -369,6 +369,13 @@ func_process_run_params <- function(run_params) {
     }
   }
   
+  
+  
+  # Quirk for avalanche deposition limit, which can no longer be left at NA -----------------------
+  if (is.na(run_params$deposition_mass_lim)) {
+    run_params$deposition_mass_lim <- 2000
+  }
+
   
   return(run_params)
 }
