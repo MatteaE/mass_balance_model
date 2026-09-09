@@ -62,8 +62,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Mass balance map over the hydrological year">
       </a>
       <br>
-      <sub><strong>Dashboard</strong><br>
-      Main application dashboard</sub>
+      <sub><strong>Mass balance map over the hydrological year</strong></sub>
     </td>
     <td align="center" width="33%">
       <a href="screenshots/full/mb_vs_ele.png" target="_blank">
@@ -72,8 +71,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Mass balance elevation profile">
       </a>
       <br>
-      <sub><strong>Settings</strong><br>
-      Application configuration</sub>
+      <sub><strong>Mass balance elevation profile</strong></sub>
     </td>
     <td align="center" width="33%">
       <a href="screenshots/full/overview_smb_t2m.png" target="_blank">
@@ -82,8 +80,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
              alt="Multi-year cumulative mass balance and air temperature">
       </a>
       <br>
-      <sub><strong>Reports</strong><br>
-      Data and analytics</sub>
+      <sub><strong>Multi-year cumulative mass balance and air temperature</strong></sub>
     </td>
   </tr>
 </table>
