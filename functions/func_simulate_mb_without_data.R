@@ -4,8 +4,8 @@
 #                 resolution, optimizing model parameters towards the best fit with point         #
 #                 mass balance measurements.                                                      #
 #                 This file contains the code to simulate the annual mass balance of a year       #
-#                 without mass balance measurements. The mass balance model is then run only      #
-#                 once, with the given parameters.                                                #
+#                 without annual mass balance measurements.                                       #
+#                 The mass balance model is then run only once, with the given parameters.        #
 ###################################################################################################  
 
 func_simulate_mb_without_data <- function(run_params,

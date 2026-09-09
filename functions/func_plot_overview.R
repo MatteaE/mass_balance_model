@@ -29,7 +29,7 @@ func_plot_overview <- function(overview_annual,
   # Also horizontal line with mean over the period.
   # If we model just one year, add point plot so that something is visible.
   # We do this only if all years have mass balance measurements, else it is confusing.
-  if (all(overview_annual$summary_df$year_has_data) == TRUE) {
+  if (all(overview_annual$summary_df$year_has_annual_data) == TRUE) {
     single_year_point <- NULL
     if (single_year) {single_year_point <- geom_point(aes(x = year, y = mb_annual_meas_corr))}
     plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
@@ -57,20 +57,20 @@ func_plot_overview <- function(overview_annual,
     single_year_point1 <- geom_point(aes(x = year, y = mb_annual_meas), color = "#FF00FF")
     single_year_point2 <- geom_point(aes(x = year, y = mb_annual_hydro), color = "#0000FF")
   }
-  year_has_data_rle <- rle(overview_annual$summary_df$year_has_data)
-  if (any((year_has_data_rle$values == TRUE) & (year_has_data_rle$lengths == 1))) {
+  year_has_annual_data_rle <- rle(overview_annual$summary_df$year_has_annual_data)
+  if (any((year_has_annual_data_rle$values == TRUE) & (year_has_annual_data_rle$lengths == 1))) {
     single_year_point1 <- geom_point(aes(x = year, y = mb_annual_meas), color = "#FF00FF")
   }
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
-    {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_line(aes(x = year, y = mb_annual_meas), color = "#FF00FF", linewidth = 1)} +
+    {if (any(overview_annual$summary_df$year_has_annual_data) == TRUE) geom_line(aes(x = year, y = mb_annual_meas), color = "#FF00FF", linewidth = 1)} +
     geom_line(aes(x = year, y = mb_annual_hydro), color = "#0000FF", linewidth = 1) +
-    {if (any(overview_annual$summary_df$year_has_data) == TRUE) single_year_point1} +
+    {if (any(overview_annual$summary_df$year_has_annual_data) == TRUE) single_year_point1} +
     single_year_point2 +
     ylab(paste0("Mass balance [", run_params$output_unit, " w.e.]")) +
     scale_y_continuous(expand = expansion(0.3, 0)) +
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("Annual mass balance (no local correction)") +
-    {if (any(overview_annual$summary_df$year_has_data) == TRUE) annotation_custom(grobTree(textGrob("Measurement period", x=0.05, y = 0.12, hjust = 0,
+    {if (any(overview_annual$summary_df$year_has_annual_data) == TRUE) annotation_custom(grobTree(textGrob("Measurement period", x=0.05, y = 0.12, hjust = 0,
                                                                                                     gp=gpar(col="#FF00FF", fontsize = base_size * 1., fontface="bold"))))} +
     annotation_custom(grobTree(textGrob("Hydrological year", x=0.05, y = 0.05, hjust = 0,
                                         gp=gpar(col="#0000FF", fontsize = base_size * 1., fontface="bold")))) +
@@ -87,8 +87,8 @@ func_plot_overview <- function(overview_annual,
     single_year_point1 <- geom_point(aes(x = year, y = mb_winter_fixed), color = "#00FFFF")
     single_year_point2 <- geom_point(aes(x = year, y = mb_winter_meas), color = "#FF00FF")
   }
-  year_has_data_rle <- rle(is.na(overview_annual$summary_df$mb_winter_meas))
-  if (any((year_has_data_rle$values == TRUE) & (year_has_data_rle$lengths == 1))) {
+  year_has_annual_data_rle <- rle(is.na(overview_annual$summary_df$mb_winter_meas))
+  if (any((year_has_annual_data_rle$values == TRUE) & (year_has_annual_data_rle$lengths == 1))) {
     single_year_point2 <- geom_point(aes(x = year, y = mb_winter_meas), color = "#FF00FF")
   }
   plots[[length(plots)+1]] <- ggplot(overview_annual$summary_df) +
@@ -139,11 +139,11 @@ func_plot_overview <- function(overview_annual,
   # If we model just one year, add point plot so that something is visible.
   # Also in case there are isolated years with mass balance measurements,
   # else they are not visible (geom_line of a single point).
-  if (any(overview_annual$summary_df$year_has_data) == TRUE) {
+  if (any(overview_annual$summary_df$year_has_annual_data) == TRUE) {
     single_year_point1 <- NULL # For RMSE
     single_year_point2 <- NULL # For LOO RMSE
-    year_has_data_rle  <- rle(overview_annual$summary_df$year_has_data)
-    if (single_year || any((year_has_data_rle$values == TRUE) & (year_has_data_rle$lengths == 1))) {
+    year_has_annual_data_rle  <- rle(overview_annual$summary_df$year_has_annual_data)
+    if (single_year || any((year_has_annual_data_rle$values == TRUE) & (year_has_annual_data_rle$lengths == 1))) {
       single_year_point1 <- geom_point(aes(x = year, y = rmse, color = "rmse"))
       if (!all(is.na(overview_annual$summary_df$loo_rmse))) {
         single_year_point2 <- geom_point(aes(x = year, y = loo_rmse, color = "loo_rmse"))
@@ -225,7 +225,7 @@ func_plot_overview <- function(overview_annual,
   df_lines <- data.frame(year_start = overview_annual$summary_df$year - 1,
                          year_end   = overview_annual$summary_df$year,
                          mb_end     = overview_annual$summary_df$mb_cumul,
-                         has_data   = as.character(overview_annual$summary_df$year_has_data))
+                         has_data   = as.character(overview_annual$summary_df$year_has_annual_data))
   # Handle the case in which there is a single year,
   # else mb_start gets 2 elements due to slicing.
   if (nrow(df_lines) > 1) {
@@ -234,7 +234,7 @@ func_plot_overview <- function(overview_annual,
     df_lines$mb_start <- 0.0
   }
   
-  if (!all(overview_annual$summary_df$year_has_data)) {
+  if (!all(overview_annual$summary_df$year_has_annual_data)) {
     # Try smart positioning of the legend: top left
     # if first point (0.0: cumulative!) is low,
     # bottom left if it is high.
@@ -256,7 +256,7 @@ func_plot_overview <- function(overview_annual,
   point_size <- 3 - max(0, min(2.5, log(max(1, (run_params$n_years - 15)/8)))) # Empirical point size, smaller if many years.
   plots[[length(plots)+1]] <- ggplot(data.frame(year = overview_annual$summary_df$year,
                                                 mb_cumul = overview_annual$summary_df$mb_cumul,
-                                                has_data = as.character(overview_annual$summary_df$year_has_data))) +
+                                                has_data = as.character(overview_annual$summary_df$year_has_annual_data))) +
     geom_hline(yintercept = 0, linetype = "dashed", linewidth = 1) +
     geom_segment(data = df_lines, aes(x = year_start, xend = year_end,
                                       y = mb_start, yend = mb_end,
@@ -336,8 +336,8 @@ func_plot_overview <- function(overview_annual,
                             mb_cumul = c(0, overview_annual$summary_df$mb_cumul))
   plots[[length(plots)+1]] <- ggplot() +
     geom_vline(xintercept = as.Date(paste0(c(run_params$years[1]-1,run_params$years), "/", run_params$hydro_start_mmdd)), color = "#0000FF", linewidth = point_size/6) +
-    {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 1), color = "#FF00FF", linetype = "dashed", linewidth = point_size/6)} +
-    {if (any(overview_annual$summary_df$year_has_data) == TRUE) geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 2), color = "#FF00FF", linetype = "dotted", linewidth = point_size/6)} +
+    {if (any(overview_annual$summary_df$year_has_annual_data) == TRUE) geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 1), color = "#FF00FF", linetype = "dashed", linewidth = point_size/6)} +
+    {if (any(overview_annual$summary_df$year_has_annual_data) == TRUE) geom_vline(xintercept = sapply(overview_annual$daily_data_list$mb_series_all_measperiod_dates, `[`, 2), color = "#FF00FF", linetype = "dotted", linewidth = point_size/6)} +
     geom_line(data = mb_all_df, aes(x = day, y = mb, group = year_id), linewidth = point_size/6) +
     geom_hline(yintercept = 0, linetype = "dashed", linewidth = 1) +
     geom_line(data = mb_cumul_df,  aes(x = year, y = mb_cumul), color = "#FF0000", linewidth = 1) +

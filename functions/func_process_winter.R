@@ -105,6 +105,8 @@ func_process_winter <- function(year_data,
     # Free some memory after processing.
     invisible(gc())
     
+    cat("\n")
+    
   } # End if process_winter
   
   return(year_data)

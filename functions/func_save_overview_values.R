@@ -37,16 +37,16 @@ func_save_overview_values <- function(year_data,
 
     df_overview$rmse[year_data$year_id]                 <- year_data$mod_output_annual_cur$weighted_rms * run_params$output_mult / 1e3
     df_overview$rmse_unweighted[year_data$year_id]      <- year_data$mod_output_annual_cur$global_rms * run_params$output_mult / 1e3
-    df_overview$year_has_data[year_data$year_id]        <- TRUE
-    
-    
+    df_overview$year_has_annual_data[year_data$year_id] <- TRUE
     
   }
+  
   
   if (year_data$process_winter) {
     df_overview$mb_winter_meas[year_data$year_id]         <- year_data$massbal_winter_values[["meas_period.mean"]] * run_params$output_mult / 1e3
     df_overview$winter_rmse[year_data$year_id]            <- year_data$mod_output_annual_cur$weighted_rms_winter * run_params$output_mult / 1e3
     df_overview$winter_rmse_unweighted[year_data$year_id] <- year_data$mod_output_annual_cur$global_rms_winter * run_params$output_mult / 1e3
+    df_overview$year_process_winter[year_data$year_id]    <- TRUE
   }
   
   if (year_data$run_loo_logi) {

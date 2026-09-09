@@ -147,6 +147,27 @@ func_process_annual <- function(year_data,
     # . Simulate year with a single model run -----------------------------------------------------
     cat("PDD sum at the AWS over the hydrological year:", round(year_data$pdd_sum_hydro), "\u00B0C d\n")
     
+    # Usually, when there are no annual data there are also no winter data.
+    # So the additive correction to prec_corr is initialized at 0.
+    # However, see the special case below for a case where this may not be true.
+    prec_corr_correction <- 0
+    
+    # (Rare) special case: there are winter data but
+    # no annual data. Then the precipitation correction
+    # was optimized by func_process_winter, and will be used.
+    # This can overwrite the mean optimized value of precipitation
+    # correction which may have been used from the previous years.
+    # This makes sense e.g. if the melt parameters are available
+    # as mean values from other years - then the model uses
+    # mean optimized melt parameters, but year-specific precipitation
+    # correction. If one wants to disregard the year-specific values,
+    # one can just remove the winter measurements from the input.
+    if (year_data$process_winter) {
+      cat("Precipitation correction was optimized over the winter period - the optimized value will be used for the annual simulation instead of the previously selected one.\n")
+      prec_corr_correction <- year_data$corr_fact_winter * year_cur_params$prec_corr
+      year_cur_params$prec_corr <- year_cur_params$prec_corr + prec_corr_correction
+    }
+    
     # The run uses unmodified year_cur_params.
     sim_res_cur <- func_simulate_mb_without_data(run_params, year_cur_params, year_data,
                                                  data_dhms, data_dems, data_surftype, data_radiation)
@@ -156,7 +177,7 @@ func_process_annual <- function(year_data,
     # No corrections are computed.
     year_data$optim_corr_annual <- list(melt_factor  = 0,
                                         rad_fact_ice = 0,
-                                        prec_corr    = 0)
+                                        prec_corr    = prec_corr_correction) # This is 0 unless there was the winter optimization.
   }
   
   

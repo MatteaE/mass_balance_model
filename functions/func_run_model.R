@@ -211,7 +211,7 @@ func_run_model <- function(run_params) {
   
   # Check if there are any years without mass balance
   # measurements, these are still not simulated.
-  year_ids_todo <- which(!overview_annual$summary_df$year_has_data)
+  year_ids_todo <- which(!overview_annual$summary_df$year_has_annual_data)
   years_todo_n  <- length(year_ids_todo)
   if (length(year_ids_todo) > 0) {
     

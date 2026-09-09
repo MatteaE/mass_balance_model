@@ -47,7 +47,7 @@ func_plot_write_overview <- function(overview_annual,
                                                sprintf(overview_annual$summary_df$prec_corr, fmt="%.2f"),
                                                sprintf(overview_annual$summary_df$mb_cumul, fmt=run_params$output_fmt1),
                                                sprintf(overview_annual$summary_df$mb_range, fmt=run_params$output_fmt1))
-  names(overview_annual$summary_df_out) <- names(overview_annual$summary_df)[1:(ncol(overview_annual$summary_df)-2)]
+  names(overview_annual$summary_df_out) <- names(overview_annual$summary_df)[1:(ncol(overview_annual$summary_df)-3)]
   write.csv(overview_annual$summary_df_out,
             file.path(run_params$output_dirname, "overview.csv"),
             quote = FALSE,

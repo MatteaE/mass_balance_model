@@ -45,7 +45,8 @@ func_setup_overview_annual <- function(run_params) {
                                            prec_corr                   = NA_real_,
                                            mb_cumul                    = NA_real_,
                                            mb_range                    = NA_real_, # Range of the cumulative mass balance during the respective hydrological year
-                                           year_has_data               = FALSE,
+                                           year_has_annual_data        = FALSE, # If TRUE, it means we have run the annual optimization and there is an "annual measurement period"
+                                           year_process_winter         = FALSE, # If TRUE, it means we have run the winter optimization and there is a "winter measurement period"
                                            year_starting_swe_available = FALSE) # This is used to optionally enable re-using of the modeled SWE as starting condition for a modeled year. If swe_prev_available[year_id] is TRUE, then year_id can use as starting condition the model output of (year_id-1).
   
   # Here we will put daily data for the overview plot
