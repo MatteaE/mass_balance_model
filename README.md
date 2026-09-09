@@ -68,10 +68,10 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       <a href="screenshots/full/swe_map.png">
         <img src="screenshots/thumbs/swe_map.png"
              width="90%"
-             alt="Map of snow-water equivalent">
+             alt="Maps of snow-water equivalent">
       </a>
       <br>
-        <sub>Map of snow-water equivalent</sub>
+        <sub>Maps of snow-water equivalent</sub>
     </td>
     <td align="center" width="33%">
       <a href="screenshots/full/snowdist_map.png">
@@ -128,10 +128,10 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
       <a href="screenshots/full/mb_vs_ele.png">
         <img src="screenshots/thumbs/mb_vs_ele.png"
              width="90%"
-             alt="Altitudinal profile of mass balance">
+             alt="Altitudinal profiles of mass balance">
       </a>
       <br>
-      <sub>Altitudinal profile of mass balance</sub>
+      <sub>Altitudinal profiles of mass balance</sub>
     </td>
       <td align="center" width="33%">
       <a href="screenshots/full/mb_stakes_plots.png">
