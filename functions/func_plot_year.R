@@ -23,10 +23,10 @@ func_plot_year <- function(year_data,
   # time_v[1] <- Sys.time()
   cat("  Common map elements...\n")
   plots_map_common_elements <- func_plot_map_common_elements(year_data,
+                                                             run_params,
                                                              data_dems,
                                                              data_dhms,
                                                              data_outlines)
-  
   
   # Plot the mass balance maps --------------------------------------------------------------------
   # This returns a list with the (5 or 6, depending on whether we have winter measurements)

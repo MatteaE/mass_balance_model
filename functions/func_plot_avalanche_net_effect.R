@@ -16,26 +16,25 @@ func_plot_avalanche_net_effect <- function(year_data,
                                            plots_map_common_elements) {
   
   
-  base_size <- 16 # For the plots.
+  if (run_params$output_unit == "m") {
+    colorbar_width <- 2.8
+    textsize_mult <- 1
+  } else {
+    colorbar_width <- 3
+    textsize_mult <- 0.8
+  }
   
-  # Empirical top margin to keep plots inside page borders
-  # when the glacier is tall (aspect ratio > 1.07).
-  margin_top <- min(80, max(0, (plots_map_common_elements$dhm_grid_aspect_ratio - 1.05) * 1200))
-  theme_map_avalanches <- theme_void(base_size = base_size) +
+  theme_map_avalanches <- theme_void(base_size = plots_map_common_elements$base_size) +
     theme(legend.position = "bottom",
-          legend.key.width = unit(3, "cm"),
-          legend.key.height = unit(0.25, "cm"),
-          legend.box.margin = margin(0,0,5,0),
-          legend.title = element_text(vjust = 0, face = "bold", size = 16),
-          legend.text = element_text(face = "bold", size = 12),
-          plot.margin = margin(margin_top,0,0,0, unit = "pt"))
+          legend.key.width = unit(colorbar_width*plots_map_common_elements$base_size/16, "cm"),
+          legend.key.height = unit(0.25*plots_map_common_elements$base_size/16, "cm"),
+          legend.box.margin = margin(-40,0,5,0)*plots_map_common_elements$base_size/16,
+          legend.title = element_text(vjust = 0.5, face = "bold", size = plots_map_common_elements$base_size,
+                                      margin = margin(-14,14,7,7,"pt")*plots_map_common_elements$base_size/16),
+          legend.text = element_text(face = "bold", size = plots_map_common_elements$base_size*0.75*textsize_mult),
+          plot.margin = margin(0,0,0,0, unit = "pt"))
   
   outline_linesize <- 0.7 * run_params$outlines_linesize_mult
-  y_line_mult <- min(1.5, max(1, (plots_map_common_elements$dhm_grid_aspect_ratio + 1.5) / 2))
-  y_line1 <- 1 + (0.21 / y_line_mult)
-  y_line2 <- 1 + (0.12 / y_line_mult)
-  y_line3 <- 1 + (0.06 / y_line_mult)
-  y_line4 <- 1 + (0.00 / y_line_mult)
   
   palette_RdBu_ext <- c("#33000F", RColorBrewer::brewer.pal(11, "RdBu")[c(1:4,6,8:11)], "#011830")
   # Values exceeding +/- max_mb will be clamped.
@@ -48,7 +47,7 @@ func_plot_avalanche_net_effect <- function(year_data,
   
   plot_df <- plots_map_common_elements$dhm_plot_df_base
   
-  plots <- list()
+  plot_pages <- list()
 
 
   #### TOTAL EFFECT ON GLACIER ####
@@ -61,7 +60,7 @@ func_plot_avalanche_net_effect <- function(year_data,
   }
   # We only plot those cells whose net effect is nonzero.
   plot_df$avalanche_effect[which(abs(plot_df$avalanche_effect) < run_params$avalanche_effect_threshold)] <- NA
-  plots[[length(plots)+1]] <- ggplot(plot_df) +
+  pl_cur <- ggplot(plot_df) +
     geom_raster(aes(x = x, y = y, fill = avalanche_effect * run_params$output_mult/1000)) +
     geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
     coord_sf(clip = "off",
@@ -71,21 +70,24 @@ func_plot_avalanche_net_effect <- function(year_data,
     {if (run_params$show_contour_labels) plots_map_common_elements$dhm_ele_text_contours} +
     {if (year_data$nstakes_annual > 0) geom_point(data = year_data$massbal_annual_meas_cur, aes(x = x, y = y), shape = 3, stroke = 1.5, size = 0)} +
     {if (year_data$nstakes_annual > 0) geom_shadowtext(data = year_data$massbal_annual_meas_cur, aes(x = x, y = y, label = id), size = 3*plots_map_common_elements$dhm_extent_size_multiplier, fontface = "bold", color = "#000000", hjust = -0.12, vjust = -0.12, bg.color = "#FFFFFF")} +
-    annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-                                        x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(label_avalanche_dates,
-                                        x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(bquote(bold("Total net effect on glacier"*" = "*.(avalanche_onglacier_lab)*" "*.(run_params$output_unit)*" w.e.")),
-                                        x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-    labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
-         subtitle = " ") +
-    scale_fill_stepsn(name = paste0("Net avalanche\neffect [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
+    scale_fill_stepsn(name = paste0("\n\n\nNet avalanche\neffect [", run_params$output_unit, " w.e.]\n\n"), colors = palette_RdBu_ext,
                       limits = max_mb*c(-1,1),
                       breaks = run_params$mb_colorscale_breaks,
                       na.value = "#FFFFFF00") +
     theme_map_avalanches
   
   
-  return(plots)
+  title_cur <- func_make_map_title(
+    list(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+         label_avalanche_dates,
+         bquote(bold("Total net effect on glacier"*" = "*.(avalanche_onglacier_lab)*" "*.(run_params$output_unit)*" w.e."))),
+    base_size = plots_map_common_elements$base_size)
+  
+  
+  plot_pages[[length(plot_pages)+1]] <- suppressWarnings(func_make_map_page(title_cur, pl_cur, plots_map_common_elements$dhm_grid_aspect_ratio,
+                                                                            title_h = 3.0, legend_h = 1.2))
+  
+  
+  return(plot_pages)
   
 }

@@ -72,6 +72,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
   cat("\n* Optimization run # 1\n")
   corr_fact_prev <- 0
   
+  
   mod_output_cur <- func_optim_worker(optimization_period, corr_fact_prev, corr_fact_winter,
                                       run_params, year_cur_params,
                                       year_data$dhm_grid_id, year_data$dem_grid_id, year_data$surftype_grid_id,

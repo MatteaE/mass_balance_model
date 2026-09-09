@@ -11,7 +11,7 @@
 
 
 func_process_run_params <- function(run_params) {
-  
+
   
   # Write supplied parameters ---------------------------------------------------------------------
   func_customlog("Started with ", length(run_params), " run_params:", level = 4)
@@ -175,7 +175,7 @@ func_process_run_params <- function(run_params) {
     
     
     # . (13) Plot parameters -----------------------------------
-    mb_colorscale_multiplier           = 1,           # [-] Use NA for automatic colorscale limits, or give a number to multiply the colorscale limits. 1 = colorscale between -2 and +2 m w.e.
+    mb_colorscale_multiplier           = NA,          # [-] Use NA for automatic colorscale limits, or give a number to multiply the colorscale limits. 1 = colorscale between -2 and +2 m w.e.
     output_unit                        = "m",         # ["m"/"mm"]: "m" for meters water-equivalent, or "mm" for millimeters water-equivalent. Applies to all output files (results and plots).
     show_contours                      = TRUE,        # [TRUE/FALSE]: in the mass balance maps, show the contour lines (TRUE) or not (FALSE).
     show_contour_labels                = TRUE,        # [TRUE/FALSE]: in the mass balance maps, show the labels of contour lines (TRUE) or not (FALSE).

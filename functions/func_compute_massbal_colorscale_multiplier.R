@@ -24,7 +24,7 @@ func_compute_massbal_colorscale_multiplier <- function(data_massbalance_annual,
                                                        data_weather,
                                                        run_params) {
   
-  multipliers_possible <- c(0.5, 1, 1.5, 2, 2.5, 3:10)
+  multipliers_possible <- c(0.5, 1, 1.5, 2, 2.5, 3:6,8,10)
   
   data_massbalance_annual_sim <- data_massbalance_annual[as.integer(format(data_massbalance_annual$end_date, "%Y")) %in% run_params$years,]
   
@@ -40,12 +40,16 @@ func_compute_massbal_colorscale_multiplier <- function(data_massbalance_annual,
     for (year_id in 1:run_params$n_years) {
       year_cur <- run_params$years[year_id]
       ids_year <- which(data_weather_sim$year_hydro == year_cur)
-      ids_cold <- which(data_weather_sim$t2m_mean < run_params$weather_snowfall_temp)
-      prec_solid_annual_max[year_id] <- sum(data_weather_sim$precip[intersect(ids_year, ids_cold)] * (1 + (ele_max - run_params$weather_aws_elevation) * (run_params$default_prec_elegrad[data_weather_sim$month[intersect(ids_year, ids_cold)]]) / 1e4))
+      prec_solid_annual_max[year_id] <- run_params$default_prec_corr/100 * mean(run_params$default_prec_summer_fact) * sum(data_weather_sim$precip[ids_year] * max(1, (1 + (ele_max[1,1] - run_params$weather_aws_elevation) * (run_params$default_prec_elegrad[data_weather_sim$month[ids_year]]) / 1e4)))
     }
     # Empirical: with avalanches, we assume that maximum mass balance
-    # to plot is 5 times the estimated maximum solid precipitation.
-    mb_val <- 5 * as.numeric(quantile(prec_solid_annual_max, 0.9)) / 1e3
+    # to plot is 2 times the estimated 90th percentile of solid precipitation.
+    mb_val <- 2 * as.numeric(quantile(prec_solid_annual_max, 0.9)) / 1e3
+    
+    # Fallback for pathological NA cases (there shouldn't be any).
+    if (is.na(mb_val)) {
+      mb_val <- 2.0 # This leads to a -2 to 2 m w.e. color scale.
+    }
     
   }
   

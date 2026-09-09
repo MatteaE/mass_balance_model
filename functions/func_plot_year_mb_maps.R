@@ -24,26 +24,27 @@ func_plot_year_mb_maps <- function(year_data,
                                    plots_map_common_elements) {
   
   
-  base_size <- 16 # For the plots.
+  if (run_params$output_unit == "m") {
+    margin_title_right <- 21
+    colorbar_width <- 2.8
+    textsize_mult <- 1
+  } else {
+    margin_title_right <- 7
+    colorbar_width <- 3
+    textsize_mult <- 0.8
+  }
   
-  # Empirical top margin to keep plots inside page borders
-  # when the glacier is tall (aspect ratio > 1.07).
-  margin_top <- min(80, max(0, (data_outlines$aspect_ratio[[year_data$outline_id]] - 1.05) * 1200))
-  theme_map_massbal <- theme_void(base_size = base_size) +
+  theme_map_massbal <- theme_void(base_size = plots_map_common_elements$base_size) +
     theme(legend.position = "bottom",
-          legend.key.width = unit(3, "cm"),
-          legend.key.height = unit(0.25, "cm"),
-          legend.box.margin = margin(0,0,5,0),
-          legend.title = element_text(vjust = 1, face = "bold", size = 16),
-          legend.text = element_text(face = "bold", size = 12),
-          plot.margin = margin(margin_top,0,0,0, unit = "pt"))
+          legend.key.width = unit(colorbar_width*plots_map_common_elements$base_size/16, "cm"),
+          legend.key.height = unit(0.25*plots_map_common_elements$base_size/16, "cm"),
+          legend.box.margin = margin(0,0,0,0),
+          legend.title = element_text(vjust = 1, face = "bold", size = plots_map_common_elements$base_size,
+                                      margin = margin(0,margin_title_right,0,7,"pt")*plots_map_common_elements$base_size/16),
+          legend.text = element_text(face = "bold", size = plots_map_common_elements$base_size*0.75*textsize_mult),
+          plot.margin = margin(0,0,0,0, unit = "pt"))
   
   outline_linesize <- 0.7 * run_params$outlines_linesize_mult
-  y_line_mult <- min(1.5, max(1, (data_outlines$aspect_ratio[[year_data$outline_id]] + 1.5) / 2))
-  y_line1 <- 1 + (0.21 / y_line_mult)
-  y_line2 <- 1 + (0.12 / y_line_mult)
-  y_line3 <- 1 + (0.06 / y_line_mult)
-  y_line4 <- 1 + (0.00 / y_line_mult)
   
   palette_RdBu_ext <- c("#33000F", RColorBrewer::brewer.pal(11, "RdBu")[c(1:4,6,8:11)], "#011830")
   # Values exceeding +/- max_mb will be clamped.
@@ -51,7 +52,7 @@ func_plot_year_mb_maps <- function(year_data,
   # in the scale (else they are too dark or washed out).
   max_mb <- abs(2*run_params$mb_colorscale_breaks[1] - run_params$mb_colorscale_breaks[2])
   
-  plots <- list()
+  plot_pages  <- list()
   
   # This one will be recycled for each plot.
   plot_df <- plots_map_common_elements$dem_plot_df_base
@@ -60,24 +61,26 @@ func_plot_year_mb_maps <- function(year_data,
   #### HYDROLOGICAL YEAR ####
   mb_hydro_lab <- sprintf(run_params$output_fmt1, year_data$massbal_annual_values[["hydro.mean"]] * run_params$output_mult / 1000.)
   plot_df$massbal <- values(year_data$massbal_annual_maps$hydro, mat = F)
-  plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
+  pl_cur <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
     geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult/1000)) +
     geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
     coord_sf(clip = "off") +
     {if (run_params$show_contours) plots_map_common_elements$dem_ele_contours} +
     {if (run_params$show_contour_labels) plots_map_common_elements$dem_ele_text_contours} +
-    annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-                                        x=0.05, y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(paste0("Hydrological year: ", run_params$hydro_start_mmdd, " - ", run_params$hydro_end_mmdd),
-                                        x=0.05, y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(bquote(bold(b[n]*" = "*.(mb_hydro_lab)*" "*.(run_params$output_unit)*" w.e.")),
-                                        x = 0.05, y = y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-    labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
-         subtitle = " ") +
     scale_fill_stepsn(name = paste0("SMB [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
                       limits = max_mb*c(-1,1),
                       breaks = run_params$mb_colorscale_breaks) +
     theme_map_massbal
+  
+  
+  title_cur <- func_make_map_title(
+    list(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+         paste0("Hydrological year: ", run_params$hydro_start_mmdd, " - ", run_params$hydro_end_mmdd),
+         bquote(bold(b[n]*" = "*.(mb_hydro_lab)*" "*.(run_params$output_unit)*" w.e."))),
+    base_size = plots_map_common_elements$base_size)
+  
+  
+  plot_pages[[length(plot_pages)+1]] <- suppressWarnings(func_make_map_page(title_cur, pl_cur, data_outlines$aspect_ratio[[year_data$outline_id]]))
   
   
   
@@ -87,24 +90,25 @@ func_plot_year_mb_maps <- function(year_data,
     mb_meas_period_annual_lab <- paste(format(year_data$massbal_annual_meas_period, "%m/%d"), collapse = " - ")
     mb_meas_annual_lab <- sprintf(run_params$output_fmt1,year_data$massbal_annual_values[["meas_period.mean"]] * run_params$output_mult / 1000.)
     plot_df$massbal <- values(year_data$massbal_annual_maps$meas_period, mat = F) # Directly recycle plot_df from before, overwriting its massbal.
-    plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
+    pl_cur <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult / 1000)) +
       geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
       coord_sf(clip = "off") +
       {if (run_params$show_contours) plots_map_common_elements$dem_ele_contours} +
       {if (run_params$show_contour_labels) plots_map_common_elements$dem_ele_text_contours} +
-      annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-                                          x=0.05,  y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(paste0("Measurement period (annual): ", mb_meas_period_annual_lab),
-                                          x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(bquote(bold(b[n]*" = "*.(mb_meas_annual_lab)*" "*.(run_params$output_unit)*" w.e.")),
-                                          x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-      labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
-           subtitle = " ") +
       scale_fill_stepsn(name = paste0("SMB [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
                         limits = max_mb*c(-1,1),
                         breaks = run_params$mb_colorscale_breaks) +
       theme_map_massbal
+    
+    
+    title_cur <- func_make_map_title(
+      list(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+           paste0("Measurement period (annual): ", mb_meas_period_annual_lab),
+           bquote(bold(b[n]*" = "*.(mb_meas_annual_lab)*" "*.(run_params$output_unit)*" w.e."))),
+      base_size = plots_map_common_elements$base_size)
+    
+    plot_pages[[length(plot_pages)+1]] <- suppressWarnings(func_make_map_page(title_cur, pl_cur, data_outlines$aspect_ratio[[year_data$outline_id]]))
     
     
     
@@ -134,7 +138,7 @@ func_plot_year_mb_maps <- function(year_data,
     }
     
     
-    plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
+    pl_cur <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult / 1000)) +
       geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
       coord_sf(clip = "off") +
@@ -147,45 +151,45 @@ func_plot_year_mb_maps <- function(year_data,
                                                                              massbal_meas_standardized*run_params$output_mult/1e3)),
                                                          size = 3*plots_map_common_elements$dem_extent_size_multiplier,
                                                          fontface = "bold", color = "#000000", hjust = -0.12, vjust = -0.12, bg.color = "#FFFFFF")} +
-      annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-                                          x=0.05,  y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(paste0("Measurement period (annual): ", mb_meas_period_annual_lab),
-                                          x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(bquote(bold(b[n]*" = "*.(mb_meas_annual_lab)*" "*.(run_params$output_unit)*" w.e.")),
-                                          x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-      annotation_custom(grobTree(textGrob(rms_txt,
-                                          x = 0.05, y=y_line4, hjust = 0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-      labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
-           subtitle = " ") +
       scale_fill_stepsn(name = paste0("SMB [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
                         limits = max_mb*c(-1,1),
                         breaks = run_params$mb_colorscale_breaks) +
       theme_map_massbal
     
+    
+    title_cur <- func_make_map_title(
+      list(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+           paste0("Measurement period (annual): ", mb_meas_period_annual_lab),
+           bquote(bold(b[n]*" = "*.(mb_meas_annual_lab)*" "*.(run_params$output_unit)*" w.e.")),
+           rms_txt),
+      base_size = plots_map_common_elements$base_size)
+    
+    plot_pages[[length(plot_pages)+1]] <- suppressWarnings(func_make_map_page(title_cur, pl_cur, data_outlines$aspect_ratio[[year_data$outline_id]]))
     
     
     
     #### MEASUREMENT PERIOD - ANNUAL, CORRECTED WITH CONTOUR LINE METHOD ####
     mb_meas_corr_annual_lab <- sprintf(run_params$output_fmt1,year_data$massbal_annual_values[["meas_period_corr.mean"]] * run_params$output_mult / 1000.)
     plot_df$massbal <- values(year_data$massbal_annual_maps$meas_period_corr, mat = F)
-    plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
+    pl_cur <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult / 1000)) +
       geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
       coord_sf(clip = "off") +
       {if (run_params$show_contours) plots_map_common_elements$dem_ele_contours} +
       {if (run_params$show_contour_labels) plots_map_common_elements$dem_ele_text_contours} +
-      annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-                                          x=0.05,  y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(paste0("Measurement period (annual, corrected): ", mb_meas_period_annual_lab),
-                                          x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(bquote(bold(b[n]*" = "*.(mb_meas_corr_annual_lab)*" "*.(run_params$output_unit)*" w.e.")),
-                                          x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-      labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
-           subtitle = " ") +
       scale_fill_stepsn(name = paste0("SMB [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
                         limits = max_mb*c(-1,1),
                         breaks = run_params$mb_colorscale_breaks) +
       theme_map_massbal
+    
+    
+    title_cur <- func_make_map_title(
+      list(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+           paste0("Measurement period (annual, corrected): ", mb_meas_period_annual_lab),
+           bquote(bold(b[n]*" = "*.(mb_meas_corr_annual_lab)*" "*.(run_params$output_unit)*" w.e."))),
+      base_size = plots_map_common_elements$base_size)
+    
+    plot_pages[[length(plot_pages)+1]] <- suppressWarnings(func_make_map_page(title_cur, pl_cur, data_outlines$aspect_ratio[[year_data$outline_id]]))
     
     
     
@@ -200,7 +204,7 @@ func_plot_year_mb_maps <- function(year_data,
       rms_txt <- paste0("RMS: ",
                         sprintf(run_params$output_fmt1, global_rmse_bandcorr*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.")
     }
-    plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
+    pl_cur <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult / 1000)) +
       geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
       coord_sf(clip = "off") +
@@ -213,20 +217,22 @@ func_plot_year_mb_maps <- function(year_data,
                                                                              massbal_meas_standardized*run_params$output_mult/1e3)),
                                                          size = 3*plots_map_common_elements$dem_extent_size_multiplier,
                                                          fontface = "bold", color = "#000000", hjust = -0.12, vjust = -0.12, bg.color = "#FFFFFF")} +
-      annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-                                          x=0.05,  y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(paste0("Measurement period (annual, corrected): ", mb_meas_period_annual_lab),
-                                          x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(bquote(bold(b[n]*" = "*.(mb_meas_corr_annual_lab)*" "*.(run_params$output_unit)*" w.e.")),
-                                          x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-      annotation_custom(grobTree(textGrob(rms_txt,
-                                          x = 0.05, y=y_line4, hjust = 0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-      labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
-           subtitle = " ") +
       scale_fill_stepsn(name = paste0("SMB [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
                         limits = max_mb*c(-1,1),
                         breaks = run_params$mb_colorscale_breaks) +
       theme_map_massbal
+    
+    
+    title_cur <- func_make_map_title(
+      list(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+           paste0("Measurement period (annual, corrected): ", mb_meas_period_annual_lab),
+           bquote(bold(b[n]*" = "*.(mb_meas_corr_annual_lab)*" "*.(run_params$output_unit)*" w.e.")),
+           rms_txt),
+      base_size = plots_map_common_elements$base_size)
+    
+    plot_pages[[length(plot_pages)+1]] <- suppressWarnings(func_make_map_page(title_cur, pl_cur, data_outlines$aspect_ratio[[year_data$outline_id]]))
+    
+    
   } # End of if (year_data$nstakes_annual > 0)
   
   
@@ -235,24 +241,26 @@ func_plot_year_mb_maps <- function(year_data,
   mb_fixed_period_winter_lab <- paste(run_params$massbal_fixed_winter_start, run_params$massbal_fixed_winter_end, sep = " - ")
   mb_fixed_winter_lab <- sprintf(run_params$output_fmt1,year_data$massbal_winter_values[["fixed.mean"]] * run_params$output_mult / 1000.)
   plot_df$massbal <- values(year_data$massbal_winter_maps$fixed, mat = F)
-  plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
+  pl_cur <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
     geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult/1000)) +
     geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
     coord_sf(clip = "off") +
     {if (run_params$show_contours) plots_map_common_elements$dem_ele_contours} +
     {if (run_params$show_contour_labels) plots_map_common_elements$dem_ele_text_contours} +
-    annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-                                        x=0.05,  y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(paste0("Fixed period (winter): ", mb_fixed_period_winter_lab),
-                                        x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-    annotation_custom(grobTree(textGrob(bquote(bold(b[w]*" = "*.(mb_fixed_winter_lab)*" "*.(run_params$output_unit)*" w.e.")),
-                                        x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-    labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
-         subtitle = " ") +
     scale_fill_stepsn(name = paste0("SMB [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
                       limits = max_mb*c(-1,1),
                       breaks = run_params$mb_colorscale_breaks) +
     theme_map_massbal
+  
+  
+  title_cur <- func_make_map_title(
+    list(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+         paste0("Fixed period (winter): ", mb_fixed_period_winter_lab),
+         bquote(bold(b[w]*" = "*.(mb_fixed_winter_lab)*" "*.(run_params$output_unit)*" w.e."))),
+    base_size = plots_map_common_elements$base_size)
+  
+  plot_pages[[length(plot_pages)+1]] <- suppressWarnings(func_make_map_page(title_cur, pl_cur, data_outlines$aspect_ratio[[year_data$outline_id]]))
+  
   
   
   if (year_data$process_winter) {
@@ -260,25 +268,25 @@ func_plot_year_mb_maps <- function(year_data,
     mb_meas_period_winter_lab <- paste(format(year_data$massbal_winter_meas_period, "%m/%d"), collapse = " - ")
     mb_meas_winter_lab <- sprintf(run_params$output_fmt1,year_data$massbal_winter_values[["meas_period.mean"]] * run_params$output_mult / 1000.)
     plot_df$massbal <- values(year_data$massbal_winter_maps$meas_period, mat = F)
-    plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
+    pl_cur <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult/1000)) +
       geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
       coord_sf(clip = "off") +
       {if (run_params$show_contours) plots_map_common_elements$dem_ele_contours} +
       {if (run_params$show_contour_labels) plots_map_common_elements$dem_ele_text_contours} +
-      annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-                                          x=0.05,  y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(paste0("Measurement period (winter): ", mb_meas_period_winter_lab),
-                                          x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(bquote(bold(b[w]*" = "*.(mb_meas_winter_lab)*" "*.(run_params$output_unit)*" w.e.")),
-                                          x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-      labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
-           subtitle = " ") +
       scale_fill_stepsn(name = paste0("SMB [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
                         limits = max_mb*c(-1,1),
                         breaks = run_params$mb_colorscale_breaks) +
       theme_map_massbal
     
+    
+    title_cur <- func_make_map_title(
+      list(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+           paste0("Measurement period (winter): ", mb_meas_period_winter_lab),
+           bquote(bold(b[w]*" = "*.(mb_meas_winter_lab)*" "*.(run_params$output_unit)*" w.e."))),
+      base_size = plots_map_common_elements$base_size)
+    
+    plot_pages[[length(plot_pages)+1]] <- suppressWarnings(func_make_map_page(title_cur, pl_cur, data_outlines$aspect_ratio[[year_data$outline_id]]))
     
     
     
@@ -291,7 +299,7 @@ func_plot_year_mb_maps <- function(year_data,
       rms_txt <- paste0("RMS: ",
                         sprintf(run_params$output_fmt1, year_data$mod_output_annual_cur$global_rms_winter*run_params$output_mult/1e3), " ", run_params$output_unit, " w.e.")
     }
-    plots[[length(plots)+1]] <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
+    pl_cur <- ggplot(plot_df[data_dems$glacier_cell_ids[[year_data$dem_grid_id]],]) +
       geom_raster(aes(x = x, y = y, fill = massbal * run_params$output_mult/1000)) +
       geom_sf(data = plots_map_common_elements$outl_sf, fill = NA, color = "#202020", linewidth = outline_linesize) +
       coord_sf(clip = "off") +
@@ -304,23 +312,22 @@ func_plot_year_mb_maps <- function(year_data,
                                                                              massbal*run_params$output_mult/1e3)),
                                                          size = 3*plots_map_common_elements$dem_extent_size_multiplier,
                                                          fontface = "bold", color = "#000000", hjust = -0.12, vjust = -0.12, bg.color = "#FFFFFF")} +
-      annotation_custom(grobTree(textGrob(paste0(year_data$year_cur-1, "/", year_data$year_cur),
-                                          x=0.05,  y=y_line1, hjust=0, gp = gpar(fontsize = 2 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(paste0("Measurement period (winter): ", mb_meas_period_winter_lab),
-                                          x=0.05,  y=y_line2, hjust=0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-      annotation_custom(grobTree(textGrob(bquote(bold(b[w]*" = "*.(mb_meas_winter_lab)*" "*.(run_params$output_unit)*" w.e.")),
-                                          x = 0.05, y=y_line3, hjust = 0, gp = gpar(fontsize = 1 * base_size)))) +
-      annotation_custom(grobTree(textGrob(rms_txt,
-                                          x = 0.05, y=y_line4, hjust = 0, gp = gpar(fontsize = 1 * base_size, fontface = "bold")))) +
-      labs(title    = " ", # Empty title to preserve spacing. We add the real title just above, with annotation_custom().
-           subtitle = " ") +
       scale_fill_stepsn(name = paste0("SMB [", run_params$output_unit, " w.e.]"), colors = palette_RdBu_ext,
                         limits = max_mb*c(-1,1),
                         breaks = run_params$mb_colorscale_breaks) +
       theme_map_massbal
     
+    title_cur <- func_make_map_title(
+      list(paste0(year_data$year_cur-1, "/", year_data$year_cur),
+           paste0("Measurement period (winter): ", mb_meas_period_winter_lab),
+           bquote(bold(b[w]*" = "*.(mb_meas_winter_lab)*" "*.(run_params$output_unit)*" w.e.")),
+           rms_txt),
+      base_size = plots_map_common_elements$base_size)
+    
+    plot_pages[[length(plot_pages)+1]] <- suppressWarnings(func_make_map_page(title_cur, pl_cur, data_outlines$aspect_ratio[[year_data$outline_id]]))
+    
   }
   
-  return(plots)
+  return(plot_pages)
   
 }
