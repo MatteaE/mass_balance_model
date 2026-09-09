@@ -51,7 +51,8 @@ func_dhm_to_dem <- function(run_params,
     
     dhm_id      <- as.integer(str_split(dhm_outline_combinations_unique[dem_id], fixed(" "))[[1]][1])
     outline_id  <- as.integer(str_split(dhm_outline_combinations_unique[dem_id], fixed(" "))[[1]][2])
-    dem_cur     <- mask(data_dhms$elevation[[dhm_id]], vect(data_outlines$outlines[[outline_id]]), touches = FALSE)
+    dem_cur     <- mask(data_dhms$elevation[[dhm_id]], makeValid(set.crs(vect(data_outlines$outlines[[outline_id]]),
+                                                                         run_params$grids_crs_epsg)), touches = FALSE)
     
     # Check for glacierized cells on the border.
     dem_border_values <- dem_cur[c(1:run_params$grid_ncol,
