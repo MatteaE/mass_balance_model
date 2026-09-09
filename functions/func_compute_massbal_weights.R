@@ -29,8 +29,8 @@ func_compute_massbal_weights <- function(run_params,
   massbal_cur <- year_data[[paste0("massbal_", massbal_type, "_meas_cur")]]
   
   # Convert outline to SpatVector.
-  outl_v    <- set.crs(vect(data_outlines$outlines[[year_data$outline_id]]),
-                       run_params$grids_crs_epsg)
+  outl_v    <- makeValid(set.crs(vect(data_outlines$outlines[[year_data$outline_id]]),
+                                 run_params$grids_crs_epsg))
   
   
   # If there is a single mass balance entry:
