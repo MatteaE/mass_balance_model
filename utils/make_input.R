@@ -1,9 +1,10 @@
 ###################################################################################################
-# This program takes a shapefile glacier outline and up to additional 2 outlines                  #
-# (firn, debris), and produces grids which can be used in the mass balance model:                 #
-# DHM, surface type and optionally daily incoming solar radiation.                                #
-# The 2 additional shapefiles are optional: in case they are not provided, the output grid        #
-# only has ice and rock (no firn and no debris).                                                  #
+# This tools prepares topographic data for input in the glacier mass balance model DMBSim.        #
+# Required input: a DEM with no gaps over the area of interest, and a vector outline of the       #
+# glacier. Also glacier name and reference year (used only for file names).                       #
+# Optional input: additional vector files with firn and debris (surface type), and a reference    #
+# raster to define the grid parameters (CRS, extent, resolution).                                 #
+# The tool can also generate grids of daily potential solar radiation.                            #
 # Author: Enrico Mattea (University of Fribourg)                                                  #
 ###################################################################################################
 
@@ -98,7 +99,7 @@ func_utm_grep <- function(input_line,
     utm_match <- utm_matches[[1]][2:length(utm_matches[[1]])]
     utm_zone  <- as.integer(utm_match[4])
     utm_ns    <- utm_match[5]
-    utm_code  <- 32600 + utm_zone + c(0,100)[2 - (utm_ns == "N")]
+    utm_code  <- 32600 + utm_zone + c(0,100)[2 - (toupper(utm_ns) == "N")] # toupper because we could have "n" here.
     return(utm_code)
     
   } else {
@@ -325,7 +326,6 @@ func_compute_all_daily_pisr <- function(dem,
     # Write file to geotiff.
     rad_out_filepath_cur <- file.path(outpath_base, "radiation", paste0("dir", sprintf("%03d", doy_cur), "24.tif"))
     terra::writeRaster(rad_cur_ras, rad_out_filepath_cur, overwrite = TRUE, datatype = "FLT4S")
-    file.rename(rad_out_filepath_cur, paste0(file_path_sans_ext(rad_out_filepath_cur), ".tif"))
   }
   
   cat("\n")
@@ -531,6 +531,13 @@ func_do_processing <- function(dem_filepath,
   } # End else there is a single DEM.
   
   
+  # Enforce single-band DEM.
+  if (nlyr(dem_l1) > 1) {
+    message("WARNING! The provided DEM file(s) have more than one band. I will use only the first band, but make sure that this is intended.")
+    dem_l1 <- dem_l1[[1]]
+  }
+  
+  
   # . Load glacier outline ------------------------------------------------------------------------
   cat("Reading glacier outline...\n")
   outl_result <- tryCatch({
@@ -549,7 +556,7 @@ func_do_processing <- function(dem_filepath,
   outline_l1 <- func_validate_vect(outline_l1,
                                    "glacier outline")
   
-  if (class(outline_l1) == "character") {
+  if (is.character(outline_l1)) {
     cat("\n*** ERROR:", outline_l1, "***\n")
     return(outline_l1)
   }
@@ -572,7 +579,7 @@ func_do_processing <- function(dem_filepath,
     firn_l1 <- func_validate_vect(firn_l1,
                                   "firn")
     
-    if (class(firn_l1) == "character") {
+    if (is.character(firn_l1)) {
       cat("\n*** ERROR:", firn_l1, "***\n")
       return(firn_l1)
     }
@@ -599,7 +606,7 @@ func_do_processing <- function(dem_filepath,
     debris_l1 <- func_validate_vect(debris_l1,
                                     "debris")
     
-    if (class(debris_l1) == "character") {
+    if (is.character(debris_l1)) {
       cat("\n*** ERROR:", debris_l1, "***\n")
       return(debris_l1)
     }
@@ -629,7 +636,7 @@ func_do_processing <- function(dem_filepath,
   # Fix coordinate systems ------------------------------------------------------------------------
   # . First of all repair any malformed CRS -------------------------------------------------------
   # We support repairing UTM CRS whose WKT definition includes
-  # (in the first line) the zone number and N/S.
+  # (in the first line or in the "CONVERSION" line) the zone number and N/S.
   dem_l1 <- func_repair_rast_crs(dem_l1)
   if (is.null(dem_l1)) {
     err_msg <- "Coordinates system of the DEM is not recognized."
@@ -658,6 +665,15 @@ func_do_processing <- function(dem_filepath,
       return(err_msg)
     }
   }
+  
+  # Check whether the recovered CRS are compatible (DEM vs outline)
+  if (!relate(ext(dem_l1), ext(project(outline_l1, crs(dem_l1))), "intersects")) {
+    err_msg <- "Recovered CRS is not compatible with the data location - please check the coordinates systems manually."
+    cat("\n*** ERROR:", err_msg, "***\n")
+    return(err_msg)
+  }
+  
+  
   
   # . Now run the logic to decide output CRS ------------------------------------------------------
   # If reference grid is given: use its CRS.
@@ -751,14 +767,16 @@ func_do_processing <- function(dem_filepath,
       
       reproj_dem       <- TRUE
       reproj_outline   <- TRUE
-      target_crs       <- utm_crs 
+      target_crs       <- utm_crs
       
     } else if (!same.crs(dem_crs, outline_crs)) {
       
       message("DEM and shapefile do not have the same coordinate system.")
-      utm_crs_allowed  <- sapply(paste0("EPSG:", 32600 + utm_crs_number + utm_offset + -1:1), function(x) terra::crs(x, proj = TRUE)) # Allow a 1-zone tolerance, for glaciers near the UTM zone borders.
+      utm_crs_allowed  <- lapply(paste0("EPSG:", 32600 + utm_crs_number + utm_offset + -1:1), terra::crs) # Allow a 1-zone tolerance, for glaciers near the UTM zone borders.
+      is_dem_utm       <- any(sapply(utm_crs_allowed, same.crs, dem_crs))
+      is_outline_utm   <- any(sapply(utm_crs_allowed, same.crs, outline_crs))
       
-      if (dem_crs %in% utm_crs_allowed) { # Reproject outline.
+      if (is_dem_utm) { # Reproject outline.
         message("DEM coordinate system is good, I am reprojecting the shapefile.")
         reproj_outline <- TRUE
         target_crs     <- dem_crs
@@ -769,7 +787,7 @@ func_do_processing <- function(dem_filepath,
           target_crs <- dem_crs
         }
         
-      } else if (outline_crs %in% utm_crs_allowed) { # Reproject DEM.
+      } else if (is_outline_utm) { # Reproject DEM.
         
         message("Shapefile coordinate system is good, I am reprojecting the DEM.") # This can take some minutes if the DEM is big.")
         reproj_dem     <- TRUE
@@ -841,6 +859,8 @@ func_do_processing <- function(dem_filepath,
   if (has_reference) {
     cat("Reference grid supplied. Overriding cell size with reference cell size...\n")
     resolution_proj_raster <- xres(reference_l1)
+    
+    # Else: no reference is given, automatically determine it or use provided value.
   } else {
     if (is.na(cell_size)) {
       cat("Cell size not supplied. Automatically computing cell size...\n")
@@ -862,9 +882,8 @@ func_do_processing <- function(dem_filepath,
         return(err_msg)
       }
       
-      # Round cell size to millimeters - too many decimals can mess with extents.
-      # User-supplied cell size should be integer in general!
-      cell_size <- round(cell_size, 3)
+      # Round cell size to integers.
+      cell_size <- round(cell_size)
       
       resolution_proj_raster <- cell_size
       cat("Cell size supplied:", resolution_proj_raster, "m\n")
@@ -908,7 +927,7 @@ func_do_processing <- function(dem_filepath,
     if (!(is.finite(dem_buffer) &&
           (dem_buffer >= ceiling(resolution_proj_raster*3)) &&
           (dem_buffer <= 100000))) {
-      err_msg <- paste0("Invalid value for the margin size around the outline. Please use a valid number in meters: between ", ceiling(resolution_proj_raster*3), " and 100000; recommended here: ", round(resolution_proj_raster*10))
+      err_msg <- paste0("Invalid value for the margin size around the outline. Please use a valid number in meters: between ", ceiling(resolution_proj_raster*3), " and 100000. Recommended here: ", round(resolution_proj_raster*10))
       cat("\n*** ERROR:", err_msg, "***\n")
       return(err_msg)
     }
@@ -954,19 +973,31 @@ func_do_processing <- function(dem_filepath,
     }
     
     dem_l2 <- terra::project(dem_l2, reference_l1, method = "bilinear")
-    dhm_out <- dem_l2
-  }
+  } # End if (reproj_dem)
   
   
   # If we have not reprojected the DEM (i.e., it already had
   # a good CRS), we may still have to resample it so that it
   # matches the desired output grid (called reference_l1, be
   # it user-supplied or computed from cell size and buffer).
-  # It is done here.
+  # It is done here (first a tight crop, for performance).
   if ((nrow(dem_l2)   != nrow(reference_l1))   ||
       (ncol(dem_l2)   != ncol(reference_l1))   ||
       (ext(dem_l2)    != ext(reference_l1))) {
     
+    # Crop DEM before resampling.
+    crop_result <- tryCatch({
+      dem_l2 <- crop(dem_l2, ext(reference_l1) + xres(reference_l1), snap = "out")
+      NULL
+    }, error = function(e) {
+      return(paste0("Error cropping the DEM file(s): ", conditionMessage(e), ". Please check the locations of the input data."))
+    })
+    if (!is.null(crop_result)) {
+      cat("\n*** ERROR:", crop_result, "***\n")
+      return(crop_result)
+    }
+    
+    # Actual resampling.
     dhm_out <- terra::resample(dem_l2, reference_l1, method = "bilinear")
     
     # If the dem_l1 was already matching the reference exactly,
@@ -975,6 +1006,7 @@ func_do_processing <- function(dem_filepath,
   } else {
     dhm_out <- dem_l2
   }
+  
   
   # Any NAs at the end? That would be a problem.
   na_cells_n <- length(which(values(is.na(dhm_out))[,1]))
@@ -1067,7 +1099,7 @@ ui <- fluidPage(useShinyjs(),
                                  h5(style="text-align: justify; margin-top: 0px; margin-bottom: 5px;",
                                     em("As"), strong(" INPUT DATA "), em("please provide:")),
                                  tags$div(tags$ul(
-                                   tags$li(em("the ", strong("glacier name "), "with no whitespaces")),
+                                   tags$li(em("the ", strong("glacier name "), "with no whitespaces (only allowed: letters, digits, dash/underscore)")),
                                    tags$li(em("the ", strong("modeled year,"), "used to set the file names")),
                                    tags$li(em("one or more ", strong("elevation grids "), "of the region of interest (for example .tif or .hgt, from EarthExplorer, SRTM, ASTER or any other). If you provide ", strong("more than one grid,"), "all grids", strong("will be merged"), "(mosaic) before processing.")),
                                    tags$li(em("a ", strong("glacier outline, "), "for example as shapefile (.shp)")),
@@ -1095,9 +1127,9 @@ ui <- fluidPage(useShinyjs(),
                 # .. Input: choose glacier name (with inline CSS modifier to have label and field on same row),
                 # DEM, outline file, and (optionally) firn and debris shapefiles, as well as reference grid for alignment ----
                 tags$head(
-                  tags$style(type="text/css", "#inline1 label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 10px; } 
+                  tags$style(type="text/css", "#inline1 label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 10px; }
                 #inline1 .form-group { display: table-row;}"),
-                  tags$style(type="text/css", "#inline2 label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 22px; } 
+                  tags$style(type="text/css", "#inline2 label{ display: table-cell; text-align: center; vertical-align: middle; padding-right: 22px; }
                 #inline2 .form-group { display: table-row;}")
                 ),
                 tags$div(id = "inline1", textInput("choose_glacier_name", "Choose glacier name:", placeholder = "Glacier name")),
@@ -1222,6 +1254,7 @@ server <- function(input, output, session) {
     if (debug_verbose == TRUE) {
       sink("make_input.log",
            split = TRUE)
+      on.exit(sink(), add = TRUE) # Whatever happens with the processing, restore the sink() at the end.
     }
     
     # These 4 below are probably not needed since the RUN! button is
@@ -1234,21 +1267,37 @@ server <- function(input, output, session) {
     debrisfilepath_sel    <- ifelse(isTruthy(debrisfilepath()), debrisfilepath(), NA)
     referencefilepath_sel <- ifelse(isTruthy(referencefilepath()), referencefilepath(), NA)
     showModal(modalDialog(h3("Processing... See RStudio console for progress."), footer=NULL))
-    processing_output <- func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$cellsize, input$checkbox_compute_radiation, file.path(glaciername()))
+    
+    
+    # Enforce sanitized glacier name.
+    glaciername_clean <- trimws(gsub("[^a-zA-Z0-9_-]", "", glaciername()))
+    if (glaciername_clean != glaciername()) {
+      processing_output <- paste0("The glacier name can only contain letters, numbers, and dashes/underscores. No spaces, no other symbols. Please fix it manually.")
+      cat("\n*** ERROR:", processing_output, "***\n")
+    } else {
+      # Processing is called here -----------------------------------------------------------------
+      processing_output <- tryCatch({
+        func_do_processing(demfilepath(), shpfilepath(), firnfilepath_sel, debrisfilepath_sel, referencefilepath_sel, input$buffersize, input$cellsize, input$checkbox_compute_radiation, file.path(glaciername()))
+      }, error = function(e) {
+        paste0("Unexpected error: ", conditionMessage(e), " - please report this to the developers")
+      })
+    }
+    
     if (processing_output == "0") {
+      modelyear_out <- sprintf("%.0f", modelyear()) # Fix in case the user supplied a fractional model year.
       rename_status <- rep(FALSE, 6)
       rename_status[1] <- file.rename(file.path(getwd(), glaciername(), "dhm", "dhm_glacier.tif"),
-                                      file.path(getwd(), glaciername(), "dhm", paste0("dhm_", glaciername(), "_", modelyear(), ".tif")))
+                                      file.path(getwd(), glaciername(), "dhm", paste0("dhm_", glaciername(), "_", modelyear_out, ".tif")))
       rename_status[2] <- file.rename(file.path(getwd(), glaciername(), "surftype", "surface_type_glacier.tif"),
-                                      file.path(getwd(), glaciername(), "surftype", paste0("surface_type_", glaciername(), "_", modelyear(), ".tif")))
+                                      file.path(getwd(), glaciername(), "surftype", paste0("surface_type_", glaciername(), "_", modelyear_out, ".tif")))
       rename_status[3] <- file.rename(file.path(getwd(), glaciername(), "outline", "outline_glacier.shp"),
-                                      file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear(), ".shp")))
+                                      file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear_out, ".shp")))
       rename_status[4] <- file.rename(file.path(getwd(), glaciername(), "outline", "outline_glacier.shx"),
-                                      file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear(), ".shx")))
+                                      file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear_out, ".shx")))
       rename_status[5] <- file.rename(file.path(getwd(), glaciername(), "outline", "outline_glacier.prj"),
-                                      file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear(), ".prj")))
+                                      file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear_out, ".prj")))
       rename_status[6] <- file.rename(file.path(getwd(), glaciername(), "outline", "outline_glacier.dbf"),
-                                      file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear(), ".dbf")))
+                                      file.path(getwd(), glaciername(), "outline", paste0("outline_", glaciername(), "_", modelyear_out, ".dbf")))
       
       # Check whether file renaming succeeded - might
       # fail if glacier name was malformed (Cyrillic?).
@@ -1271,7 +1320,9 @@ server <- function(input, output, session) {
     # We get here if the processing failed, or if the
     # processing went well but the final file renaming failed.
     if (processing_output != "0") {
-      unlink(file.path(getwd(), glaciername()), recursive = TRUE)
+      if (file.path(getwd(), glaciername()) != file.path(getwd())) { # Guard against somehow corrupted glaciername() to avoid wiping the utils/ folder.
+        unlink(file.path(getwd(), glaciername()), recursive = TRUE)
+      }
       showModal(modalDialog(h3("Processing ", strong(style="color: #FF0000", "FAILED!")),
                             h3("Information about the error:"),
                             h4(processing_output),
@@ -1279,10 +1330,7 @@ server <- function(input, output, session) {
                             div(style="margin:auto;margin-top:7%;width:20%;", modalButton(strong("Ok, I try again"))),
                             footer=NULL))
     }
-    if (debug_verbose == TRUE) {
-      sink()
-    }
-  })
+  }) # End actions on start-processing button click.
   
 }
 # Run the app.

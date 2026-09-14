@@ -115,7 +115,7 @@ func_plot_overview <- function(overview_annual,
     geom_line(aes(x = year, y = ela), linewidth = 1) +
     single_year_point +
     ylab("Equilibrium Line Altitude [m a.s.l.]") +
-    scale_y_continuous(expand = expansion(2, 0)) +
+    scale_y_continuous(expand = expansion(mult = 0.5, add = 2)) +
     scale_x_continuous(breaks = x_breaks) +
     ggtitle("Equilibrium Line Altitude") +
     theme_overview_plots
