@@ -254,11 +254,12 @@ func_compute_day_rad <- function(dem_mat,
       jd_cur <- JDymd(year_cur, month_cur, day_cur, hour_cur)
       sun_vec <- sunvector(jd_cur, lat, lon, 0)
       hillshade_cur <- hillshading(norm_mat, sun_vec)
-      shaded <- doshade(dem_mat, sun_vec, dem_res)
+      shaded_logi   <- doshade(dem_mat, sun_vec, dem_res)
+      
       sun_zenith <- degrees(acos(sun_vec[,3]))
-      # Compute direct radiation modified by terrain + diffuse irradiation (sky-view factor ignored).
+      # Compute direct radiation modified by terrain + diffuse irradiation (sky view factor is ignored for diffuse irradiation)
       Idirdif = insolation(sun_zenith, jd_cur, ele_ref, visibility, rh, tempK, O3, alphag)
-      Iglobal = Iglobal + (Idirdif[,1] * hillshade_cur + Idirdif[,2] ) * delta_t / 24 # Values in W m^-2
+      Iglobal = Iglobal + (Idirdif[,1] * hillshade_cur * shaded_logi + Idirdif[,2] ) * delta_t / 24 # Values in W m^-2
       
     } # End loop on the timesteps
     
@@ -1119,7 +1120,7 @@ ui <- fluidPage(useShinyjs(),
                                    tags$li("(OPTIONAL): ", em("365 grids of ", strong("daily potential solar radiation."))),
                                    style = "margin-top: 0px; margin-bottom: 5px;")),
                                  h5(style="text-align: justify; margin-top: 0px; margin-bottom: 30px; text-align: justify;",
-                                    em("The ", strong("coordinate system"), " (UTM / WGS84) is adjusted automatically."))),
+                                    em("The ", strong("coordinate system"), " (UTM / WGS84) is adjusted automatically. Non-UTM projected coordinate systems are supported (please provide a DEM and outline already using them, or alternatively an appropriate reference grid)."))),
                 
                 # . UI layout below the help text ----
                 p(),
