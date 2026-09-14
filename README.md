@@ -186,7 +186,7 @@ DMBSim is implemented in R (with some C++ routines for performance), is fully cr
 
 # <a name="quickstart"></a>Quick start
 
-[Tutorial 1](/doc/tutorial1_singleyear/DMBSim_tutorial_1.pdf) will guide you through system setup and simple mass balance calculations. Alternatively, follow the steps below or check out the [introductory slides](/blob/main/doc/presentation_model_introduction/presentation.pdf) or the other [documentation](/doc).
+[Tutorial 1](/doc/tutorial1_singleyear/DMBSim_tutorial_1.pdf) will guide you through system setup and simple mass balance calculations. Alternatively, follow the steps below or check out the [introductory slides](/doc/presentation_model_introduction/presentation.pdf) or the other [documentation](/doc).
 
 ## <a name="installation"></a>Minimal installation instructions
 
