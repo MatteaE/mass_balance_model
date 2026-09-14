@@ -11,7 +11,7 @@
 
 run_params <- list(
   
-  # . (0) Required parameters -------------------------------
+  # . (0) Required parameters -----------------------------
   name_glacier                      = "glacier_name",      # [name in "quotes"]: glacier name, which is used for the input folder, the output folder, and a lot of files
   filename_weather                  = "weather_data.dat",  # [filename in "quotes"]: name of the file (under weather/) with the daily meteorological series
   file_weather_nskip                = 4,                   # [-]: number of header lines to skip in the meteo file. The first non-skipped line should already have the first data entry (no header)

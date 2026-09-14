@@ -11,7 +11,7 @@
 
 run_params <- list(
   
-  # . (0) Required parameters -------------------------------
+  # . (0) Required parameters -----------------------------
   name_glacier                      = "glacier_name",      # [name in "quotes"]: glacier name, which is used for the input folder, the output folder, and a lot of files
   filename_weather                  = "weather_data.dat",  # [filename in "quotes"]: name of the file (under weather/) with the daily meteorological series
   file_weather_nskip                = 4,                   # [-]: number of header lines to skip in the meteo file. The first non-skipped line should already have the first data entry (no header)
@@ -21,7 +21,7 @@ run_params <- list(
   last_year                         = 2020,                # [-]: the last year to be processed. If same as first_year, a single year is simulated. Else the model covers multiple years.
   
   
-  # . (1) Input files parameters ----------------------------
+  # . (1) Input files parameters --------------------------
   dir_data_recursive                 = FALSE,              # [TRUE/FALSE]: should the model look recursively for input files in the specified directories?
   dhm_interpolate                    = FALSE,              # [TRUE/FALSE]: should the model do linear interpolation to compute each year's elevation model? Otherwise, the grid closest in time is used.
   
@@ -32,12 +32,12 @@ run_params <- list(
   filename_params_suffix             = ".dat",             # [string]: file name of the annual parameters will be <prefix><year><suffix>
   
   
-  # . (2) Weather series parameters -------------------------
+  # . (2) Weather series parameters -----------------------
   weather_snowfall_temp              = 1.5,                # [°C]: at this temperature, precipitation is 50 % rain and 50 % snow. One degree above it is all rain, one degree below it is all snow (snow fraction is linearly interpolated).
   weather_max_precip_ele             = 4000,               # [m asl]: above this altitude, precipitation does not increase any more but becomes constant (cutoff). If NA, it is estimated automatically as the 80th percentile of the values in the first DEM grid.
   
   
-  # . (3) Mass balance input parameters ---------------------
+  # . (3) Mass balance input parameters -------------------
   stake_cluster_distance             = 20,                 # [m]: threshold distance for clustering stakes together. This is used to ensure a more uniform distribution of the stakes: if measurements are very dense in one place they can induce a bias in the optimization, so we average stakes in clusters. This can reduce the total number of stakes. Only stakes measured on the same days can be clustered. A value of 0 corresponds to no clustering.
   stakes_unknown_latest_start        = "2/28",             # [month/day in "quotes"]: in the automatic search of the start date for snow pits and depth probings without a measured start date, we search no later than this date. The starting date will be set to the day of the minimum cumulative mass balance between the start of the simulation and the date set here. If not set or NA, it is set to 28 February in the Northern Hemisphere and 31 August in the Southern Hemisphere.
   stake_duration_min_n               = 30,                 # [days]: stop with error if any stakes (annual or winter) have an observation period shorter than this duration.
@@ -49,7 +49,7 @@ run_params <- list(
   stake_end_latest                   = "11/30",            # [month/day in "quotes"]: a mass balance measurement is included in the set of the current year if the end date of its observation period is at or earlier than stake_end_latest. In the Northern Hemisphere, stake_end_latest is always interpreted as YYYY; in the Southern Hemisphere, stake_end_latest with month in [7,12] is interpreted as YYYY-1, else YYYY. Default value if not set or NA: "11/30" in the North, "05/31" in the South (i.e., an annual stake could be measured up to 2 months after the end of the hydrological year).
   
   
-  # . (4) Topographic snow distribution parameters ----------
+  # . (4) Topographic snow distribution parameters --------
   curvature_dhm_smooth               = 1.0,                # [cells]: amount of Gaussian smoothing applied before computing curvature (which is very sensitive to DEM noise, unlike slope). Can be non-integer. 1.0 is good for a normal 20 m DEM.
   curvature_cutoff_fact              = 1.2,                # [-]: multiplier for the curvature cutoff threshold at which the snow distribution is not further changed. The threshold is given by the smaller of the two curvature extremes (positive and negative) divided by this factor. Only values >= 1 make sense.
   curvature_effect_limit             = 0.5,                # [-]: maximum effect of curvature, i.e. the curvature multiplier will be within [1 ± curvature_effect_limit]. Only values between 0 and 1 make sense.
@@ -60,7 +60,7 @@ run_params <- list(
   topographic_snowdist_fact          = 1.0,                # [-]: importance (multiplier) of topographic snow distribution. 0 = no topographic control on the relative snow distribution. 1 = full-strength topographic control on the relative snow distribution.
   
   
-  # . (5) Winter probes snow distribution parameters --------
+  # . (5) Winter probes snow distribution parameters ------
   probes_snowdist_idw_type           = "adaptive",         # ["global"/"adaptive"] type of IDW interpolation: "global" (standard IDW) or "adaptive" (as in IDL)
   probes_snowdist_search_radius_init = 300,                # [m]: for the "adaptive" interpolation: initial search radius
   probes_snowdist_dist_min           = 25,                 # [m]: for the "adaptive" interpolation: minimum distance to avoid excessive weighting
@@ -71,7 +71,7 @@ run_params <- list(
   probes_snowdist_fact               = 1.0,                # [-]: importance (multiplier) of probes snow distribution. 0 = no effect of winter measurements on the relative snow distribution. 1 = full-strength control of winter measurements on the relative snow distribution.
   
   
-  # . (6) Avalanche model parameters ------------------------
+  # . (6) Avalanche model parameters ----------------------
   avalanche_routine_cpp              = TRUE,               # [TRUE/FALSE]: should the model use the C++ (TRUE) or R (FALSE) version of the avalanche routine? C++ is much faster but it requires a code compiler
   deposition_slope_lim               = 40,                 # [°]: at or above this slope value, snow will not be deposited during an avalanche. A lower value makes avalanches travel farther. Called beta_lim in Gruber (2007).
   deposition_mass_lim                = 2000,               # [mm w.e.]: maximum snow deposition in a (flat) cell during an avalanche. A lower value makes avalanches travel farther. Called D_lim in Gruber (2007).
@@ -80,14 +80,14 @@ run_params <- list(
   model_avalanche_dates              = c("3/31", "5/31"),  # [month/day in "quotes"]: one or more dates for avalanches during the simulation. To skip avalanches, use NA or do not provide this parameter.
   
   
-  # . (7) Initial snow cover parameters ---------------------
+  # . (7) Initial snow cover parameters -------------------
   initial_snowline_elevation         = NA,                 # [m asl]: altitude of the snow line at the start of the simulation. If NA or missing, the 70th percentile of glacier altitude is used.
   initial_snow_gradient              = 200,                # [mm w.e. (100 m)-1]: initial SWE gradient above the snowline elevation
   initial_snow_avalanche             = TRUE,               # [TRUE/FALSE]: shall we process the map of initial snow distribution via avalanche, to unload the slopes? This is done at the end of the calculations (i.e., on the map which already includes small-scale and large-scale variability).
   initial_snow_dist_from_model       = TRUE,               # [TRUE/FALSE]: use the result from the previous year's model as starting condition for the current year? This will be respected only if the required model output is available from the previous year (i.e., sequential simulation - not respected for the years which are not simulated sequentially (i.e. which have gaps in the measured mass balances - those are processed at the end).
   
   
-  # . (8) Mass balance model main parameters ----------------
+  # . (8) Mass balance model main parameters --------------
   default_prec_corr                  = 100,                # [%]: default correction of the measured precipitation. 100 % = no correction, 200 % = double the precipitation. This parameter can be overridden by annual parameter files or by optimization against winter measurements.
   default_prec_summer_fact           = 1,                  # [-]: default multiplicative reduction of precipitation correction in summer. It can be either 1 number (applied from 1 May to 30 September), or 12 numbers (applied month-wise or with daily linear interpolation). This parameter can be overridden by annual parameter files.
   default_prec_elegrad               = 0,                  # [% (100 m)-1]: default altitudinal gradient of precipitation. It can be either 1 number (applied every day of the year), or 12 numbers (applied month-wise or with daily linear interpolation). This parameter can be overridden by annual parameter files.
@@ -99,32 +99,32 @@ run_params <- list(
   params_daily_interp                = "linear",           # ["constant"/"linear"]: how to interpolate the prec_summer_fact, prec_elegrad and temp_elegrad from 12 monthly values (if provided) to the daily series. "constant" is kept constant within each month, "linear" interpolates through the month midpoints.
   
   
-  # . (9) Additional melt model parameters ------------------
+  # . (9) Additional melt model parameters ----------------
   debris_red_fac                     = 0.6,                # [-]: reduction factor of melt over debris-covered ice.
   albedo_ice_decrease_elev           = 0,                  # [m asl]: below this altitude, the ice albedo decreases linearly with altitude (darker ice).
   albedo_ice_decrease_fact           = 0.014,              # [m-1]: rate of increase above 1 (with decreasing altitude) of the ice albedo factor (multiplying ice melt).
   
   
-  # . (10) Optimization parameters ---------------------------
+  # . (10) Optimization parameters ------------------------
   optim_bias_threshold               = 1,                  # [mm w.e.]: optimization stops when abs(mean bias) is below this threshold
   optim_max_iter                     = 20,                 # [-]: force mass balance optimization to stop after this number of iterations, even if bias is not within threshold. This is useful in case the optimization is not converging due to avalanches barely reaching a stake, thus a small change in the snow amounts changes a stake's simulated mass balance by a lot, thus bias keeps jumping around 0. In normal conditions, the model converges much faster than 20 iterations.
   optim_winter_areaweight_fact       = 0.0,                # [-]: area weighting of each mass balance point in the winter optimization. 0 (default): uniform weight; 1: weight is the area of the Voronoi cell of each point. Between 0 and 1: linear interpolation.
   optim_annual_areaweight_fact       = 0.0,                # [-]: area weighting of each mass balance point in the annual optimization. 0 (default): uniform weight; 1: weight is the area of the Voronoi cell of each point. Between 0 and 1: linear interpolation.
   
   
-  # . (11) Mass balance postprocessing parameters -------
+  # . (11) Mass balance postprocessing parameters ---------
   ele_bands_auto_min_extent          = 50,                 # [m]: when automatically computing elevation bands for local correction, merge bands which are smaller than this vertical extent.
   ele_bands_ela_size                 = 10,                 # [m]: to compute the equilibrium line altitude, divide the glacier grid into elevation bands with this vertical extent.
   massbal_fixed_winter_start         = "10/1",             # [month/day in "quotes"]: start of the fixed "winter" period for mass balance evaluation. If NA, this will be 1 October (YYYY-1) in the Northern Hemisphere and 1 April (YYYY-1) in the Southern Hemisphere. Note: this MM/DD date is always assigned to YYYY-1.
   massbal_fixed_winter_end           = "4/30",             # [month/day in "quotes"]: end of the fixed "winter" period for mass balance evaluation. If NA, this will be 30 April (YYYY) in the Northern Hemisphere and 31 October (YYYY-1) in the Southern Hemisphere. Note: this MM/DD date is assigned to YYYY in the Northern Hemisphere and to YYYY-1 in the Southern Hemisphere.
   
   
-  # . (12) Leave-one-out validation parameters ---------------
+  # . (12) Leave-one-out validation parameters ------------
   run_loo_validation                 = FALSE,              # [TRUE/FALSE]: run leave-one-out validation of the stakes.
   loo_stake_iter_max_n               = 10,                 # [-]: maximum number of iterations to achieve the LOO validation of one stake.
   
   
-  # . (13) Plot parameters -----------------------------------
+  # . (13) Plot parameters --------------------------------
   mb_colorscale_multiplier           = 1,                  # [-]: a number to multiply the colorscale limits. 1 = colorscale between -2 and +2 m w.e.; use NA for automatic colorscale limits
   output_unit                        = "m",                # ["m"/"mm"]: "m" for meters water-equivalent, or "mm" for millimeters water-equivalent. Applies to all output files (results and plots).
   show_contours                      = TRUE,               # [TRUE/FALSE]: in the mass balance maps, show the contour lines (TRUE) or not (FALSE).
@@ -134,14 +134,14 @@ run_params <- list(
   outlines_linesize_mult             = 1.0,                # [-]: multiplier for the thickness of the glacier outlines in map plots.
   
   
-  # . (14) General output parameters -------------------------
+  # . (14) General output parameters ----------------------
   save_simulation_RData              = FALSE,              # [TRUE/FALSE]: call save.image() at the end of the model run? Can be useful for debugging.
   overwrite_output                   = TRUE,               # [TRUE/FALSE]: what to do if the output directory is already there? TRUE: overwrite with warning. FALSE: stop with error
   output_grid_ext                    = ".tif",             # [".tif"/".asc"/...]: extension of the output grid files. Use ?writeFormats to check what is available. Common choices are ".tif" for GeoTiff, and ".asc" for ASCII grid.
   dem_write                          = TRUE,               # [TRUE/FALSE]: should the model write the annual used DEM to the output directory?
   
   
-  # . (15) Daily output parameters ---------------------------
+  # . (15) Daily output parameters ------------------------
   plot_daily_maps_winter             = FALSE,              # [TRUE/FALSE]: at the end of each year, produce plots of daily surface type and SWE from the winter simulation (slow, but useful for debug or visualization).
   plot_daily_maps_winter_freq        = 1,                  # [days]: produce "daily" plots of surface type and SWE from winter simulation only at a given interval, to speed up their generation. 1 = daily, 2 = skip half of the days, 3 = plot one day out of 3, and so on.
   write_daily_grids_winter           = FALSE,              # [TRUE/FALSE]: at the end of each year, write daily geotiff grids of SWE from winter simulation (useful for debugging)
