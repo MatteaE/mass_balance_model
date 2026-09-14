@@ -11,7 +11,7 @@
 
 
 func_process_run_params <- function(run_params) {
-
+  
   
   # Write supplied parameters ---------------------------------------------------------------------
   func_customlog("Started with ", length(run_params), " run_params:", level = 4)
@@ -23,13 +23,13 @@ func_process_run_params <- function(run_params) {
   
   # Check REQUIRED parameters ---------------------------------------------------------------------
   # These must exist from set_params, stop with error if not.
-  run_params_required <- c("name_glacier",             # [name as string]: this name is used for the input folder, the output folder, and a lot of files
-                           "filename_weather",         # [filename as string]: name of the file with the daily meteorological series
+  run_params_required <- c("name_glacier",             # [name in "quotes"]: glacier name, which is used for the input folder, the output folder, and a lot of files
+                           "filename_weather",         # [filename in "quotes"]: name of the file (located in folder weather/) with the daily meteorological series
                            "file_weather_nskip",       # [-]: number of header lines to skip in the meteo file. The first non-skipped line should already have the first data entry (no header)
                            "grids_crs",                # [-]: EPSG code as integer - this is the reference system of the grids, used in slope/aspect computations. Overrides any CRS info reported from the grid files.
                            "weather_aws_elevation",    # [m asl]: reference elevation for the meteorological data
-                           "first_year",               # [-]: year as integer - the first year to be simulated. In the Northern Hemisphere a year usually goes from September of the previous year (YYYY-1) to September of the specified year (YYYY). In the Southern Hemisphere, from March YYYY-1 to March YYYY.
-                           "last_year")                # [-]: year as integer - the last year to be simulated. If same as first_year, a single year is simulated. Else more than 1.
+                           "first_year",               # [-]: the first year to be processed. In the Northern Hemisphere a year usually goes from September of the previous year (YYYY-1) to September of the specified year (YYYY). In the Southern Hemisphere, from March YYYY-1 to March YYYY.
+                           "last_year")                # [-]: the last year to be processed. If same as first_year, a single year is simulated. Else the model covers multiple years.
   
   # Check availability.
   run_params_required_missing <- setdiff(run_params_required, names(run_params))
@@ -47,8 +47,8 @@ func_process_run_params <- function(run_params) {
     func_customlog("There are ", length(run_params_required_wrongtype), " required parameters which have wrong type. Please check them in set_params.R. They are: ", paste0(run_params_required_wrongtype, collapse = ", "), level = 2)
     func_stop()
   }
-
-    
+  
+  
   # Check finite values.
   params_required_numeric_ids <- 3:length(run_params_required)
   ids_val_bad <- which(!is.finite(unlist(run_params[run_params_required[params_required_numeric_ids]])))
@@ -127,11 +127,11 @@ func_process_run_params <- function(run_params) {
     deposition_mass_lim                = 2000,        # [mm w.e.]: maximum snow deposition in a (flat) cell during an avalanche. A lower value makes avalanches travel farther. Called D_lim in Gruber (2007).
     movable_slope_lim_lower            = 30,          # [°]: above this slope value, there is a linearly increasing movable fraction in the initial mass distribution, for avalanches. A lower value makes avalanches start also on more gentle slopes.
     movable_slope_lim_upper            = 70,          # [°]: above this slope value, all input snow is movable in the avalanche routine.
-    model_avalanche_dates              = "",          # ["mm/dd"]: one or more dates for avalanches during the simulation
+    model_avalanche_dates              = "0/0",       # ["mm/dd"]: one or more dates for avalanches during the simulation. "0/0" is a default dummy value to skip avalanches.
     
     
     # . (7) Initial snow cover parameters ---------------------
-    initial_snowline_elevation         = NA,          # [m asl]: altitude of the snow line at the start of the simulation
+    initial_snowline_elevation         = NA,          # [m asl]: altitude of the snow line at the start of the simulation. If NA or missing, the 70th percentile of glacier altitude is used.
     initial_snow_gradient              = 200,         # [mm w.e. (100 m)-1]: initial SWE gradient above the snowline elevation
     initial_snow_avalanche             = TRUE,        # [TRUE/FALSE]: shall we process the map of initial snow distribution via avalanche, to unload the slopes? This is done at the end of the calculations (i.e., on the map which already includes small-scale and large-scale variability).
     initial_snow_dist_from_model       = FALSE,       # [TRUE/FALSE]: use the result from the previous year's model as starting condition for the current year? This will be respected only if the required model output is available from the previous year (i.e., sequential simulation - not respected if there are annual gaps in the measured mass balances).
@@ -305,10 +305,24 @@ func_process_run_params <- function(run_params) {
   run_params$elevation_equal_threshold   <- 1e-3 # [m]: threshold for considering two elevation values equal when we look for problematic flat patches
   run_params$avalanche_effect_threshold  <- 1e-9 # [mm w.e.]: threshold for considering nonzero avalanche effect
   
-  run_params$model_avalanche_dates       <- format(as.Date(paste0("2000/", run_params$model_avalanche_dates), format = "%Y/%m/%d"), format = "%m/%d") # Add leading zeroes to single-digit values if needed. Use 2000 as dummy year for that (but it is not recommended to set avalanches on 29 February!).
-  if (any(is.na(run_params$model_avalanche_dates))) {
+  
+  # Validate the avalanche dates and convert them to have zero-padded dates.
+  # "0/0" is a dummy default to signify no avalanches.
+  if ((any(is.na(run_params$model_avalanche_dates))) ||
+      length(run_params$model_avalanche_dates) == 0) {
     func_customlog("Invalid value(s) for parameter model_avalanche_dates in set_params.R. Please check it.", level = 2)
     func_stop()
+  }
+  if ((length(run_params$model_avalanche_dates) == 1) &&
+      run_params$model_avalanche_dates == "") {
+    run_params$model_avalanche_dates <- "0/0"
+  }
+  if (!((length(run_params$model_avalanche_dates) == 1) && (run_params$model_avalanche_dates == "0/0"))) {
+    run_params$model_avalanche_dates       <- format(as.Date(paste0("2000/", run_params$model_avalanche_dates), format = "%Y/%m/%d"), format = "%m/%d") # Add leading zeroes to single-digit values if needed. Use 2000 as dummy year for that (but it is not recommended to set avalanches on 29 February!).
+    if (any(is.na(run_params$model_avalanche_dates))) {
+      func_customlog("Invalid value(s) for parameter model_avalanche_dates in set_params.R. Please check it.", level = 2)
+      func_stop()
+    }
   }
   
   
@@ -375,7 +389,7 @@ func_process_run_params <- function(run_params) {
   if (is.na(run_params$deposition_mass_lim)) {
     run_params$deposition_mass_lim <- 2000
   }
-
+  
   
   return(run_params)
 }

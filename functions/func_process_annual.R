@@ -99,7 +99,7 @@ func_process_annual <- function(year_data,
     
     # . Check if any annual stakes were affected by avalanches ------------------------------------
     # If yes, emit a warning
-    if (all(!is.na(run_params$model_avalanche_dates))) {
+    if (run_params$model_avalanche_dates[1] != "0/0") {
       
       avalanche_r          <- setValues(data_dhms$elevation[[year_data$dhm_grid_id]],
                                         year_data$mod_output_annual_cur$avalanche_net)

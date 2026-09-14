@@ -53,8 +53,8 @@ func_plot_avalanche_net_effect <- function(year_data,
   #### TOTAL EFFECT ON GLACIER ####
   plot_df$avalanche_effect <- year_data$mod_output_annual_cur$avalanche_net
   avalanche_onglacier_lab <- sprintf(run_params$output_fmt3, mean(plot_df$avalanche_effect[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]]) * run_params$output_mult / 1000.)
-  if (length(run_params$model_avalanche_dates) == 0) {
-    label_avalanche_dates <- "No avalanches defined"
+  if (run_params$model_avalanche_dates[1] == "0/0") {
+    label_avalanche_dates <- "Avalanche dates: no avalanches defined"
   } else {
     label_avalanche_dates <- paste0("Avalanche dates: ", paste0(run_params$model_avalanche_dates, collapse = " - "))
   }
