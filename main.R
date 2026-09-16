@@ -8,7 +8,11 @@
 
 
 # If in utils folder, move one up -----------------------------------------------------------------
-if (basename(getwd()) %in% c("functions", "utils")) { setwd("..") }
+if (basename(getwd()) %in% c("functions", "utils")) setwd("..")
+
+
+# Cleanup environment from previous runs ----------------------------------------------------------
+rm(list=ls())
 
 
 # Load all the model functions --------------------------------------------------------------------
