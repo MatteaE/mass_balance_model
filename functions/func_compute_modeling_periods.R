@@ -44,7 +44,7 @@ func_compute_modeling_periods <- function(year_data, run_params, year_cur_params
   winter_start <- NA
   winter_end   <- NA
   if (year_data$process_winter) {
-    winter_start <- min(c(year_cur_params$hydro_start, year_data$massbal_winter_meas_cur$start_date))
+    winter_start <- min(c(year_cur_params$hydro_start, year_data$massbal_winter_meas_cur$start_date), na.rm = T)
     winter_end   <- max(year_data$massbal_winter_meas_cur$end_date)
   }
   
