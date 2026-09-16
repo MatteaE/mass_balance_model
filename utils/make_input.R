@@ -248,13 +248,13 @@ func_compute_day_rad <- function(dem_mat,
   
   # If no sun at all, keep Iglobal at 0.0.
   if (dayl[3] > 0) {
-    
     for (hour_cur in seq(dayl[1], dayl[2], delta_t)) {
       
       jd_cur <- JDymd(year_cur, month_cur, day_cur, hour_cur)
       sun_vec <- sunvector(jd_cur, lat, lon, 0)
       hillshade_cur <- hillshading(norm_mat, sun_vec)
-      shaded_logi   <- doshade(dem_mat, sun_vec, dem_res)
+      # shaded_logi   <- doshade(dem_mat, sun_vec, dem_res)                   # This line would use the old version (original Corripio code)
+      shaded_logi   <- doshade2(dem_mat, sun_vec, dem_res, max_threads_n = 0) # This line uses the new, fully correct version, with full multi-threading 
       
       sun_zenith <- degrees(acos(sun_vec[,3]))
       # Compute direct radiation modified by terrain + diffuse irradiation (sky view factor is ignored for diffuse irradiation)
