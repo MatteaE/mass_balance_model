@@ -12,7 +12,7 @@ if (basename(getwd()) %in% c("functions", "utils")) setwd("..")
 
 
 # Cleanup environment from previous runs ----------------------------------------------------------
-rm(list=ls())
+rm(list = ls())
 
 
 # Load all the model functions --------------------------------------------------------------------

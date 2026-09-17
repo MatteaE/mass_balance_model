@@ -58,6 +58,7 @@ func_plot_year_mb_maps <- function(year_data,
   plot_df <- plots_map_common_elements$dem_plot_df_base
   
   
+  
   #### HYDROLOGICAL YEAR ####
   mb_hydro_lab <- sprintf(run_params$output_fmt1, year_data$massbal_annual_values[["hydro.mean"]] * run_params$output_mult / 1000.)
   plot_df$massbal <- values(year_data$massbal_annual_maps$hydro, mat = F)
@@ -81,7 +82,7 @@ func_plot_year_mb_maps <- function(year_data,
   
   
   plot_pages[[length(plot_pages)+1]] <- suppressWarnings(func_make_map_page(title_cur, pl_cur, data_outlines$aspect_ratio[[year_data$outline_id]]))
-  
+
   
   
   #### MEASUREMENT PERIOD - ANNUAL ####
