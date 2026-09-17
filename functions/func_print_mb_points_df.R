@@ -28,6 +28,14 @@ func_print_mb_points_df <- function(points_df,
       field_widths <- c(field_widths, 15)
     }
     
+    # Are we printing a set which has no z_dem column yet?
+    # Then take the z field instead.
+    z_field <- "z_dem"
+    if (("z" %in% names(points_df)) &&
+        !("z_dem" %in% names(points_df))) {
+      z_field <- "z"
+    }
+    
     func_customlog(paste0(str_pad(names(points_df),
                                   field_widths, side = "left", pad = " "), collapse = " "),
                    level = 0)
@@ -44,7 +52,7 @@ func_print_mb_points_df <- function(points_df,
                     format(points_df$end_date[i], "%F"),
                     as.character(round(points_df$x[i])),
                     as.character(round(points_df$y[i])),
-                    as.character(round(points_df$z_dem[i])),
+                    as.character(round(points_df[,z_field][i])),
                     sprintf(run_params$output_fmt1, points_df$massbal[i]*run_params$output_mult/1000))
       if ("avalanche_net" %in% names(points_df)) {
         line_cur <- c(line_cur,

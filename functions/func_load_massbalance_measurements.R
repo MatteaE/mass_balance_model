@@ -253,6 +253,7 @@ func_load_massbalance_measurements <- function(run_params,
   }
   
   
+  
   # Cluster measurements according to a user-defined distance -------------------------------------
   # This to improve the spatial distribution / representativity.
   # We skip this step in case we have only one measurement

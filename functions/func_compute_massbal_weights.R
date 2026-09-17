@@ -22,7 +22,6 @@ func_compute_massbal_weights <- function(run_params,
                                          data_outlines,
                                          compute_loo) {
   
-  
   cat("Computing weights of the", massbal_type, "mass balance points...\n")
   
   # Select winter vs annual mass balance measurements.

@@ -73,6 +73,23 @@ func_select_year_mb_measurements <- function(data_massbal,
   
   ids_year <- which(data_massbal$end_date %in% end_dates_allowed)
   
+  
+  
+  # Verify that there are no duplicated coordinate sets -------------------------------------------
+  massbal_sel <- data_massbal[ids_year,]
+  crds_char   <- paste0(sprintf("%.3f", massbal_sel$x), "_", sprintf("%.3f", massbal_sel$y))
+  ids_dup     <- which(duplicated(crds_char))
+  if (length(ids_dup) > 0) {
+    dup1 <- which(crds_char == crds_char[ids_dup[1]])
+    func_customlog("Year ", year, ": found ", length(ids_dup), " mass balance entries which have duplicated coordinates.", level = 2)
+    func_customlog("        This is not supported, please fix them manually. The first problematic group is:\n", level = 0)
+    
+    func_print_mb_points_df(massbal_sel[dup1,],
+                            run_params)
+    
+    func_stop()
+  }
+  
   return(ids_year)
   
 }
