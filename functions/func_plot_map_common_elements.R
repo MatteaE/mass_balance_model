@@ -81,7 +81,6 @@ func_plot_map_common_elements <- function(year_data,
               dhm_ele_text_contours      = dhm_ele_text_contours,
               dhm_extent_size_multiplier = dhm_extent_size_multiplier,
               dhm_grid_aspect_ratio      = dhm_grid_aspect_ratio,
-              base_size                  = base_size
-              ))
+              base_size                  = base_size))
   
 }

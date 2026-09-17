@@ -1191,20 +1191,71 @@ ui <- fluidPage(useShinyjs(),
 # Define server logic to read selected file ----
 server <- function(input, output, session) {
   
-  volumes <- c(func_getvolumes(), setNames(dirname(getwd()), basename(dirname(getwd()))), setNames(dirname(dirname(getwd())), basename(dirname(dirname(getwd())))))
-  shinyFileChoose(input, "choose_dem_file", roots=volumes, session=session)
-  shinyFileChoose(input, "choose_shp_file", roots=volumes, session=session)
-  shinyFileChoose(input, "choose_firn_file", roots=volumes, session=session)
-  shinyFileChoose(input, "choose_debris_file", roots=volumes, session=session)
-  shinyFileChoose(input, "choose_reference_file", roots=volumes, session=session)
+  volumes_static <- c(func_getvolumes(), setNames(dirname(getwd()), basename(dirname(getwd()))), setNames(dirname(dirname(getwd())), basename(dirname(dirname(getwd())))))
+  
+  # Reactive value holding the directory of the most recently selected input file
+  # (across any of the 5 file choosers), or NULL if none has been selected yet.
+  last_input_dir <- reactiveVal(NULL)
+  
+  # roots_dynamic() is passed as `roots` to every shinyFileChoose() call below.
+  # shinyFiles evaluates `roots` as a function at the moment the chooser dialog
+  # is opened, so this lets every button offer the static volumes plus
+  # (if available) the folder of the last-selected input, without needing to
+  # re-register the file choosers.
+  roots_dynamic <- function() {
+    if (is.null(last_input_dir())) {
+      return(volumes_static)
+    }
+    extra_name <- paste0(basename(last_input_dir()), " (last used)")
+    extra <- setNames(last_input_dir(), extra_name)
+    c(volumes_static, extra[!(extra %in% volumes_static)])
+  }
+  
+  shinyFileChoose(input, "choose_dem_file", roots=roots_dynamic, session=session)
+  shinyFileChoose(input, "choose_shp_file", roots=roots_dynamic, session=session)
+  shinyFileChoose(input, "choose_firn_file", roots=roots_dynamic, session=session)
+  shinyFileChoose(input, "choose_debris_file", roots=roots_dynamic, session=session)
+  shinyFileChoose(input, "choose_reference_file", roots=roots_dynamic, session=session)
   
   glaciername       <- reactive(input$choose_glacier_name)
   modelyear         <- reactive(input$choose_model_year)
-  demfilepath       <- reactive(as.character(parseFilePaths(volumes, input$choose_dem_file)$datapath))
-  shpfilepath       <- reactive(as.character(parseFilePaths(volumes, input$choose_shp_file)$datapath))
-  firnfilepath      <- reactive(as.character(parseFilePaths(volumes, input$choose_firn_file)$datapath))
-  debrisfilepath    <- reactive(as.character(parseFilePaths(volumes, input$choose_debris_file)$datapath))
-  referencefilepath <- reactive(as.character(parseFilePaths(volumes, input$choose_reference_file)$datapath))
+  demfilepath       <- reactive(as.character(parseFilePaths(roots_dynamic(), input$choose_dem_file)$datapath))
+  shpfilepath       <- reactive(as.character(parseFilePaths(roots_dynamic(), input$choose_shp_file)$datapath))
+  firnfilepath      <- reactive(as.character(parseFilePaths(roots_dynamic(), input$choose_firn_file)$datapath))
+  debrisfilepath    <- reactive(as.character(parseFilePaths(roots_dynamic(), input$choose_debris_file)$datapath))
+  referencefilepath <- reactive(as.character(parseFilePaths(roots_dynamic(), input$choose_reference_file)$datapath))
+  
+  
+  # Whenever any file chooser yields a real path (i.e., the user actually
+  # picked a file rather than cancelling/de-selecting), remember its folder
+  # so that subsequent choosers can offer it as an extra root.
+  # We use the raw `input$choose_*_file` triggers (not the derived filepath()
+  # reactives) so that this fires exactly once per shinyFiles selection event,
+  # each guarded by isTruthy() to skip the initial NULL / a cancel.
+  observeEvent(input$choose_dem_file, {
+    fp <- demfilepath()
+    if (isTruthy(fp) && length(fp) > 0 && nzchar(fp[1])) last_input_dir(dirname(fp[1]))
+  }, ignoreInit = TRUE)
+  
+  observeEvent(input$choose_shp_file, {
+    fp <- shpfilepath()
+    if (isTruthy(fp) && length(fp) > 0 && nzchar(fp[1])) last_input_dir(dirname(fp[1]))
+  }, ignoreInit = TRUE)
+  
+  observeEvent(input$choose_firn_file, {
+    fp <- firnfilepath()
+    if (isTruthy(fp) && length(fp) > 0 && nzchar(fp[1])) last_input_dir(dirname(fp[1]))
+  }, ignoreInit = TRUE)
+  
+  observeEvent(input$choose_debris_file, {
+    fp <- debrisfilepath()
+    if (isTruthy(fp) && length(fp) > 0 && nzchar(fp[1])) last_input_dir(dirname(fp[1]))
+  }, ignoreInit = TRUE)
+  
+  observeEvent(input$choose_reference_file, {
+    fp <- referencefilepath()
+    if (isTruthy(fp) && length(fp) > 0 && nzchar(fp[1])) last_input_dir(dirname(fp[1]))
+  }, ignoreInit = TRUE)
   
   # Disable "RUN!" button if the required input is missing.
   observe({
