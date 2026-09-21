@@ -329,11 +329,11 @@ For more advanced usage, check out [Tutorial 1](/doc/tutorial1_singleyear/DMBSim
 
 * Measured points are considered spatially fixed during their observation period - intra-annual displacement due to ice flow is ignored
 
-* The melt model is a simple Enhanced Temperature Index formula based on daily mean air temperature - potentially unsuitable at very high altitude sites with a radiation-dominated melting regime
+* The melt model is a simple Enhanced Temperature Index formula based on daily mean air temperature - potentially unsuitable at very high altitude sites with a radiation/sublimation-dominated melting regime
 
 * Melt of a debris-covered ice surface is rather simplified, with a uniform reduction factor
 
-* The workflow is organized around annual mass balance - calculations may fail for glaciers with no well-defined accumulation and ablation seasons (e.g., close to the Equator)
+* The workflow is organized around annual mass balance - calculations may fail for glaciers with no well-defined accumulation and ablation seasons (for example, close to the Equator)
 
 
 
