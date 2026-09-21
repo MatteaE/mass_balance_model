@@ -159,11 +159,22 @@ func_setup_winter_probes_dist <- function(year_data,
   } # End apply smooth mask to snow distribution outside glacier.
   
   
-  
   # Normalize again to arithmetic average = 1 on glacier.
   dist_probes_norm_red_r <- dist_probes_red_r / mean(dist_probes_red_r[data_dems$glacier_cell_ids[[year_data$dem_grid_id]]][,1])
   
   year_data$dist_probes_norm_values_red <- values(dist_probes_norm_red_r, mat = FALSE)
+  
+  val_min <- min(year_data$dist_probes_norm_values_red)
+  
+  if (val_min < 1e-5) {
+    if (val_min < 0) {
+      func_customlog("Year ", year_data$year_cur, ": values < 0 found in the snow distribution multiplier from winter probes.", level = 2)
+      func_customlog("        Is the value of probes_snowdist_fact between 0 and 1?", level = 0)
+      func_stop()
+    }
+    func_customlog("Year ", year_data$year_cur, ": the snow distribution multiplier from winter probes reaches 0.0. Some cells may never see any snow.", level = 1)
+    func_customlog("          Please make sure that this is intended.", level = 0)
+  }
   
   cat("Snow distribution map is ready.\n")
   

@@ -26,7 +26,7 @@ func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) 
     
     cat("  Grid number", paste0(dem_grid_id, "...\n"))
     
-
+    
     #### Curvature factor (lower accumulation on convex surfaces, higher on concave) ####
     # In the original IDL implementation, the curvature multiplication factor
     # is (1 - x), with x linearly dependent on the terrain curvature up to a cutoff:
@@ -34,17 +34,17 @@ func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) 
     # threshold is currently the smaller of the two curvature extremes (abs(max) and abs(min))
     # reduced by a tunable factor (default 1.2), so that both 1.5 and 0.5 are reached (even with some margin!)
     # in the curvature multiplication factor (arbitrary!).
-    # IMPORTANT: terrain curvature in IDL is computed manually by taking cells at distance 3, 5 and 6
+    # Note: terrain curvature in IDL is computed manually by taking cells at distance 3, 5 and 6
     # from the focal cell. This is a bit arbitrary (taken from some old ArcGIS documentation)
     # and produces a smoothed-out curvature.
     
     # We use a smoothed DHM to compute curvature because it is very sensitive to DHM noise.
     # The window size used for the smoothing is automatically computed from the smoothing amount.
     # We have to use data_dems$dhm_id[dem_grid_id] to select the DHM (see func_dhm_to_dem.R).
-    dhm_smooth <- raster.gaussian.smooth(data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]],
-                                         run_params$curvature_dhm_smooth,
-                                         run_params$dhm_smooth_windowsize,
-                                         type = "mean")
+    dhm_smooth <- suppressMessages(raster.gaussian.smooth(data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]],
+                                                          run_params$curvature_dhm_smooth,
+                                                          run_params$dhm_smooth_windowsize,
+                                                          type = "mean"))
     dhm_na_border <- which(is.na(values(dhm_smooth)))
     dhm_valid     <- setdiff(1:run_params$grid_ncells, dhm_na_border)
     dhm_smooth    <- cover(dhm_smooth, data_dhms$elevation[[data_dems$dhm_id[dem_grid_id]]], values = NA) # Fill NA edges of smoothed raster with original values.
@@ -60,8 +60,7 @@ func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) 
     dhm_curvature_bound <- min(abs(max(values(dhm_curvature), na.rm=T)), abs(min(values(dhm_curvature), na.rm=T))) / run_params$curvature_cutoff_fact
     
     # Apply corrected cutoff to curvature.
-    dhm_curvature_cut <- setValues(dhm_curvature,
-                                   pmin(dhm_curvature_bound, pmax(-dhm_curvature_bound, values(dhm_curvature))))
+    dhm_curvature_cut <- terra::clamp(dhm_curvature, lower = -dhm_curvature_bound, upper = dhm_curvature_bound, values = TRUE)
     
     # Compute final curvature factor for snow distribution.
     snowdist_curv_mult <- 1 - (dhm_curvature_cut * run_params$curvature_effect_limit / dhm_curvature_bound)
@@ -105,7 +104,13 @@ func_compute_snowdist_topographic <- function(run_params, data_dhms, data_dems) 
     # have no net effect on the total snow amount
     # over the glacier.
     snowdist_topographic[[dem_grid_id]] <- snowdist_topographic_cur_raw / mean(snowdist_topographic_cur_raw[data_dems$glacier_cell_ids[[dem_grid_id]]][,1])
-  
+    
+    val_min <- terra::global(snowdist_topographic[[dem_grid_id]], "min")[,1]
+    if (val_min < 0) {
+      func_customlog("Unexpected value < 0 encountered in the topographic snow distribution, please check manually.", level = 2)
+      func_stop()
+    }
+    
   }
   
   cat("  Finished computation of topographic snow distribution.\n")

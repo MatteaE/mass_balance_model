@@ -11,7 +11,8 @@ innovations
 zNOTE*
 
 # Input files for other glaciers #
-input/
+input/*
+!input/example_minimal
         
 # Output files #
 output/
