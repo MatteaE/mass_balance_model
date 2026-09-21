@@ -170,8 +170,8 @@ func_plot_year <- function(year_data,
   # This data frame is used later to save some overview values.
   ele_bands_plot_df <- mb_vs_ele_list[["ele_bands_plot_df"]]
   
-  
-  
+
+    
   # Plot modeled series of each stake -------------------------------------------------------------
   # time_v[13] <- Sys.time()
   if (year_data$nstakes_annual > 0) {

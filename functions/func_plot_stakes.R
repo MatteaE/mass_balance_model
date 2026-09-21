@@ -96,7 +96,8 @@ func_plot_stakes <- function(year_data,
                                           mb = year_data$mod_output_annual_cur$stakes_mb_meas[annual_stake_id] * run_params$output_mult/1e3)
     
     stake_aval_txt          <- "" # Empty annotation in case avalanche effect is zero.
-    if (abs(year_data$mod_output_annual_cur$avalanche_stakes_net[annual_stake_id]) >= run_params$avalanche_effect_threshold) {
+    if ((run_params$model_avalanche_dates[1] != "0/0") &&
+        (abs(year_data$mod_output_annual_cur$avalanche_stakes_net[annual_stake_id]) >= run_params$avalanche_effect_threshold)) {
       stake_aval_txt        <- paste0("With ",
                                       sprintf(run_params$output_fmt3, year_data$mod_output_annual_cur$avalanche_stakes_net[annual_stake_id] * run_params$output_mult/1e3),
                                       " ", run_params$output_unit, " w.e. from avalanches")
