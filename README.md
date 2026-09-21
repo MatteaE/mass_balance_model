@@ -1,4 +1,4 @@
-<img src="icons/icon128.png" width="128">
+<img src="icons/logo512.png" width="256">
 
 
 # Contents
