@@ -1,5 +1,5 @@
 ###################################################################################################
-# This tools prepares topographic data for input in the glacier mass balance model DMBSim.        #
+# This tool prepares topographic data for input in the glacier mass balance model DMBSim.         #
 # Required input: a DEM with no gaps over the area of interest, and a vector outline of the       #
 # glacier. Also glacier name and reference year (used only for file names).                       #
 # Optional input: additional vector files with firn and debris (surface type), and a reference    #
