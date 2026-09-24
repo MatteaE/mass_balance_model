@@ -163,18 +163,18 @@ func_massbal_postprocess <- function(year_data,
   
   #### (8) Calculate vertical ablation gradients ####
   # Conditions to do this:
-  # - there are at least 2 annual stakes which have negative measured-period mass balance in both measurements (standardized) and model
+  # - there are at least 2 annual stakes which have negative measured-period mass balance in the measurements
   # - those stakes have at least 20 m vertical elevation span (z_dem)
   # Units are m w.e. / m asl
-  year_data$abl_grad_meas <- NA_real_
-  year_data$abl_grad_mod  <- NA_real_
+  year_data$abl_grad_meas  <- NA_real_
+  year_data$abl_grad_mod   <- NA_real_
+  year_data$abl_stakes_ids <- integer(0) # These are the indices of the ablation stakes used in the calculation of ablation-area gradients.
   if (year_data$nstakes_annual > 1) {
     
-    stakes_cand_ids <- which((year_data$massbal_annual_meas_cur$massbal_meas_standardized <= 0) &
-                               year_data$massbal_annual_meas_cur$massbal_mod_standardized <= 0)
+    stakes_cand_ids <- which(year_data$massbal_annual_meas_cur$massbal_meas_standardized <= 0)
     if (length(stakes_cand_ids) > 1) {
       
-      # Require at least 1 m vertical coverage of stakes to compute gradients.
+      # Require at least 20 m vertical coverage of stakes to compute gradients.
       if (diff(range(year_data$massbal_annual_meas_cur$z_dem[stakes_cand_ids])) > 20) {
         
         meas_lm <- lm(formula = massbal_meas_standardized~z_dem,
@@ -183,9 +183,10 @@ func_massbal_postprocess <- function(year_data,
                       data = year_data$massbal_annual_meas_cur)
         
         year_data$abl_grad_meas   <- meas_lm$coefficients["z_dem"]/1e3       # Gradient in m w.e. / m asl
-        year_data$abl_grad_meas_i <- meas_lm$coefficients["(Intercept)"]/1e3 # Mass balance at 0 m asl, in m w.e.
+        year_data$abl_grad_meas_i <- meas_lm$coefficients["(Intercept)"]     # Mass balance at 0 m asl, in mm w.e.
         year_data$abl_grad_mod    <- mod_lm$coefficients["z_dem"]/1e3        # Gradient in m w.e. / m asl
-        year_data$abl_grad_mod_i  <- mod_lm$coefficients["(Intercept)"]/1e3  # Mass balance at 0 m asl, in m w.e.
+        year_data$abl_grad_mod_i  <- mod_lm$coefficients["(Intercept)"]      # Mass balance at 0 m asl, in mm w.e.
+        year_data$abl_stakes_ids  <- stakes_cand_ids
         
         year_data$abl_grad_diff_rel <- abs((year_data$abl_grad_mod - year_data$abl_grad_meas) / year_data$abl_grad_meas)
         if (!is.na(year_data$abl_grad_diff_rel) && (year_data$abl_grad_diff_rel > 0.25)) {

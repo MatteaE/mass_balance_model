@@ -144,22 +144,81 @@ func_plot_massbal_vs_elevation <- function(year_data,
             legend.box.background = element_blank())
     
     
-    # If we have ablation gradients, annotate them and draw them as segments.
+    # . If we have ablation gradients, annotate them and draw them as segments --------------------
+    # A segment is drawn on the plot for the measured and for the modeled gradient.
+    # It goes from (x1,y1) to (x2,y2) (remember this plot has coord_flip()).
+    # For the gradient computed from measured values:
+    
+    # If the gradient is positive (common case),
+    # x1 = min(glacier elevation)
+    # y1 = y(x1), along the linear fit for the respective (measured or modeled) gradient
+    # y2 = 0
+    # x2 = x(y2), along the linear fit: ele = (mb - intercept) / gradient
+    
+    # If the gradient is zero or negative (inverted) (both very rare), then:
+    # x1 = altitude of the lowest ablation stake
+    # x2 = altitude of the highest ablation stake
+    # y1 = y(x1), along the linear fit
+    # y2 = y(x2), along the linear fit
+    # If the gradient is zero then this reduces to the computed intercept, in mm w.e. (converted when put in the df).
     abl_grad_meas_txt <- ""
     if (!is.na(year_data$abl_grad_meas)) {
-      abl_grad_meas_txt <- paste0("Measured ablation gradient: ", sprintf("%.4f", year_data$abl_grad_meas))
-      abl_grad_meas_df <- data.frame(x1 = min(df_scatterplot$ele),
-                                     y1 = (year_data$abl_grad_meas_i + min(df_scatterplot$ele) * year_data$abl_grad_meas)*run_params$output_mult,
-                                     x2 = -year_data$abl_grad_meas_i / year_data$abl_grad_meas,
-                                     y2 = 0)
+      abl_grad_meas_txt <- paste0("Measured gradient (ablation stakes): ", sprintf("%.4f", year_data$abl_grad_meas))
+      
+      # Compute segment for plotting measured mass balance gradient in the ablation area:
+      # Case 1 (standard) - positive gradient of measured mass balance with altitude in the ablation area.
+      if (year_data$abl_grad_meas > 0) {
+        
+        x1 <- min(df_scatterplot$ele)
+        y1 <- x1*year_data$abl_grad_meas*1e3 + year_data$abl_grad_meas_i
+        y2 <- 0.0
+        x2 <- ((y2 - year_data$abl_grad_meas_i)/1e3) / year_data$abl_grad_meas
+        
+        
+        # Case 2 (very rare) - zero or negative (inverted) gradient of measured mass balance with altitude in the ablation area.
+      } else {
+        
+        x1 <- min(df_stakes$z[year_data$abl_stakes_ids])
+        x2 <- max(df_stakes$z[year_data$abl_stakes_ids])
+        y1 <- x1*year_data$abl_grad_meas*1e3 + year_data$abl_grad_meas_i
+        y2 <- x2*year_data$abl_grad_meas*1e3 + year_data$abl_grad_meas_i
+        
+      }
+      abl_grad_meas_df <- data.frame(x1 = x1, y1 = y1*run_params$output_mult/1e3, x2 = x2, y2 = y2*run_params$output_mult/1e3)
+      
     }
+    
+    
+    
+    # Now do the same for the modeled gradient.
+    # The x1/x2/y1/y2 are picked in the same way (but on the modeled values
+    # of mass balance at the stakes rather than the measured ones).
     abl_grad_mod_txt <- ""
     if (!is.na(year_data$abl_grad_mod)) {
-      abl_grad_mod_txt <- paste0("Modeled ablation gradient: ", sprintf("%.4f", year_data$abl_grad_mod))
-      abl_grad_mod_df <- data.frame(x1 = min(df_scatterplot$ele),
-                                    y1 = (year_data$abl_grad_mod_i + min(df_scatterplot$ele) * year_data$abl_grad_mod)*run_params$output_mult,
-                                    x2 = -year_data$abl_grad_mod_i / year_data$abl_grad_mod,
-                                    y2 = 0)
+      abl_grad_mod_txt <- paste0("Modeled gradient (ablation stakes): ", sprintf("%.4f", year_data$abl_grad_mod))
+      
+      
+      # Compute segment for plotting modeled mass balance gradient in the ablation area:
+      # Case 1 (standard) - positive gradient of modeled mass balance with altitude in the ablation area.
+      if (year_data$abl_grad_mod > 0) {
+        
+        x1 <- min(df_scatterplot$ele)
+        y1 <- x1*year_data$abl_grad_mod*1e3 + year_data$abl_grad_mod_i
+        y2 <- 0.0
+        x2 <- ((y2 - year_data$abl_grad_mod_i)/1e3) / year_data$abl_grad_mod
+        
+        
+        # Case 2 (very rare) - zero or negative (inverted) gradient of modeled mass balance with altitude in the ablation area.
+      } else {
+        
+        x1 <- min(df_stakes$z[year_data$abl_stakes_ids])
+        x2 <- max(df_stakes$z[year_data$abl_stakes_ids])
+        y1 <- x1*year_data$abl_grad_mod*1e3 + year_data$abl_grad_mod_i
+        y2 <- x2*year_data$abl_grad_mod*1e3 + year_data$abl_grad_mod_i
+        
+      }
+      abl_grad_mod_df <- data.frame(x1 = x1, y1 = y1*run_params$output_mult/1e3, x2 = x2, y2 = y2*run_params$output_mult/1e3)
+      
     }
     
     # RMS label (main RMS, either weighted or unweighted, and LOO if available).
@@ -182,14 +241,14 @@ func_plot_massbal_vs_elevation <- function(year_data,
                                           x=0.02, y = 0.93, hjust = 0, vjust = 0, gp=gpar(fontsize = base_size, fontface="bold")))) +
       annotation_custom(grobTree(textGrob(rms_txt, x=0.02, y = 0.85, hjust = 0, vjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
+      {if (!is.na(year_data$abl_grad_meas)) annotation_custom(grobTree(linesGrob(x=c(0.02,0.546), y = 0.761,
+                                                                                 gp=gpar(col = "#ff0000", lty = "solid", lwd=2.0))))} +
       annotation_custom(grobTree(textGrob(abl_grad_meas_txt, x=0.02, y = 0.77, hjust = 0, vjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
-      {if (!is.na(year_data$abl_grad_meas)) annotation_custom(grobTree(linesGrob(x=c(0.02,0.424), y = 0.761,
-                                                                                 gp=gpar(col = "#ff0000", lty = "solid", lwd=2.0))))} +
+      {if (!is.na(year_data$abl_grad_mod)) annotation_custom(grobTree(linesGrob(x=c(0.02,0.535), y = 0.681,
+                                                                                gp=gpar(col = "#ff0000", lty = "longdash", lwd=2.0))))} +
       annotation_custom(grobTree(textGrob(abl_grad_mod_txt, x=0.02, y = 0.69, hjust = 0, vjust = 0,
                                           gp=gpar(fontsize = base_size, fontface="bold")))) +
-      {if (!is.na(year_data$abl_grad_mod)) annotation_custom(grobTree(linesGrob(x=c(0.02,0.4055), y = 0.681,
-                                                                                gp=gpar(col = "#ff0000", lty = "longdash", lwd=2.0))))} +
       coord_flip() +
       scale_x_continuous(limits = range(df_scatterplot$ele),
                          oob = scales::oob_keep,

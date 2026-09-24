@@ -5,7 +5,7 @@
    height="1132"
    version="1.1"
    id="svg13"
-   sodipodi:docname="icon.svg"
+   sodipodi:docname="snowflake_icon.svg"
    inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
    inkscape:export-filename="snowflake_icon.png"
    inkscape:export-xdpi="96"
@@ -27,10 +27,10 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="0.54157383"
-     inkscape:cx="376.67994"
-     inkscape:cy="564.09668"
+     inkscape:cx="281.58672"
+     inkscape:cy="601.02608"
      inkscape:window-width="1920"
-     inkscape:window-height="998"
+     inkscape:window-height="1118"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
@@ -47,16 +47,90 @@
      id="rect1"
      style="fill:#214478" />
   <!-- Snowflake -->
+  <rect
+     x="541"
+     y="133.66783"
+     width="50"
+     height="862"
+     rx="25"
+     id="rect2"
+     style="fill:#f3f8fd" />
+  <g
+     id="g15"
+     transform="translate(1.25)">
+    <polygon
+       points="275,416 553,587 579,545 301,374 "
+       id="polygon2"
+       style="fill:#f3f8fd"
+       transform="translate(-1.5)" />
+    <polygon
+       points="829,374 553,545 579,587 855,416 "
+       id="polygon3"
+       style="fill:#f3f8fd"
+       transform="translate(1)" />
+  </g>
+  <g
+     id="g16"
+     transform="translate(1.25)">
+    <polygon
+       points="296,750 578,588 554,544 272,706 "
+       id="polygon4"
+       style="fill:#f3f8fd"
+       transform="translate(0.5)" />
+    <polygon
+       points="831,750 857,706 579,544 553,588 "
+       id="polygon5"
+       style="fill:#f3f8fd" />
+  </g>
+  <polygon
+     points="630,602 566,640 502,602 502,530 566,492 630,530 "
+     id="polygon6"
+     style="fill:#f3f8fd" />
   <!-- Rounded branch tips -->
+  <g
+     stroke="#f3f8fd"
+     stroke-width="52"
+     stroke-linecap="round"
+     fill="none"
+     id="g9"
+     transform="translate(-1,18.66782)">
+    <line
+       x1="566"
+       y1="252"
+       x2="466"
+       y2="192"
+       id="line6" />
+    <line
+       x1="566"
+       y1="252"
+       x2="668"
+       y2="192"
+       id="line7" />
+    <line
+       x1="566"
+       y1="850"
+       x2="466"
+       y2="900"
+       id="line8" />
+    <line
+       x1="566"
+       y1="850"
+       x2="668"
+       y2="900"
+       id="line9" />
+  </g>
   <!-- Center hole -->
+  <circle
+     cx="566"
+     cy="566"
+     r="36"
+     fill="#1966B0"
+     id="circle9"
+     style="fill:#214478" />
   <!-- Thermometer -->
-  <!-- Water drop -->
-  <!-- Plus sign -->
-  <!-- Minus sign -->
   <g
      id="g13"
-     style="fill:#f3f8fd;fill-opacity:1"
-     transform="matrix(1.2155062,0,0,1.2155062,-124.77812,-120.35728)">
+     style="fill:#82e4fb;fill-opacity:1">
     <rect
        x="173"
        y="230"
@@ -65,19 +139,18 @@
        rx="32"
        fill="#ffffff"
        id="rect9"
-       style="fill:#f3f8fd;fill-opacity:1" />
+       style="fill:#82e4fb;fill-opacity:1" />
     <circle
        cx="206"
        cy="379"
        r="57"
        fill="#ffffff"
        id="circle10"
-       style="fill:#f3f8fd;fill-opacity:1" />
+       style="fill:#82e4fb;fill-opacity:1" />
   </g>
   <g
      id="g14"
-     style="fill:#214478;fill-opacity:1"
-     transform="matrix(1.2155062,0,0,1.2155062,-124.77812,-120.35728)">
+     style="fill:#006680;fill-opacity:1">
     <rect
        x="194"
        y="256"
@@ -86,147 +159,47 @@
        rx="11"
        fill="#82e4fb"
        id="rect10"
-       style="fill:#214478;fill-opacity:1" />
+       style="fill:#006680;fill-opacity:1" />
     <circle
        cx="206"
        cy="379"
        r="33"
        fill="#82e4fb"
        id="circle11"
-       style="fill:#214478;fill-opacity:1" />
+       style="fill:#006680;fill-opacity:1" />
   </g>
+  <!-- Water drop -->
   <path
-     d="m 128.04717,694.03187 c 26.74114,43.75823 65.63733,100.23136 65.63733,139.12756 0,30.38766 -26.74113,60.21546 -65.63733,60.21546 -38.896199,0 -65.637335,-29.8278 -65.637335,-60.21546 0,-38.8962 38.896195,-95.36933 65.637335,-139.12756 z"
+     d="m 208,670 c 22,36 54,82.46059 54,114.46059 0,25 -22,49.53941 -54,49.53941 -32,0 -54,-24.53941 -54,-49.53941 C 154,752.46059 186,706 208,670 Z"
      fill="#82e4fb"
      id="path11"
-     sodipodi:nodetypes="csssc"
-     style="fill:#f3f8fd;fill-opacity:1;stroke-width:1.21551" />
+     sodipodi:nodetypes="csssc" />
+  <!-- Plus sign -->
   <g
      fill="#82E4FB"
-     id="g12"
-     style="fill:#f3f8fd;fill-opacity:1"
-     transform="matrix(1.2155062,0,0,1.2155062,-124.77812,-120.35728)">
+     id="g12">
     <rect
        x="902"
        y="260"
        width="47"
        height="160"
        rx="16"
-       id="rect11"
-       style="fill:#f3f8fd;fill-opacity:1" />
+       id="rect11" />
     <rect
        x="846"
        y="316"
        width="160"
        height="47"
        rx="16"
-       id="rect12"
-       style="fill:#f3f8fd;fill-opacity:1" />
+       id="rect12" />
   </g>
+  <!-- Minus sign -->
   <rect
-     x="931.49677"
-     y="754.80719"
-     width="170.17087"
-     height="58.344299"
-     rx="19.448099"
+     x="869"
+     y="720"
+     width="140"
+     height="48"
+     rx="16"
      fill="#82E4FB"
-     id="rect13"
-     style="fill:#f3f8fd;fill-opacity:1;stroke-width:1.21551" />
-  <rect
-     x="523.69446"
-     y="42.116798"
-     width="79.007904"
-     height="1047.7664"
-     rx="39.503952"
-     id="rect2"
-     style="fill:#f3f8fd;stroke-width:1.3859" />
-  <g
-     id="g3"
-     transform="matrix(1.2155062,0,0,1.2155062,-124.77812,-117.11452)">
-    <polygon
-       points="553,587 579,545 301,374 275,416 "
-       id="polygon2"
-       style="fill:#f3f8fd"
-       transform="matrix(1.2995698,0,0,1.2995698,-82.631682,-112.03909)" />
-    <polygon
-       points="553,545 579,587 855,416 829,374 "
-       id="polygon3"
-       style="fill:#f3f8fd"
-       transform="matrix(1.3001598,0,0,1.3001598,-254.38662,-112.25976)" />
-    <polygon
-       points="578,588 554,544 272,706 296,750 "
-       id="polygon4"
-       style="fill:#f3f8fd;stroke-width:4.6;stroke-dasharray:none"
-       transform="matrix(1.3002682,0,0,1.3002682,-79.922949,-225.20115)" />
-    <polygon
-       points="857,706 579,544 553,588 831,750 "
-       id="polygon5"
-       style="fill:#f3f8fd;stroke-width:4.6;stroke-dasharray:none"
-       transform="matrix(1.2997153,0,0,1.2997153,-255.60601,-224.78647)" />
-  </g>
-  <path
-     sodipodi:type="star"
-     style="fill:#f3f8fd;fill-opacity:1;stroke:#000000;stroke-width:1;stroke-dasharray:0, 11;stroke-dashoffset:0"
-     id="path7"
-     inkscape:flatsided="true"
-     sodipodi:sides="6"
-     sodipodi:cx="487.00809"
-     sodipodi:cy="359.0542"
-     sodipodi:r1="376.03674"
-     sodipodi:r2="188.01839"
-     sodipodi:arg1="0.52359878"
-     sodipodi:arg2="1.0471976"
-     inkscape:rounded="0"
-     inkscape:randomized="0"
-     d="M 812.66546,547.07257 487.00809,735.09094 161.35071,547.07257 l 1e-5,-376.03674 325.65737,-188.018374 325.65737,188.018374 z"
-     inkscape:transform-center-y="-49.81771"
-     transform="matrix(0.5299238,0,0,0.5299238,305.12119,375.72863)"
-     inkscape:transform-center-x="2.8916013e-06" />
-  <circle
-     cx="563.19836"
-     cy="566"
-     r="97.717171"
-     fill="#1966B0"
-     id="circle9"
-     style="fill:#214478;stroke-width:2.71437" />
-  <g
-     id="g4"
-     transform="matrix(1.2155062,0,0,1.2155062,-124.77812,-120.33621)">
-    <g
-       id="g1"
-       transform="translate(0.51991828)">
-      <line
-         x1="558.79913"
-         y1="265.87231"
-         x2="471.2009"
-         y2="215.46332"
-         id="line6"
-         style="fill:none;stroke:#f3f8fd;stroke-width:67.5523;stroke-linecap:round" />
-      <line
-         x1="571.90393"
-         y1="266.04767"
-         x2="660.09607"
-         y2="215.28796"
-         id="line7"
-         style="fill:none;stroke:#f3f8fd;stroke-width:66.8787;stroke-linecap:round" />
-    </g>
-    <g
-       id="g2"
-       transform="matrix(1,0,0,-1,0.51991828,1129.301)">
-      <line
-         x1="558.79913"
-         y1="265.87231"
-         x2="471.2009"
-         y2="215.46332"
-         id="line1"
-         style="fill:none;stroke:#f3f8fd;stroke-width:67.5523;stroke-linecap:round" />
-      <line
-         x1="571.90393"
-         y1="266.04767"
-         x2="660.09607"
-         y2="215.28796"
-         id="line2"
-         style="fill:none;stroke:#f3f8fd;stroke-width:66.8787;stroke-linecap:round" />
-    </g>
-  </g>
+     id="rect13" />
 </svg>
