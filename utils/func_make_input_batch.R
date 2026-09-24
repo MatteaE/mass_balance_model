@@ -258,11 +258,11 @@ func_compute_all_daily_pisr <- function(dem,
   ele_ref <- as.numeric(global(dem, mean))
   
   # Irradiance model constants.
-  visibility <- 50   # [km]
-  rh         <- 60    # [%]
-  tempK      <- 280   # [K]
-  O3         <- 0.002 # [cm]
-  alphag     <- 0.5   # [-]
+  visibility <<- 50   # [km]
+  rh         <<- 60    # [%]
+  tempK      <<- 280   # [K]
+  O3         <<- 0.002 # [cm]
+  alphag     <<- 0.5   # [-]
   
   for (doy_cur in 1:365) {
     

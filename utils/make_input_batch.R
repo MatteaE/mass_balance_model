@@ -45,6 +45,7 @@ rawdir_outl_fp     <- file.path(name_glacier, rawdir_fn, rawdir_outl_fn)
 outdir_outl_fp     <- file.path(name_glacier, "outline")
 raw_firn_fp        <- file.path(name_glacier, rawdir_surftype_fn, "firn.shp")
 raw_debris_fp      <- file.path(name_glacier, rawdir_surftype_fn, "debris.shp")
+outdir_surftype_fp <- file.path(name_glacier, "surftype")
 
 
 
@@ -158,6 +159,9 @@ if (file.exists(raw_firn_fp)) {
 if (file.exists(raw_debris_fp)) {
   surftype_r <- terra::mask(surftype_r, terra::intersect(project(vect(raw_debris_fp), crs(ref_grid_r)), outl_all_v), inverse = TRUE, updatevalue = 5)
 }
+
+dir.create(outdir_surftype_fp, recursive = TRUE)
+writeRaster(surftype_r, file.path(outdir_surftype_fp, paste0("surface_type_", name_glacier, "_", dem_years_str[i], ".tif")))
 
 
 
