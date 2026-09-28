@@ -31,6 +31,13 @@ func_compute_blueprint_grid <- function(run_params,
   ymin_all   <- max(c(sapply(data_surftype$grids, "ymin"), sapply(data_dhms$elevation, "ymin")))
   ymax_all   <- min(c(sapply(data_surftype$grids, "ymax"), sapply(data_dhms$elevation, "ymax")))
   
+  
+  # Guard against degenerate extent.
+  if ((xmin_all >= xmax_all) || (ymin_all >= ymax_all)) {
+    func_customlog("Intersection of all provided grids is empty. Please check DEMs and surface types.", level = 2)
+    func_stop()
+  }
+  
   # In case of inconsistent extent vs resolution (e.g. extent from 0 to 10
   # and resolution of 3), rast() will give priority to the resolution, and compute
   # the closest matching extent - thus, the output extent could sometimes be unexpected

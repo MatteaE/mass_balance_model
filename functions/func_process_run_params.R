@@ -39,10 +39,16 @@ func_process_run_params <- function(run_params) {
     func_stop()
   }
   
-  
   # Check type.
-  run_params_required_classes <- c("character", "character", "numeric", "numeric", "numeric", "numeric", "numeric")
-  run_params_required_wrongtype <- run_params_required[which(sapply(run_params[run_params_required], class) != run_params_required_classes)]
+  run_params_required_classes   <- list("character",
+                                        "character",
+                                        c("numeric", "integer"),
+                                        c("numeric", "integer"),
+                                        c("numeric", "integer"),
+                                        c("numeric", "integer"),
+                                        c("numeric", "integer"))
+  param_wrong_type_logi         <- !mapply(`%in%`, sapply(run_params[run_params_required], class), run_params_required_classes)
+  run_params_required_wrongtype <- run_params_required[param_wrong_type_logi]
   if (length(run_params_required_wrongtype) > 0) {
     func_customlog("There are ", length(run_params_required_wrongtype), " required parameters which have wrong type. Please check them in set_params.R. They are: ", paste0(run_params_required_wrongtype, collapse = ", "), level = 2)
     func_stop()
