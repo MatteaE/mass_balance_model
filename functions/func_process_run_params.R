@@ -285,7 +285,15 @@ func_process_run_params <- function(run_params) {
   # Define fixed PLOT parameters ------------------------------------------------------------------
   run_params$mb_colorscale_breaks        <- c(-2,-1.5,-1,-0.5,-0.2,0,0.2,0.5,1,1.5,2) # [m w.e.]: use these breaks in the color scale for mass balance maps. NOTE: these have to be exactly 11.
   run_params$mb_colorscale_breaks        <- run_params$mb_colorscale_breaks * run_params$output_mult
-  run_params$ele_bands_plot_size         <- 50          # [m]: plot the annual mass balance profile as function of elevation, using elevation bands with this vertical extent.
+  
+  # Plot the annual mass balance profile as function of elevation, using elevation bands with this vertical extent [m].
+  # We enforce integer values so that the bands can be matched by value.
+  run_params$ele_bands_plot_size         <- 50
+  if (round(run_params$ele_bands_plot_size/2) != run_params$ele_bands_plot_size/2) {
+    func_customlog("Size of elevation bands for plotting should be a multiple of 2", level = 2)
+    func_stop()
+  }
+  
   run_params$size_mult                   <- 1.183267/3 # To get A4 PDF pages.
   
   

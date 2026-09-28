@@ -44,6 +44,9 @@ func_compute_ele_bands_from_stakes <- function(stakes_ele,
   ele_bands_smallest_id <-  which.min(ele_bands$extent)
   while (ele_bands$extent[ele_bands_smallest_id] < run_params$ele_bands_auto_min_extent) {
     # cat("Merging bands with extent below fixed threshold...\n")
+    if (nrow(ele_bands) < 4) { # Are we about to go from 3 to 2 bands? This is below the minimum, no bands will be returned.
+      return(NA)
+    }
     ele_bands <- func_merge_elevation_band(ele_bands, ele_bands_smallest_id)
     ele_bands_smallest_id <-  which.min(ele_bands$extent)
   }
@@ -55,6 +58,9 @@ func_compute_ele_bands_from_stakes <- function(stakes_ele,
   ele_bands_smallest_id <-  which.min(ele_bands$extent)
   while (ele_bands$extent[ele_bands_smallest_id] < ele_bands_extent_lower_bound) {
     # cat("Merging bands with unusually small extent...\n")
+    if (nrow(ele_bands) < 4) { # Are we about to go from 3 to 2 bands? This is below the minimum, no bands will be returned.
+      return(NA)
+    }
     ele_bands <- func_merge_elevation_band(ele_bands, ele_bands_smallest_id)
     ele_bands_extent_q25 <- as.numeric(quantile(ele_bands$extent, 0.25))
     ele_bands_extent_iqr <- IQR(ele_bands$extent)
