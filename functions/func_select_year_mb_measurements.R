@@ -5,15 +5,23 @@
 #                 mass balance measurements.                                                      #
 #                 This file contains the selection of the indices of the mass balance points      #
 #                 which will be considered for the given year YYYY.                               #
-#                 A measurement is included in the set of the current year if the end date of
-#                 its observation period is between run_params$stake_end_earliest and
-#                 run_params$stake_end_latest.
-#                 
+#                 A measurement is included in the set of the current year if the end date of     #
+#                 its observation period is between run_params$stake_end_earliest and             #
+#                 run_params$stake_end_latest.                                                    #
+#                 There is one additional condition on winter measurements - no end date after    #
+#                 the end of the hydrological year.                                               #
 ################################################################################################### 
+
+
+
+# period_sel is either "annual" or "winter".
+# Only used to enforce the additional constraint of winter stakes
+# (no end date after end of the current hydrological year).
 
 func_select_year_mb_measurements <- function(data_massbal,
                                              year,
-                                             run_params) {
+                                             run_params,
+                                             period_sel) {
   
   # Convert the given acceptable time bounds from MM/DD to an actual date,
   # which can be either YYYY or YYYY-1 depending on the month and the location
@@ -66,9 +74,21 @@ func_select_year_mb_measurements <- function(data_massbal,
   }
   
   
+  # Enforce tighter limit on winter measurements: max end date
+  # must be earlier than hydro year end (otherwise, e.g. 29 Nov YYYY
+  # would be acceptable, which might include some short-term
+  # early winter observations from the following year - those would then
+  # be included twice!).
+  end_date_max <- as.Date(paste0(end_latest_year, "/", run_params$stake_end_latest))
+  if (period_sel == "winter") {
+    end_date_max <- min(end_date_max, as.Date(paste0(year, "/", run_params$hydro_end_mmdd)))
+  }
+                          
+  
+  
   # Make a sequence of allowed observation-end dates and check which measurements belong to it.
   end_dates_allowed <- seq.Date(as.Date(paste0(end_earliest_year, "/", run_params$stake_end_earliest)),
-                                as.Date(paste0(end_latest_year, "/", run_params$stake_end_latest)),
+                                end_date_max,
                                 "1 day")
   
   ids_year <- which(data_massbal$end_date %in% end_dates_allowed)
