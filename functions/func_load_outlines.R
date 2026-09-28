@@ -54,7 +54,7 @@ func_load_outlines <- function(run_params) {
     })
     
     
-    # In case the outline had a valid CRS, check that
+    # In case the outline already has a valid CRS, check that
     # it matches the user-defined one from run_params.
     # If it doesn't match, reproject with a warning.
     crs_cur <- st_crs(outlines_out$outlines[[outline_id]])$epsg

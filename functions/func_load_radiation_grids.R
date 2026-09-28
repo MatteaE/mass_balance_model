@@ -51,7 +51,7 @@ func_load_radiation_grids <- function(run_params,
                                                        run_params$filename_radiation_prefix,
                                                        "[0-9]{3}",
                                                        run_params$filename_radiation_suffix,
-                                                       "(\\", paste0(grid_exts, collapse = "$)|(\\"), "$)"))
+                                                       "(\\", paste0(grid_exts, collapse = "$|\\"), "$)"))
   
   
 
