@@ -97,8 +97,9 @@ func_dhm_to_dem <- function(run_params,
         msg <- paste0("years ", min(years_affected), " to ", max(years_affected))
       }
       
-      func_customlog("DEM grid ", dem_id, ": there are only ", length(data_dems$glacier_cell_ids[[dem_id]]), " cells marked as glacier surface.", level = 2)
+      func_customlog("DEM grid ", dem_id, ": there are ", length(data_dems$glacier_cell_ids[[dem_id]]), " cells marked as glacier surface (required minimum: 10).", level = 2)
       func_customlog("        This number is too low, please check the input DEM and outline. The issue affects ", msg, ".", level = 0)
+      func_stop()
       
     }
     
