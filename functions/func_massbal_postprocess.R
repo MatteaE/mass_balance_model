@@ -48,8 +48,13 @@ func_massbal_postprocess <- function(year_data,
     # In that case, we force it to 1.0 with a warning.
     if (!is.finite(mb_band_corr_fact)) {
       mb_band_corr_fact <- 1.0
-      func_customlog("Year ", year_data$year_cur, ": encountered non-finite factor in the elevation band correction. Falling back to no correction...", level = 1)
+      func_customlog("Year ", year_data$year_cur, ": encountered non-finite global correction from the elevation band calculations. Falling back to no correction...", level = 1)
     }
+    
+    if ((mb_band_corr_fact > 10) || (mb_band_corr_fact < 0.1)) {
+      func_customlog("Year ", year_data$year_cur, ": encountered very large global correction from the elevation band calculations. Results may be unexpected.", level = 1)
+    }
+    
     year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr    <- year_data$mod_output_annual_cur$gl_melt_cumul * mb_band_corr_fact
     year_data$mod_output_annual_cur$gl_massbal_cumul_bandcorr <- year_data$mod_output_annual_cur$gl_accum_cumul - year_data$mod_output_annual_cur$gl_melt_cumul_bandcorr
   }

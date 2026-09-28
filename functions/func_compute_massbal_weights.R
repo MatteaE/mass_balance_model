@@ -29,7 +29,7 @@ func_compute_massbal_weights <- function(run_params,
   
   # Convert outline to SpatVector. aggregate() so that multi-entity outline gets
   # dissolved into a single entity, otherwise Voronoi cells could also end up split.
-  outl_v      <- aggregate(makeValid(set.crs(vect(data_outlines$outlines[[year_data$outline_id]]),
+  outl_v      <- terra::aggregate(makeValid(set.crs(vect(data_outlines$outlines[[year_data$outline_id]]),
                                              run_params$grids_crs_epsg)))
   
   
