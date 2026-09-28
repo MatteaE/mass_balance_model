@@ -53,7 +53,6 @@ func_dhm_to_dem <- function(run_params,
     outline_id  <- as.integer(str_split(dhm_outline_combinations_unique[dem_id], fixed(" "))[[1]][2])
     dem_cur     <- mask(data_dhms$elevation[[dhm_id]], makeValid(set.crs(vect(data_outlines$outlines[[outline_id]]),
                                                                          run_params$grids_crs_epsg)), touches = FALSE)
-    
     # Check for glacierized cells on the border.
     dem_border_values <- dem_cur[c(1:run_params$grid_ncol,
                                   run_params$grid_ncells - run_params$grid_ncol + 1:run_params$grid_ncol,
@@ -83,6 +82,25 @@ func_dhm_to_dem <- function(run_params,
     glacier_ids_logi                        <- is.na(dem_cur_values)
     data_dems$glacier_cell_ids[[dem_id]]    <- which(!glacier_ids_logi)
     data_dems$no_glacier_cell_ids[[dem_id]] <- which(glacier_ids_logi)
+    
+    
+    # If there are too few glacierized cells,
+    # it means the DEM/outline combination has a problem.
+    # We check it here. We reconstruct the years that the DEM applies to,
+    # so that the user can quickly find where the error is.
+    if (length(data_dems$glacier_cell_ids[[dem_id]]) < 10) {
+      
+      years_affected <- run_params$years[data_dems$grid_year_id == dem_id]
+      if (length(years_affected) == 1) {
+        msg <- paste0("year ", years_affected)
+      } else {
+        msg <- paste0("years ", min(years_affected), " to ", max(years_affected))
+      }
+      
+      func_customlog("DEM grid ", dem_id, ": there are only ", length(data_dems$glacier_cell_ids[[dem_id]]), " cells marked as glacier surface.", level = 2)
+      func_customlog("        This number is too low, please check the input DEM and outline. The issue affects ", msg, ".", level = 0)
+      
+    }
     
     # Elevation bands for the ELA estimation (user-defined vertical extent, typically 10 m).
     data_dems$elevation_bands_ela[[dem_id]] <- round(dem_cur / run_params$ele_bands_ela_size) * run_params$ele_bands_ela_size
