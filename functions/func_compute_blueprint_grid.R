@@ -33,7 +33,7 @@ func_compute_blueprint_grid <- function(run_params,
   
   
   # Guard against degenerate extent.
-  if ((floor(xmax_all-xmin_all) <= 0) || (floor(ymax_all-ymin_all) <= 0)) {
+  if ((floor((xmax_all-xmin_all)/res_all_out) <= 0) || (floor((ymax_all-ymin_all)/res_all_out) <= 0)) {
     func_customlog("Intersection of all provided grids is empty. Please check DEMs and surface types.", level = 2)
     func_stop()
   }
