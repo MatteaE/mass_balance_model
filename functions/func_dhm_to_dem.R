@@ -90,7 +90,7 @@ func_dhm_to_dem <- function(run_params,
     # so that the user can quickly find where the error is.
     if (length(data_dems$glacier_cell_ids[[dem_id]]) < 10) {
       
-      years_affected <- run_params$years[data_dems$grid_year_id == dem_id]
+      years_affected <- run_params$years[cur_combination_year_ids]
       if (length(years_affected) == 1) {
         msg <- paste0("year ", years_affected)
       } else {

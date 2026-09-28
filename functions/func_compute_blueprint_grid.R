@@ -33,7 +33,7 @@ func_compute_blueprint_grid <- function(run_params,
   
   
   # Guard against degenerate extent.
-  if ((xmin_all >= xmax_all) || (ymin_all >= ymax_all)) {
+  if ((floor(xmax_all-xmin_all) <= 0) || (floor(ymax_all-ymin_all) <= 0)) {
     func_customlog("Intersection of all provided grids is empty. Please check DEMs and surface types.", level = 2)
     func_stop()
   }
@@ -43,12 +43,12 @@ func_compute_blueprint_grid <- function(run_params,
   # the closest matching extent - thus, the output extent could sometimes be unexpected
   # (e.g., with extent (0,11) and resolution 3, the output extent will be (0,12)).
   # So, we compute a proper extent here, not exceeding the computed bounds.
-  xmax_all   <- xmin_all + floor((xmax_all-xmin_all)/res_all)*res_all
-  ymax_all   <- ymin_all + floor((ymax_all-ymin_all)/res_all)*res_all
+  xmax_all   <- xmin_all + floor((xmax_all-xmin_all)/res_all_out)*res_all_out
+  ymax_all   <- ymin_all + floor((ymax_all-ymin_all)/res_all_out)*res_all_out
   extent_all <- ext(xmin_all, xmax_all, ymin_all, ymax_all)
   
   # This blueprint grid will be used as reference for extent and resolution.
-  raster_blueprint <- rast(ext = extent_all, resolution = res_all, crs = crs_all)
+  raster_blueprint <- rast(ext = extent_all, resolution = res_all_out, crs = crs_all)
   
   # Compute final grid parameters for the current model run.
   run_params$grid_nrow       <- nrow(raster_blueprint)

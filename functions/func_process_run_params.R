@@ -296,7 +296,7 @@ func_process_run_params <- function(run_params) {
   # We enforce integer values so that the bands can be matched by value.
   run_params$ele_bands_plot_size         <- 50
   if (round(run_params$ele_bands_plot_size/2) != run_params$ele_bands_plot_size/2) {
-    func_customlog("Size of elevation bands for plotting should be a multiple of 2", level = 2)
+    func_customlog("The size of elevation bands for plotting should be a multiple of 2 (provided: ", run_params$ele_bands_plot_size, ")", level = 2)
     func_stop()
   }
   
@@ -318,6 +318,12 @@ func_process_run_params <- function(run_params) {
   
   run_params$elevation_equal_threshold   <- 1e-3 # [m]: threshold for considering two elevation values equal when we look for problematic flat patches
   run_params$avalanche_effect_threshold  <- 1e-9 # [mm w.e.]: threshold for considering nonzero avalanche effect
+  
+  
+  if (round(run_params$ele_bands_ela_size) != run_params$ele_bands_ela_size) {
+    func_customlog("The size of elevation bands for ELA calculation should be an integer number (provided: ", run_params$ele_bands_ela_size, ")", level = 2)
+    func_stop()
+  }
   
   
   # Validate the avalanche dates and convert them to have zero-padded dates.

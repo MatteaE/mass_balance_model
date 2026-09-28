@@ -160,7 +160,7 @@ func_optimize_mb <- function(optimization_period, corr_fact_winter,
     }
   } # End of optimization loop.
   
-  if ((abs(bias_cur) > run_params$optim_bias_threshold) && (niter == run_params$optim_max_iter)) {
+  if ((abs(bias_cur) > run_params$optim_bias_threshold) && (niter >= run_params$optim_max_iter)) {
     func_customlog("Year ", year_data$year_cur, ": the ", optimization_period, " optimization did not converge within ", niter, " iterations.", level = 1)
     func_customlog("          Bias on the last iteration: ", sprintf("%.1f", bias_cur), " mm w.e.", level = 0)
     func_customlog("          The calculations continue, but the result may be unexpected.", level = 0)
