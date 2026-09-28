@@ -25,9 +25,9 @@ func_load_outlines <- function(run_params) {
   
   cat("    Looking for outline files...\n")
   
-  run_params <- func_find_input_files_single(run_params, "outline")
+  run_params    <- func_find_input_files_single(run_params, "outline")
   outline_paths <- run_params$outline_paths
-  outline_n <- length(outline_paths)
+  outline_n     <- length(outline_paths)
   
   if (outline_n == 0) {
     func_customlog("No outline files found. Please check parameters dir_data_outline, filename_outline_prefix and filename_outline_suffix.", level = 2)
@@ -36,10 +36,10 @@ func_load_outlines <- function(run_params) {
     cat("    Found", outline_n, "outline file(s). Available year(s):", run_params$outline_years, "\n")
   }
   
-  # Load outlines
+  # Load outlines.
   for (outline_id in 1:length(outline_paths)) {
     outline_path_split <- strsplit(outline_paths[outline_id], ".", fixed = TRUE)
-    outline_filetype <- outline_path_split[[1]][length(outline_path_split[[1]])]
+    outline_filetype   <- outline_path_split[[1]][length(outline_path_split[[1]])]
     
     tryCatch({
       if (outline_filetype == "xyzn") {
@@ -53,9 +53,25 @@ func_load_outlines <- function(run_params) {
       func_stop()
     })
     
+    
+    # In case the outline had a valid CRS, check that
+    # it matches the user-defined one from run_params.
+    # If it doesn't match, reproject with a warning.
+    crs_cur <- st_crs(outlines_out$outlines[[outline_id]])$epsg
+    if (is.finite(crs_cur)) {
+     
+      if (paste0("EPSG:", crs_cur) != run_params$grids_crs_epsg) {
+        func_customlog("Wrong coordinates system found in outline: ", basename(outline_paths[outline_id]), level = 1)
+        func_customlog("          It will be reprojected to the given parameter (", run_params$grids_crs_epsg, ")", level = 0)
+        outlines_out$outlines[[outline_id]] <- as(spTransform(outlines_out$outlines[[outline_id]], CRS(run_params$grids_crs_epsg)), "SpatialPolygons")
+      }
+    }
+    
+    
+    
     # Aspect ratio: > 1 if tall glacier, < 1 if wide glacier. Used to add margins to the area plots,
     # in order to keep the plot titles within the page margins.
-    outline_ext <- ext(outlines_out$outlines[[outline_id]])
+    outline_ext                             <- ext(outlines_out$outlines[[outline_id]])
     outlines_out$aspect_ratio[[outline_id]] <- (outline_ext[4] - outline_ext[3]) / (outline_ext[2] - outline_ext[1])
   }
   

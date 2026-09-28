@@ -1,6 +1,11 @@
-Latest revision: 2026/09/22
+Latest revision: 2026/09/28
 
 This file lists some of the possible improvements to DMBSim
+
+**Data handling:**
+
+* Move away from the `sf` package, all vector operations can now be performed within `terra`.
+
 
 **Documentation:**
 
