@@ -24,6 +24,9 @@ logs/
 utils/data/
 utils/make_input.log
 utils/mass_balance_point.csv
+utils/make_input_batch_allyears.R
+utils/make_input_batch.R
+utils/aggregate_meteo_data_no_interp.R
 
 # Old procedures superseded by functions #
 procedures/*.old
