@@ -17,7 +17,7 @@ func_stop <- function() {
   tryCatch({
     notify("Run failed ❌", 
            title = paste0("DMBSim ", dmbsim_version),
-           image = normalizePath("icons/icon64.png"))
+           image = normalizePath("icons/logo64.png"))
   }, error = function(e) {
     tryCatch({
     func_customlog("Could not send desktop notification (", conditionMessage(e), ").", level = 0)

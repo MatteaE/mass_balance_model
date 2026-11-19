@@ -291,7 +291,7 @@ func_run_model <- function(run_params) {
   # Send success notification ---------------------------------------------------------------------
   try(notify("Run finished successfully ✅",
            title = paste0("DMBSim ", dmbsim_version),
-           image = normalizePath("icons/icon64.png")),
+           image = normalizePath("icons/logo64.png")),
       silent = TRUE)
   
   
